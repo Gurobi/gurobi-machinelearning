@@ -23,6 +23,8 @@ class ReLUmin():
                                          vtype=GRB.CONTINUOUS,
                                          name='__minact[{}]'.format(layer.name))
             layer.minact = minact
+        if layer.wmax is None:
+            return
         if self.bigm is not None:
             layer.wmax = np.minimum(layer.wmax, self.bigm)
             layer.wmin = np.maximum(layer.wmin, -1*self.bigm)
@@ -47,7 +49,7 @@ class ReLUmin():
         layer.constrs.append(c)
 
 
-        
+
 class GRBReLU():
     ''' Model ReLU in a MIP'''
     def __init__(self, eps=1e-8, bigm=None, complement=False):

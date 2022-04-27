@@ -79,13 +79,14 @@ class NNLayer:
         assert n == activation_vars.shape[0]
 
         # Compute bounds on weighted sums by propagation
-        wmin, wmax = self._wminmax()
-        if self.wmax is not None:
-            wmax = np.minimum(wmax, self.wmax)
-        if self.wmin is not None:
-            wmin = np.maximum(wmin, self.wmin)
-        self.wmin = wmin
-        self.wmax = wmax
+        if activation.setbounds:
+            wmin, wmax = self._wminmax()
+            if wmax is not None and self.wmax is not None:
+                wmax = np.minimum(wmax, self.wmax)
+            if wmin is not None and self.wmin is not None:
+                wmin = np.maximum(wmin, self.wmin)
+            self.wmin = wmin
+            self.wmax = wmax
 
         # Apply bounds to activation variables (and other preprocessing)
         activation.preprocess(self)

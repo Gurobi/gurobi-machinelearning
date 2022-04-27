@@ -36,10 +36,11 @@ class ReLUGC():
                                      vtype=GRB.CONTINUOUS,
                                      name='__mix[{}]'.format(layer.name))
         layer.mixing = mixing
+        layer.model.update()
         if self.bigm is not None:
             layer.wmax = np.minimum(layer.wmax, self.bigm)
             layer.wmin = np.maximum(layer.wmin, -1*self.bigm)
-        if self.setbounds:
+        if self.setbounds and layer.wmax is not None:
             layer.actvar.LB = 0.0
             layer.actvar.UB = np.maximum(layer.wmax, 0.0)
             layer.mixing.LB = layer.wmin
