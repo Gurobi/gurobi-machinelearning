@@ -21,3 +21,4 @@ def transpose(gpvars):
     assert isinstance(gpvars, gp.MVar)
     assert gpvars.ndim == 2
     return gp.MVar(gpvars.tolist()[0], (gpvars.shape[1], gpvars.shape[0]))
+

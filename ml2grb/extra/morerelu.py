@@ -2,6 +2,52 @@ import numpy as np
 from gurobipy import GRB
 from numpy.core.fromnumeric import partition
 
+
+class ReLUmin():
+    ''' Model the ReLU function in a twisted way (i.e min(-x, 0)) using
+        Gurobi max general constraints.'''
+    def __init__(self, bigm=None, setbounds=None):
+        if not setbounds:
+            bigm = None
+        self.bigm = bigm
+        self.setbounds = setbounds
+
+    def preprocess(self, layer):
+        '''Prepare for modeling ReLU in a layer'''
+        if not hasattr(layer, 'mixing'):
+            mixing = layer.model.addMVar(layer.actvar.shape, lb=-GRB.INFINITY,
+                                         vtype=GRB.CONTINUOUS,
+                                         name='__mix[{}]'.format(layer.name))
+            layer.mixing = mixing
+            minact = layer.model.addMVar(layer.actvar.shape, lb=-GRB.INFINITY, ub=0.0,
+                                         vtype=GRB.CONTINUOUS,
+                                         name='__minact[{}]'.format(layer.name))
+            layer.minact = minact
+        if self.bigm is not None:
+            layer.wmax = np.minimum(layer.wmax, self.bigm)
+            layer.wmin = np.maximum(layer.wmin, -1*self.bigm)
+        if self.setbounds:
+            layer.actvar.LB = 0.0
+            layer.actvar.UB = np.maximum(layer.wmax, 0.0)
+            layer.minact.LB = - np.maximum(layer.wmax, 0.0)
+            layer.mixing.LB = -layer.wmax
+            layer.mixing.UB = -layer.wmin
+
+    def conv(self, layer, index):
+        ''' Add MIP formulation for ReLU for neuron in layer'''
+        vact = layer.actvar[index]
+        minact = layer.minact[index]
+        constrname = layer.getname(index, 'relu')
+        mixing = layer.getmixing(index)
+        c = layer.model.addConstr(layer.mixing[index] == - mixing, name=constrname+'_mix')
+        layer.constrs.append(c)
+        mixing = layer.mixing[index]
+        layer.constrs.append(layer.model.addConstr(vact == -minact))
+        c = layer.model.addGenConstrMin(minact, [mixing, 0.0], name=constrname+'_relu')
+        layer.constrs.append(c)
+
+
+        
 class GRBReLU():
     ''' Model ReLU in a MIP'''
     def __init__(self, eps=1e-8, bigm=None, complement=False):

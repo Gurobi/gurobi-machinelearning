@@ -8,7 +8,7 @@ from gurobipy import GRB
 
 class Identity():
     '''Model identity activation (i.e. does nearly nothing'''
-    def __init__(self, setbounds=True):
+    def __init__(self, setbounds=False):
         self.setbounds = setbounds
 
     def preprocess(self, layer):
@@ -26,7 +26,7 @@ class Identity():
 class ReLUGC():
     ''' Model the ReLU function (i.e max(x, 0)) using
         Gurobi max general constraints.'''
-    def __init__(self, bigm=None, setbounds=True):
+    def __init__(self, bigm=None, setbounds=False):
         self.bigm = bigm
         self.setbounds = setbounds
 

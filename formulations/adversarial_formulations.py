@@ -10,7 +10,7 @@ from gurobipy import GRB
 import sys
 sys.path.append('..')
 from ml2grb.sklearn2grb import Pipe2Gurobi
-from ml2grb.extra.morerelu import GRBReLU
+from ml2grb.extra.morerelu import ReLUmin
 from ml2grb.activations2grb import Identity
 
 
@@ -34,7 +34,7 @@ def do_formulation(pipe, X, exampleno, filename, doobbt=0, docuts=False):
     m.addConstr(absdiff[0, :] >= - x[0, :] + example[0, :])
     m.addConstr(absdiff[0, :].sum() <= epsilon)
     pipe2grb = Pipe2Gurobi(pipe, m)
-    pipe2grb.steps[-1].actdict['relu'] = GRBReLU()
+#    pipe2grb.steps[-1].actdict['relu'] = ReLUmin()
     pipe2grb.steps[-1].actdict['softmax'] = Identity()
     pipe2grb.predict(x, output)
     m.setObjective(output[0, sortedidx[0]] -

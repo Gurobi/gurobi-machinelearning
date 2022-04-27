@@ -45,6 +45,10 @@ class NNLayer:
 
     def _wminmax(self):
         '''Compute min/max for w variable'''
+        if (self.invar.UB >= - gp.GRB.INFINITY).any():
+            return (None, None)
+        if (self.invar.LB <= gp.GRB.INFINITY).any():
+            return (None, None)
         wpos = np.maximum(self.coefs, 0.0)
         wneg = np.minimum(self.coefs, 0.0)
         wmin = self.invar.LB @ wpos + self.invar.UB @ wneg + self.intercept
