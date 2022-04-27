@@ -4,6 +4,7 @@
 from torch import nn
 from .ml2grb import BaseNNRegression2Grb
 
+
 class Sequential2Grb(BaseNNRegression2Grb):
     '''Transform a pytorch Sequential Neural Network to Gurboi constraint with
        input and output as matrices of variables.'''

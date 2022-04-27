@@ -12,6 +12,7 @@ from .activations2grb import ReLUGC
 from .activations2grb import Identity
 from .utils import validate_gpvars, transpose
 
+
 class NNLayer:
     '''Class to build one layer of a neural network'''
 
@@ -34,10 +35,9 @@ class NNLayer:
         (k, j) = index
         input_size = self.invar.shape[1]
 
-        mixing = sum(self.invar[k, l] * self.coefs[l, j]
-                    for l in range(input_size)) + self.intercept[j]
+        mixing = sum(self.invar[k, i] * self.coefs[i, j]
+                     for i in range(input_size)) + self.intercept[j]
         return mixing
-
 
     def getname(self, index, name):
         '''Get a fancy name for a neuron in layer'''
@@ -94,18 +94,14 @@ class NNLayer:
         # Now build model neuron by neuron and example by example
         for j in range(layer_size):
             for k in range(n):
-                activation.conv(self, (k,j))
+                activation.conv(self, (k, j))
         self.model.update()
 
     def reset_bounds(self):
         '''Reset bounds on layer'''
-        activation_vars = self.actvar
         activation_function = self.activation
         model = self.model
         model.update()
-
-        wmin = self.wmin
-        wmax = self.wmax
 
         activation_function.reset_bounds(self)
 
@@ -115,6 +111,7 @@ class NNLayer:
         ''' Rebuild the layer (possibly using a different model for activation)'''
         self.model.remove(self.constrs)
         self.add(activation)
+
 
 class BaseNNRegression2Grb:
     ''' Base class for inserting a regressor based on neural-network/tensor into Gurobi'''
@@ -167,4 +164,3 @@ class BaseNNRegression2Grb:
         for layer in self:
             layer.redolayer(activation)
         self.model.update()
-

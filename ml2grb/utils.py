@@ -1,5 +1,6 @@
 import gurobipy as gp
 
+
 def validate_gpvars(gpvars):
     if isinstance(gpvars, gp.MVar):
         if gpvars.ndim == 1:
@@ -13,12 +14,12 @@ def validate_gpvars(gpvars):
     if isinstance(gpvars, list):
         return gp.MVar(gpvars, shape=(1, len(gpvars)))
     if isinstance(gpvars, gp.Var):
-        rval = gp.MVar(gpvars, shape=(1,1))
-        rval._vararr = rval._vararr.reshape((1,1)) # Bug in MVar? an MVar of a single var doesn't follow shape
+        rval = gp.MVar(gpvars, shape=(1, 1))
+        rval._vararr = rval._vararr.reshape((1, 1))  # Bug in MVar? an MVar of a single var doesn't follow shape
         return rval
+
 
 def transpose(gpvars):
     assert isinstance(gpvars, gp.MVar)
     assert gpvars.ndim == 2
     return gp.MVar(gpvars.tolist()[0], (gpvars.shape[1], gpvars.shape[0]))
-

@@ -6,6 +6,7 @@
 import numpy as np
 from gurobipy import GRB
 
+
 class Identity():
     '''Model identity activation (i.e. does nearly nothing'''
     def __init__(self, setbounds=False):
@@ -22,6 +23,7 @@ class Identity():
         mixing = layer.getmixing(index)
         c = layer.model.addConstr(vact == mixing, name=constrname)
         layer.constrs.append(c)
+
 
 class ReLUGC():
     ''' Model the ReLU function (i.e max(x, 0)) using
@@ -57,6 +59,7 @@ class ReLUGC():
         c = layer.model.addGenConstrMax(vact, [mixing, 0.0], name=constrname+'_relu')
         layer.constrs.append(c)
 
+
 class LogitPWL:
     '''Model Logit in a MIP using some PWL formulation'''
     def __init__(self):
@@ -64,7 +67,6 @@ class LogitPWL:
         self.trouble = 15
         self.nbreak = 15
         self.logitapprox = '3pieces'
-
 
     @staticmethod
     def preprocess(layer):
