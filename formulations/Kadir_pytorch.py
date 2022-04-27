@@ -17,10 +17,10 @@ from gurobipy import GRB
 from ml2grb.pytorch2grb import Sequential2Grb
 from ml2grb.nnalgs import prop
 
+
 def do_regression(seed):
     X = torch.from_numpy(np.genfromtxt('X.csv')).float()
     Y = torch.from_numpy(np.genfromtxt('Y.csv')).float()
-
 
     hs = 128
     torch.manual_seed(seed)
@@ -57,6 +57,7 @@ def do_regression(seed):
 
     return model
 
+
 def do_model(nnmodel, seed):
     np.random.seed = seed
     p = np.random.randint(30, size=24)
@@ -70,14 +71,15 @@ def do_model(nnmodel, seed):
 
     return (m, nn2grb)
 
+
 def gen_nn(seed):
     filename = "{}-seed{}.pkl".format(
         'Kadir_torch',
         seed)
     try:
-        with torch.load(filename) as m:
-            return
-    except:
+        torch.load(filename)
+        return
+    except Exception:
         pass
     model = do_regression(seed)
     torch.save(model, filename)
@@ -85,7 +87,6 @@ def gen_nn(seed):
 
 def heuristic(nn, nn2grb):
     X = torch.from_numpy(np.genfromtxt('X.csv')).float()
-    Y = torch.from_numpy(np.genfromtxt('Y.csv')).float()
 
     prediction = nn.forward(X)
     feasibles = X[((prediction >= 20) & (prediction <= 30)).all(axis=1), :]
@@ -93,18 +94,19 @@ def heuristic(nn, nn2grb):
 
     prop(nn2grb, feasibles[sortedinputs[0, 0]].numpy().reshape(1, -1), reset=True)
 
+
 def doone(filename, doobbt=None, doheuristic=None, seed=None):
     outputfile = filename.strip('.joblib') + f'-objseed{seed}.lp.bz2'
     try:
         with gp.read(outputfile) as m:
             return
-    except:
+    except Exception:
         pass
 
     model = torch.load(f'Networks_pytorch/{filename}')
 
     if filename.startswith('Kadir'):
-        m, nn2grb  = do_model(model, seed)
+        m, nn2grb = do_model(model, seed)
     else:
         return
     if doobbt:
@@ -114,15 +116,18 @@ def doone(filename, doobbt=None, doheuristic=None, seed=None):
         m.write(outputfile[:-len('lp.bz2')]+'attr')
     m.write(outputfile)
 
+
 def gen_all_nn():
     with parallel_backend('multiprocessing'):
         do = gen_nn
-        r = Parallel(n_jobs=8, verbose=10)(delayed(do)(seed)
+        Parallel(n_jobs=8, verbose=10)(delayed(do)(seed)
                                        for seed in range(10))
+
+
 if __name__ == "__main__":
     files = [f for f in os.listdir('Networks_pytorch') if f.startswith('Kadir') and f.endswith('.pkl')]
     doobbt = False
     doheuristic = False
 
-    r = Parallel(n_jobs=5, verbose=10)(
-        delayed(doone)(f, doobbt, doheuristic, seed) for f in files for seed in range(1,11))
+    Parallel(n_jobs=5, verbose=10)(
+        delayed(doone)(f, doobbt, doheuristic, seed) for f in files for seed in range(1, 11))

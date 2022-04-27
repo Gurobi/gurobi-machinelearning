@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def prop_layer(layer, input):
     activation_vars = layer.actvar
     layer_coefs = layer.coefs
@@ -7,7 +8,6 @@ def prop_layer(layer, input):
     activation_function = layer.activation
     assert activation_function in ('relu', 'identity', 'softmax')
     (input_size, _) = layer_coefs.shape
-    n = input.shape[0]
     assert input_size == input.shape[1]
 
     if activation_function == 'relu':
@@ -29,12 +29,12 @@ def prop_layer(layer, input):
         activation_vars.UB = activation
     return activation
 
+
 def prop_activities(layer, input, numfix=20):
     layer_coefs = layer.coefs
     layer_intercept = layer.intercept
     activation_function = layer.activation
     input_size = layer_coefs.shape[0]
-    n = input.shape[0]
     assert input_size == input.shape[1], f'{input_size} != {input.shape}'
 
     mixing = input @ layer_coefs + layer_intercept
@@ -47,6 +47,7 @@ def prop_activities(layer, input, numfix=20):
         keep_list = []
     return (mixing, keep_list)
 
+
 def most_violated(layer):
     activation_function = layer.activation
     layer_intercept = layer.intercept
@@ -56,7 +57,6 @@ def most_violated(layer):
     if activation_function != 'relu':
         return None
     input_size = layer_coefs.shape[0]
-    n = input.shape[0]
     assert input_size == input.shape[1]
 
     z = layer.zvar
@@ -67,13 +67,15 @@ def most_violated(layer):
     error = activations - relu
     rval = error.argmax()
     print(f'variable {rval} activation {activations[0, rval]} relu {relu[0,rval]}')
-    return (rval, error[0,rval], relu[0, rval])
+    return (rval, error[0, rval], relu[0, rval])
+
 
 def relax_act(nn2grb):
     for layer_model in nn2grb._layers:
         layer_model._actvar.LB = layer_model._wmin
         layer_model._actvar.UB = layer_model._wmax
     nn2grb.model.update()
+
 
 def prop(nn2grb, X, reset=False):
     '''Propagate fixings into the network'''
@@ -86,24 +88,9 @@ def prop(nn2grb, X, reset=False):
         activation, keepopen = prop_activities(layer, input_vals, numfix=min(target, 50))
         torelax += keepopen
 
-
     nn2grb.model.optimize()
     nn2grb.canrelax = torelax
     if reset:
         for layer in nn2grb._layers:
             layer.reset_bounds()
             nn2grb.model.update()
-
-
-def cut_round(nn2grb, model=None):
-    nn = nn2grb.regressor
-
-    cuts = list()
-
-    # Iterate over the hidden layers
-    for layer in nn2grb:
-        if layer.activation is None:
-            continue
-        cuts += layer_cuts(layer)
-    #print(f"Generated {len(cuts)} cuts")
-    return cuts

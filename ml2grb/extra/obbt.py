@@ -1,5 +1,6 @@
 from gurobipy import GRB
 
+
 def obbt_layer(layer, round_num, stats=None):
     ''' Perform OBBT on layer '''
     model = layer.model
@@ -36,8 +37,8 @@ def obbt_layer(layer, round_num, stats=None):
                 continue
             done += 1
             model.setObjective(w0 + sum(input_vars[k, p] * w[p]
-                                    for p in range(input_vars.shape[1])),
-                           GRB.MAXIMIZE)
+                                        for p in range(input_vars.shape[1])),
+                               GRB.MAXIMIZE)
             model.optimize()
             newbound = model.Objval
             if newbound < wmax[k, j] - 2 * eps:
@@ -46,8 +47,7 @@ def obbt_layer(layer, round_num, stats=None):
             if stats is not None:
                 stats['done'] += 1
                 stats['iters'] += model.IterCount
-    print(
-        f'OBBT strengthened {n_strengthened} upper bounds on layer {layer.name} (did {done})')
+    print(f'OBBT strengthened {n_strengthened} upper bounds on layer {layer.name} (did {done})')
 
     total_strengthened = n_strengthened
     n_strengthened = 0
@@ -89,20 +89,20 @@ def obbt_layer(layer, round_num, stats=None):
 
 
 def obbt(nn2grb, n_rounds=1, activation=None):
-     '''Perform OBBT on model'''
-     stats = {'done': 0, 'iters': 0}
-     outputflag = nn2grb.model.Params.OutputFlag
-     nn2grb.model.Params.OutputFlag = 0
-     nn2grb.rebuild_formulation(activation)
-     for roundnum in range(n_rounds):
-         n_strengthened = 0
-         for layer in nn2grb:
-             if layer.activation is None:
-                 continue
-             n_strengthened += obbt_layer(layer, roundnum, stats=stats)
-             nn2grb.rebuild_formulation(activation)
-         if n_strengthened == 0:
-             break
-     nn2grb.rebuild_formulation()
-     nn2grb.model.Params.OutputFlag = outputflag
-     return stats
+    '''Perform OBBT on model'''
+    stats = {'done': 0, 'iters': 0}
+    outputflag = nn2grb.model.Params.OutputFlag
+    nn2grb.model.Params.OutputFlag = 0
+    nn2grb.rebuild_formulation(activation)
+    for roundnum in range(n_rounds):
+        n_strengthened = 0
+        for layer in nn2grb:
+            if layer.activation is None:
+                continue
+            n_strengthened += obbt_layer(layer, roundnum, stats=stats)
+            nn2grb.rebuild_formulation(activation)
+        if n_strengthened == 0:
+            break
+    nn2grb.rebuild_formulation()
+    nn2grb.model.Params.OutputFlag = outputflag
+    return stats

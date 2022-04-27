@@ -1,9 +1,3 @@
-# %%
-"""
-Created on Mon Jul 19 17:26:18 2021
-
-@author: 4ka
-"""
 import time
 import os
 import pprint
@@ -17,6 +11,11 @@ from gurobipy import GRB
 from ml2grb.pytorch2grb import Sequential2Grb
 from ml2grb.nnalgs import prop
 
+"""
+Created on Mon Jul 19 17:26:18 2021
+
+@author: 4ka
+"""
 # Load data
 X = torch.from_numpy(np.genfromtxt('X.csv')).float()
 Y = torch.from_numpy(np.genfromtxt('Y.csv')).float()
@@ -31,7 +30,7 @@ def heuristic(modelname, seed):
     m = gp.Model()
     x = m.addMVar((1, 48), vtype=GRB.CONTINUOUS, name="x", lb=0, ub=410)
     y = m.addMVar((1, 24), lb=20, ub=30, vtype=GRB.CONTINUOUS, name="y")
-    m.setObjective(p @ x[0,24:],GRB.MINIMIZE)
+    m.setObjective(p @ x[0, 24:], GRB.MINIMIZE)
     m.update()
 
     # Add constraint to predict value of y using x
@@ -44,7 +43,7 @@ def heuristic(modelname, seed):
 
     tottime = - time.monotonic()
     prediction = model.forward(X)
-    feasibles = X[((prediction >= 20) & (prediction <= 30)).all(axis=1),:]
+    feasibles = X[((prediction >= 20) & (prediction <= 30)).all(axis=1), :]
     sortedinputs = np.argsort(nn2grb._layers[0].invar.Obj@feasibles.numpy().T)
 
     xin = feasibles[sortedinputs[0, 0]].numpy().reshape(1, -1)
@@ -74,16 +73,17 @@ def heuristic(modelname, seed):
     print(f'Heuristic finished value {obj} time {tottime:.2f}')
     print()
     m.dispose()
-    return {"status": "Worked", "time":tottime, "obj":obj}
+    return {"status": "Worked", "time": tottime, "obj": obj}
+
 
 if __name__ == '__main__':
     results = dict()
     files = ['Networks_pytorch/'+f for f in os.listdir('Networks_pytorch') if f.startswith('Kadir') and f.endswith('.pkl')]
     for f in files:
-        for i in range(1,11):
+        for i in range(1, 11):
             try:
                 results[(f, i)] = heuristic(f, i)
-            except:
+            except Exception:
                 results[(f, i)] = {"Status": "Failed"}
 
     pprint.pprint(results)

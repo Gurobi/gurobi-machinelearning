@@ -1,5 +1,7 @@
+import numpy as np
 import gurobipy as gp
 from gurobipy import GRB
+
 
 def layer_cuts(layer, model=None):
     layer_intercept = layer.intercept
@@ -32,7 +34,6 @@ def layer_cuts(layer, model=None):
                 zX = z.X
 
             if (w == 0).all():
-                #assert outX == 0.0
                 continue
             Lstar = LB[k, :].copy()
             Ustar = UB[k, :].copy()
@@ -50,6 +51,18 @@ def layer_cuts(layer, model=None):
                             gp.LinExpr(w[Istar], input_vars[k, Istar].tolist()) - w[Istar] @ Lstar[Istar])
     return cuts
 
+
+def cut_round(nn2grb, model=None):
+    cuts = list()
+
+    # Iterate over the hidden layers
+    for layer in nn2grb:
+        if layer.activation is None:
+            continue
+        cuts += layer_cuts(layer)
+    return cuts
+
+
 def ReLUcb(model, where):
     '''Generate cuts for the ReLU activation in the network
     Also try to compute a feasible solution by forward propagation'''
@@ -57,7 +70,6 @@ def ReLUcb(model, where):
         return
     if model.cbGet(GRB.Callback.MIPNODE_STATUS) != GRB.OPTIMAL:
         return
-    nodecnt = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
     print(f"CB nodes {model.cbGet(GRB.Callback.MIPNODE_NODCNT)}")
 
     nn2grb = model._nn2grb
@@ -108,6 +120,7 @@ def simplecutloop(nn2grb, addAsCuts=False):
     model.update()
     model.Params.OutputFlag = output
 
+
 def complexcutloop(model, addAsCuts=False, nodelimit=10):
     model._nn2grb = model._pipe2grb.steps[-1]
     model._mycuts = list()
@@ -123,5 +136,3 @@ def complexcutloop(model, addAsCuts=False, nodelimit=10):
     if addAsCuts:
         make_lastrows_cuts(model, rowsbefore)
     model.resetParams()
-
-

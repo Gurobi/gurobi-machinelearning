@@ -1,6 +1,6 @@
 import numpy as np
+import gurobipy as gp
 from gurobipy import GRB
-from numpy.core.fromnumeric import partition
 
 
 class ReLUmin():
@@ -47,7 +47,6 @@ class ReLUmin():
         layer.constrs.append(layer.model.addConstr(vact == -minact))
         c = layer.model.addGenConstrMin(minact, [mixing, 0.0], name=constrname+'_relu')
         layer.constrs.append(c)
-
 
 
 class GRBReLU():
@@ -109,12 +108,12 @@ class GRBReLU():
         return np.maximum(0.0, input_values)
 
     @staticmethod
-    def forward_fixing(layer, input_values, threshold = -20):
+    def forward_fixing(layer, input_values, threshold=-20):
         '''Fix binaries according to input_values'''
         zvar = layer.zvar
         if threshold < 0:
             threshold = -int(threshold)
-            threshold = np.sort(np.abs(input_values))[0,threshold]
+            threshold = np.sort(np.abs(input_values))[0, threshold]
         zvar[input_values < 0.0].UB = 0
         zvar[input_values >= 0.0].LB = 1
 
@@ -128,6 +127,7 @@ class GRBReLU():
         layer.zvar.LB = 0.0
         layer.actvar.LB = 0.0
         layer.actvar.UB = np.maximum(layer.wmax, 0.0)
+
 
 class ReLUM():
     ''' Model ReLU in a MIP'''
@@ -171,8 +171,8 @@ class ReLUM():
             vz = layer.zvar[index]
             c0 = layer.model.addConstr(vact >= mixing, name=constrname+'_low')
             c1 = layer.model.addConstr(vact <= ub*vz, name=constrname+'_vub')
-            c2 = layer.model.addConstr(
-            vact <= mixing - lb * (1 - vz), name=constrname+'_vub2')
+            c2 = layer.model.addConstr(vact <= mixing - lb * (1 - vz),
+                                       name=constrname+'_vub2')
             layer.constrs += [c0, c1, c2]
         elif ub <= self.eps:
             vact.UB = 0.0
@@ -189,12 +189,12 @@ class ReLUM():
         return np.maximum(0.0, input_values)
 
     @staticmethod
-    def forward_fixing(layer, input_values, threshold = -20):
+    def forward_fixing(layer, input_values, threshold=-20):
         '''Fix binaries according to input_values'''
         zvar = layer.zvar
         if threshold < 0:
             threshold = -int(threshold)
-            threshold = np.sort(np.abs(input_values))[0,threshold]
+            threshold = np.sort(np.abs(input_values))[0, threshold]
         zvar[input_values < 0.0].UB = 0
         zvar[input_values >= 0.0].LB = 1
 
@@ -208,6 +208,7 @@ class ReLUM():
         layer.zvar.LB = 0.0
         layer.actvar.LB = 0.0
         layer.actvar.UB = np.maximum(layer.wmax, 0.0)
+
 
 class reluOBBT():
     def __init__(self, obbt_rel):
@@ -239,21 +240,22 @@ class reluOBBT():
 
         if self.obbt_rel == 'comb':
             c0 = layer.model.addConstr(vact >= alpha*mixing, name=constrname+'_low')
-            layer.constrs += [c0,]
+            layer.constrs += [c0, ]
         elif self.obbt_rel == 'either':
             if abs(ub) > abs(lb):
                 c0 = layer.model.addConstr(vact >= mixing, name=constrname+'_low')
             else:
                 c0 = layer.model.addConstr(vact >= 0, name=constrname+'_low')
-            layer.constrs += [c0,]
+            layer.constrs += [c0, ]
         else:
             c0 = layer.model.addConstr(vact >= mixing, name=constrname+'_low1')
-            layer.constrs += [c0,]
+            layer.constrs += [c0, ]
             c0 = layer.model.addConstr(vact >= 0, name=constrname+'_low2')
-            layer.constrs += [c0,]
+            layer.constrs += [c0, ]
 
         c1 = layer.model.addConstr(vact <= alpha*mixing - lb*alpha, name=constrname+'_up')
-        layer.constrs += [c1,]
+        layer.constrs += [c1, ]
+
 
 class ReluQuad():
     def __init__(self):
@@ -263,7 +265,7 @@ class ReluQuad():
     def preprocess(self, layer):
         if not layer.zvar:
             mixvar = layer.model.addMVar(layer.actvar.shape, lb=layer.wmin, ub=layer.wmax, vtype=GRB.CONTINUOUS,
-                                    name='__mixing[{}]'.format(layer.name))
+                                         name='__mixing[{}]'.format(layer.name))
             layer.mixvar = mixvar
             z = layer.model.addMVar(layer.actvar.shape, lb=0, ub=1, vtype=GRB.BINARY,
                                     name='__mixing[{}]'.format(layer.name))
@@ -289,8 +291,7 @@ class ReluQuad():
             c1 = layer.model.addConstr(diffsq*vact <= ub*mixvar*mixvar - 2*ub*lb*mixvar + ub*lb*lb, name=constrname+'_quad')
             c2 = layer.constrs.append(layer.model.addConstr(vact >= mixing, name=constrname+"low"))
             c3 = layer.model.addConstr(vact <= ub*vz, name=constrname+'_vub')
-            c4 = layer.model.addConstr(
-            vact <= mixing - lb * (1 - vz), name=constrname+'_vub2')
+            c4 = layer.model.addConstr(vact <= mixing - lb * (1 - vz), name=constrname+'_vub2')
             layer.constrs += [c0, c1, c2, c3, c4]
         elif ub <= self.eps:
             vact.UB = 0.0
@@ -301,8 +302,9 @@ class ReluQuad():
                 vact == mixing, name=constrname)
             layer.constrs.append(c)
 
+
 class reluPart(ReLUM):
-    def __init__(self, n_partitions = 2):
+    def __init__(self, n_partitions=2):
         super().__init__()
         self.n_partitions = n_partitions
 
@@ -329,11 +331,11 @@ class reluPart(ReLUM):
         model = layer.model
         invar = layer.invar[k, :]
         vact = layer.actvar[index]
-        w  = layer.coefs[:,j]
+        w = layer.coefs[:, j]
         w0 = layer.intercept[j]
         lb = layer.sigma_min[:, k, j]
         ub = layer.sigma_max[:, k, j]
-        vsigma = layer.sigma[:,k ,j]
+        vsigma = layer.sigma[:, k, j]
         vz = layer.zvar[k, j]
 
         mixing = layer.getmixing(index)
@@ -352,13 +354,13 @@ class reluPart(ReLUM):
             c = model.addConstr(part_expr - s <= vz * ub[p], name=name+f'_{p}_4')
             layer.constrs.append(c)
         c = model.addConstr(mixing - w0 - sum(vsigma[:].tolist()) + vz * w0 <= 0,
-                            name=name+f'_link1')
+                            name=name+'_link1')
         layer.constrs.append(c)
-        c = model.addConstr(sum(vsigma[:].tolist()) + (1 - vz) * w0 >= 0,
-                                 name=name+f'_link2')
+        c = model.addConstr(gp.quicksum(vsigma[:].tolist()) + (1 - vz) * w0 >= 0,
+                            name=name+'_link2')
         layer.constrs.append(c)
-        c = model.addConstr(vact == sum(vsigma[:].tolist()) + (1 - vz) * w0,
-                            name=name+f'_link3')
+        c = model.addConstr(vact == gp.quicksum(vsigma[:].tolist()) + (1 - vz) * w0,
+                            name=name+'_link3')
         layer.constrs.append(c)
 
     def preprocess(self, layer):
@@ -391,6 +393,7 @@ class reluPart(ReLUM):
             sigma.LB = np.minimum(sigma_min, 0)
             sigma.UB = np.maximum(sigma_max, 0)
             layer.model.update()
+
 
 def obbt_part(layer, round):
     m = layer.model
@@ -440,7 +443,7 @@ def obbt_part(layer, round):
                 assert m.Status == GRB.OPTIMAL
                 if m.ObjVal < sigma_max[p, k, j] - 1e-5:
                     sigma_max[p, k, j] = m.ObjVal + 1e-5
-                    n_strengthened+=1
+                    n_strengthened += 1
     print(f'OBBT strengthened {n_strengthened} and fixed {n_fixed} upper bounds on layer {layer.name} (did {done})')
 
     layer.wmax = np.minimum(layer.sigma_max.sum(axis=0) + layer_intercept, layer.wmax)
@@ -464,7 +467,7 @@ def obbt_part(layer, round):
                 assert m.Status == GRB.OPTIMAL
                 if m.ObjVal > sigma_min[p, k, j] + 1e-5:
                     sigma_min[p, k, j] = m.ObjVal - 1e-5
-                    n_strengthened+=1
+                    n_strengthened += 1
 
     print(f'OBBT strengthened {n_strengthened} and fixed {n_fixed} lower bounds on layer {layer.name} (did {done})')
 
@@ -478,5 +481,3 @@ def obbt_part(layer, round):
     m.ModelSense = objsense
     m.update()
     return total_strengthened + n_strengthened
-
-

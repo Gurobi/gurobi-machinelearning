@@ -1,4 +1,3 @@
-import sys
 import unittest
 
 import numpy as np
@@ -6,11 +5,11 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.datasets import make_regression
 import gurobipy as gp
 
-sys.path.append('../')
 from ml2grb.sklearn2grb import MLPRegressor2Grb
 
 from ml2grb.activations2grb import ReLUGC
 from ml2grb.extra.morerelu import ReLUmin
+
 
 def build_abs_network():
     ''' Make a scikit-learn neural network for computing absolute value'''
@@ -18,30 +17,20 @@ def build_abs_network():
     x = np.arange(-10, 10, 1)
     z = np.abs(x)
 
-
     X = np.concatenate([x.ravel().reshape(-1, 1)], axis=1)
     y = z.ravel()
 
-
-    layers=[2]
-    regression = MLPRegressor(hidden_layer_sizes=layers, max_iter=5, activation='relu', verbose=0)
+    regression = MLPRegressor(hidden_layer_sizes=[2], max_iter=5, activation='relu', verbose=0)
     regression.fit(X=X, y=y)
 
+    regression.intercepts_ = [np.array([0, 0]), np.array([0])]
 
-    regression.intercepts_ = [np.array([ 0, 0]), np.array([0])]
-
-    regression.coefs_ = [np.array([[1.0 , -1.0]]),
-     np.array([[1.0],
-            [ 1.0 ]])]
-
+    regression.coefs_ = [np.array([[1.0, -1.0]]),
+                         np.array([[1.0], [1.0]])]
 
     checkvals = np.array([-10, -1, 0, 1, 12])
-    assert (regression.predict(checkvals.reshape(-1,1)) == np.abs(checkvals)).all()
+    assert (regression.predict(checkvals.reshape(-1, 1)) == np.abs(checkvals)).all()
     return regression
-
-
-def regression_data(n_samples, n_features):
-    return (X, y)
 
 
 def model(X, y, nn, infbound, relumodel=None):
@@ -53,11 +42,11 @@ def model(X, y, nn, infbound, relumodel=None):
         X = np.concatenate([X, np.ones((samples, 1))], axis=1)
 
         # Decision variables
-        beta = regressor.addMVar(dim +1 , lb=-bound, ub=bound, name="beta") # Weights
+        beta = regressor.addMVar(dim + 1, lb=-bound, ub=bound, name="beta")  # Weights
         diff = regressor.addMVar((samples, 1), lb=-infbound, ub=infbound, name='diff')
         absdiff = regressor.addMVar((samples, 1), lb=-infbound, ub=infbound, name='absdiff')
 
-        regressor.addConstr(X@beta - y == diff[:,0])
+        regressor.addConstr(X @ beta - y == diff[:, 0])
         regressor.setObjective(absdiff.sum(), gp.GRB.MINIMIZE)
 
         if nn:
@@ -123,4 +112,3 @@ class TestNNFormulation(unittest.TestCase):
 
     def test_min_noprop_with_bounds(self):
         self.dothetest(100, ReLUmin(setbounds=False))
-

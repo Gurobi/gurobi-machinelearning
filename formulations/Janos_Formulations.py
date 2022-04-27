@@ -1,4 +1,3 @@
-import os
 from joblib import parallel_backend
 from joblib import Parallel, delayed
 from joblib import load, dump
@@ -13,8 +12,10 @@ from gurobipy import GRB
 
 from ml2grb.sklearn2grb import Pipe2Gurobi
 
+
 KNOWN_FEATURES = ['SAT', 'GPA']
 DEC_FEATURES = ['scholarship']
+
 
 def do_regression(layers, seed, known_features, dec_features):
     # Retrieve historical data used to do the regression
@@ -42,6 +43,7 @@ def do_regression(layers, seed, known_features, dec_features):
     decidx = historical_data.columns.get_indexer(dec_features)
     return (pipe, decidx)
 
+
 def do_model(pipe, decidx, known_features, dec_features, reluformulation=None):
     # ### Do the optimization model
     # Retrieve new data used for the optimization
@@ -67,7 +69,7 @@ def do_model(pipe, decidx, known_features, dec_features, reluformulation=None):
     x = m.addMVar((nstudents, len(features)), lb=lb, ub=ub, name='x')
     y = m.addMVar((nstudents, 1), lb=-GRB.INFINITY, name='y')
 
-    m.setObjective(y[:,0].sum(), gp.GRB.MAXIMIZE)
+    m.setObjective(y[:, 0].sum(), gp.GRB.MAXIMIZE)
     m.addConstr(x[:, decidx].sum() <= 0.2*nstudents)
 
     # create transforms to turn scikit-learn pipeline into Gurobi constraints
@@ -81,6 +83,7 @@ def do_model(pipe, decidx, known_features, dec_features, reluformulation=None):
     m._pipe2grb = pipe2grb
     return m
 
+
 def dojanosformulation(pipe):
     (pipe, decidx) = pipe
     model = do_model(pipe, decidx, KNOWN_FEATURES, DEC_FEATURES)
@@ -93,22 +96,23 @@ def gen_nn(layers, seed):
         '-'.join([f'{n}' for n in layers]),
         seed)
     try:
-        with load(filename) as m:
-            return
-    except:
+        load(filename)
+        return
+    except Exception:
         pass
     pipe, decidx = do_regression(layers, seed, KNOWN_FEATURES, DEC_FEATURES)
     nn = pipe.steps[-1][1]
     for layer in nn.coefs_:
-    	layer[np.abs(layer) < 1e-8] = 0.0
+        layer[np.abs(layer) < 1e-8] = 0.0
     dump((pipe, decidx), filename)
+
 
 def gen_all_nn():
     do = gen_nn
     with parallel_backend('multiprocessing'):
-        r = Parallel(n_jobs=4, verbose=10)(delayed(do)(hidden_layers, seed)
-                                           for hidden_layers in ([5]*2, [5]*3, [10]*2, [10]*3, [15]*2, [15]*3)
-                                           for seed in range(10))
+        Parallel(n_jobs=4, verbose=10)(delayed(do)(hidden_layers, seed)
+                                       for hidden_layers in ([5]*2, [5]*3, [10]*2, [10]*3, [15]*2, [15]*3)
+                                       for seed in range(10))
 
 
 if __name__ == '__main__':

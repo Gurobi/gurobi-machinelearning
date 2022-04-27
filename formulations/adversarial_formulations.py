@@ -1,16 +1,9 @@
-from joblib import parallel_backend
 from joblib import Parallel, delayed
 from joblib import load
 import numpy as np
-from sklearn.neural_network import MLPClassifier
-from sklearn.pipeline import make_pipeline
 import gurobipy as gp
-from gurobipy import GRB
 
-import sys
-sys.path.append('..')
 from ml2grb.sklearn2grb import Pipe2Gurobi
-from ml2grb.extra.morerelu import ReLUmin
 from ml2grb.activations2grb import Identity
 
 
@@ -34,7 +27,6 @@ def do_formulation(pipe, X, exampleno, filename, doobbt=0, docuts=False):
     m.addConstr(absdiff[0, :] >= - x[0, :] + example[0, :])
     m.addConstr(absdiff[0, :].sum() <= epsilon)
     pipe2grb = Pipe2Gurobi(pipe, m)
-#    pipe2grb.steps[-1].actdict['relu'] = ReLUmin()
     pipe2grb.steps[-1].actdict['softmax'] = Identity()
     pipe2grb.predict(x, output)
     m.setObjective(output[0, sortedidx[0]] -
@@ -45,21 +37,23 @@ def do_formulation(pipe, X, exampleno, filename, doobbt=0, docuts=False):
     try:
         if doobbt:
             pipe2grb.steps[0].obbt(doobbt)
-    except:
+    except Exception:
         return
     m.update()
     m.write(filename)
 
+
 def doone(filename, exampleno, docuts, doobbt):
     outputfile = filename.strip('.joblib') + f'-{exampleno}.lp.bz2'
     try:
-        with gp.read(outputfile) as m:
-            return
-    except:
+        gp.read(outputfile)
+        return
+    except Exception:
         pass
     pipe = load(filename)
     X = load('MNIST_first100.joblib')
     do_formulation(pipe, X, exampleno, outputfile, doobbt, docuts)
+
 
 if __name__ == "__main__":
     files = ('MNIST_50_50.joblib', 'MNIST_100_100.joblib')
