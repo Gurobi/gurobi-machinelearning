@@ -1,4 +1,4 @@
-
+# Copyright © 2022 Gurobi Optimization, LLC
 import numpy as np
 from gurobipy import GRB, quicksum
 

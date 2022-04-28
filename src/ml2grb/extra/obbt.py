@@ -1,3 +1,4 @@
+# Copyright © 2022 Gurobi Optimization, LLC
 from gurobipy import GRB
 
 
