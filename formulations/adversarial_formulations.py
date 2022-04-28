@@ -1,10 +1,9 @@
-from joblib import Parallel, delayed
-from joblib import load
-import numpy as np
 import gurobipy as gp
+import numpy as np
+from joblib import Parallel, delayed, load
 
-from ml2grb.sklearn2grb import Pipe2Gurobi
 from ml2grb.activations2grb import Identity
+from ml2grb.sklearn2grb import Pipe2Gurobi
 
 
 def do_formulation(pipe, X, exampleno, filename, doobbt=0, docuts=False):

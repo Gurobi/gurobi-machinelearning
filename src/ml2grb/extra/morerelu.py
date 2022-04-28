@@ -1,5 +1,5 @@
-import numpy as np
 import gurobipy as gp
+import numpy as np
 from gurobipy import GRB
 
 
@@ -260,7 +260,6 @@ class reluOBBT():
 class ReluQuad():
     def __init__(self):
         self.eps = 1e-6
-        pass
 
     def preprocess(self, layer):
         if not layer.zvar:

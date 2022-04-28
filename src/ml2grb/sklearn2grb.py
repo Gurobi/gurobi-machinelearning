@@ -20,9 +20,10 @@ What we have so far:
 
 # pylint: disable=C0103
 
+import numpy as np
+
 from .ml2grb import BaseNNRegression2Grb
 from .utils import validate_gpvars
-import numpy as np
 
 
 class StandardScaler2Grb:

@@ -1,17 +1,13 @@
-from joblib import parallel_backend
-from joblib import Parallel, delayed
-from joblib import load, dump
-import pandas as pd
+import gurobipy as gp
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+import pandas as pd
+from gurobipy import GRB
+from joblib import Parallel, delayed, dump, load, parallel_backend
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
-import gurobipy as gp
-from gurobipy import GRB
-
+from sklearn.preprocessing import StandardScaler
 
 from ml2grb.sklearn2grb import Pipe2Gurobi
-
 
 KNOWN_FEATURES = ['SAT', 'GPA']
 DEC_FEATURES = ['scholarship']

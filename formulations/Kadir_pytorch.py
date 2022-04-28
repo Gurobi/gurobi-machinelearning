@@ -4,18 +4,17 @@ Created on Mon Jul 19 17:26:18 2021
 @author: 4ka
 """
 import os
-import numpy as np
-from joblib import parallel_backend
-from joblib import Parallel, delayed
 
-import torch
 import gurobipy as gp
+import numpy as np
+import torch
 from gurobipy import GRB
+from joblib import Parallel, delayed, parallel_backend
 
+from ml2grb.nnalgs import prop
 
 # import my functions
 from ml2grb.pytorch2grb import Sequential2Grb
-from ml2grb.nnalgs import prop
 
 
 def do_regression(seed):

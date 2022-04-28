@@ -4,16 +4,13 @@ Created on Mon Jul 19 17:26:18 2021
 @author: 4ka
 """
 import os
-import numpy as np
-from joblib import parallel_backend
-from joblib import Parallel, delayed
-from joblib import load, dump
 
+import gurobipy as gp
+import numpy as np
+from gurobipy import GRB
+from joblib import Parallel, delayed, dump, load, parallel_backend
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
-import gurobipy as gp
-from gurobipy import GRB
-
 
 # import my functions
 from ml2grb.sklearn2grb import Pipe2Gurobi

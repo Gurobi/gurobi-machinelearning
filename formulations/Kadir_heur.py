@@ -1,15 +1,14 @@
-import time
 import os
 import pprint
-import numpy as np
-
-import torch
+import time
 
 import gurobipy as gp
+import numpy as np
+import torch
 from gurobipy import GRB
 
-from ml2grb.pytorch2grb import Sequential2Grb
 from ml2grb.nnalgs import prop
+from ml2grb.pytorch2grb import Sequential2Grb
 
 """
 Created on Mon Jul 19 17:26:18 2021

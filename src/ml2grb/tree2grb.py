@@ -1,7 +1,8 @@
 
-from .utils import validate_gpvars, transpose
-from gurobipy import GRB, quicksum
 import numpy as np
+from gurobipy import GRB, quicksum
+
+from .utils import transpose, validate_gpvars
 
 
 class DecisionTree2Grb:

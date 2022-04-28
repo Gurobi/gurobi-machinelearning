@@ -2,6 +2,7 @@
 # pylint: disable=C0103
 
 from torch import nn
+
 from .ml2grb import BaseNNRegression2Grb
 
 

@@ -1,14 +1,13 @@
 import unittest
 
-import numpy as np
-from sklearn.neural_network import MLPRegressor
-from sklearn.datasets import make_regression
 import gurobipy as gp
-
-from ml2grb.sklearn2grb import MLPRegressor2Grb
+import numpy as np
+from sklearn.datasets import make_regression
+from sklearn.neural_network import MLPRegressor
 
 from ml2grb.activations2grb import ReLUGC
 from ml2grb.extra.morerelu import ReLUmin
+from ml2grb.sklearn2grb import MLPRegressor2Grb
 
 
 def build_abs_network():

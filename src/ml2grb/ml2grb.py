@@ -4,13 +4,11 @@ or regrssion constructs in Gurobi'''
 
 # pylint: disable=C0103
 
-import numpy as np
 import gurobipy as gp
+import numpy as np
 
-from .activations2grb import LogitPWL
-from .activations2grb import ReLUGC
-from .activations2grb import Identity
-from .utils import validate_gpvars, transpose
+from .activations2grb import Identity, LogitPWL, ReLUGC
+from .utils import transpose, validate_gpvars
 
 
 class NNLayer:
