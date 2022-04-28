@@ -1,3 +1,9 @@
+"""
+Created on Mon Jul 19 17:26:18 2021
+
+@author: 4ka
+"""
+
 import os
 import pprint
 import time
@@ -10,11 +16,6 @@ from gurobipy import GRB
 from ml2grb.nnalgs import prop
 from ml2grb.pytorch2grb import Sequential2Grb
 
-"""
-Created on Mon Jul 19 17:26:18 2021
-
-@author: 4ka
-"""
 # Load data
 X = torch.from_numpy(np.genfromtxt('X.csv')).float()
 Y = torch.from_numpy(np.genfromtxt('Y.csv')).float()
