@@ -264,8 +264,8 @@ class ReluQuad():
 
     def preprocess(self, layer):
         if not layer.zvar:
-            mixvar = layer.model.addMVar(layer.actvar.shape, lb=layer.wmin, ub=layer.wmax, vtype=GRB.CONTINUOUS,
-                                         name='__mixing[{}]'.format(layer.name))
+            mixvar = layer.model.addMVar(layer.actvar.shape, lb=layer.wmin, ub=layer.wmax,
+                                         vtype=GRB.CONTINUOUS, name='__mixing[{}]'.format(layer.name))
             layer.mixvar = mixvar
             z = layer.model.addMVar(layer.actvar.shape, lb=0, ub=1, vtype=GRB.BINARY,
                                     name='__mixing[{}]'.format(layer.name))
