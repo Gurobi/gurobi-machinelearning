@@ -54,7 +54,7 @@ class DecisionTree2Grb:
                 m.addConstrs((nodes[k, node] == 1) >> (y[k, 0] == tree.value[node][0][0]) for k in range(X.shape[0]))
                 continue
             m.addConstrs((nodes[k, left] == 1) >> (X[k, tree.feature[node]] <= tree.threshold[node]) for k in range(X.shape[0]))
-            m.addConstrs((nodes[k, right] == 1) >> (X[k, tree.feature[node]] >= tree.threshold[node] + 0.01) for k in range(X.shape[0]))
+            m.addConstrs((nodes[k, right] == 1) >> (X[k, tree.feature[node]] >= tree.threshold[node] + 1e-8) for k in range(X.shape[0]))
 
         # We should attain 1 leaf
         m.addConstrs(quicksum([nodes[k, i] for i in range(tree.capacity)

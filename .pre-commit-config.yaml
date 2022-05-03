@@ -14,12 +14,6 @@ repos:
           files: (^(src|tests)/)|(^[^/]*$)
           args: [--in-place, --remove-all-unused-imports, --recursive, --ignore-init-module-imports]
 
-    - repo: https://github.com/leoll2/copyright_notice_precommit
-      rev: 8c328ab1bdd32b5cb68a52c89cbf8b4bbeae1d21
-      hooks:
-        - id: copyright-notice
-          args: [--notice=copyright.txt]
-
     - repo: https://github.com/pycqa/isort
       rev: 5.10.1
       hooks:

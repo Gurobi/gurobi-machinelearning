@@ -23,6 +23,7 @@ What we have so far:
 import numpy as np
 
 from .ml2grb import BaseNNRegression2Grb
+from .tree2grb import DecisionTree2Grb
 from .utils import validate_gpvars
 
 
@@ -150,8 +151,10 @@ class Pipe2Gurobi:
                 self.steps.append(MLPRegressor2Grb(obj, model, **kwargs))
             elif name == 'mlpclassifier':
                 self.steps.append(MLPRegressor2Grb(obj, model, **kwargs))
+            elif name == 'decisiontreeregressor':
+                self.steps.append(DecisionTree2Grb(obj, model, **kwargs))
             else:
-                raise BaseException(f"I don't know how to deal with that object: {obj.__name__}")
+                raise BaseException(f"I don't know how to deal with that object: {name}")
 
     def predict(self, X, y):
         for obj in self.steps[:-1]:
