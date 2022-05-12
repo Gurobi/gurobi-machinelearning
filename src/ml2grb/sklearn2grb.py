@@ -98,7 +98,7 @@ class MLPRegressor2Grb(BaseNNRegression2Grb):
         '''
 
     def __init__(self, regressor, model, clean_regressor=False, **kwargs):
-        BaseNNRegression2Grb.__init__(self, regressor, model, clean_regressor, **kwargs)
+        BaseNNRegression2Grb.__init__(self, regressor, model, clean_regressor=clean_regressor, **kwargs)
         assert regressor.out_activation_ in ('identity', 'relu', 'softmax')
 
     def predict(self, X, y):

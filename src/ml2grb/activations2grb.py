@@ -9,7 +9,7 @@ from gurobipy import GRB
 
 class Identity():
     '''Model identity activation (i.e. does nearly nothing'''
-    def __init__(self, setbounds=False):
+    def __init__(self, setbounds=True):
         self.setbounds = setbounds
 
     def preprocess(self, layer):
@@ -28,16 +28,17 @@ class Identity():
 class ReLUGC():
     ''' Model the ReLU function (i.e max(x, 0)) using
         Gurobi max general constraints.'''
-    def __init__(self, bigm=None, setbounds=False):
+    def __init__(self, bigm=None, setbounds=True):
         self.bigm = bigm
         self.setbounds = setbounds
 
     def preprocess(self, layer):
         '''Prepare for modeling ReLU in a layer'''
-        mixing = layer.model.addMVar(layer.actvar.shape, lb=-GRB.INFINITY,
-                                     vtype=GRB.CONTINUOUS,
-                                     name='__mix[{}]'.format(layer.name))
-        layer.mixing = mixing
+        if not hasattr(layer, 'mixing'):
+            mixing = layer.model.addMVar(layer.actvar.shape, lb=-GRB.INFINITY,
+                                         vtype=GRB.CONTINUOUS,
+                                         name='__mix[{}]'.format(layer.name))
+            layer.mixing = mixing
         layer.model.update()
         if self.bigm is not None:
             layer.wmax = np.minimum(layer.wmax, self.bigm)

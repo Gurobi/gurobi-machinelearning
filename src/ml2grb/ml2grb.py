@@ -43,10 +43,12 @@ class NNLayer:
 
     def _wminmax(self):
         '''Compute min/max for w variable'''
-        if (self.invar.UB >= - gp.GRB.INFINITY).any():
-            return (None, None)
-        if (self.invar.LB <= gp.GRB.INFINITY).any():
-            return (None, None)
+        if (self.invar.UB >= gp.GRB.INFINITY).any():
+            assert 0
+            return (-gp.GRB.INFINITY*np.ones(self.actvar.shape), gp.GRB.INFINITY*np.ones(self.actvar.shape))
+        if (self.invar.LB <= - gp.GRB.INFINITY).any():
+            assert 0
+            return (-gp.GRB.INFINITY*np.ones(self.actvar.shape), gp.GRB.INFINITY*np.ones(self.actvar.shape))
         wpos = np.maximum(self.coefs, 0.0)
         wneg = np.minimum(self.coefs, 0.0)
         wmin = self.invar.LB @ wpos + self.invar.UB @ wneg + self.intercept
@@ -145,7 +147,8 @@ class BaseNNRegression2Grb:
         '''add a layer to model'''
         if name is None:
             name = f'{len(self._layers)}'
-        name = f'{self.name}[{name}]'
+        if self.name != '':
+            name = f'{self.name}[{name}]'
 
         layer = NNLayer(self.model, activation_vars, input_vars, layer_coefs,
                         layer_intercept, activation, name)
@@ -159,5 +162,6 @@ class BaseNNRegression2Grb:
     def rebuild_formulation(self, activation=None):
         '''Rebuild the MIP formulation for regression model'''
         for layer in self:
-            layer.redolayer(activation)
+            if not isinstance(layer.activation, Identity):
+                layer.redolayer(activation)
         self.model.update()

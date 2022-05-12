@@ -217,7 +217,10 @@ class reluOBBT():
         self.obbt_rel = obbt_rel
 
     def preprocess(self, layer):
-        pass
+        if layer.wmax is not None:
+            layer.actvar.LB = 0.0
+            layer.actvar.UB = np.maximum(layer.wmax, 0.0)
+
 
     def conv(self, layer, index):
         ''' This is the convex hull of ReLU without binary (just for doing OBBT)'''
