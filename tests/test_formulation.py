@@ -35,7 +35,7 @@ class TestFormulations(unittest.TestCase):
         y = data['target']
 
         to_test = [(LinearRegression(), sklearn2grb.LinearRegression2Grb),
-                   (DecisionTreeRegressor(), sklearn2grb.DecisionTree2Grb),
+                   (DecisionTreeRegressor(max_leaf_nodes=50), sklearn2grb.DecisionTree2Grb),
                    (MLPRegressor([20,20]), sklearn2grb.MLPRegressor2Grb)]
 
         for regressor, translator in to_test:
