@@ -63,3 +63,31 @@ class DecisionTree2Grb:
 
         y.LB = np.min(tree.value)
         y.UB = np.max(tree.value)
+
+class GradientBoostingRegressor2Gurobi:
+    def __init__(self, regressor, model):
+        self.regressor = regressor
+        self.model = model
+
+
+    def predict(self, X, y):
+        ''' Predict output variables y from input variables X using the
+            decision tree.
+
+            Both X and y should be array or list of variables of conforming dimensions.
+        '''
+        X, y = DecisionTree2Grb.validate(X, y)
+
+        m = self.model
+        regressor = self.regressor
+
+        treevars = m.addMVar((X.shape[0], regressor.n_estimators_), lb = -GRB.INFINITY)
+        constant = regressor.init_.constant_
+
+        tree2grb = []
+        for i in range(regressor.n_estimators_):
+            tree = regressor.estimators_[i]
+            tree2grb.append(DecisionTree2Grb(tree[0], m))
+            tree2grb[-1].predict(X, treevars[:, i])
+        for k in range(X.shape[0]):
+            m.addConstr(y[k, :] == regressor.learning_rate * treevars[k,:].sum() + constant)

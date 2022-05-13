@@ -3,6 +3,7 @@ import unittest
 
 import gurobipy as gp
 from sklearn import datasets
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
@@ -36,6 +37,7 @@ class TestFormulations(unittest.TestCase):
 
         to_test = [(LinearRegression(), sklearn2grb.LinearRegression2Grb),
                    (DecisionTreeRegressor(max_leaf_nodes=50), sklearn2grb.DecisionTree2Grb),
+                   (GradientBoostingRegressor(n_estimators=20), sklearn2grb.GradientBoostingRegressor2Gurobi),
                    (MLPRegressor([20,20]), sklearn2grb.MLPRegressor2Grb)]
 
         for regressor, translator in to_test:
