@@ -103,7 +103,7 @@ class NNLayer(Submodel):
 
     def redolayer(self, activation=None):
         ''' Rebuild the layer (possibly using a different model for activation)'''
-        self.remove()
+        self.remove(['Constrs', 'QConstrs', 'GenConstrs'])
         self.add(activation)
 
 

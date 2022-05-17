@@ -230,33 +230,26 @@ class reluOBBT():
         constrname = layer.getname(index, 'reluOBBT')
         mixing = layer.getmixing(index)
         if ub < 1e-8:
-            c0 = layer.model.addConstr(vact <= 0, name=constrname+'_inactive')
-            layer.constrs.append(c0)
+            layer.model.addConstr(vact <= 0, name=constrname+'_inactive')
             return
         elif lb > -1e-8:
-            c0 = layer.model.addConstr(mixing == vact, name=constrname+'_active')
-            layer.constrs.append(c0)
+            layer.model.addConstr(mixing == vact, name=constrname+'_active')
             return
 
         alpha = ub/(ub - lb)
 
         if self.obbt_rel == 'comb':
-            c0 = layer.model.addConstr(vact >= alpha*mixing, name=constrname+'_low')
-            layer.constrs += [c0, ]
+            layer.model.addConstr(vact >= alpha*mixing, name=constrname+'_low')
         elif self.obbt_rel == 'either':
             if abs(ub) > abs(lb):
-                c0 = layer.model.addConstr(vact >= mixing, name=constrname+'_low')
+                layer.model.addConstr(vact >= mixing, name=constrname+'_low')
             else:
-                c0 = layer.model.addConstr(vact >= 0, name=constrname+'_low')
-            layer.constrs += [c0, ]
+                layer.model.addConstr(vact >= 0, name=constrname+'_low')
         else:
-            c0 = layer.model.addConstr(vact >= mixing, name=constrname+'_low1')
-            layer.constrs += [c0, ]
-            c0 = layer.model.addConstr(vact >= 0, name=constrname+'_low2')
-            layer.constrs += [c0, ]
+            layer.model.addConstr(vact >= mixing, name=constrname+'_low1')
+            layer.model.addConstr(vact >= 0, name=constrname+'_low2')
 
-        c1 = layer.model.addConstr(vact <= alpha*mixing - lb*alpha, name=constrname+'_up')
-        layer.constrs += [c1, ]
+        layer.model.addConstr(vact <= alpha*mixing - lb*alpha, name=constrname+'_up')
 
 
 class ReluQuad():

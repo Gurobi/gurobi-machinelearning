@@ -89,8 +89,14 @@ class Submodel(object):
         X, y = self.validate(X, y)
         self.mip_model(X, y)
 
-    def remove(self):
-        for s, v in self.added_.items():
-            self.model.remove(v)
-            self.added_[s] = []
+    def remove(self, what=None):
+        if what is None:
+            for s, v in self.added_.items():
+                self.model.remove(v)
+                self.added_[s] = []
+        else:
+            for s in what:
+                key = 'Num'+s
+                self.model.remove(self.added_[key])
+                self.added_[key] = []
         self.model.update()
