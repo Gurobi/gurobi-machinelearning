@@ -44,7 +44,7 @@ class Submodel:
         return (input_vars, output_vars)
 
     def remove(self):
-        for s, v in added_.items():
+        for s, v in self.added_.items():
             self.model.remove(v)
 
 class DecisionTree2Grb(Submodel):
