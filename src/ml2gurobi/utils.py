@@ -1,4 +1,6 @@
 # Copyright © 2022 Gurobi Optimization, LLC
+import types  # NOQA
+
 import gurobipy as gp
 
 
@@ -64,6 +66,14 @@ class Submodel(object):
 
         return (input_vars, output_vars)
 
+    def update(self, begin, end):
+        for s in self.torec_.keys():
+            added = end[s] - begin[s]
+            if added == 0:
+                continue
+            self.added_[s] += (eval('self.model.' + self.torec_[s] + '()')[begin[s]: end[s]])
+            exec(f'self.{s} += added')
+
     def mip_model(self, X, y):
         pass
 
@@ -72,12 +82,7 @@ class Submodel(object):
         X, y = self.validate(X, y)
         self.mip_model(X, y)
         end = self.get_stats_()
-        for s in self.torec_.keys():
-            added = end[s] - begin[s]
-            if added == 0:
-                continue
-            self.added_[s] += (eval('self.model.' + self.torec_[s] + '()')[begin[s]: end[s]])
-            exec(f'self.{s} += added')
+        self.update(begin, end)
 
     def remove(self):
         for s, v in self.added_.items():

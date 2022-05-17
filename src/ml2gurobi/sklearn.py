@@ -27,32 +27,34 @@ from .nnbase import BaseNNRegression2Gurobi
 from .utils import Submodel, validate_gpvars
 
 
-class StandardScaler2Gurobi:
+class StandardScaler2Gurobi(Submodel):
     ''' Class to use a StandardScale to create scaled version of
         some Gurobi variables. '''
 
     def __init__(self, scaler, model, **kwargs):
-        self.scaler_ = scaler
-        self.model_ = model
-        self.constrs_ = None
+        super().__init__(model, **kwargs)
+        self.scaler = scaler
         self.vars_ = None
 
     def transform(self, X):
         '''Do the transormation on x'''
-        self.model_.update()
-
         X = validate_gpvars(X)
 
         nfeat = X.shape[1]
-        scale = self.scaler_.scale_
-        mean = self.scaler_.mean_
+        scale = self.scaler.scale_
+        mean = self.scaler.mean_
 
-        self.vars_ = self.model_.addMVar(X.shape, name='__scaledx')
-        self.vars_.LB = (X.LB - mean)/scale
-        self.vars_.UB = (X.UB - mean)/scale
-        self.constrs_ = [self.model_.addConstr(X[:, i] - self.vars_[:, i] * scale[i] == mean[i],
-                                               name=f'__scaling[{i}]')
-                         for i in range(nfeat)]
+        begin = self.get_stats_()
+
+        variables = self.model.addMVar(X.shape, name='__scaledx')
+        variables.LB = (X.LB - mean)/scale
+        variables.UB = (X.UB - mean)/scale
+        self.model.addConstrs((X[:, i] - variables[:, i] * scale[i] == mean[i]
+                               for i in range(nfeat)),
+                               name=f'__scaling')
+        end = self.get_stats_()
+        self.update(begin, end)
+        self.vars_ = variables
         return self
 
     def X(self):
