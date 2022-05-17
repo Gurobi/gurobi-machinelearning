@@ -66,7 +66,6 @@ class TestFormulations(unittest.TestCase):
                 with self.subTest(regressor=regressor, translator=translator, exampleno=exampleno):
                     self.add_remove(regressor, translator, X, y, exampleno)
 
-        return
         for regressor, _ in to_test:
             pipeline = make_pipeline(StandardScaler(), regressor)
             pipeline.fit(X, y)

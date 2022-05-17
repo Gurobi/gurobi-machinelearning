@@ -22,7 +22,6 @@ class Identity():
         constrname = layer.getname(index, 'mix')
         mixing = layer.getmixing(index)
         c = layer.model.addConstr(vact == mixing, name=constrname)
-        layer.constrs.append(c)
 
 
 class ReLUGC():
@@ -54,11 +53,9 @@ class ReLUGC():
         vact = layer.actvar[index]
         constrname = layer.getname(index, 'relu')
         mixing = layer.getmixing(index)
-        c = layer.model.addConstr(layer.mixing[index] == mixing, name=constrname+'_mix')
-        layer.constrs.append(c)
+        layer.model.addConstr(layer.mixing[index] == mixing, name=constrname+'_mix')
         mixing = layer.mixing[index]
-        c = layer.model.addGenConstrMax(vact, [mixing, 0.0], name=constrname+'_relu')
-        layer.constrs.append(c)
+        layer.model.addGenConstrMax(vact, [mixing, 0.0], name=constrname+'_relu')
 
 
 class LogitPWL:
@@ -152,13 +149,12 @@ class LogitPWL:
         vx = layer.zvar[index]
         constrname = layer.getname('logit', index)
         mixing = layer.getmixing(index)
-        c = model.addConstr(vx == mixing, name=constrname+'_mix')
-        layer.constrs.append(c)
+        model.addConstr(vx == mixing, name=constrname+'_mix')
 
         if self.logitapprox == 'PWL':
             xval, yval = self._logit_pwl_approx(vx, vact)
         else:
             xval, yval = self._logit_pwl_3pieces(vx, vact)
         if len(xval) > 0:
-            layer.constrs.append(layer.model.addGenConstrPWL(vx, vact, xval, yval,
-                                                             name=constrname+'_pwl'))
+            layer.model.addGenConstrPWL(vx, vact, xval, yval,
+                                        name=constrname+'_pwl')
