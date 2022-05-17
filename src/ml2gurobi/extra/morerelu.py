@@ -42,12 +42,10 @@ class ReLUmin():
         minact = layer.minact[index]
         constrname = layer.getname(index, 'relu')
         mixing = layer.getmixing(index)
-        c = layer.model.addConstr(layer.mixing[index] == - mixing, name=constrname+'_mix')
-        layer.constrs.append(c)
+        layer.model.addConstr(layer.mixing[index] == - mixing, name=constrname+'_mix')
         mixing = layer.mixing[index]
-        layer.constrs.append(layer.model.addConstr(vact == -minact))
-        c = layer.model.addGenConstrMin(minact, [mixing, 0.0], name=constrname+'_relu')
-        layer.constrs.append(c)
+        layer.model.addConstr(vact == -minact)
+        layer.model.addGenConstrMin(minact, [mixing, 0.0], name=constrname+'_relu')
 
 
 class GRBReLU():
