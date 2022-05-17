@@ -7,7 +7,7 @@ or regrssion constructs in Gurobi'''
 import gurobipy as gp
 import numpy as np
 
-from .activations2gurobi import Identity, LogitPWL, ReLUGC
+from .activations import Identity, LogitPWL, ReLUGC
 from .utils import transpose, validate_gpvars
 
 

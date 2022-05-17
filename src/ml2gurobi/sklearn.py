@@ -22,8 +22,8 @@ What we have so far:
 
 import numpy as np
 
-from .ml2gurobi import BaseNNRegression2Gurobi
-from .tree2gurobi import DecisionTree2Gurobi, GradientBoostingRegressor2Gurobi
+from .decisiontrees import DecisionTree2Gurobi, GradientBoostingRegressor2Gurobi
+from .nnbase import BaseNNRegression2Gurobi
 from .utils import validate_gpvars
 
 

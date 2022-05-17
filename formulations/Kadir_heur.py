@@ -14,7 +14,7 @@ import torch
 from gurobipy import GRB
 
 from ml2gurobi.nnalgs import prop
-from ml2gurobi.pytorch2gurobi import Sequential2Gurobi
+from ml2gurobi.pytorch import Sequential2Gurobi
 
 # Load data
 X = torch.from_numpy(np.genfromtxt('X.csv')).float()

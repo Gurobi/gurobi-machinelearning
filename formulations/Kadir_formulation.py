@@ -13,7 +13,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
 
 # import my functions
-from ml2gurobi.sklearn2gurobi import Pipe2Gurobi
+from ml2gurobi.sklearn import Pipe2Gurobi
 
 
 def do_regression(layers, seed):

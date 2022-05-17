@@ -2,8 +2,8 @@ import gurobipy as gp
 import numpy as np
 from joblib import Parallel, delayed, load
 
-from ml2gurobi.activations2gurobi import Identity
-from ml2gurobi.sklearn2gurobi import Pipe2Gurobi
+from ml2gurobi.activations import Identity
+from ml2gurobi.sklearn import Pipe2Gurobi
 
 
 def do_formulation(pipe, X, exampleno, filename, doobbt=0, docuts=False):

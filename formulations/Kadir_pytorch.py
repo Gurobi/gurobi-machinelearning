@@ -14,7 +14,7 @@ from joblib import Parallel, delayed, parallel_backend
 from ml2gurobi.nnalgs import prop
 
 # import my functions
-from ml2gurobi.pytorch2gurobi import Sequential2Gurobi
+from ml2gurobi.pytorch import Sequential2Gurobi
 
 
 def do_regression(seed):

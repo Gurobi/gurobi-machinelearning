@@ -3,7 +3,7 @@
 
 from torch import nn
 
-from .ml2gurobi import BaseNNRegression2Gurobi
+from .nnbase import BaseNNRegression2Gurobi
 
 
 class Sequential2Gurobi(BaseNNRegression2Gurobi):
