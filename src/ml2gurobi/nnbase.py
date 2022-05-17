@@ -8,15 +8,15 @@ import gurobipy as gp
 import numpy as np
 
 from .activations import Identity, LogitPWL, ReLUGC
-from .utils import Submodel
+from .utils import Submodel, addtosubmodel
 
 
-class NNLayer:
+class NNLayer(Submodel):
     '''Class to build one layer of a neural network'''
 
     def __init__(self, model, activation_vars, input_vars, layer_coefs,
                  layer_intercept, activation_function, name):
-        self.model = model
+        super().__init__(model)
         self.actvar = activation_vars
         self.invar = input_vars
         self.coefs = layer_coefs
@@ -25,7 +25,6 @@ class NNLayer:
         self.wmin = None
         self.wmax = None
         self.zvar = None
-        self.constrs = []
         self.name = name
 
     def getmixing(self, index):
@@ -55,6 +54,7 @@ class NNLayer:
 
         return (wmin, wmax)
 
+    @addtosubmodel
     def add(self, activation=None):
         ''' Add the layer to model'''
         model = self.model
@@ -97,16 +97,13 @@ class NNLayer:
     def reset_bounds(self):
         '''Reset bounds on layer'''
         activation_function = self.activation
-        model = self.model
-        model.update()
-
+        self.model.update()
         activation_function.reset_bounds(self)
-
         self.model.update()
 
     def redolayer(self, activation=None):
         ''' Rebuild the layer (possibly using a different model for activation)'''
-        self.model.remove(self.constrs)
+        self.remove()
         self.add(activation)
 
 

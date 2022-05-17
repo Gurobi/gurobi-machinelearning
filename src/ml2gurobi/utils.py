@@ -33,6 +33,14 @@ model_stats = {'NumConstrs': 'getConstrs',
               'NumVars': 'getVars',
               'NumGenConstrs': 'getGenConstrs'}
 
+def addtosubmodel(function):
+    def wrapper(self, *args, **kwargs):
+        begin = self.get_stats_()
+        function(self, *args, **kwargs)
+        end = self.get_stats_()
+        self.update(begin, end)
+    return wrapper
+
 
 class Submodel(object):
     def __init__(self, model):
@@ -44,7 +52,6 @@ class Submodel(object):
             exec(f'''def {func}(self): return self.added_['{stat}']''')
             exec(f'self.{func} = types.MethodType({func}, self)')
             exec(f'self.{stat} = 0')
-
 
     def get_stats_(self):
         m = self.model
@@ -77,12 +84,10 @@ class Submodel(object):
     def mip_model(self, X, y):
         pass
 
+    @addtosubmodel
     def predict(self, X, y):
-        begin = self.get_stats_()
         X, y = self.validate(X, y)
         self.mip_model(X, y)
-        end = self.get_stats_()
-        self.update(begin, end)
 
     def remove(self):
         for s, v in self.added_.items():
