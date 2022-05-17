@@ -3,14 +3,14 @@
 
 from torch import nn
 
-from .ml2grb import BaseNNRegression2Grb
+from .ml2gurobi import BaseNNRegression2Gurobi
 
 
-class Sequential2Grb(BaseNNRegression2Grb):
+class Sequential2Gurobi(BaseNNRegression2Gurobi):
     '''Transform a pytorch Sequential Neural Network to Gurboi constraint with
        input and output as matrices of variables.'''
     def __init__(self, regressor, model, clean_regressor=False):
-        BaseNNRegression2Grb.__init__(self, regressor, model, clean_regressor)
+        BaseNNRegression2Gurobi.__init__(self, regressor, model, clean_regressor)
 
         linear = None
         for step in regressor:

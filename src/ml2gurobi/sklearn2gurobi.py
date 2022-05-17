@@ -7,13 +7,13 @@ in a scikit-learn object we want to transform and the model we want
 to transform it into.
 
 What we have so far:
-  - StandardScaler2Grb: would create scaled version of a set of variables
+  - StandardScaler2Gurobi: would create scaled version of a set of variables
     in a Gurobi model: xscale = scaled(x)
-  - LinearRegression2Grb: insert a constraint of the form y = g(x, psi)
+  - LinearRegression2Gurobi: insert a constraint of the form y = g(x, psi)
     where g is the regressor prediticted by a logitstic regression.
-  - LogisticRegression2Grb: insert a constraint of the form y = g(x, psi)
+  - LogisticRegression2Gurobi: insert a constraint of the form y = g(x, psi)
     where g is the regressor prediticted by a logitstic regression.
-  - MLSRegression2Grb: a neural network.
+  - MLSRegression2Gurobi: a neural network.
   - Pipe2Gurobi: convert a scikit-learn pipeline.
 
 '''
@@ -22,12 +22,12 @@ What we have so far:
 
 import numpy as np
 
-from .ml2grb import BaseNNRegression2Grb
-from .tree2grb import DecisionTree2Grb, GradientBoostingRegressor2Gurobi
+from .ml2gurobi import BaseNNRegression2Gurobi
+from .tree2gurobi import DecisionTree2Gurobi, GradientBoostingRegressor2Gurobi
 from .utils import validate_gpvars
 
 
-class StandardScaler2Grb:
+class StandardScaler2Gurobi:
     ''' Class to use a StandardScale to create scaled version of
         some Gurobi variables. '''
 
@@ -60,13 +60,13 @@ class StandardScaler2Grb:
         return self.vars_
 
 
-class LinearRegression2Grb(BaseNNRegression2Grb):
+class LinearRegression2Gurobi(BaseNNRegression2Gurobi):
     ''' Predict a Gurobi variable using a Linear Regression that
         takes another Gurobi matrix variable as input.
         '''
 
     def __init__(self, regressor, model, **kwargs):
-        BaseNNRegression2Grb.__init__(self, regressor, model, **kwargs)
+        BaseNNRegression2Gurobi.__init__(self, regressor, model, **kwargs)
 
     def predict(self, X, y):
         '''Add the prediction constraints to Gurobi'''
@@ -76,13 +76,13 @@ class LinearRegression2Grb(BaseNNRegression2Grb):
         return self
 
 
-class LogisticRegression2Grb(BaseNNRegression2Grb):
+class LogisticRegression2Gurobi(BaseNNRegression2Gurobi):
     ''' Predict a Gurobi variable using a Logistic Regression that
         takes another Gurobi matrix variable as input.
         '''
 
     def __init__(self, regressor, model, **kwargs):
-        BaseNNRegression2Grb.__init__(self, regressor, model, **kwargs)
+        BaseNNRegression2Gurobi.__init__(self, regressor, model, **kwargs)
 
     def predict(self, X, y):
         '''Add the prediction constraints to Gurobi'''
@@ -92,13 +92,13 @@ class LogisticRegression2Grb(BaseNNRegression2Grb):
         return self
 
 
-class MLPRegressor2Grb(BaseNNRegression2Grb):
+class MLPRegressor2Gurobi(BaseNNRegression2Gurobi):
     ''' Predict a Gurobi matrix variable using a neural network that
         takes another Gurobi matrix variable as input.
         '''
 
     def __init__(self, regressor, model, clean_regressor=False, **kwargs):
-        BaseNNRegression2Grb.__init__(self, regressor, model, clean_regressor=clean_regressor, **kwargs)
+        BaseNNRegression2Gurobi.__init__(self, regressor, model, clean_regressor=clean_regressor, **kwargs)
         assert regressor.out_activation_ in ('identity', 'relu', 'softmax')
 
     def predict(self, X, y):
@@ -142,17 +142,17 @@ class Pipe2Gurobi:
         self.steps = []
         for name, obj in pipeline.steps:
             if name == 'standardscaler':
-                self.steps.append(StandardScaler2Grb(obj, model, **kwargs))
+                self.steps.append(StandardScaler2Gurobi(obj, model, **kwargs))
             elif name == 'linearregression':
-                self.steps.append(LinearRegression2Grb(obj, model, **kwargs))
+                self.steps.append(LinearRegression2Gurobi(obj, model, **kwargs))
             elif name == 'logisticregression':
-                self.steps.append(LogisticRegression2Grb(obj, model, **kwargs))
+                self.steps.append(LogisticRegression2Gurobi(obj, model, **kwargs))
             elif name == 'mlpregressor':
-                self.steps.append(MLPRegressor2Grb(obj, model, **kwargs))
+                self.steps.append(MLPRegressor2Gurobi(obj, model, **kwargs))
             elif name == 'mlpclassifier':
-                self.steps.append(MLPRegressor2Grb(obj, model, **kwargs))
+                self.steps.append(MLPRegressor2Gurobi(obj, model, **kwargs))
             elif name == 'decisiontreeregressor':
-                self.steps.append(DecisionTree2Grb(obj, model, **kwargs))
+                self.steps.append(DecisionTree2Gurobi(obj, model, **kwargs))
             elif name == 'gradientboostingregressor':
                 self.steps.append(GradientBoostingRegressor2Gurobi(obj, model, **kwargs))
             else:

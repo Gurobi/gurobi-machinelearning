@@ -25,7 +25,7 @@ def doone(filename, docuts=None, doobbt=None, reluactivation=None):
         else:
             m = func_model(pipe)
         if doobbt:
-            m._pipe2grb.steps[-1].obbt()
+            m._pipe2gurobi.steps[-1].obbt()
     except Exception:
         print(f'Failed on {filename}')
         raise

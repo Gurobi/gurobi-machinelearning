@@ -13,8 +13,8 @@ import numpy as np
 import torch
 from gurobipy import GRB
 
-from ml2grb.nnalgs import prop
-from ml2grb.pytorch2grb import Sequential2Grb
+from ml2gurobi.nnalgs import prop
+from ml2gurobi.pytorch2gurobi import Sequential2Gurobi
 
 # Load data
 X = torch.from_numpy(np.genfromtxt('X.csv')).float()
@@ -34,8 +34,8 @@ def heuristic(modelname, seed):
     m.update()
 
     # Add constraint to predict value of y using x
-    nn2grb = Sequential2Grb(model, m, clean_regressor=True)
-    nn2grb.predict(x, y)
+    nn2gurobi = Sequential2Gurobi(model, m, clean_regressor=True)
+    nn2gurobi.predict(x, y)
     m.Params.OutputFlag = 0
     m.Params.Threads = 4
 
@@ -44,18 +44,18 @@ def heuristic(modelname, seed):
     tottime = - time.monotonic()
     prediction = model.forward(X)
     feasibles = X[((prediction >= 20) & (prediction <= 30)).all(axis=1), :]
-    sortedinputs = np.argsort(nn2grb._layers[0].invar.Obj@feasibles.numpy().T)
+    sortedinputs = np.argsort(nn2gurobi._layers[0].invar.Obj@feasibles.numpy().T)
 
     xin = feasibles[sortedinputs[0, 0]].numpy().reshape(1, -1)
 
     for it in range(100):
-        prop(nn2grb, xin, reset=False)
+        prop(nn2gurobi, xin, reset=False)
 
-        for v in nn2grb.canrelax:
+        for v in nn2gurobi.canrelax:
             v.LB = 0.0
             v.UB = 1.0
         m.update()
-        nn2grb.obbt(1)
+        nn2gurobi.obbt(1)
 
         m.Params.OutputFlag = 1
         m.optimize()
@@ -65,7 +65,7 @@ def heuristic(modelname, seed):
         print(f'Iteration {it} obj: {obj:.2f}')
         if m.ObjVal < 1e-2:
             break
-        for layer in nn2grb._layers:
+        for layer in nn2gurobi._layers:
             layer.zvar.UB = 1.0
             layer.zvar.LB = 0.0
     tottime += time.monotonic()

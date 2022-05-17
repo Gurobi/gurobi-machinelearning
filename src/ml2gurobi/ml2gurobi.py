@@ -7,7 +7,7 @@ or regrssion constructs in Gurobi'''
 import gurobipy as gp
 import numpy as np
 
-from .activations2grb import Identity, LogitPWL, ReLUGC
+from .activations2gurobi import Identity, LogitPWL, ReLUGC
 from .utils import transpose, validate_gpvars
 
 
@@ -110,7 +110,7 @@ class NNLayer:
         self.add(activation)
 
 
-class BaseNNRegression2Grb:
+class BaseNNRegression2Gurobi:
     ''' Base class for inserting a regressor based on neural-network/tensor into Gurobi'''
 
     def __init__(self, regressor, model, name='', clean_regressor=False):

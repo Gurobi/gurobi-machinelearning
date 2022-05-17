@@ -11,10 +11,10 @@ import torch
 from gurobipy import GRB
 from joblib import Parallel, delayed, parallel_backend
 
-from ml2grb.nnalgs import prop
+from ml2gurobi.nnalgs import prop
 
 # import my functions
-from ml2grb.pytorch2grb import Sequential2Grb
+from ml2gurobi.pytorch2gurobi import Sequential2Gurobi
 
 
 def do_regression(seed):
@@ -65,10 +65,10 @@ def do_model(nnmodel, seed):
     y = m.addMVar((1, 24), lb=20, ub=30, vtype=GRB.CONTINUOUS, name="y")
     m.setObjective(p @ x[0, 24:], GRB.MINIMIZE)
 
-    nn2grb = Sequential2Grb(nnmodel, m)
-    nn2grb.predict(x, y)
+    nn2gurobi = Sequential2Gurobi(nnmodel, m)
+    nn2gurobi.predict(x, y)
 
-    return (m, nn2grb)
+    return (m, nn2gurobi)
 
 
 def gen_nn(seed):
@@ -84,14 +84,14 @@ def gen_nn(seed):
     torch.save(model, filename)
 
 
-def heuristic(nn, nn2grb):
+def heuristic(nn, nn2gurobi):
     X = torch.from_numpy(np.genfromtxt('X.csv')).float()
 
     prediction = nn.forward(X)
     feasibles = X[((prediction >= 20) & (prediction <= 30)).all(axis=1), :]
-    sortedinputs = np.argsort(nn2grb._layers[0].invar.Obj@feasibles.numpy().T)
+    sortedinputs = np.argsort(nn2gurobi._layers[0].invar.Obj@feasibles.numpy().T)
 
-    prop(nn2grb, feasibles[sortedinputs[0, 0]].numpy().reshape(1, -1), reset=True)
+    prop(nn2gurobi, feasibles[sortedinputs[0, 0]].numpy().reshape(1, -1), reset=True)
 
 
 def doone(filename, doobbt=None, doheuristic=None, seed=None):
@@ -105,13 +105,13 @@ def doone(filename, doobbt=None, doheuristic=None, seed=None):
     model = torch.load(f'Networks_pytorch/{filename}')
 
     if filename.startswith('Kadir'):
-        m, nn2grb = do_model(model, seed)
+        m, nn2gurobi = do_model(model, seed)
     else:
         return
     if doobbt:
-        nn2grb.obbt(1)
+        nn2gurobi.obbt(1)
     if doheuristic:
-        heuristic(model, nn2grb)
+        heuristic(model, nn2gurobi)
         m.write(outputfile[:-len('lp.bz2')]+'attr')
     m.write(outputfile)
 

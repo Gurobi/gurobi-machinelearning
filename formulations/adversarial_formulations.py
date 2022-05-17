@@ -2,8 +2,8 @@ import gurobipy as gp
 import numpy as np
 from joblib import Parallel, delayed, load
 
-from ml2grb.activations2grb import Identity
-from ml2grb.sklearn2grb import Pipe2Gurobi
+from ml2gurobi.activations2gurobi import Identity
+from ml2gurobi.sklearn2gurobi import Pipe2Gurobi
 
 
 def do_formulation(pipe, X, exampleno, filename, doobbt=0, docuts=False):
@@ -25,9 +25,9 @@ def do_formulation(pipe, X, exampleno, filename, doobbt=0, docuts=False):
     m.addConstr(absdiff[0, :] >= x[0, :] - example[0, :])
     m.addConstr(absdiff[0, :] >= - x[0, :] + example[0, :])
     m.addConstr(absdiff[0, :].sum() <= epsilon)
-    pipe2grb = Pipe2Gurobi(pipe, m)
-    pipe2grb.steps[-1].actdict['softmax'] = Identity()
-    pipe2grb.predict(x, output)
+    pipe2gurobi = Pipe2Gurobi(pipe, m)
+    pipe2gurobi.steps[-1].actdict['softmax'] = Identity()
+    pipe2gurobi.predict(x, output)
     m.setObjective(output[0, sortedidx[0]] -
                    output[0, sortedidx[-1]], gp.GRB.MAXIMIZE)
     m.update()
@@ -35,7 +35,7 @@ def do_formulation(pipe, X, exampleno, filename, doobbt=0, docuts=False):
     m.Params.OutputFlag = 1
     try:
         if doobbt:
-            pipe2grb.steps[0].obbt(doobbt)
+            pipe2gurobi.steps[0].obbt(doobbt)
     except Exception:
         return
     m.update()

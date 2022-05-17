@@ -47,7 +47,7 @@ class Submodel:
         for s, v in self.added_.items():
             self.model.remove(v)
 
-class DecisionTree2Grb(Submodel):
+class DecisionTree2Gurobi(Submodel):
     ''' Class to model a trained decision tree in a Gurobi model'''
     def __init__(self, regressor, model):
         super().__init__(model)
@@ -119,7 +119,7 @@ class GradientBoostingRegressor2Gurobi:
 
             Both X and y should be array or list of variables of conforming dimensions.
         '''
-        X, y = DecisionTree2Grb.validate(X, y)
+        X, y = DecisionTree2Gurobi.validate(X, y)
 
         m = self.model
         regressor = self.regressor
@@ -127,10 +127,10 @@ class GradientBoostingRegressor2Gurobi:
         treevars = m.addMVar((X.shape[0], regressor.n_estimators_), lb = -GRB.INFINITY)
         constant = regressor.init_.constant_
 
-        tree2grb = []
+        tree2gurobi = []
         for i in range(regressor.n_estimators_):
             tree = regressor.estimators_[i]
-            tree2grb.append(DecisionTree2Grb(tree[0], m))
-            tree2grb[-1].predict(X, treevars[:, i])
+            tree2gurobi.append(DecisionTree2Gurobi(tree[0], m))
+            tree2gurobi[-1].predict(X, treevars[:, i])
         for k in range(X.shape[0]):
             m.addConstr(y[k, :] == regressor.learning_rate * treevars[k,:].sum() + constant)

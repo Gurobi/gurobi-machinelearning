@@ -53,11 +53,11 @@ def layer_cuts(layer, model=None):
     return cuts
 
 
-def cut_round(nn2grb, model=None):
+def cut_round(nn2gurobi, model=None):
     cuts = list()
 
     # Iterate over the hidden layers
-    for layer in nn2grb:
+    for layer in nn2gurobi:
         if layer.activation is None:
             continue
         cuts += layer_cuts(layer)
@@ -73,8 +73,8 @@ def ReLUcb(model, where):
         return
     print(f"CB nodes {model.cbGet(GRB.Callback.MIPNODE_NODCNT)}")
 
-    nn2grb = model._nn2grb
-    cuts = nn2grb.cut_round(model)
+    nn2gurobi = model._nn2gurobi
+    cuts = nn2gurobi.cut_round(model)
     if cuts is None:
         return
     for c in cuts:
@@ -88,8 +88,8 @@ def make_lastrows_cuts(model, startcuts):
     model.setAttr(GRB.Attr.Lazy, model.getConstrs(), Lazy)
 
 
-def simplecutloop(nn2grb, addAsCuts=False):
-    model = nn2grb.model
+def simplecutloop(nn2gurobi, addAsCuts=False):
+    model = nn2gurobi.model
     model.update()
     output = model.Params.OutputFlag
     model.Params.OutputFlag = 0
@@ -105,12 +105,12 @@ def simplecutloop(nn2grb, addAsCuts=False):
         if model.Status != GRB.OPTIMAL:
             break
         if output:
-            print(f'Round {round}: objective value {model.ObjVal} cuts {len(nn2grb._cuts)} new {len(cuts)}')
-        cuts = cut_round(nn2grb)
+            print(f'Round {round}: objective value {model.ObjVal} cuts {len(nn2gurobi._cuts)} new {len(cuts)}')
+        cuts = cut_round(nn2gurobi)
         if cuts:
             model.addConstrs(c for c in cuts)
             model.update()
-            nn2grb._cuts += model.getConstrs()[-len(cuts):]
+            nn2gurobi._cuts += model.getConstrs()[-len(cuts):]
         else:
             break
         round += 1
@@ -123,7 +123,7 @@ def simplecutloop(nn2grb, addAsCuts=False):
 
 
 def complexcutloop(model, addAsCuts=False, nodelimit=10):
-    model._nn2grb = model._pipe2grb.steps[-1]
+    model._nn2gurobi = model._pipe2gurobi.steps[-1]
     model._mycuts = list()
 
     model.Params.PreCrush = 1

@@ -10,7 +10,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 
-from ml2grb import sklearn2grb
+from ml2gurobi import sklearn2gurobi
 
 
 class TestFormulations(unittest.TestCase):
@@ -22,8 +22,8 @@ class TestFormulations(unittest.TestCase):
 
             y.shape
 
-            reg2grb = translator(regressor, model=m)
-            reg2grb.predict(x, y)
+            reg2gurobi = translator(regressor, model=m)
+            reg2gurobi.predict(x, y)
             m.Params.OutputFlag = 0
             m.optimize()
 
@@ -35,10 +35,10 @@ class TestFormulations(unittest.TestCase):
         X = data['data']
         y = data['target']
 
-        to_test = [(LinearRegression(), sklearn2grb.LinearRegression2Grb),
-                   (DecisionTreeRegressor(max_leaf_nodes=50), sklearn2grb.DecisionTree2Grb),
-                   (GradientBoostingRegressor(n_estimators=20), sklearn2grb.GradientBoostingRegressor2Gurobi),
-                   (MLPRegressor([20,20]), sklearn2grb.MLPRegressor2Grb)]
+        to_test = [(LinearRegression(), sklearn2gurobi.LinearRegression2Gurobi),
+                   (DecisionTreeRegressor(max_leaf_nodes=50), sklearn2gurobi.DecisionTree2Gurobi),
+                   (GradientBoostingRegressor(n_estimators=20), sklearn2gurobi.GradientBoostingRegressor2Gurobi),
+                   (MLPRegressor([20,20]), sklearn2gurobi.MLPRegressor2Gurobi)]
 
         for regressor, translator in to_test:
             regressor.fit(X, y)
@@ -53,4 +53,4 @@ class TestFormulations(unittest.TestCase):
             for _ in range(5):
                 exampleno=random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, translator=translator, exampleno=exampleno):
-                    self.fixed_model(pipeline, sklearn2grb.Pipe2Gurobi, X, y, exampleno)
+                    self.fixed_model(pipeline, sklearn2gurobi.Pipe2Gurobi, X, y, exampleno)

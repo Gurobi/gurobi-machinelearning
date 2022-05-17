@@ -89,21 +89,21 @@ def obbt_layer(layer, round_num, stats=None):
     return total_strengthened + n_strengthened
 
 
-def obbt(nn2grb, n_rounds=1, activation=None):
+def obbt(nn2gurobi, n_rounds=1, activation=None):
     '''Perform OBBT on model'''
     stats = {'done': 0, 'iters': 0}
-    outputflag = nn2grb.model.Params.OutputFlag
-    nn2grb.model.Params.OutputFlag = 0
-    nn2grb.rebuild_formulation(activation)
+    outputflag = nn2gurobi.model.Params.OutputFlag
+    nn2gurobi.model.Params.OutputFlag = 0
+    nn2gurobi.rebuild_formulation(activation)
     for roundnum in range(n_rounds):
         n_strengthened = 0
-        for layer in nn2grb:
+        for layer in nn2gurobi:
             if layer.activation is None:
                 continue
             n_strengthened += obbt_layer(layer, roundnum, stats=stats)
-            nn2grb.rebuild_formulation(activation)
+            nn2gurobi.rebuild_formulation(activation)
         if n_strengthened == 0:
             break
-    nn2grb.rebuild_formulation()
-    nn2grb.model.Params.OutputFlag = outputflag
+    nn2gurobi.rebuild_formulation()
+    nn2gurobi.model.Params.OutputFlag = outputflag
     return stats

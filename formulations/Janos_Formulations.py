@@ -7,7 +7,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from ml2grb.sklearn2grb import Pipe2Gurobi
+from ml2gurobi.sklearn2gurobi import Pipe2Gurobi
 
 KNOWN_FEATURES = ['SAT', 'GPA']
 DEC_FEATURES = ['scholarship']
@@ -69,14 +69,14 @@ def do_model(pipe, decidx, known_features, dec_features, reluformulation=None):
     m.addConstr(x[:, decidx].sum() <= 0.2*nstudents)
 
     # create transforms to turn scikit-learn pipeline into Gurobi constraints
-    pipe2grb = Pipe2Gurobi(pipe, m)
+    pipe2gurobi = Pipe2Gurobi(pipe, m)
     if reluformulation is not None:
-        pipe2grb.steps[-1].actdict['relu'] = reluformulation
+        pipe2gurobi.steps[-1].actdict['relu'] = reluformulation
 
     # Add constraint to predict value of y using kwnown and to compute features
-    pipe2grb.predict(X=x, y=y)
+    pipe2gurobi.predict(X=x, y=y)
 
-    m._pipe2grb = pipe2grb
+    m._pipe2gurobi = pipe2gurobi
     return m
 
 

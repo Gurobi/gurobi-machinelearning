@@ -71,27 +71,27 @@ def most_violated(layer):
     return (rval, error[0, rval], relu[0, rval])
 
 
-def relax_act(nn2grb):
-    for layer_model in nn2grb._layers:
+def relax_act(nn2gurobi):
+    for layer_model in nn2gurobi._layers:
         layer_model._actvar.LB = layer_model._wmin
         layer_model._actvar.UB = layer_model._wmax
-    nn2grb.model.update()
+    nn2gurobi.model.update()
 
 
-def prop(nn2grb, X, reset=False):
+def prop(nn2gurobi, X, reset=False):
     '''Propagate fixings into the network'''
     # Iterate over the layers
     torelax = list()
     activation = X
     target = 20
-    for layer in nn2grb:
+    for layer in nn2gurobi:
         input_vals = activation
         activation, keepopen = prop_activities(layer, input_vals, numfix=min(target, 50))
         torelax += keepopen
 
-    nn2grb.model.optimize()
-    nn2grb.canrelax = torelax
+    nn2gurobi.model.optimize()
+    nn2gurobi.canrelax = torelax
     if reset:
-        for layer in nn2grb._layers:
+        for layer in nn2gurobi._layers:
             layer.reset_bounds()
-            nn2grb.model.update()
+            nn2gurobi.model.update()

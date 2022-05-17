@@ -13,7 +13,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
 
 # import my functions
-from ml2grb.sklearn2grb import Pipe2Gurobi
+from ml2gurobi.sklearn2gurobi import Pipe2Gurobi
 
 
 def do_regression(layers, seed):
@@ -39,16 +39,16 @@ def do_model(pipe, seed=None, reluformulation=None):
     y = m.addMVar((1, 24), lb=20, ub=30, vtype=GRB.CONTINUOUS, name="y")
     m.setObjective(p @ x[0, 24:], GRB.MINIMIZE)
 
-    pipe2grb = Pipe2Gurobi(pipe, m)
+    pipe2gurobi = Pipe2Gurobi(pipe, m)
     if reluformulation is not None:
-        pipe2grb.steps[-1].actdict['relu'] = reluformulation
-    pipe2grb.predict(x, y)
+        pipe2gurobi.steps[-1].actdict['relu'] = reluformulation
+    pipe2gurobi.predict(x, y)
 
-    m._pipe2grb = pipe2grb
+    m._pipe2gurobi = pipe2gurobi
     return m
 
 
-def heuristic(nn, p, nn2grb):
+def heuristic(nn, p, nn2gurobi):
     X = np.genfromtxt('X.csv')
 
     def prop():
@@ -58,7 +58,7 @@ def heuristic(nn, p, nn2grb):
     feasibles = X[((prediction >= 20) & (prediction <= 30)).all(axis=1), :]
     sortedinputs = np.argsort(p@feasibles[:, 24:].numpy().T)
 
-    prop(nn2grb, feasibles[sortedinputs[0]].numpy().reshape(1, -1), reset=True)
+    prop(nn2gurobi, feasibles[sortedinputs[0]].numpy().reshape(1, -1), reset=True)
 
 
 def gen_nn(layers, seed):
@@ -95,7 +95,7 @@ def doone(filename, doobbt=None, seed=None):
     else:
         return
     if doobbt:
-        m._pipe2grb.steps[-1].obbt()
+        m._pipe2gurobi.steps[-1].obbt()
 
     m.write(outputfile)
 

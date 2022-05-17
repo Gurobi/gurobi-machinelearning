@@ -5,9 +5,9 @@ import numpy as np
 from sklearn.datasets import make_regression
 from sklearn.neural_network import MLPRegressor
 
-from ml2grb.activations2grb import ReLUGC
-from ml2grb.extra.morerelu import ReLUmin
-from ml2grb.sklearn2grb import MLPRegressor2Grb
+from ml2gurobi.activations2gurobi import ReLUGC
+from ml2gurobi.extra.morerelu import ReLUmin
+from ml2gurobi.sklearn2gurobi import MLPRegressor2Gurobi
 
 
 def build_abs_network():
@@ -50,12 +50,12 @@ def model(X, y, nn, infbound, relumodel=None):
 
         if nn:
             # create transforms to turn scikit-learn pipeline into Gurobi constraints
-            nn2grb = MLPRegressor2Grb(nn, regressor)
+            nn2gurobi = MLPRegressor2Gurobi(nn, regressor)
             if relumodel is not None:
-                nn2grb.actdict['relu'] = relumodel
+                nn2gurobi.actdict['relu'] = relumodel
 
             # Add constraint to predict value of y using kwnown and to compute features
-            nn2grb.predict(X=diff, y=absdiff)
+            nn2gurobi.predict(X=diff, y=absdiff)
         else:
             for i in range(samples):
                 regressor.addConstr(absdiff[i, 0] == gp.abs_(diff[i, 0]))
