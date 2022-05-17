@@ -22,19 +22,30 @@ from ml2gurobi.sklearn import (
 
 class TestFormulations(unittest.TestCase):
 
-    def fixed_model(self, regressor, translator, X, y, exampleno):
+    def add_remove(self, regressor, translator, X, y, exampleno):
         with gp.Model() as m:
             x = m.addMVar(X.shape[1], lb=X[exampleno,:], ub=X[exampleno,:])
             y = m.addMVar(1, lb=-gp.GRB.INFINITY)
-
-            y.shape
+            m.update()
+            numVars = m.NumVars
 
             m.Params.OutputFlag = 0
             reg2gurobi = translator(regressor, model=m)
+            assert m.NumVars == numVars + reg2gurobi.NumVars
+            assert m.NumConstrs == reg2gurobi.NumConstrs
+            assert m.NumQConstrs == reg2gurobi.NumQConstrs
+            assert m.NumGenConstrs == reg2gurobi.NumGenConstrs
             reg2gurobi.predict(x, y)
-            m.optimize()
-
-            self.assertTrue(abs(y.X - regressor.predict(X[exampleno,:].reshape(1, -1))) < 1e-5)
+            m.update()
+            assert m.NumVars == numVars + reg2gurobi.NumVars
+            assert m.NumConstrs == reg2gurobi.NumConstrs
+            assert m.NumQConstrs == reg2gurobi.NumQConstrs
+            assert m.NumGenConstrs == reg2gurobi.NumGenConstrs
+            reg2gurobi.remove()
+            assert m.NumVars == numVars
+            assert m.NumConstrs == 0
+            assert m.NumGenConstrs == 0
+            assert m.NumQConstrs == 0
 
     def test_diabetes(self):
         data = datasets.load_diabetes()
@@ -53,7 +64,7 @@ class TestFormulations(unittest.TestCase):
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, translator=translator, exampleno=exampleno):
-                    self.fixed_model(regressor, translator, X, y, exampleno)
+                    self.add_remove(regressor, translator, X, y, exampleno)
 
         return
         for regressor, _ in to_test:
@@ -62,4 +73,4 @@ class TestFormulations(unittest.TestCase):
             for _ in range(5):
                 exampleno=random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, translator=translator, exampleno=exampleno):
-                    self.fixed_model(pipeline, Pipe2Gurobi, X, y, exampleno)
+                    self.add_remove(pipeline, Pipe2Gurobi, X, y, exampleno)

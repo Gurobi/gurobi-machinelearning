@@ -8,7 +8,7 @@ import gurobipy as gp
 import numpy as np
 
 from .activations import Identity, LogitPWL, ReLUGC
-from .utils import transpose, validate_gpvars
+from .utils import Submodel
 
 
 class NNLayer:
@@ -110,12 +110,12 @@ class NNLayer:
         self.add(activation)
 
 
-class BaseNNRegression2Gurobi:
+class BaseNNRegression2Gurobi(Submodel):
     ''' Base class for inserting a regressor based on neural-network/tensor into Gurobi'''
 
     def __init__(self, regressor, model, name='', clean_regressor=False):
+        super().__init__(model)
         self.regressor = regressor
-        self.model = model
         self.name = name
         self.clean = clean_regressor
         self.actdict = {'relu': ReLUGC(), 'identity': Identity(), 'logit': LogitPWL()}
@@ -125,18 +125,6 @@ class BaseNNRegression2Gurobi:
 
     def __iter__(self):
         return self._layers.__iter__()
-
-    @staticmethod
-    def validate(input_vars, output_vars):
-        input_vars = validate_gpvars(input_vars)
-        output_vars = validate_gpvars(output_vars)
-        if output_vars.shape[0] != input_vars.shape[0] and output_vars.shape[1] != input_vars.shape[0]:
-            raise BaseException("Non-conforming dimension between input variable and output variable: {} != {}".
-                                format(output_vars.shape[0], input_vars.shape[0]))
-        elif output_vars.shape[1] == input_vars.shape[0]:
-            output_vars = transpose(output_vars)
-
-        return (input_vars, output_vars)
 
     def addlayer(self, input_vars, layer_coefs,
                  layer_intercept, activation,

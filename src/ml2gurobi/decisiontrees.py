@@ -2,63 +2,18 @@
 import numpy as np
 from gurobipy import GRB, quicksum
 
-from .utils import transpose, validate_gpvars
+from .utils import Submodel
 
-
-class Submodel:
-    def __init__(self, model):
-        self.model = model
-        self.torec_ = {'NumConstrs': model.getConstrs,
-                       'NumVars': model.getVars,
-                       'NumGenConstrs': model.getGenConstrs}
-        self.added_ = {}
-
-    def get_stats_(self):
-        m = self.model
-        m.update()
-        rval = {}
-        for s in self.torec_.keys():
-            rval[s] = m.getAttr(s)
-        return rval
-
-    def add(self, submodel):
-        begin = self.get_stats_()
-        submodel()
-        end = self.get_stats_()
-        for s in self.torec_.keys():
-            added = end[s] - begin[s]
-            if added > 0:
-                continue
-            self.added_[s] = self.torec_[s](range(begin[s], end[s]))
-
-    @staticmethod
-    def validate(input_vars, output_vars):
-        input_vars = validate_gpvars(input_vars)
-        output_vars = validate_gpvars(output_vars)
-        if output_vars.shape[0] != input_vars.shape[0] and output_vars.shape[1] != input_vars.shape[0]:
-            raise BaseException("Non-conforming dimension between input variable and output variable: {} != {}".
-                                format(output_vars.shape[0], input_vars.shape[0]))
-        elif input_vars.shape[0] != output_vars.shape[0] and output_vars.shape[1] == input_vars.shape[0]:
-            output_vars = transpose(output_vars)
-
-        return (input_vars, output_vars)
-
-    def remove(self):
-        for s, v in self.added_.items():
-            self.model.remove(v)
 
 class DecisionTree2Gurobi(Submodel):
     ''' Class to model a trained decision tree in a Gurobi model'''
     def __init__(self, regressor, model):
         super().__init__(model)
         self.tree = regressor.tree_
-        self.model = model
 
-    def mip_model(self):
+    def mip_model(self, X, y):
         tree = self.tree
         m = self.model
-        X = self.input
-        y = self.output
 
         nodes = m.addMVar((X.shape[0], tree.capacity), vtype=GRB.BINARY)
 
@@ -95,32 +50,19 @@ class DecisionTree2Gurobi(Submodel):
         y.LB = np.min(tree.value)
         y.UB = np.max(tree.value)
 
-    def predict(self, X, y):
-        ''' Predict output variables y from input variables X using the
-            decision tree.
 
-            Both X and y should be array or list of variables of conforming dimensions.
-        '''
-        X, y = self.validate(X, y)
-        self.input = X
-        self.output = y
-        self.add(self.mip_model)
-
-
-class GradientBoostingRegressor2Gurobi:
+class GradientBoostingRegressor2Gurobi(Submodel):
     def __init__(self, regressor, model):
+        super().__init__(model)
         self.regressor = regressor
-        self.model = model
 
 
-    def predict(self, X, y):
+    def mip_model(self, X, y):
         ''' Predict output variables y from input variables X using the
             decision tree.
 
             Both X and y should be array or list of variables of conforming dimensions.
         '''
-        X, y = DecisionTree2Gurobi.validate(X, y)
-
         m = self.model
         regressor = self.regressor
 

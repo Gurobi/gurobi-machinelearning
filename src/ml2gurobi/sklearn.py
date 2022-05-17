@@ -24,7 +24,7 @@ import numpy as np
 
 from .decisiontrees import DecisionTree2Gurobi, GradientBoostingRegressor2Gurobi
 from .nnbase import BaseNNRegression2Gurobi
-from .utils import validate_gpvars
+from .utils import Submodel, validate_gpvars
 
 
 class StandardScaler2Gurobi:
@@ -66,14 +66,12 @@ class LinearRegression2Gurobi(BaseNNRegression2Gurobi):
         '''
 
     def __init__(self, regressor, model, **kwargs):
-        BaseNNRegression2Gurobi.__init__(self, regressor, model, **kwargs)
+        super().__init__(regressor, model, **kwargs)
 
-    def predict(self, X, y):
+    def mip_model(self, X, y):
         '''Add the prediction constraints to Gurobi'''
-        X, y = self.validate(X, y)
         self.addlayer(X, self.regressor.coef_.T.reshape(-1, 1),
                       np.array(self.regressor.intercept_).reshape((-1,)), self.actdict['identity'], y)
-        return self
 
 
 class LogisticRegression2Gurobi(BaseNNRegression2Gurobi):
@@ -82,14 +80,12 @@ class LogisticRegression2Gurobi(BaseNNRegression2Gurobi):
         '''
 
     def __init__(self, regressor, model, **kwargs):
-        BaseNNRegression2Gurobi.__init__(self, regressor, model, **kwargs)
+        super().__init__(regressor, model, **kwargs)
 
-    def predict(self, X, y):
+    def mip_model(self, X, y):
         '''Add the prediction constraints to Gurobi'''
-        X, y = self.validate(X, y)
         self.addlayer(X, self.regressor.coef_.T,
                       self.regressor.intercept_, self.actdict['logit'], y)
-        return self
 
 
 class MLPRegressor2Gurobi(BaseNNRegression2Gurobi):
@@ -98,17 +94,16 @@ class MLPRegressor2Gurobi(BaseNNRegression2Gurobi):
         '''
 
     def __init__(self, regressor, model, clean_regressor=False, **kwargs):
-        BaseNNRegression2Gurobi.__init__(self, regressor, model, clean_regressor=clean_regressor, **kwargs)
+        super().__init__(regressor, model, clean_regressor=clean_regressor, **kwargs)
         assert regressor.out_activation_ in ('identity', 'relu', 'softmax')
 
-    def predict(self, X, y):
+    def mip_model(self, X, y):
         '''Add the prediction constraints to Gurobi'''
         neuralnet = self.regressor
         if neuralnet.activation not in self.actdict:
             raise BaseException(f'No implementation for activation function {neuralnet.activation}')
         activation = self.actdict[neuralnet.activation]
 
-        X, y = self.validate(X, y)
         self._input = X
         self._output = y
 
@@ -135,10 +130,10 @@ class MLPRegressor2Gurobi(BaseNNRegression2Gurobi):
             self.model.update()
 
 
-class Pipe2Gurobi:
+class Pipe2Gurobi(Submodel):
     '''Use a scikit-learn pipeline to build constraints in Gurobi model.'''
     def __init__(self, pipeline, model, **kwargs):
-        self.model = model
+        super().__init__(model)
         self.steps = []
         for name, obj in pipeline.steps:
             if name == 'standardscaler':
@@ -158,12 +153,11 @@ class Pipe2Gurobi:
             else:
                 raise BaseException(f"I don't know how to deal with that object: {name}")
 
-    def predict(self, X, y):
+    def mip_model(self, X, y):
         for obj in self.steps[:-1]:
             obj.transform(X)
             X = obj.X()
         self.steps[-1].predict(X, y)
-        return self
 
 
 def pipe_predict(X, y, pipe, model, **kwargs):

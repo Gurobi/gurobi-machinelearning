@@ -24,9 +24,8 @@ class Sequential2Gurobi(BaseNNRegression2Gurobi):
                 print(step)
                 raise BaseException("Unsupported network structure")
 
-    def predict(self, X, y):
+    def mip_model(self, X, y):
         network = self.regressor
-        X, y = self.validate(X, y)
         self._input = X
         self._output = y
         input_vars = X
