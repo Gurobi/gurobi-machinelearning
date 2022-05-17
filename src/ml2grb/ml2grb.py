@@ -122,7 +122,6 @@ class BaseNNRegression2Grb:
         self._input = None
         self._output = None
         self._layers = []
-        self._cuts = []
 
     def __iter__(self):
         return self._layers.__iter__()

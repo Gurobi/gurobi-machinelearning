@@ -5,11 +5,31 @@ from gurobipy import GRB, quicksum
 from .utils import transpose, validate_gpvars
 
 
-class DecisionTree2Grb:
-    ''' Class to model a trained decision tree in a Gurobi model'''
-    def __init__(self, regressor, model):
-        self.tree = regressor.tree_
+class Submodel:
+    def __init__(self, model):
         self.model = model
+        self.torec_ = {'NumConstrs': model.getConstrs,
+                       'NumVars': model.getVars,
+                       'NumGenConstrs': model.getGenConstrs}
+        self.added_ = {}
+
+    def get_stats_(self):
+        m = self.model
+        m.update()
+        rval = {}
+        for s in self.torec_.keys():
+            rval[s] = m.getAttr(s)
+        return rval
+
+    def add(self, submodel):
+        begin = self.get_stats_()
+        submodel()
+        end = self.get_stats_()
+        for s in self.torec_.keys():
+            added = end[s] - begin[s]
+            if added > 0:
+                continue
+            self.added_[s] = self.torec_[s](range(begin[s], end[s]))
 
     @staticmethod
     def validate(input_vars, output_vars):
@@ -23,16 +43,22 @@ class DecisionTree2Grb:
 
         return (input_vars, output_vars)
 
-    def predict(self, X, y):
-        ''' Predict output variables y from input variables X using the
-            decision tree.
+    def remove(self):
+        for s, v in added_.items():
+            self.model.remove(v)
 
-            Both X and y should be array or list of variables of conforming dimensions.
-        '''
-        X, y = self.validate(X, y)
+class DecisionTree2Grb(Submodel):
+    ''' Class to model a trained decision tree in a Gurobi model'''
+    def __init__(self, regressor, model):
+        super().__init__(model)
+        self.tree = regressor.tree_
+        self.model = model
 
+    def mip_model(self):
         tree = self.tree
         m = self.model
+        X = self.input
+        y = self.output
 
         nodes = m.addMVar((X.shape[0], tree.capacity), vtype=GRB.BINARY)
 
@@ -51,10 +77,15 @@ class DecisionTree2Grb:
             left = tree.children_left[node]
             right = tree.children_right[node]
             if left < 0:
-                m.addConstrs((nodes[k, node] == 1) >> (y[k, 0] == tree.value[node][0][0]) for k in range(X.shape[0]))
+                m.addConstrs((nodes[k, node] == 1) >> (y[k, 0] == tree.value[node][0][0])
+                             for k in range(X.shape[0]))
                 continue
-            m.addConstrs((nodes[k, left] == 1) >> (X[k, tree.feature[node]] <= tree.threshold[node]) for k in range(X.shape[0]))
-            m.addConstrs((nodes[k, right] == 1) >> (X[k, tree.feature[node]] >= tree.threshold[node] + 1e-8) for k in range(X.shape[0]))
+            m.addConstrs((nodes[k, left] == 1) >>
+                         (X[k, tree.feature[node]] <= tree.threshold[node])
+                         for k in range(X.shape[0]))
+            m.addConstrs((nodes[k, right] == 1) >>
+                         (X[k, tree.feature[node]] >= tree.threshold[node] + 1e-8)
+                         for k in range(X.shape[0]))
 
         # We should attain 1 leaf
         m.addConstrs(quicksum([nodes[k, i] for i in range(tree.capacity)
@@ -63,6 +94,18 @@ class DecisionTree2Grb:
 
         y.LB = np.min(tree.value)
         y.UB = np.max(tree.value)
+
+    def predict(self, X, y):
+        ''' Predict output variables y from input variables X using the
+            decision tree.
+
+            Both X and y should be array or list of variables of conforming dimensions.
+        '''
+        X, y = self.validate(X, y)
+        self.input = X
+        self.output = y
+        self.add(self.mip_model)
+
 
 class GradientBoostingRegressor2Gurobi:
     def __init__(self, regressor, model):
