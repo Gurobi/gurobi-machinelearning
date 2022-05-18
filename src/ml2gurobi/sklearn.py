@@ -51,7 +51,7 @@ class StandardScaler2Gurobi(Submodel):
         variables.UB = (X.UB - mean)/scale
         self.model.addConstrs((X[:, i] - variables[:, i] * scale[i] == mean[i]
                                for i in range(nfeat)),
-                               name=f'__scaling')
+                               name='__scaling')
         end = self.get_stats_()
         self.update(begin, end)
         self.vars_ = variables

@@ -1,4 +1,7 @@
 # Copyright © 2022 Gurobi Optimization, LLC
+
+# pylint: disable=C0103
+
 import types  # NOQA
 
 import gurobipy as gp
@@ -10,16 +13,17 @@ def validate_gpvars(gpvars):
             return gp.MVar(gpvars.tolist(), shape=(1, gpvars.shape[0]))
         if gpvars.ndim == 2:
             return gpvars
-        else:
-            raise BaseException("Variables should be an MVar of dimension 1 or 2")
+        raise BaseException("Variables should be an MVar of dimension 1 or 2")
     if isinstance(gpvars, dict):
         gpvars = gpvars.values()
     if isinstance(gpvars, list):
         return gp.MVar(gpvars, shape=(1, len(gpvars)))
     if isinstance(gpvars, gp.Var):
         rval = gp.MVar(gpvars, shape=(1, 1))
-        rval._vararr = rval._vararr.reshape((1, 1))  # Bug in MVar? an MVar of a single var doesn't follow shape
+        # Bug in MVar? an MVar of a single var doesn't follow shape
+        rval._vararr = rval._vararr.reshape((1, 1))
         return rval
+    raise BaseException("Could not validate variables")
 
 
 def transpose(gpvars):
@@ -29,9 +33,16 @@ def transpose(gpvars):
 
 
 model_stats = {'NumConstrs': 'getConstrs',
-              'NumQConstrs': 'getQConstrs',
-              'NumVars': 'getVars',
-              'NumGenConstrs': 'getGenConstrs'}
+               'NumQConstrs': 'getQConstrs',
+               'NumVars': 'getVars',
+               'NumSOS': 'getSOSs',
+               'NumGenConstrs': 'getGenConstrs'}
+
+name_attrs = {'NumConstrs': 'ConstrName',
+              'NumQConstrs': 'QCName',
+              'NumVars': 'VarName',
+              'NumSOS': 'SOSName',
+              'NumGenConstrs': 'GenConstrName'}
 
 def addtosubmodel(function):
     def wrapper(self, *args, **kwargs):
@@ -42,12 +53,12 @@ def addtosubmodel(function):
     return wrapper
 
 
-class Submodel(object):
-    def __init__(self, model):
+class Submodel:
+    def __init__(self, model, name=''):
         self.model = model
-        self.torec_ = {name: func
-                       for name, func in model_stats.items()}
-        self.added_ = {name: [] for name in model_stats.keys()}
+        self.name = name
+        self.torec_ = model_stats.copy()
+        self.added_ = {name: [] for name in model_stats}
         for stat, func in model_stats.items():
             exec(f'''def {func}(self): return self.added_['{stat}']''')
             exec(f'self.{func} = types.MethodType({func}, self)')
@@ -63,12 +74,16 @@ class Submodel(object):
 
     @staticmethod
     def validate(input_vars, output_vars):
+        ''' Validate input and output variables (check shapes, reshape if needed.'''
         input_vars = validate_gpvars(input_vars)
         output_vars = validate_gpvars(output_vars)
-        if output_vars.shape[0] != input_vars.shape[0] and output_vars.shape[1] != input_vars.shape[0]:
-            raise BaseException("Non-conforming dimension between input variable and output variable: {} != {}".
-                             format(output_vars.shape[0], input_vars.shape[0]))
-        elif input_vars.shape[0] != output_vars.shape[0] and output_vars.shape[1] == input_vars.shape[0]:
+        if (output_vars.shape[0] != input_vars.shape[0] and
+            output_vars.shape[1] != input_vars.shape[0]):
+            raise BaseException("Non-conforming dimension between " +
+                                "input variable and output variable: {} != {}".
+                                format(output_vars.shape[0], input_vars.shape[0]))
+        if (input_vars.shape[0] != output_vars.shape[0] and
+            output_vars.shape[1] == input_vars.shape[0]):
             output_vars = transpose(output_vars)
 
         return (input_vars, output_vars)
@@ -78,8 +93,13 @@ class Submodel(object):
             added = end[s] - begin[s]
             if added == 0:
                 continue
-            self.added_[s] += (eval('self.model.' + self.torec_[s] + '()')[begin[s]: end[s]])
             exec(f'self.{s} += added')
+            added = (eval('self.model.' + self.torec_[s] + '()')[begin[s]: end[s]])
+            # if self.name != '':
+            #     for o in added:
+            #         oname = o.getAttr(name_attrs[s])
+            #         o.setAttr(name_attrs[s], self.name+oname)
+            self.added_[s] += added
 
     def mip_model(self, X, y):
         pass

@@ -16,7 +16,7 @@ class NNLayer(Submodel):
 
     def __init__(self, model, activation_vars, input_vars, layer_coefs,
                  layer_intercept, activation_function, name):
-        super().__init__(model)
+        super().__init__(model, name)
         self.actvar = activation_vars
         self.invar = input_vars
         self.coefs = layer_coefs
@@ -25,7 +25,6 @@ class NNLayer(Submodel):
         self.wmin = None
         self.wmax = None
         self.zvar = None
-        self.name = name
 
     def getmixing(self, index):
         '''Mix layer input'''
@@ -43,9 +42,11 @@ class NNLayer(Submodel):
     def _wminmax(self):
         '''Compute min/max for w variable'''
         if (self.invar.UB >= gp.GRB.INFINITY).any():
-            return (-gp.GRB.INFINITY*np.ones(self.actvar.shape), gp.GRB.INFINITY*np.ones(self.actvar.shape))
+            return (-gp.GRB.INFINITY*np.ones(self.actvar.shape),
+                    gp.GRB.INFINITY*np.ones(self.actvar.shape))
         if (self.invar.LB <= - gp.GRB.INFINITY).any():
-            return (-gp.GRB.INFINITY*np.ones(self.actvar.shape), gp.GRB.INFINITY*np.ones(self.actvar.shape))
+            return (-gp.GRB.INFINITY*np.ones(self.actvar.shape),
+                    gp.GRB.INFINITY*np.ones(self.actvar.shape))
         wpos = np.maximum(self.coefs, 0.0)
         wneg = np.minimum(self.coefs, 0.0)
         wmin = self.invar.LB @ wpos + self.invar.UB @ wneg + self.intercept

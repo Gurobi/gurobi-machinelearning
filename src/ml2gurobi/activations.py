@@ -21,7 +21,7 @@ class Identity():
         vact = layer.actvar[index]
         constrname = layer.getname(index, 'mix')
         mixing = layer.getmixing(index)
-        c = layer.model.addConstr(vact == mixing, name=constrname)
+        layer.model.addConstr(vact == mixing, name=constrname)
 
 
 class ReLUGC():
@@ -36,7 +36,7 @@ class ReLUGC():
         if not hasattr(layer, 'mixing'):
             mixing = layer.model.addMVar(layer.actvar.shape, lb=-GRB.INFINITY,
                                          vtype=GRB.CONTINUOUS,
-                                         name='__mix[{}]'.format(layer.name))
+                                         name=f'__mix[{layer.name}]')
             layer.mixing = mixing
         layer.model.update()
         if self.bigm is not None:
