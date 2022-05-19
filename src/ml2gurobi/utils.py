@@ -2,7 +2,6 @@
 
 # pylint: disable=C0103
 
-import types  # NOQA
 
 import gurobipy as gp
 
@@ -32,11 +31,11 @@ def transpose(gpvars):
     return gp.MVar(gpvars.tolist()[0], (gpvars.shape[1], gpvars.shape[0]))
 
 
-model_stats = {'NumConstrs': 'getConstrs',
-               'NumQConstrs': 'getQConstrs',
-               'NumVars': 'getVars',
-               'NumSOS': 'getSOSs',
-               'NumGenConstrs': 'getGenConstrs'}
+model_stats = {'NumConstrs': 'Constrs',
+               'NumQConstrs': 'QConstrs',
+               'NumVars': 'Vars',
+               'NumSOS': 'SOSs',
+               'NumGenConstrs': 'GenConstrs'}
 
 name_attrs = {'NumConstrs': 'ConstrName',
               'NumQConstrs': 'QCName',
@@ -57,12 +56,14 @@ class Submodel:
     def __init__(self, model, name=''):
         self.model = model
         self.name = name
-        self.torec_ = model_stats.copy()
-        self.added_ = {name: [] for name in model_stats}
+        self.torec_ = {'NumConstrs': model.getConstrs,
+                       'NumQConstrs': model.getQConstrs,
+                       'NumVars': model.getVars,
+                       'NumSOS':  model.getSOSs,
+                       'NumGenConstrs': model.getGenConstrs}
         for stat, func in model_stats.items():
-            exec(f'''def {func}(self): return self.added_['{stat}']''')
-            exec(f'self.{func} = types.MethodType({func}, self)')
-            exec(f'self.{stat} = 0')
+            self.__dict__[func] = []
+            self.__dict__[stat] = 0
 
     def get_stats_(self):
         m = self.model
@@ -89,17 +90,13 @@ class Submodel:
         return (input_vars, output_vars)
 
     def update(self, begin, end):
-        for s in self.torec_.keys():
+        for s, func in self.torec_.items():
             added = end[s] - begin[s]
             if added == 0:
                 continue
-            exec(f'self.{s} += added')
-            added = (eval('self.model.' + self.torec_[s] + '()')[begin[s]: end[s]])
-            # if self.name != '':
-            #     for o in added:
-            #         oname = o.getAttr(name_attrs[s])
-            #         o.setAttr(name_attrs[s], self.name+oname)
-            self.added_[s] += added
+            self.__dict__[s] += added
+            added = func()[begin[s]: end[s]]
+            self.__dict__[model_stats[s]] += added
 
     def mip_model(self, X, y):
         pass
@@ -111,12 +108,14 @@ class Submodel:
 
     def remove(self, what=None):
         if what is None:
-            for s, v in self.added_.items():
-                self.model.remove(v)
-                self.added_[s] = []
+            for s, v in model_stats.items():
+                self.model.remove(self.__dict__[v])
+                self.__dict__[v] = []
+                self.__dict__[s] = 0
         else:
             for s in what:
                 key = 'Num'+s
-                self.model.remove(self.added_[key])
-                self.added_[key] = []
+                self.model.remove(self.__dict__[key])
+                self.__dict__[s] = []
+                self.__dict__[key] = 0
         self.model.update()

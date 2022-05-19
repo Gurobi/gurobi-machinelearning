@@ -22,6 +22,19 @@ from ml2gurobi.sklearn import (
 
 class TestFormulations(unittest.TestCase):
 
+    def check_counts(self, m, reg2gurobi, numVars):
+        self.assertEqual(m.NumVars, numVars + reg2gurobi.NumVars)
+        self.assertEqual(m.NumSOS, reg2gurobi.NumSOS)
+        self.assertEqual(m.NumConstrs, reg2gurobi.NumConstrs)
+        self.assertEqual(m.NumQConstrs, reg2gurobi.NumQConstrs)
+        self.assertEqual(m.NumGenConstrs, reg2gurobi.NumGenConstrs)
+
+        self.assertEqual(reg2gurobi.NumVars, len(reg2gurobi.Vars))
+        self.assertEqual(reg2gurobi.NumSOS, len(reg2gurobi.SOSs))
+        self.assertEqual(reg2gurobi.NumConstrs, len(reg2gurobi.Constrs))
+        self.assertEqual(reg2gurobi.NumQConstrs, len(reg2gurobi.QConstrs))
+        self.assertEqual(reg2gurobi.NumGenConstrs, len(reg2gurobi.GenConstrs))
+
     def add_remove(self, regressor, translator, X, y, exampleno):
         with gp.Model() as m:
             x = m.addMVar(X.shape[1], lb=X[exampleno,:], ub=X[exampleno,:])
@@ -31,18 +44,16 @@ class TestFormulations(unittest.TestCase):
 
             m.Params.OutputFlag = 0
             reg2gurobi = translator(regressor, model=m)
-            assert m.NumVars == numVars + reg2gurobi.NumVars
-            assert m.NumConstrs == reg2gurobi.NumConstrs
-            assert m.NumQConstrs == reg2gurobi.NumQConstrs
-            assert m.NumGenConstrs == reg2gurobi.NumGenConstrs
+
+            self.check_counts(m, reg2gurobi, numVars)
+
+            assert reg2gurobi.NumVars == len(reg2gurobi.Vars)
             reg2gurobi.predict(x, y)
             m.update()
-            assert m.NumVars == numVars + reg2gurobi.NumVars
-            assert m.NumConstrs == reg2gurobi.NumConstrs
-            assert m.NumQConstrs == reg2gurobi.NumQConstrs
-            assert m.NumGenConstrs == reg2gurobi.NumGenConstrs
+
+            self.check_counts(m, reg2gurobi, numVars)
             reg2gurobi.remove()
-            assert m.NumVars == numVars
+            self.check_counts(m, reg2gurobi, numVars)
             assert m.NumConstrs == 0
             assert m.NumGenConstrs == 0
             assert m.NumQConstrs == 0
