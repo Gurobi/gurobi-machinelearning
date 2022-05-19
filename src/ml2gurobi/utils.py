@@ -1,12 +1,14 @@
 # Copyright © 2022 Gurobi Optimization, LLC
 
-# pylint: disable=C0103
+'''Utilities for ml2gurobi'''
 
+# pylint: disable=C0103
 
 import gurobipy as gp
 
 
 def validate_gpvars(gpvars):
+    ''' Put variables into appropriate form (matrix of variable)'''
     if isinstance(gpvars, gp.MVar):
         if gpvars.ndim == 1:
             return gp.MVar(gpvars.tolist(), shape=(1, gpvars.shape[0]))
@@ -18,14 +20,15 @@ def validate_gpvars(gpvars):
     if isinstance(gpvars, list):
         return gp.MVar(gpvars, shape=(1, len(gpvars)))
     if isinstance(gpvars, gp.Var):
-        rval = gp.MVar(gpvars, shape=(1, 1))
-        # Bug in MVar? an MVar of a single var doesn't follow shape
-        rval._vararr = rval._vararr.reshape((1, 1))
-        return rval
+        return  gp.MVar([gpvars,], shape=(1, 1))
     raise BaseException("Could not validate variables")
 
 
 def transpose(gpvars):
+    '''Transpose a matrix of variables
+
+    Should I really do this?
+    '''
     assert isinstance(gpvars, gp.MVar)
     assert gpvars.ndim == 2
     return gp.MVar(gpvars.tolist()[0], (gpvars.shape[1], gpvars.shape[0]))
@@ -37,13 +40,8 @@ model_stats = {'NumConstrs': 'Constrs',
                'NumSOS': 'SOSs',
                'NumGenConstrs': 'GenConstrs'}
 
-name_attrs = {'NumConstrs': 'ConstrName',
-              'NumQConstrs': 'QCName',
-              'NumVars': 'VarName',
-              'NumSOS': 'SOSName',
-              'NumGenConstrs': 'GenConstrName'}
-
 def addtosubmodel(function):
+    ''' Wrapper function to add to submodel '''
     def wrapper(self, *args, **kwargs):
         begin = self.get_stats_()
         function(self, *args, **kwargs)
@@ -53,6 +51,7 @@ def addtosubmodel(function):
 
 
 class Submodel:
+    ''' Class to define a submodel'''
     def __init__(self, model, name=''):
         self.model = model
         self.name = name
@@ -90,6 +89,10 @@ class Submodel:
         return (input_vars, output_vars)
 
     def update(self, begin, end):
+        '''Update submodel after changes
+
+        (i.e. record what happened between begin and end).
+        '''
         for s, func in self.torec_.items():
             added = end[s] - begin[s]
             if added == 0:
@@ -99,14 +102,20 @@ class Submodel:
             self.__dict__[model_stats[s]] += added
 
     def mip_model(self, X, y):
-        pass
+        ''' Mip model for predict
+        (implemented in child classes)'''
 
     @addtosubmodel
     def predict(self, X, y):
+        '''Predict y from X using regression/classifier
+
+        X and y are Gurobi Matrices or list of variables of conforming
+        dimensions'''
         X, y = self.validate(X, y)
         self.mip_model(X, y)
 
     def remove(self, what=None):
+        '''Remove everything added by this object from Gurobi model'''
         if what is None:
             for s, v in model_stats.items():
                 self.model.remove(self.__dict__[v])

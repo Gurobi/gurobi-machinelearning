@@ -1,6 +1,9 @@
 # Copyright © 2022 Gurobi Optimization, LLC
 # pylint: disable=C0103
 
+''' To transform a sequential neural network of PyTorch
+in a Gurobi model '''
+
 from torch import nn
 
 from .nnbase import BaseNNRegression2Gurobi
