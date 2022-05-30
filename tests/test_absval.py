@@ -11,6 +11,7 @@ from ml2gurobi.sklearn import MLPRegressor2Gurobi
 
 gp.gurobi._nd_unleashed = True
 
+
 def build_abs_network():
     ''' Make a scikit-learn neural network for computing absolute value'''
     # We fakely fit a neural network and then set the correct coefficients by hand

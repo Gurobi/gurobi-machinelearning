@@ -43,7 +43,7 @@ class ReLUmin():
             minact = layer.minact[index]
             constrname = layer.getname(index, 'relu')
             mixing = sum(layer.invar[k, i] * layer.coefs[i, j]
-                      for i in range(input_size)) + layer.intercept[j]
+                         for i in range(input_size)) + layer.intercept[j]
             layer.model.addConstr(layer.mixing[index] == - mixing, name=constrname+'_mix')
             mixing = layer.mixing[index]
             layer.model.addConstr(vact == -minact)
@@ -220,7 +220,6 @@ class reluOBBT():
         if layer.wmax is not None:
             layer.actvar.LB = 0.0
             layer.actvar.UB = np.maximum(layer.wmax, 0.0)
-
 
     def conv(self, layer, index):
         ''' This is the convex hull of ReLU without binary (just for doing OBBT)'''

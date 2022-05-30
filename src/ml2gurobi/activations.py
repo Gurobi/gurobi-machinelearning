@@ -21,7 +21,7 @@ class Identity():
         for index in np.ndindex(layer.actvar.shape):
             (k, j) = index
             mixing = sum(layer.invar[k, i] * layer.coefs[i, j]
-                      for i in range(input_size)) + layer.intercept[j]
+                         for i in range(input_size)) + layer.intercept[j]
             layer.model.addConstr(layer.actvar[index] == mixing, name=layer.name+f'_mix[{index}]')
 
 
@@ -53,7 +53,7 @@ class ReLUGC():
         for index in np.ndindex(layer.actvar.shape):
             (k, j) = index
             mixing = sum(layer.invar[k, i] * layer.coefs[i, j]
-                      for i in range(input_size)) + layer.intercept[j]
+                         for i in range(input_size)) + layer.intercept[j]
             layer.model.addConstr(layer.mixing[index] == mixing, name=layer.name+f'_mix[{index}]')
             layer.model.addGenConstrMax(layer.actvar[index], [layer.mixing[index], ], constant=0.0, name=layer.name+'_relu')
 
@@ -157,4 +157,4 @@ class LogitPWL:
                 xval, yval = self._logit_pwl_3pieces(vx, vact)
             if len(xval) > 0:
                 layer.model.addGenConstrPWL(vx, vact, xval, yval,
-                                             name=layer.getname(index)+'_pwl')
+                                            name=layer.getname(index)+'_pwl')

@@ -20,7 +20,7 @@ def validate_gpvars(gpvars):
     if isinstance(gpvars, list):
         return gp.MVar(gpvars, shape=(1, len(gpvars)))
     if isinstance(gpvars, gp.Var):
-        return  gp.MVar([gpvars,], shape=(1, 1))
+        return gp.MVar([gpvars, ], shape=(1, 1))
     raise BaseException("Could not validate variables")
 
 
@@ -39,6 +39,7 @@ model_stats = {'NumConstrs': 'Constrs',
                'NumVars': 'Vars',
                'NumSOS': 'SOSs',
                'NumGenConstrs': 'GenConstrs'}
+
 
 def addtosubmodel(function):
     ''' Wrapper function to add to submodel '''
@@ -78,12 +79,12 @@ class Submodel:
         input_vars = validate_gpvars(input_vars)
         output_vars = validate_gpvars(output_vars)
         if (output_vars.shape[0] != input_vars.shape[0] and
-            output_vars.shape[1] != input_vars.shape[0]):
+                output_vars.shape[1] != input_vars.shape[0]):
             raise BaseException("Non-conforming dimension between " +
                                 "input variable and output variable: {} != {}".
                                 format(output_vars.shape[0], input_vars.shape[0]))
         if (input_vars.shape[0] != output_vars.shape[0] and
-            output_vars.shape[1] == input_vars.shape[0]):
+                output_vars.shape[1] == input_vars.shape[0]):
             output_vars = transpose(output_vars)
 
         return (input_vars, output_vars)

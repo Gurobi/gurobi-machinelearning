@@ -56,7 +56,6 @@ class GradientBoostingRegressor2Gurobi(Submodel):
         super().__init__(model)
         self.regressor = regressor
 
-
     def mip_model(self, X, y):
         ''' Predict output variables y from input variables X using the
             decision tree.
@@ -66,7 +65,7 @@ class GradientBoostingRegressor2Gurobi(Submodel):
         m = self.model
         regressor = self.regressor
 
-        treevars = m.addMVar((X.shape[0], regressor.n_estimators_), lb = -GRB.INFINITY)
+        treevars = m.addMVar((X.shape[0], regressor.n_estimators_), lb=-GRB.INFINITY)
         constant = regressor.init_.constant_
 
         tree2gurobi = []
@@ -75,4 +74,4 @@ class GradientBoostingRegressor2Gurobi(Submodel):
             tree2gurobi.append(DecisionTree2Gurobi(tree[0], m))
             tree2gurobi[-1].predict(X, treevars[:, i])
         for k in range(X.shape[0]):
-            m.addConstr(y[k, :] == regressor.learning_rate * treevars[k,:].sum() + constant)
+            m.addConstr(y[k, :] == regressor.learning_rate * treevars[k, :].sum() + constant)

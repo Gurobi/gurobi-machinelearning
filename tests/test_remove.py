@@ -19,7 +19,9 @@ from ml2gurobi.sklearn import (
     Pipe2Gurobi,
 )
 
+
 gp.gurobi._nd_unleashed = True
+
 
 class TestFormulations(unittest.TestCase):
 
@@ -38,7 +40,7 @@ class TestFormulations(unittest.TestCase):
 
     def add_remove(self, regressor, translator, X, y, exampleno):
         with gp.Model() as m:
-            x = m.addMVar(X.shape[1], lb=X[exampleno,:], ub=X[exampleno,:])
+            x = m.addMVar(X.shape[1], lb=-gp.GRB.INFINITY)
             y = m.addMVar(1, lb=-gp.GRB.INFINITY)
             m.update()
             numVars = m.NumVars
@@ -68,7 +70,7 @@ class TestFormulations(unittest.TestCase):
         to_test = [(LinearRegression(), LinearRegression2Gurobi),
                    (DecisionTreeRegressor(max_leaf_nodes=50), DecisionTree2Gurobi),
                    (GradientBoostingRegressor(n_estimators=20), GradientBoostingRegressor2Gurobi),
-                   (MLPRegressor([20,20]), MLPRegressor2Gurobi)]
+                   (MLPRegressor([20, 20]), MLPRegressor2Gurobi)]
 
         warnings.filterwarnings('ignore')
         for regressor, translator in to_test:
@@ -82,6 +84,6 @@ class TestFormulations(unittest.TestCase):
             pipeline = make_pipeline(StandardScaler(), regressor)
             pipeline.fit(X, y)
             for _ in range(5):
-                exampleno=random.randint(0, X.shape[0]-1)
+                exampleno = random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, translator=translator, exampleno=exampleno):
                     self.add_remove(pipeline, Pipe2Gurobi, X, y, exampleno)
