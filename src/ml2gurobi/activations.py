@@ -157,4 +157,4 @@ class LogitPWL:
                 xval, yval = self._logit_pwl_3pieces(vx, vact)
             if len(xval) > 0:
                 layer.model.addGenConstrPWL(vx, vact, xval, yval,
-                                        name=constrname+'_pwl')
+                                             name=layer.getname(index)+'_pwl')

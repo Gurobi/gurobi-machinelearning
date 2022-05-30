@@ -26,10 +26,6 @@ class NNLayer(Submodel):
         self.wmax = None
         self.zvar = None
 
-    def getmixing(self):
-        '''Mix layer input'''
-        return mixing
-
     def getname(self, index, name):
         '''Get a fancy name for a neuron in layer'''
         return f'{name}[{self.name}][{index[0]},{index[1]}]'
