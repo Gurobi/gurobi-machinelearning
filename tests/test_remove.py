@@ -19,7 +19,6 @@ from ml2gurobi.sklearn import (
     Pipe2Gurobi,
 )
 
-
 gp.gurobi._nd_unleashed = True
 
 
