@@ -13,8 +13,8 @@ class ReLUmin():
         self.bigm = bigm
         self.setbounds = setbounds
 
-    def preprocess(self, layer):
-        '''Prepare for modeling ReLU in a layer'''
+    def mip_model(self, layer):
+        ''' Add weird MIP formulation for ReLU for neuron in layer'''
         if not hasattr(layer, 'mixing'):
             mixing = layer.model.addMVar(layer.actvar.shape, lb=-GRB.INFINITY,
                                          vtype=GRB.CONTINUOUS,
@@ -36,16 +36,18 @@ class ReLUmin():
             layer.mixing.LB = -layer.wmax
             layer.mixing.UB = -layer.wmin
 
-    def conv(self, layer, index):
-        ''' Add MIP formulation for ReLU for neuron in layer'''
-        vact = layer.actvar[index]
-        minact = layer.minact[index]
-        constrname = layer.getname(index, 'relu')
-        mixing = layer.getmixing(index)
-        layer.model.addConstr(layer.mixing[index] == - mixing, name=constrname+'_mix')
-        mixing = layer.mixing[index]
-        layer.model.addConstr(vact == -minact)
-        layer.model.addGenConstrMin(minact, [mixing, 0.0], name=constrname+'_relu')
+        input_size = layer.invar.shape[1]
+        for index in np.ndindex(layer.actvar.shape):
+            k, j = index
+            vact = layer.actvar[index]
+            minact = layer.minact[index]
+            constrname = layer.getname(index, 'relu')
+            mixing = sum(layer.invar[k, i] * layer.coefs[i, j]
+                      for i in range(input_size)) + layer.intercept[j]
+            layer.model.addConstr(layer.mixing[index] == - mixing, name=constrname+'_mix')
+            mixing = layer.mixing[index]
+            layer.model.addConstr(vact == -minact)
+            layer.model.addGenConstrMin(minact, [mixing, 0.0], name=constrname+'_relu')
 
 
 class GRBReLU():

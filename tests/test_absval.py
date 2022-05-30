@@ -9,6 +9,7 @@ from ml2gurobi.activations import ReLUGC
 from ml2gurobi.extra.morerelu import ReLUmin
 from ml2gurobi.sklearn import MLPRegressor2Gurobi
 
+gp.gurobi._nd_unleashed = True
 
 def build_abs_network():
     ''' Make a scikit-learn neural network for computing absolute value'''

@@ -26,13 +26,8 @@ class NNLayer(Submodel):
         self.wmax = None
         self.zvar = None
 
-    def getmixing(self, index):
+    def getmixing(self):
         '''Mix layer input'''
-        (k, j) = index
-        input_size = self.invar.shape[1]
-
-        mixing = sum(self.invar[k, i] * self.coefs[i, j]
-                     for i in range(input_size)) + self.intercept[j]
         return mixing
 
     def getname(self, index, name):
@@ -87,12 +82,7 @@ class NNLayer(Submodel):
         self.wmax = wmax
 
         # Apply bounds to activation variables (and other preprocessing)
-        activation.preprocess(self)
-
-        # Now build model neuron by neuron and example by example
-        for j in range(layer_size):
-            for k in range(n):
-                activation.conv(self, (k, j))
+        activation.mip_model(self)
         self.model.update()
 
     def reset_bounds(self):

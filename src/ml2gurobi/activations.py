@@ -12,16 +12,17 @@ class Identity():
     def __init__(self, setbounds=True):
         self.setbounds = setbounds
 
-    def preprocess(self, layer):
+    def mip_model(self, layer):
         if self.setbounds:
             layer.actvar.LB = np.maximum(layer.actvar.LB, layer.wmin)
             layer.actvar.UB = np.minimum(layer.actvar.UB, layer.wmax)
 
-    def conv(self, layer, index):
-        vact = layer.actvar[index]
-        constrname = layer.getname(index, 'mix')
-        mixing = layer.getmixing(index)
-        layer.model.addConstr(vact == mixing, name=constrname)
+        input_size = layer.invar.shape[1]
+        for index in np.ndindex(layer.actvar.shape):
+            (k, j) = index
+            mixing = sum(layer.invar[k, i] * layer.coefs[i, j]
+                      for i in range(input_size)) + layer.intercept[j]
+            layer.model.addConstr(layer.actvar[index] == mixing, name=layer.name+f'_mix[{index}]')
 
 
 class ReLUGC():
@@ -31,14 +32,15 @@ class ReLUGC():
         self.bigm = bigm
         self.setbounds = setbounds
 
-    def preprocess(self, layer):
-        '''Prepare for modeling ReLU in a layer'''
+    def mip_model(self, layer):
+        ''' Add MIP formulation for ReLU for neuron in layer'''
         if not hasattr(layer, 'mixing'):
             mixing = layer.model.addMVar(layer.actvar.shape, lb=-GRB.INFINITY,
                                          vtype=GRB.CONTINUOUS,
                                          name=f'__mix[{layer.name}]')
             layer.mixing = mixing
         layer.model.update()
+        input_size = layer.invar.shape[1]
         if self.bigm is not None:
             layer.wmax = np.minimum(layer.wmax, self.bigm)
             layer.wmin = np.maximum(layer.wmin, -1*self.bigm)
@@ -48,14 +50,12 @@ class ReLUGC():
             layer.mixing.LB = layer.wmin
             layer.mixing.UB = layer.wmax
 
-    def conv(self, layer, index):
-        ''' Add MIP formulation for ReLU for neuron in layer'''
-        vact = layer.actvar[index]
-        constrname = layer.getname(index, 'relu')
-        mixing = layer.getmixing(index)
-        layer.model.addConstr(layer.mixing[index] == mixing, name=constrname+'_mix')
-        mixing = layer.mixing[index]
-        layer.model.addGenConstrMax(vact, [mixing, 0.0], name=constrname+'_relu')
+        for index in np.ndindex(layer.actvar.shape):
+            (k, j) = index
+            mixing = sum(layer.invar[k, i] * layer.coefs[i, j]
+                      for i in range(input_size)) + layer.intercept[j]
+            layer.model.addConstr(layer.mixing[index] == mixing, name=layer.name+f'_mix[{index}]')
+            layer.model.addGenConstrMax(layer.actvar[index], [layer.mixing[index], ], constant=0.0, name=layer.name+'_relu')
 
 
 class LogitPWL:
@@ -69,15 +69,6 @@ class LogitPWL:
     @staticmethod
     def preprocess(layer):
         '''Prepare to add logit activation to layer'''
-        if not layer.zvar:
-            z = layer.model.addMVar(layer.actvar.shape, lb=-GRB.INFINITY,
-                                    name=f'__z[{layer.name}]')
-            layer.zvar = z
-        else:
-            z = layer.zvar
-        z.LB = layer.wmin
-        z.UB = layer.wmax
-        layer.model.update()
 
     def _logit_pwl_3pieces(self, vx, vy):
         ''' Do a 3 pieces approximation of logit'''
@@ -142,19 +133,28 @@ class LogitPWL:
 
         return (xval, yval)
 
-    def conv(self, layer, index):
+    def mip_model(self, layer):
         '''Add formulation for logit for neuron of layer'''
         model = layer.model
-        vact = layer.actvar[index]
-        vx = layer.zvar[index]
-        constrname = layer.getname('logit', index)
-        mixing = layer.getmixing(index)
-        model.addConstr(vx == mixing, name=constrname+'_mix')
-
-        if self.logitapprox == 'PWL':
-            xval, yval = self._logit_pwl_approx(vx, vact)
+        if not layer.zvar:
+            z = layer.model.addMVar(layer.actvar.shape, lb=-GRB.INFINITY,
+                                    name=f'__z[{layer.name}]')
+            layer.zvar = z
         else:
-            xval, yval = self._logit_pwl_3pieces(vx, vact)
-        if len(xval) > 0:
-            layer.model.addGenConstrPWL(vx, vact, xval, yval,
+            z = layer.zvar
+        z.LB = layer.wmin
+        z.UB = layer.wmax
+        model.update()
+        mixing = layer.invar @ layer.coefs + layer.intercept
+        model.addConstr(layer.zvar == mixing, name=layer.name+'_mix')
+
+        for index in np.ndindex(layer.actvar.shape):
+            vact = layer.actvar[index]
+            vx = layer.zvar[index]
+            if self.logitapprox == 'PWL':
+                xval, yval = self._logit_pwl_approx(vx, vact)
+            else:
+                xval, yval = self._logit_pwl_3pieces(vx, vact)
+            if len(xval) > 0:
+                layer.model.addGenConstrPWL(vx, vact, xval, yval,
                                         name=constrname+'_pwl')
