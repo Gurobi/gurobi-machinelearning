@@ -1,3 +1,4 @@
+import os
 import random
 import unittest
 import warnings
@@ -97,8 +98,9 @@ class TestFormulations(unittest.TestCase):
 
     def test_adversarial_activations(self):
         # Load the trained network and the examples
-        pipe = load('networks/MNIST_50_50.joblib')
-        X = load('networks/MNIST_first100.joblib')
+        dirname = os.path.dirname(__file__)
+        pipe = load(os.path.join(dirname, 'networks/MNIST_50_50.joblib'))
+        X = load(os.path.join(dirname, 'networks/MNIST_first100.joblib'))
 
         # Choose an example
         exampleno = random.randint(0, 100)
@@ -119,8 +121,9 @@ class TestFormulations(unittest.TestCase):
 
     def test_adversarial_activations_obbt(self):
         # Load the trained network and the examples
-        pipe = load('networks/MNIST_50_50.joblib')
-        X = load('networks/MNIST_first100.joblib')
+        dirname = os.path.dirname(__file__)
+        pipe = load(os.path.join(dirname, 'networks/MNIST_50_50.joblib'))
+        X = load(os.path.join(dirname, 'networks/MNIST_first100.joblib'))
 
         # Choose an example
         exampleno = random.randint(0, 100)
