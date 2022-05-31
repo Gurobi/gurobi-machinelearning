@@ -110,7 +110,7 @@ class TestFormulations(unittest.TestCase):
             with gp.Model() as m:
                 m.Params.OutputFlag = 0
                 with self.subTest(example=exampleno, epsilon=epsilon, activation=activation, obbt=False):
-                    pipe2gurobi = self.adversarial_model(m, pipe, example, epsilon, activation=activation)
+                    self.adversarial_model(m, pipe, example, epsilon, activation=activation)
                     m.optimize()
                     if value is None:
                         value = m.ObjVal
