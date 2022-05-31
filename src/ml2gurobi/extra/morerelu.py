@@ -57,8 +57,8 @@ class GRBReLU():
         self.bigm = bigm
         self.complement = complement
 
-    def preprocess(self, layer):
-        '''Prepare for modeling ReLU in a layer'''
+    def mip_model(self, layer):
+        ''' Add MIP formulation for ReLU for neuron in layer'''
         if not layer.zvar:
             z = layer.model.addMVar(layer.actvar.shape, ub=1.0, vtype=GRB.BINARY,
                                     name=f'__z[{layer.name}]')
@@ -74,52 +74,32 @@ class GRBReLU():
         layer.mixing.LB = 0.0
         layer.mixing.UB = np.maximum(-layer.wmin, 0.0)
 
-    def conv(self, layer, index):
-        ''' Add MIP formulation for ReLU for neuron in layer'''
-        lb = layer.wmin[index]
-        ub = layer.wmax[index]
-        vact = layer.actvar[index]
-        vmix = layer.mixing[index]
-        assert ub >= lb
-        constrname = layer.getname(index, 'relu')
-        mixing = layer.getmixing(index)
-        if ub > self.eps and lb < -self.eps:
-            c = layer.model.addConstr(vact - vmix == mixing, name=constrname+'_mix')
-            layer.constrs.append(c)
-            mixing = layer.mixing[index]
-            vz = layer.zvar[index]
-            if self.complement or -lb < ub:
-                vz = 1 - vz
-            c0 = layer.model.addConstr(vmix <= -lb*(1-vz), name=constrname+'_low')
-            c1 = layer.model.addConstr(vact <= ub*vz, name=constrname+'_vub')
-            layer.constrs += [c0, c1]
-        elif ub <= self.eps:
-            vact.UB = 0.0
-            vact.LB = 0.0
-            vmix.UB = 0.0
-        else:
-            assert lb >= -self.eps
-            c = layer.model.addConstr(
-                vact == mixing, name=constrname)
-            layer.constrs.append(c)
-
-    @staticmethod
-    def forward(input_values):
-        '''Return ReLU of input_values'''
-        return np.maximum(0.0, input_values)
-
-    @staticmethod
-    def forward_fixing(layer, input_values, threshold=-20):
-        '''Fix binaries according to input_values'''
-        zvar = layer.zvar
-        if threshold < 0:
-            threshold = -int(threshold)
-            threshold = np.sort(np.abs(input_values))[0, threshold]
-        zvar[input_values < 0.0].UB = 0
-        zvar[input_values >= 0.0].LB = 1
-
-        closetozero = zvar[np.abs(input_values) <= threshold].tolist()
-        return closetozero
+        input_size = layer.invar.shape[1]
+        for index in np.ndindex(layer.actvar.shape):
+            k, j = index
+            lb = layer.wmin[index]
+            ub = layer.wmax[index]
+            vact = layer.actvar[index]
+            vmix = layer.mixing[index]
+            assert ub >= lb
+            constrname = layer.getname(index, 'relu')
+            mixing = sum(layer.invar[k, i] * layer.coefs[i, j]
+                         for i in range(input_size)) + layer.intercept[j]
+            if ub > self.eps and lb < -self.eps:
+                layer.model.addConstr(vact - vmix == mixing, name=constrname+'_mix')
+                mixing = layer.mixing[index]
+                vz = layer.zvar[index]
+                if self.complement or -lb < ub:
+                    vz = 1 - vz
+                layer.model.addConstr(vmix <= -lb*(1-vz), name=constrname+'_low')
+                layer.model.addConstr(vact <= ub*vz, name=constrname+'_vub')
+            elif ub <= self.eps:
+                vact.UB = 0.0
+                vact.LB = 0.0
+                vmix.UB = 0.0
+            else:
+                assert lb >= -self.eps
+                layer.model.addConstr(vact == mixing, name=constrname)
 
     @staticmethod
     def reset_bounds(layer):
@@ -137,8 +117,8 @@ class ReLUM():
         self.bigm = bigm
         self.expand = expand
 
-    def preprocess(self, layer):
-        '''Prepare for modeling ReLU in a layer'''
+    def mip_model(self, layer):
+        ''' Add MIP formulation for ReLU for neuron in layer'''
         if not layer.zvar:
             z = layer.model.addMVar(layer.actvar.shape, ub=1.0, vtype=GRB.BINARY,
                                     name=f'__z[{layer.name}]')
@@ -156,33 +136,31 @@ class ReLUM():
             layer.mixing.LB = layer.wmin
             layer.mixing.UB = layer.wmax
 
-    def conv(self, layer, index):
-        ''' Add MIP formulation for ReLU for neuron in layer'''
-        lb = layer.wmin[index]
-        ub = layer.wmax[index]
-        vact = layer.actvar[index]
-        assert ub >= lb
-        constrname = layer.getname(index, 'relu')
-        mixing = layer.getmixing(index)
-        if ub > self.eps and lb < -self.eps:
-            if not self.expand:
-                c = layer.model.addConstr(layer.mixing[index] == mixing, name=constrname+'_mix')
-                layer.constrs.append(c)
-                mixing = layer.mixing[index]
-            vz = layer.zvar[index]
-            c0 = layer.model.addConstr(vact >= mixing, name=constrname+'_low')
-            c1 = layer.model.addConstr(vact <= ub*vz, name=constrname+'_vub')
-            c2 = layer.model.addConstr(vact <= mixing - lb * (1 - vz),
-                                       name=constrname+'_vub2')
-            layer.constrs += [c0, c1, c2]
-        elif ub <= self.eps:
-            vact.UB = 0.0
-            vact.LB = 0.0
-        else:
-            assert lb >= -self.eps
-            c = layer.model.addConstr(
-                vact == mixing, name=constrname)
-            layer.constrs.append(c)
+        input_size = layer.invar.shape[1]
+        for index in np.ndindex(layer.actvar.shape):
+            k, j = index
+            lb = layer.wmin[index]
+            ub = layer.wmax[index]
+            vact = layer.actvar[index]
+            assert ub >= lb
+            constrname = layer.getname(index, 'relu')
+            mixing = sum(layer.invar[k, i] * layer.coefs[i, j]
+                         for i in range(input_size)) + layer.intercept[j]
+            if ub > self.eps and lb < -self.eps:
+                if not self.expand:
+                    layer.model.addConstr(layer.mixing[index] == mixing, name=constrname+'_mix')
+                    mixing = layer.mixing[index]
+                vz = layer.zvar[index]
+                layer.model.addConstr(vact >= mixing, name=constrname+'_low')
+                layer.model.addConstr(vact <= ub*vz, name=constrname+'_vub')
+                layer.model.addConstr(vact <= mixing - lb * (1 - vz),
+                                      name=constrname+'_vub2')
+            elif ub <= self.eps:
+                vact.UB = 0.0
+                vact.LB = 0.0
+            else:
+                assert lb >= -self.eps
+                layer.model.addConstr(vact == mixing, name=constrname)
 
     @staticmethod
     def forward(input_values):
@@ -216,86 +194,43 @@ class reluOBBT():
         assert obbt_rel in ('either', 'comb', 'both')
         self.obbt_rel = obbt_rel
 
-    def preprocess(self, layer):
+    def mip_model(self, layer):
+        ''' This is the convex hull of ReLU without binary (just for doing OBBT)'''
         if layer.wmax is not None:
             layer.actvar.LB = 0.0
             layer.actvar.UB = np.maximum(layer.wmax, 0.0)
 
-    def conv(self, layer, index):
-        ''' This is the convex hull of ReLU without binary (just for doing OBBT)'''
-        k, j = index
-        lb = layer.wmin[index]
-        ub = layer.wmax[index]
-        vact = layer.actvar[index]
+        input_size = layer.invar.shape[1]
+        for index in np.ndindex(layer.actvar.shape):
+            k, j = index
+            lb = layer.wmin[index]
+            ub = layer.wmax[index]
+            vact = layer.actvar[index]
 
-        constrname = layer.getname(index, 'reluOBBT')
-        mixing = layer.getmixing(index)
-        if ub < 1e-8:
-            layer.model.addConstr(vact <= 0, name=constrname+'_inactive')
-            return
-        elif lb > -1e-8:
-            layer.model.addConstr(mixing == vact, name=constrname+'_active')
-            return
+            constrname = layer.getname(index, 'reluOBBT')
+            mixing = sum(layer.invar[k, i] * layer.coefs[i, j]
+                         for i in range(input_size)) + layer.intercept[j]
+            if ub < 1e-8:
+                layer.model.addConstr(vact <= 0, name=constrname+'_inactive')
+                return
+            elif lb > -1e-8:
+                layer.model.addConstr(mixing == vact, name=constrname+'_active')
+                return
 
-        alpha = ub/(ub - lb)
+            alpha = ub/(ub - lb)
 
-        if self.obbt_rel == 'comb':
-            layer.model.addConstr(vact >= alpha*mixing, name=constrname+'_low')
-        elif self.obbt_rel == 'either':
-            if abs(ub) > abs(lb):
-                layer.model.addConstr(vact >= mixing, name=constrname+'_low')
+            if self.obbt_rel == 'comb':
+                layer.model.addConstr(vact >= alpha*mixing, name=constrname+'_low')
+            elif self.obbt_rel == 'either':
+                if abs(ub) > abs(lb):
+                    layer.model.addConstr(vact >= mixing, name=constrname+'_low')
+                else:
+                    layer.model.addConstr(vact >= 0, name=constrname+'_low')
             else:
-                layer.model.addConstr(vact >= 0, name=constrname+'_low')
-        else:
-            layer.model.addConstr(vact >= mixing, name=constrname+'_low1')
-            layer.model.addConstr(vact >= 0, name=constrname+'_low2')
+                layer.model.addConstr(vact >= mixing, name=constrname+'_low1')
+                layer.model.addConstr(vact >= 0, name=constrname+'_low2')
 
-        layer.model.addConstr(vact <= alpha*mixing - lb*alpha, name=constrname+'_up')
-
-
-class ReluQuad():
-    def __init__(self):
-        self.eps = 1e-6
-
-    def preprocess(self, layer):
-        if not layer.zvar:
-            mixvar = layer.model.addMVar(layer.actvar.shape, lb=layer.wmin, ub=layer.wmax,
-                                         vtype=GRB.CONTINUOUS, name='__mixing[{}]'.format(layer.name))
-            layer.mixvar = mixvar
-            z = layer.model.addMVar(layer.actvar.shape, lb=0, ub=1, vtype=GRB.BINARY,
-                                    name='__mixing[{}]'.format(layer.name))
-            layer.zvar = z
-        layer.actvar.LB = 0.0
-        layer.actvar.UB = np.maximum(layer.wmax, 0.0)
-
-    def conv(self, layer, index):
-        '''This is a quadratic approximation of the ReLU function'''
-        k, j = index
-        lb = layer.wmin[index]
-        ub = layer.wmax[index]
-        vact = layer.actvar[index]
-
-        constrname = layer.getname(index, 'reluOBBT')
-        mixing = layer.getmixing(index)
-        if ub > self.eps and lb < -self.eps:
-            diffsq = (ub - lb)**2
-            vz = layer.zvar[index]
-            mixvar = layer.mixvar[index]
-            c0 = layer.model.addConstr(mixvar == mixing, name=constrname+'_mixing')
-            assert(diffsq > 1e-8)
-            c1 = layer.model.addConstr(diffsq*vact <= ub*mixvar*mixvar - 2*ub*lb*mixvar + ub*lb*lb, name=constrname+'_quad')
-            c2 = layer.constrs.append(layer.model.addConstr(vact >= mixing, name=constrname+"low"))
-            c3 = layer.model.addConstr(vact <= ub*vz, name=constrname+'_vub')
-            c4 = layer.model.addConstr(vact <= mixing - lb * (1 - vz), name=constrname+'_vub2')
-            layer.constrs += [c0, c1, c2, c3, c4]
-        elif ub <= self.eps:
-            vact.UB = 0.0
-            vact.LB = 0.0
-        else:
-            assert lb >= -self.eps
-            c = layer.model.addConstr(
-                vact == mixing, name=constrname)
-            layer.constrs.append(c)
+            layer.model.addConstr(vact <= alpha*mixing - lb*alpha, name=constrname+'_up')
 
 
 class reluPart(ReLUM):

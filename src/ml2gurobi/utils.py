@@ -123,9 +123,8 @@ class Submodel:
                 self.__dict__[v] = []
                 self.__dict__[s] = 0
         else:
-            for s in what:
-                key = 'Num'+s
+            for key in what:
                 self.model.remove(self.__dict__[key])
-                self.__dict__[s] = []
-                self.__dict__[key] = 0
+                self.__dict__['Num'+key] = 0
+                self.__dict__[key] = []
         self.model.update()

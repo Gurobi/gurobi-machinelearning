@@ -15,9 +15,12 @@ def obbt_layer(layer, round_num, stats=None):
     vtypes = model.getAttr(GRB.Attr.VType, model.getVars())
     model.setAttr(GRB.Attr.VType, model.getVars(), GRB.CONTINUOUS)
 
+    verbose = model.Params.OutputFlag
+
     model.optimize()
     assert model.Status == GRB.OPTIMAL
-    print(f'Round {round_num} objval {model.ObjVal}')
+    if verbose:
+        print(f'Round {round_num} objval {model.ObjVal}')
     model.Params.Method = 0
 
     n = input_vars.shape[0]
@@ -48,7 +51,8 @@ def obbt_layer(layer, round_num, stats=None):
             if stats is not None:
                 stats['done'] += 1
                 stats['iters'] += model.IterCount
-    print(f'OBBT strengthened {n_strengthened} upper bounds on layer {layer.name} (did {done})')
+    if verbose:
+        print(f'OBBT strengthened {n_strengthened} upper bounds on layer {layer.name} (did {done})')
 
     total_strengthened = n_strengthened
     n_strengthened = 0
@@ -76,8 +80,9 @@ def obbt_layer(layer, round_num, stats=None):
                 stats['iters'] += model.IterCount
             model.update()
 
-    print(
-        f'OBBT strengthened {n_strengthened} lower bounds on layer {layer.name} (did {done})')
+    if verbose:
+        print(
+            f'OBBT strengthened {n_strengthened} lower bounds on layer {layer.name} (did {done})')
 
     # Restore model
     model.Params.Method = savemethod
