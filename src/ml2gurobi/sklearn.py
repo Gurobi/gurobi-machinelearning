@@ -69,10 +69,11 @@ class LinearRegression2Gurobi(BaseNNRegression2Gurobi):
     def __init__(self, regressor, model, **kwargs):
         super().__init__(regressor, model, **kwargs)
 
-    def mip_model(self, X, y):
+    def mip_model(self):
         '''Add the prediction constraints to Gurobi'''
-        self.addlayer(X, self.regressor.coef_.T.reshape(-1, 1),
-                      np.array(self.regressor.intercept_).reshape((-1,)), self.actdict['identity'], y)
+        self.addlayer(self._input, self.regressor.coef_.T.reshape(-1, 1),
+                      np.array(self.regressor.intercept_).reshape((-1,)),
+                      self.actdict['identity'], self._output)
 
 
 class LogisticRegression2Gurobi(BaseNNRegression2Gurobi):
@@ -83,10 +84,11 @@ class LogisticRegression2Gurobi(BaseNNRegression2Gurobi):
     def __init__(self, regressor, model, **kwargs):
         super().__init__(regressor, model, **kwargs)
 
-    def mip_model(self, X, y):
+    def mip_model(self):
         '''Add the prediction constraints to Gurobi'''
-        self.addlayer(X, self.regressor.coef_.T,
-                      self.regressor.intercept_, self.actdict['logit'], y)
+        self.addlayer(self._input, self.regressor.coef_.T,
+                      self.regressor.intercept_, self.actdict['logit'],
+                      self._output)
 
 
 class MLPRegressor2Gurobi(BaseNNRegression2Gurobi):
@@ -98,18 +100,14 @@ class MLPRegressor2Gurobi(BaseNNRegression2Gurobi):
         super().__init__(regressor, model, clean_regressor=clean_regressor, **kwargs)
         assert regressor.out_activation_ in ('identity', 'relu', 'softmax')
 
-    def mip_model(self, X, y):
+    def mip_model(self):
         '''Add the prediction constraints to Gurobi'''
         neuralnet = self.regressor
         if neuralnet.activation not in self.actdict:
             raise BaseException(f'No implementation for activation function {neuralnet.activation}')
         activation = self.actdict[neuralnet.activation]
 
-        self._input = X
-        self._output = y
-
-        activations = X
-        # Iterate over the layers
+        activations = self._input
         for i in range(neuralnet.n_layers_ - 1):
             layer_coefs = neuralnet.coefs_[i]
             layer_intercept = neuralnet.intercepts_[i]
@@ -118,7 +116,7 @@ class MLPRegressor2Gurobi(BaseNNRegression2Gurobi):
 
             # For last layer change activation
             if i == neuralnet.n_layers_ - 2:
-                activations = y
+                activations = self._output
                 if neuralnet.out_activation_ != neuralnet.activation:
                     activation = self.actdict[neuralnet.out_activation_]
             else:
@@ -154,12 +152,30 @@ class Pipe2Gurobi(Submodel):
             else:
                 raise BaseException(f"I don't know how to deal with that object: {name}")
 
-    def mip_model(self, X, y):
+    def mip_model(self):
+        X = self._input
         for obj in self.steps[:-1]:
             obj.transform(X)
             X = obj.X()
-        self.steps[-1].predict(X, y)
+        self.steps[-1].predict(X, self._output)
 
+def add_linearregression(regressor, model, X, y, **kwargs):
+    return LinearRegression2Gurobi(regressor, model, **kwargs).predict(X, y)
 
-def pipe_predict(X, y, pipe, model, **kwargs):
+def add_logisticregression(regressor, model, X, y, **kwargs):
+    return LogisticRegression2Gurobi(regressor, model, **kwargs).predict(X, y)
+
+def add_mlpclassifier(regressor, model, X, y, **kwargs):
+    return MLPRegressor2Gurobi(regressor, model, **kwargs).predict(X, y)
+
+def add_mlpregressor(regressor, model, X, y, **kwargs):
+    return MLPRegressor2Gurobi(regressor, model, **kwargs).predict(X, y)
+
+def add_decisiontreeregressor(regressor, model, X, y, **kwargs):
+    return DecisionTree2Gurobi(regressor, model, **kwargs).predict(X, y)
+
+def add_gradientboostingregressor(regressor, model, X, y, **kwargs):
+    return GradientBoostingRegressor2Gurobi(regressor, model, **kwargs).predict(X, y)
+
+def add_pipe(pipe, model, X, y, **kwargs):
     return Pipe2Gurobi(pipe, model, **kwargs).predict(X, y)

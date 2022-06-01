@@ -11,11 +11,14 @@ class DecisionTree2Gurobi(Submodel):
         super().__init__(model)
         self.tree = regressor.tree_
 
-    def mip_model(self, X, y):
+    def mip_model(self):
         tree = self.tree
         m = self.model
 
-        nodes = m.addMVar((X.shape[0], tree.capacity), vtype=GRB.BINARY)
+        input = self._input
+        output = self._output
+        n = input.shape[0]
+        nodes = m.addMVar((n, tree.capacity), vtype=GRB.BINARY)
 
         # Intermediate nodes constraints
         # Can be added all at once
@@ -32,23 +35,23 @@ class DecisionTree2Gurobi(Submodel):
             left = tree.children_left[node]
             right = tree.children_right[node]
             if left < 0:
-                m.addConstrs((nodes[k, node] == 1) >> (y[k, 0] == tree.value[node][0][0])
-                             for k in range(X.shape[0]))
+                m.addConstrs((nodes[k, node] == 1) >> (output[k, 0] == tree.value[node][0][0])
+                             for k in range(n))
                 continue
             m.addConstrs((nodes[k, left] == 1) >>
-                         (X[k, tree.feature[node]] <= tree.threshold[node])
-                         for k in range(X.shape[0]))
+                         (input[k, tree.feature[node]] <= tree.threshold[node])
+                         for k in range(n))
             m.addConstrs((nodes[k, right] == 1) >>
-                         (X[k, tree.feature[node]] >= tree.threshold[node] + 1e-8)
-                         for k in range(X.shape[0]))
+                         (input[k, tree.feature[node]] >= tree.threshold[node] + 1e-8)
+                         for k in range(n))
 
         # We should attain 1 leaf
         m.addConstrs(quicksum([nodes[k, i] for i in range(tree.capacity)
                               if tree.children_left[i] < 0]) == 1
-                     for k in range(X.shape[0]))
+                     for k in range(input.shape[0]))
 
-        y.LB = np.min(tree.value)
-        y.UB = np.max(tree.value)
+        output.LB = np.min(tree.value)
+        output.UB = np.max(tree.value)
 
 
 class GradientBoostingRegressor2Gurobi(Submodel):
@@ -56,7 +59,7 @@ class GradientBoostingRegressor2Gurobi(Submodel):
         super().__init__(model)
         self.regressor = regressor
 
-    def mip_model(self, X, y):
+    def mip_model(self):
         ''' Predict output variables y from input variables X using the
             decision tree.
 
@@ -65,13 +68,17 @@ class GradientBoostingRegressor2Gurobi(Submodel):
         m = self.model
         regressor = self.regressor
 
-        treevars = m.addMVar((X.shape[0], regressor.n_estimators_), lb=-GRB.INFINITY)
+        input = self._input
+        output = self._output
+        n = input.shape[0]
+
+        treevars = m.addMVar((n, regressor.n_estimators_), lb=-GRB.INFINITY)
         constant = regressor.init_.constant_
 
         tree2gurobi = []
         for i in range(regressor.n_estimators_):
             tree = regressor.estimators_[i]
             tree2gurobi.append(DecisionTree2Gurobi(tree[0], m))
-            tree2gurobi[-1].predict(X, treevars[:, i])
-        for k in range(X.shape[0]):
-            m.addConstr(y[k, :] == regressor.learning_rate * treevars[k, :].sum() + constant)
+            tree2gurobi[-1].predict(input, treevars[:, i])
+        for k in range(n):
+            m.addConstr(output[k, :] == regressor.learning_rate * treevars[k, :].sum() + constant)

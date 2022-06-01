@@ -56,20 +56,20 @@ class NNLayer(Submodel):
         layer_coefs = self.coefs
         if activation is None:
             activation = self.activation
-        (n, _) = input_vars.shape
-        layer_size = layer_coefs.shape[1]
+        n, _ = input_vars.shape
+        _, layer_size = layer_coefs.shape
 
         # Add activation variables if we don't have them
         if activation_vars is None:
-            activation_vars = model.addMVar((input_vars.shape[0], layer_coefs.shape[1]),
+            activation_vars = model.addMVar((n, layer_size),
                                             lb=-gp.GRB.INFINITY,
                                             name=f'__act[{self.name}]')
             self.actvar = activation_vars
-        assert layer_size == activation_vars.shape[1]
-        assert n == activation_vars.shape[0]
 
         # Compute bounds on weighted sums by propagation
         wmin, wmax = self._wminmax()
+
+        # Take best bound from what we have stored and what we propagated
         if wmax is not None and self.wmax is not None:
             wmax = np.minimum(wmax, self.wmax)
         if wmin is not None and self.wmin is not None:
@@ -77,7 +77,7 @@ class NNLayer(Submodel):
         self.wmin = wmin
         self.wmax = wmax
 
-        # Apply bounds to activation variables (and other preprocessing)
+        # Do the mip model for the activation in the layer
         activation.mip_model(self)
         self.model.update()
 
@@ -113,7 +113,7 @@ class BaseNNRegression2Gurobi(Submodel):
     def addlayer(self, input_vars, layer_coefs,
                  layer_intercept, activation,
                  activation_vars=None, name=None):
-        '''add a layer to model'''
+        '''Add a layer to model'''
         if name is None:
             name = f'{len(self._layers)}'
         if self.name != '':

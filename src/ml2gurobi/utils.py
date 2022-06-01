@@ -64,6 +64,8 @@ class Submodel:
         for stat, func in model_stats.items():
             self.__dict__[func] = []
             self.__dict__[stat] = 0
+        self._input = None
+        self._output = None
 
     def get_stats_(self):
         m = self.model
@@ -102,7 +104,7 @@ class Submodel:
             added = func()[begin[s]: end[s]]
             self.__dict__[model_stats[s]] += added
 
-    def mip_model(self, X, y):
+    def mip_model(self):
         ''' Mip model for predict
         (implemented in child classes)'''
 
@@ -112,8 +114,13 @@ class Submodel:
 
         X and y are Gurobi Matrices or list of variables of conforming
         dimensions'''
+        if self._input is not None or self._output is not None:
+            raise BaseException('Object already holds a MIP submodel')
         X, y = self.validate(X, y)
-        self.mip_model(X, y)
+        self._input = X
+        self._output = y
+        self.mip_model()
+        return self
 
     def remove(self, what=None):
         '''Remove everything added by this object from Gurobi model'''

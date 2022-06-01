@@ -14,15 +14,15 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 
-from ml2gurobi.activations import Identity
 from ml2gurobi.extra import morerelu
 from ml2gurobi.extra.obbt import obbt
 from ml2gurobi.sklearn import (
-    DecisionTree2Gurobi,
-    GradientBoostingRegressor2Gurobi,
-    LinearRegression2Gurobi,
-    MLPRegressor2Gurobi,
     Pipe2Gurobi,
+    add_decisiontreeregressor,
+    add_gradientboostingregressor,
+    add_linearregression,
+    add_mlpregressor,
+    add_pipe,
 )
 
 gp.gurobi._nd_unleashed = True
@@ -34,11 +34,8 @@ class TestFormulations(unittest.TestCase):
             x = m.addMVar(X.shape[1], lb=X[exampleno, :], ub=X[exampleno, :])
             y = m.addMVar(1, lb=-gp.GRB.INFINITY)
 
-            y.shape
-
             m.Params.OutputFlag = 0
-            reg2gurobi = translator(regressor, model=m)
-            reg2gurobi.predict(x, y)
+            reg2gurobi = translator(regressor, m, x, y)
             m.optimize()
 
             self.assertTrue(abs(y.X - regressor.predict(X[exampleno, :].reshape(1, -1))) < 1e-5)
@@ -49,10 +46,10 @@ class TestFormulations(unittest.TestCase):
         X = data['data']
         y = data['target']
 
-        to_test = [(LinearRegression(), LinearRegression2Gurobi),
-                   (DecisionTreeRegressor(max_leaf_nodes=50), DecisionTree2Gurobi),
-                   (GradientBoostingRegressor(n_estimators=20), GradientBoostingRegressor2Gurobi),
-                   (MLPRegressor([20, 20]), MLPRegressor2Gurobi)]
+        to_test = [(LinearRegression(), add_linearregression),
+                   (DecisionTreeRegressor(max_leaf_nodes=50), add_decisiontreeregressor),
+                   (GradientBoostingRegressor(n_estimators=20), add_gradientboostingregressor),
+                   (MLPRegressor([20, 20]), add_mlpregressor)]
 
         warnings.filterwarnings('ignore')
         for regressor, translator in to_test:
@@ -68,7 +65,7 @@ class TestFormulations(unittest.TestCase):
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, translator=translator, exampleno=exampleno):
-                    self.fixed_model(pipeline, Pipe2Gurobi, X, y, exampleno)
+                    self.fixed_model(pipeline, add_pipe, X, y, exampleno)
 
     def adversarial_model(self, m, pipe, example, epsilon, activation=None):
         ex_prob = pipe.predict_proba(example)
@@ -87,12 +84,13 @@ class TestFormulations(unittest.TestCase):
         m.addConstr(absdiff[0, :] >= - x[0, :] + example.to_numpy()[0, :])
         m.addConstr(absdiff[0, :].sum() <= epsilon)
 
+        self.assertEqual(pipe.steps[-1][1].out_activation_, 'identity')
         # Code to add the neural network to the constraints
         pipe2gurobi = Pipe2Gurobi(pipe, m)
         # For this example we should model softmax in the last layer using identity
         if activation is not None:
             pipe2gurobi.steps[-1].actdict['relu'] = activation
-        pipe2gurobi.steps[-1].actdict['softmax'] = Identity()
+        # pipe2gurobi.steps[-1].actdict['softmax'] = Identity()
         pipe2gurobi.predict(x, output)
         return pipe2gurobi
 
@@ -101,6 +99,9 @@ class TestFormulations(unittest.TestCase):
         dirname = os.path.dirname(__file__)
         pipe = load(os.path.join(dirname, 'networks/MNIST_50_50.joblib'))
         X = load(os.path.join(dirname, 'networks/MNIST_first100.joblib'))
+
+        # Change the out_activation of neural network to identity
+        pipe.steps[-1][1].out_activation_ = 'identity'
 
         # Choose an example
         exampleno = random.randint(0, 100)
@@ -124,6 +125,9 @@ class TestFormulations(unittest.TestCase):
         dirname = os.path.dirname(__file__)
         pipe = load(os.path.join(dirname, 'networks/MNIST_50_50.joblib'))
         X = load(os.path.join(dirname, 'networks/MNIST_first100.joblib'))
+
+        # Change the out_activation of neural network to identity
+        pipe.steps[-1][1].out_activation_ = 'identity'
 
         # Choose an example
         exampleno = random.randint(0, 100)
