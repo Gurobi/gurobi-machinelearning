@@ -2,13 +2,13 @@
 import numpy as np
 from gurobipy import GRB, quicksum
 
-from .utils import Submodel
+from .utils import MLSubModel
 
 
-class DecisionTree2Gurobi(Submodel):
+class DecisionTree2Gurobi(MLSubModel):
     ''' Class to model a trained decision tree in a Gurobi model'''
-    def __init__(self, regressor, model):
-        super().__init__(model)
+    def __init__(self, model, regressor, input, output):
+        super().__init__(model, input, output)
         self.tree = regressor.tree_
 
     def mip_model(self):
@@ -54,9 +54,9 @@ class DecisionTree2Gurobi(Submodel):
         output.UB = np.max(tree.value)
 
 
-class GradientBoostingRegressor2Gurobi(Submodel):
-    def __init__(self, regressor, model):
-        super().__init__(model)
+class GradientBoostingRegressor2Gurobi(MLSubModel):
+    def __init__(self, model, regressor, input, output):
+        super().__init__(model, input, output)
         self.regressor = regressor
 
     def mip_model(self):
@@ -78,7 +78,7 @@ class GradientBoostingRegressor2Gurobi(Submodel):
         tree2gurobi = []
         for i in range(regressor.n_estimators_):
             tree = regressor.estimators_[i]
-            tree2gurobi.append(DecisionTree2Gurobi(tree[0], m))
-            tree2gurobi[-1].predict(input, treevars[:, i])
+            tree2gurobi.append(DecisionTree2Gurobi(m, tree[0], input,treevars[:, i]))
+            tree2gurobi[-1].predict()
         for k in range(n):
             m.addConstr(output[k, :] == regressor.learning_rate * treevars[k, :].sum() + constant)

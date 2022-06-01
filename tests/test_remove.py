@@ -45,7 +45,7 @@ class TestFormulations(unittest.TestCase):
             numVars = m.NumVars
 
             m.Params.OutputFlag = 0
-            reg2gurobi = translator(regressor, model=m)
+            reg2gurobi = translator(m, regressor)
 
             self.check_counts(m, reg2gurobi, numVars)
 

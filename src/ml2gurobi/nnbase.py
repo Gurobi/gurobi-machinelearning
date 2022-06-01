@@ -8,17 +8,15 @@ import gurobipy as gp
 import numpy as np
 
 from .activations import Identity, LogitPWL, ReLUGC
-from .utils import Submodel, addtosubmodel
+from .utils import MLSubModel, addtosubmodel
 
 
-class NNLayer(Submodel):
+class NNLayer(MLSubModel):
     '''Class to build one layer of a neural network'''
 
-    def __init__(self, model, activation_vars, input_vars, layer_coefs,
+    def __init__(self, model, output, input, layer_coefs,
                  layer_intercept, activation_function, name):
-        super().__init__(model, name)
-        self.actvar = activation_vars
-        self.invar = input_vars
+        super().__init__(model, input, output, name)
         self.coefs = layer_coefs
         self.intercept = layer_intercept
         self.activation = activation_function
@@ -32,16 +30,16 @@ class NNLayer(Submodel):
 
     def _wminmax(self):
         '''Compute min/max for w variable'''
-        if (self.invar.UB >= gp.GRB.INFINITY).any():
-            return (-gp.GRB.INFINITY*np.ones(self.actvar.shape),
-                    gp.GRB.INFINITY*np.ones(self.actvar.shape))
-        if (self.invar.LB <= - gp.GRB.INFINITY).any():
-            return (-gp.GRB.INFINITY*np.ones(self.actvar.shape),
-                    gp.GRB.INFINITY*np.ones(self.actvar.shape))
+        if (self._input.UB >= gp.GRB.INFINITY).any():
+            return (-gp.GRB.INFINITY*np.ones(self._output.shape),
+                    gp.GRB.INFINITY*np.ones(self._output.shape))
+        if (self._input.LB <= - gp.GRB.INFINITY).any():
+            return (-gp.GRB.INFINITY*np.ones(self._output.shape),
+                    gp.GRB.INFINITY*np.ones(self._output.shape))
         wpos = np.maximum(self.coefs, 0.0)
         wneg = np.minimum(self.coefs, 0.0)
-        wmin = self.invar.LB @ wpos + self.invar.UB @ wneg + self.intercept
-        wmax = self.invar.UB @ wpos + self.invar.LB @ wneg + self.intercept
+        wmin = self._input.LB @ wpos + self._input.UB @ wneg + self.intercept
+        wmax = self._input.UB @ wpos + self._input.LB @ wneg + self.intercept
         wmax = np.maximum(wmin, wmax)
 
         return (wmin, wmax)
@@ -51,20 +49,20 @@ class NNLayer(Submodel):
         ''' Add the layer to model'''
         model = self.model
         model.update()
-        activation_vars = self.actvar
-        input_vars = self.invar
+        output = self._output
+        input = self._input
         layer_coefs = self.coefs
         if activation is None:
             activation = self.activation
-        n, _ = input_vars.shape
+        n, _ = input.shape
         _, layer_size = layer_coefs.shape
 
         # Add activation variables if we don't have them
-        if activation_vars is None:
-            activation_vars = model.addMVar((n, layer_size),
+        if output is None:
+            output = model.addMVar((n, layer_size),
                                             lb=-gp.GRB.INFINITY,
                                             name=f'__act[{self.name}]')
-            self.actvar = activation_vars
+            self._output = output
 
         # Compute bounds on weighted sums by propagation
         wmin, wmax = self._wminmax()
@@ -94,17 +92,14 @@ class NNLayer(Submodel):
         self.add(activation)
 
 
-class BaseNNRegression2Gurobi(Submodel):
+class BaseNNRegression2Gurobi(MLSubModel):
     ''' Base class for inserting a regressor based on neural-network/tensor into Gurobi'''
 
-    def __init__(self, regressor, model, name='', clean_regressor=False):
-        super().__init__(model)
+    def __init__(self, model, regressor, input, output, name='', clean_regressor=False):
+        super().__init__(model, input, output, name)
         self.regressor = regressor
-        self.name = name
         self.clean = clean_regressor
         self.actdict = {'relu': ReLUGC(), 'identity': Identity(), 'logit': LogitPWL()}
-        self._input = None
-        self._output = None
         self._layers = []
 
     def __iter__(self):

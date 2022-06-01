@@ -51,9 +51,9 @@ def addtosubmodel(function):
     return wrapper
 
 
-class Submodel:
+class MLSubModel:
     ''' Class to define a submodel'''
-    def __init__(self, model, name=''):
+    def __init__(self, model, input, output, name=''):
         self.model = model
         self.name = name
         self.torec_ = {'NumConstrs': model.getConstrs,
@@ -64,8 +64,14 @@ class Submodel:
         for stat, func in model_stats.items():
             self.__dict__[func] = []
             self.__dict__[stat] = 0
-        self._input = None
-        self._output = None
+        if input is not None:
+            self._set_input(input)
+        else:
+            self._input = None
+        if output is not None:
+            self._set_output(output)
+        else:
+            self._output = None
 
     def get_stats_(self):
         m = self.model
@@ -75,11 +81,20 @@ class Submodel:
             rval[s] = m.getAttr(s)
         return rval
 
+    def _set_input(self, input):
+        self._input = validate_gpvars(input)
+
+    def _set_output(self, output):
+        self._output = validate_gpvars(output)
+
     @staticmethod
     def validate(input_vars, output_vars):
         ''' Validate input and output variables (check shapes, reshape if needed.'''
-        input_vars = validate_gpvars(input_vars)
-        output_vars = validate_gpvars(output_vars)
+        if input_vars is None:
+            raise BaseException('No input variables')
+        if output_vars is None:
+            raise BaseException('No output variables')
+
         if (output_vars.shape[0] != input_vars.shape[0] and
                 output_vars.shape[1] != input_vars.shape[0]):
             raise BaseException("Non-conforming dimension between " +
@@ -109,16 +124,9 @@ class Submodel:
         (implemented in child classes)'''
 
     @addtosubmodel
-    def predict(self, X, y):
-        '''Predict y from X using regression/classifier
-
-        X and y are Gurobi Matrices or list of variables of conforming
-        dimensions'''
-        if self._input is not None or self._output is not None:
-            raise BaseException('Object already holds a MIP submodel')
-        X, y = self.validate(X, y)
-        self._input = X
-        self._output = y
+    def predict(self):
+        '''Predict output from input using regression/classifier'''
+        self._input, self._output = self.validate(self._input, self._output)
         self.mip_model()
         return self
 

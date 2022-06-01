@@ -35,7 +35,7 @@ class TestFormulations(unittest.TestCase):
             y = m.addMVar(1, lb=-gp.GRB.INFINITY)
 
             m.Params.OutputFlag = 0
-            reg2gurobi = translator(regressor, m, x, y)
+            reg2gurobi = translator(m, regressor, x, y)
             m.optimize()
 
             self.assertTrue(abs(y.X - regressor.predict(X[exampleno, :].reshape(1, -1))) < 1e-5)
@@ -86,12 +86,12 @@ class TestFormulations(unittest.TestCase):
 
         self.assertEqual(pipe.steps[-1][1].out_activation_, 'identity')
         # Code to add the neural network to the constraints
-        pipe2gurobi = Pipe2Gurobi(pipe, m)
+        pipe2gurobi = Pipe2Gurobi(m, pipe, x, output)
         # For this example we should model softmax in the last layer using identity
         if activation is not None:
             pipe2gurobi.steps[-1].actdict['relu'] = activation
         # pipe2gurobi.steps[-1].actdict['softmax'] = Identity()
-        pipe2gurobi.predict(x, output)
+        pipe2gurobi.predict()
         return pipe2gurobi
 
     def test_adversarial_activations(self):
@@ -104,7 +104,7 @@ class TestFormulations(unittest.TestCase):
         pipe.steps[-1][1].out_activation_ = 'identity'
 
         # Choose an example
-        exampleno = random.randint(0, 100)
+        exampleno = random.randint(0, 99)
         example = X.iloc[exampleno:exampleno+1, :]
         epsilon = 0.01
         activations = (None, morerelu.ReLUmin(), morerelu.GRBReLU(), morerelu.ReLUM())
@@ -130,7 +130,7 @@ class TestFormulations(unittest.TestCase):
         pipe.steps[-1][1].out_activation_ = 'identity'
 
         # Choose an example
-        exampleno = random.randint(0, 100)
+        exampleno = random.randint(0, 99)
         example = X.iloc[exampleno:exampleno+1, :]
         activations = (None, morerelu.GRBReLU(), morerelu.ReLUM())
         epsilon = 0.1

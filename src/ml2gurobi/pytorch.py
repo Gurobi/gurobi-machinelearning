@@ -12,8 +12,9 @@ from .nnbase import BaseNNRegression2Gurobi
 class Sequential2Gurobi(BaseNNRegression2Gurobi):
     '''Transform a pytorch Sequential Neural Network to Gurboi constraint with
        input and output as matrices of variables.'''
-    def __init__(self, regressor, model, clean_regressor=False):
-        BaseNNRegression2Gurobi.__init__(self, regressor, model, clean_regressor)
+    def __init__(self, regressor, model, input, output, clean_regressor=False):
+        BaseNNRegression2Gurobi.__init__(self, regressor, model, input, output,
+                                         clean_regressor)
 
         linear = None
         for step in regressor:
@@ -27,10 +28,10 @@ class Sequential2Gurobi(BaseNNRegression2Gurobi):
                 print(step)
                 raise BaseException("Unsupported network structure")
 
-    def mip_model(self, X, y):
+    def mip_model(self):
         network = self.regressor
-        self._input = X
-        self._output = y
+        X = self._input
+        y = self._output
         input_vars = X
         linear = None
         for i, step in enumerate(network):
@@ -43,7 +44,7 @@ class Sequential2Gurobi(BaseNNRegression2Gurobi):
                 layer = self.addlayer(input_vars, layer_weight,
                                       layer_bias, self.actdict['relu'], None, name=f'{i}')
                 linear = None
-                input_vars = layer.actvar
+                input_vars = layer._output
             elif isinstance(step, nn.Linear):
                 assert linear is None
                 linear = step

@@ -8,7 +8,7 @@ def obbt_layer(layer, round_num, stats=None):
     obj = model.getObjective()
     objsense = model.ModelSense
     savemethod = model.Params.Method
-    input_vars = layer.invar
+    input_vars = layer._input
     layer_coefs = layer.coefs
     layer_intercept = layer.intercept
 
