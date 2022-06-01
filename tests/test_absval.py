@@ -36,37 +36,37 @@ def build_abs_network():
 
 def model(X, y, nn, infbound, relumodel=None):
     bound = 100
-    with gp.Model() as regressor:
+    with gp.Model() as model:
         samples, dim = X.shape
         assert samples == y.shape[0]
 
         X = np.concatenate([X, np.ones((samples, 1))], axis=1)
 
         # Decision variables
-        beta = regressor.addMVar(dim + 1, lb=-bound, ub=bound, name="beta")  # Weights
-        diff = regressor.addMVar((samples, 1), lb=-infbound, ub=infbound, name='diff')
-        absdiff = regressor.addMVar((samples, 1), lb=-infbound, ub=infbound, name='absdiff')
+        beta = model.addMVar(dim + 1, lb=-bound, ub=bound, name="beta")  # Weights
+        diff = model.addMVar((samples, 1), lb=-infbound, ub=infbound, name='diff')
+        absdiff = model.addMVar((samples, 1), lb=-infbound, ub=infbound, name='absdiff')
 
-        regressor.addConstr(X @ beta - y == diff[:, 0])
-        regressor.setObjective(absdiff.sum(), gp.GRB.MINIMIZE)
+        model.addConstr(X @ beta - y == diff[:, 0])
+        model.setObjective(absdiff.sum(), gp.GRB.MINIMIZE)
 
         if nn:
             # create transforms to turn scikit-learn pipeline into Gurobi constraints
-            nn2gurobi = MLPRegressor2Gurobi(nn, regressor)
+            nn2gurobi = MLPRegressor2Gurobi(model, nn, diff, absdiff)
             if relumodel is not None:
                 nn2gurobi.actdict['relu'] = relumodel
 
             # Add constraint to predict value of y using kwnown and to compute features
-            nn2gurobi.predict(X=diff, y=absdiff)
+            nn2gurobi.predict()
         else:
             for i in range(samples):
-                regressor.addConstr(absdiff[i, 0] == gp.abs_(diff[i, 0]))
+                model.addConstr(absdiff[i, 0] == gp.abs_(diff[i, 0]))
 
-        regressor.Params.OutputFlag = 0
-        regressor.Params.WorkLimit = 100
+        model.Params.OutputFlag = 0
+        model.Params.WorkLimit = 100
 
-        regressor.optimize()
-        return regressor.ObjVal
+        model.optimize()
+        return model.ObjVal
 
 
 class TestNNFormulation(unittest.TestCase):

@@ -45,12 +45,12 @@ class TestFormulations(unittest.TestCase):
             numVars = m.NumVars
 
             m.Params.OutputFlag = 0
-            reg2gurobi = translator(m, regressor)
+            reg2gurobi = translator(m, regressor, x, y)
 
             self.check_counts(m, reg2gurobi, numVars)
 
             assert reg2gurobi.NumVars == len(reg2gurobi.Vars)
-            reg2gurobi.predict(x, y)
+            reg2gurobi.predict()
             m.update()
 
             self.check_counts(m, reg2gurobi, numVars)
