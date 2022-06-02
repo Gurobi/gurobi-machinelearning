@@ -45,9 +45,10 @@ def addtosubmodel(function):
     ''' Wrapper function to add to submodel '''
     def wrapper(self, *args, **kwargs):
         begin = self.get_stats_()
-        function(self, *args, **kwargs)
+        rval = function(self, *args, **kwargs)
         end = self.get_stats_()
         self.update(begin, end)
+        return rval
     return wrapper
 
 

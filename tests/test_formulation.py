@@ -1,7 +1,6 @@
 import os
 import random
 import unittest
-import warnings
 
 try:
     import gurobi.modeling as gp
@@ -11,103 +10,74 @@ except ImportError as e:
     HAS_MODELING=False
 
 import numpy as np
+from base_cases import DiabetesCases
 from joblib import load
 from sklearn import datasets
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.neural_network import MLPRegressor
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.tree import DecisionTreeRegressor
 
 from ml2gurobi.extra import morerelu
 from ml2gurobi.extra.obbt import obbt
-from ml2gurobi.sklearn import (
-    Pipe2Gurobi,
-    decisiontreeregressor2gurobi,
-    gradientboostingregressor2gurobi,
-    linearregression2gurobi,
-    mlpregressor2gurobi,
-    pipe2gurobi,
-)
+from ml2gurobi.sklearn import Pipe2Gurobi, pipe2gurobi
 
 
 class TestFormulations(unittest.TestCase):
-    def fixed_model(self, regressor, translator, X, exampleno, use_gurobi_modeling=False):
-        with gp.Model() as m:
-            x = m.addMVar(X.shape[1], lb=X[exampleno, :], ub=X[exampleno, :])
-            y = m.addMVar(1, lb=-gp.GRB.INFINITY)
+    def fixed_model(self, predictor, translator, example, use_gurobi_modeling=False):
+        with gp.Model() as gpm:
+            x = gpm.addMVar(example.shape, lb=example, ub=example)
+            y = gpm.addMVar(1, lb=-gp.GRB.INFINITY)
 
-            m.Params.OutputFlag = 0
+            gpm.Params.OutputFlag = 0
             if use_gurobi_modeling:
-                m.add(translator, regressor, x, y)
+                gpm.add(translator, predictor, x, y)
             else:
-                translator(m, regressor, x, y)
-            m.optimize()
-            m.write('toto.lp')
+                translator(gpm, predictor, x, y)
+            gpm.optimize()
 
-            self.assertTrue(abs(y.X - regressor.predict(X[exampleno, :].reshape(1, -1))) < 1e-5)
+            self.assertTrue(abs(y.X - predictor.predict(example.reshape(1, -1))) < 1e-5)
 
     def test_diabetes(self):
         data = datasets.load_diabetes()
 
         X = data['data']
-        y = data['target']
+        cases = DiabetesCases()
 
-        to_test = [(LinearRegression(), linearregression2gurobi),
-                   (DecisionTreeRegressor(max_leaf_nodes=50), decisiontreeregressor2gurobi),
-                   (GradientBoostingRegressor(n_estimators=20), gradientboostingregressor2gurobi),
-                   (MLPRegressor([20, 20]), mlpregressor2gurobi)]
-
-        warnings.filterwarnings('ignore')
-        for regressor, translator in to_test:
-            regressor.fit(X, y)
+        for regressor, translator in cases.to_test:
+            regressor = cases.get_case(regressor, False)['predictor']
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=False):
-                    self.fixed_model(regressor, translator, X, exampleno)
+                    self.fixed_model(regressor, translator, X[exampleno,:])
 
         if not HAS_MODELING:
             return
 
-        for regressor, translator in to_test:
-            regressor.fit(X, y)
+        for regressor, translator in cases.to_test:
+            regressor = cases.get_case(regressor, False)['predictor']
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=True):
-                    self.fixed_model(regressor, translator, X, exampleno, use_gurobi_modeling=True)
-
+                    self.fixed_model(regressor, translator, X[exampleno,:], use_gurobi_modeling=True)
 
     def test_diabetes_with_pipes(self):
         data = datasets.load_diabetes()
 
         X = data['data']
-        y = data['target']
-
-        to_test = [(LinearRegression(), linearregression2gurobi),
-                   (DecisionTreeRegressor(max_leaf_nodes=50), decisiontreeregressor2gurobi),
-                   (GradientBoostingRegressor(n_estimators=20), gradientboostingregressor2gurobi),
-                   (MLPRegressor([20, 20]), mlpregressor2gurobi)]
-
-        warnings.filterwarnings('ignore')
-        for regressor, _ in to_test:
-            pipeline = make_pipeline(StandardScaler(), regressor)
-            pipeline.fit(X, y)
+        cases = DiabetesCases()
+        for regressor, _ in cases.to_test:
+            pipeline = cases.get_case(regressor, True)['predictor']
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
-                with self.subTest(regressor=regressor, exampleno=exampleno):
-                    self.fixed_model(pipeline, pipe2gurobi, X, exampleno)
+                with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=False):
+                    self.fixed_model(pipeline, pipe2gurobi, X[exampleno, :], False)
 
         if not HAS_MODELING:
             return
 
-        for regressor, _ in to_test:
-            pipeline = make_pipeline(StandardScaler(), regressor)
-            pipeline.fit(X, y)
+        for regressor, _ in cases.to_test:
+            pipeline = cases.get_case(regressor, True)['predictor']
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=True):
-                    self.fixed_model(pipeline, pipeline, X, exampleno, True)
+                    self.fixed_model(pipeline , pipe2gurobi, X[exampleno, :], True)
 
     def adversarial_model(self, m, pipe, example, epsilon, activation=None):
         ex_prob = pipe.predict_proba(example)
@@ -139,8 +109,8 @@ class TestFormulations(unittest.TestCase):
     def test_adversarial_activations(self):
         # Load the trained network and the examples
         dirname = os.path.dirname(__file__)
-        pipe = load(os.path.join(dirname, 'networks/MNIST_50_50.joblib'))
-        X = load(os.path.join(dirname, 'networks/MNIST_first100.joblib'))
+        pipe = load(os.path.join(dirname, 'predictors/MNIST_50_50.joblib'))
+        X = load(os.path.join(dirname, 'predictors/MNIST_first100.joblib'))
 
         # Change the out_activation of neural network to identity
         pipe.steps[-1][1].out_activation_ = 'identity'
@@ -165,8 +135,8 @@ class TestFormulations(unittest.TestCase):
     def test_adversarial_activations_obbt(self):
         # Load the trained network and the examples
         dirname = os.path.dirname(__file__)
-        pipe = load(os.path.join(dirname, 'networks/MNIST_50_50.joblib'))
-        X = load(os.path.join(dirname, 'networks/MNIST_first100.joblib'))
+        pipe = load(os.path.join(dirname, 'predictors/MNIST_50_50.joblib'))
+        X = load(os.path.join(dirname, 'predictors/MNIST_first100.joblib'))
 
         # Change the out_activation of neural network to identity
         pipe.steps[-1][1].out_activation_ = 'identity'
