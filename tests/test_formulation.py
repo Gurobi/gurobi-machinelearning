@@ -19,7 +19,9 @@ from ml2gurobi.extra.obbt import obbt
 from ml2gurobi.sklearn import Pipe2Gurobi, pipe2gurobi
 
 
-class TestFormulations(unittest.TestCase):
+class TestFixedModel(unittest.TestCase):
+    ''' Test that if we fix the input of the predictor the feasible solution from
+    Gurobi is identical to what the predict function would return.'''
     def fixed_model(self, predictor, translator, example, use_gurobi_modeling=False):
         with gp.Model() as gpm:
             x = gpm.addMVar(example.shape, lb=example, ub=example)
@@ -79,6 +81,8 @@ class TestFormulations(unittest.TestCase):
                 with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=True):
                     self.fixed_model(pipeline , pipe2gurobi, X[exampleno, :], True)
 
+class TestReLU(unittest.TestCase):
+    ''' Test that various versions of ReLU work and give the same results.'''
     def adversarial_model(self, m, pipe, example, epsilon, activation=None):
         ex_prob = pipe.predict_proba(example)
         output_shape = ex_prob.shape

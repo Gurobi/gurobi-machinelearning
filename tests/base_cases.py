@@ -28,12 +28,12 @@ class DiabetesCases:
         self.basedir = os.path.join(os.path.dirname(__file__), 'predictors')
         version = None
         with open(os.path.join(self.basedir, 'sklearn_version')) as filein:
-            version = filein.read()
+            version = filein.read().strip()
         if version != sklearn_version:
             print("Scikit learn version changed. Regenerate predictors")
             self.build_predictors()
             with open(os.path.join(self.basedir, 'sklearn_version'), 'w') as fileout:
-                fileout.write(sklearn_version)
+                print(sklearn_version, file=fileout)
 
     def build_predictors(self):
         data = datasets.load_diabetes()
