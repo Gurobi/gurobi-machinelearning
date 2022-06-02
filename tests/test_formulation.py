@@ -107,7 +107,7 @@ class TestFormulations(unittest.TestCase):
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=True):
-                    self.fixed_model(pipeline, pipe, X, exampleno, True)
+                    self.fixed_model(pipeline, pipeline, X, exampleno, True)
 
     def adversarial_model(self, m, pipe, example, epsilon, activation=None):
         ex_prob = pipe.predict_proba(example)
