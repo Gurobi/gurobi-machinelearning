@@ -12,8 +12,8 @@ from .nnbase import BaseNNRegression2Gurobi
 class Sequential2Gurobi(BaseNNRegression2Gurobi):
     '''Transform a pytorch Sequential Neural Network to Gurboi constraint with
        input and output as matrices of variables.'''
-    def __init__(self, regressor, model, input, output, clean_regressor=False):
-        BaseNNRegression2Gurobi.__init__(self, regressor, model, input, output,
+    def __init__(self, regressor, model, input_vars, output_vars, clean_regressor=False):
+        BaseNNRegression2Gurobi.__init__(self, regressor, model, input_vars, output_vars,
                                          clean_regressor)
 
         linear = None
@@ -30,9 +30,9 @@ class Sequential2Gurobi(BaseNNRegression2Gurobi):
 
     def mip_model(self):
         network = self.regressor
-        X = self._input
-        y = self._output
-        input_vars = X
+        _input = self._input
+        output = self._output
+
         linear = None
         for i, step in enumerate(network):
             if isinstance(step, nn.ReLU):
@@ -41,10 +41,10 @@ class Sequential2Gurobi(BaseNNRegression2Gurobi):
                         layer_weight = param.detach().numpy().T
                     elif name == 'bias':
                         layer_bias = param.detach().numpy()
-                layer = self.addlayer(input_vars, layer_weight,
+                layer = self.addlayer(_input, layer_weight,
                                       layer_bias, self.actdict['relu'], None, name=f'{i}')
                 linear = None
-                input_vars = layer._output
+                _input = layer._output  # pylint: disable=W0212
             elif isinstance(step, nn.Linear):
                 assert linear is None
                 linear = step
@@ -56,4 +56,4 @@ class Sequential2Gurobi(BaseNNRegression2Gurobi):
                     layer_weight = param.detach().numpy().T
                 elif name == 'bias':
                     layer_bias = param.detach().numpy()
-            self.addlayer(input_vars, layer_weight, layer_bias, self.actdict['identity'], y)
+            self.addlayer(_input, layer_weight, layer_bias, self.actdict['identity'], output)

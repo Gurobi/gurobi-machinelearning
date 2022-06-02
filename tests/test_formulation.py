@@ -24,11 +24,11 @@ from ml2gurobi.extra import morerelu
 from ml2gurobi.extra.obbt import obbt
 from ml2gurobi.sklearn import (
     Pipe2Gurobi,
-    decisiontreeregressor,
-    gradientboostingregressor,
-    linearregression,
-    mlpregressor,
-    pipe,
+    decisiontreeregressor2gurobi,
+    gradientboostingregressor2gurobi,
+    linearregression2gurobi,
+    mlpregressor2gurobi,
+    pipe2gurobi,
 )
 
 
@@ -54,10 +54,10 @@ class TestFormulations(unittest.TestCase):
         X = data['data']
         y = data['target']
 
-        to_test = [(LinearRegression(), linearregression),
-                   (DecisionTreeRegressor(max_leaf_nodes=50), decisiontreeregressor),
-                   (GradientBoostingRegressor(n_estimators=20), gradientboostingregressor),
-                   (MLPRegressor([20, 20]), mlpregressor)]
+        to_test = [(LinearRegression(), linearregression2gurobi),
+                   (DecisionTreeRegressor(max_leaf_nodes=50), decisiontreeregressor2gurobi),
+                   (GradientBoostingRegressor(n_estimators=20), gradientboostingregressor2gurobi),
+                   (MLPRegressor([20, 20]), mlpregressor2gurobi)]
 
         warnings.filterwarnings('ignore')
         for regressor, translator in to_test:
@@ -84,10 +84,10 @@ class TestFormulations(unittest.TestCase):
         X = data['data']
         y = data['target']
 
-        to_test = [(LinearRegression(), linearregression),
-                   (DecisionTreeRegressor(max_leaf_nodes=50), decisiontreeregressor),
-                   (GradientBoostingRegressor(n_estimators=20), gradientboostingregressor),
-                   (MLPRegressor([20, 20]), mlpregressor)]
+        to_test = [(LinearRegression(), linearregression2gurobi),
+                   (DecisionTreeRegressor(max_leaf_nodes=50), decisiontreeregressor2gurobi),
+                   (GradientBoostingRegressor(n_estimators=20), gradientboostingregressor2gurobi),
+                   (MLPRegressor([20, 20]), mlpregressor2gurobi)]
 
         warnings.filterwarnings('ignore')
         for regressor, _ in to_test:
@@ -96,7 +96,7 @@ class TestFormulations(unittest.TestCase):
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, exampleno=exampleno):
-                    self.fixed_model(pipeline, pipe, X, exampleno)
+                    self.fixed_model(pipeline, pipe2gurobi, X, exampleno)
 
         if not HAS_MODELING:
             return

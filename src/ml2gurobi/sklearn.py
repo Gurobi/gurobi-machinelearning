@@ -31,33 +31,33 @@ class StandardScaler2Gurobi(MLSubModel):
     ''' Class to use a StandardScale to create scaled version of
         some Gurobi variables. '''
 
-    def __init__(self, model, scaler, input, **kwargs):
-        super().__init__(model, input, None, **kwargs)
+    def __init__(self, model, scaler, input_vars, **kwargs):
+        super().__init__(model, input_vars, None, **kwargs)
         self.scaler = scaler
 
     def transform(self):
         '''Do the transormation on x'''
-        X = self._input
+        _input = self._input
 
-        nfeat = X.shape[1]
+        nfeat = _input.shape[1]
         scale = self.scaler.scale_
         mean = self.scaler.mean_
 
         begin = self.get_stats_()
 
-        variables = self.model.addMVar(X.shape, name='__scaledx')
-        variables.LB = (X.LB - mean)/scale
-        variables.UB = (X.UB - mean)/scale
-        self.model.addConstrs((X[:, i] - variables[:, i] * scale[i] == mean[i]
+        variables = self.model.addMVar(_input.shape, name='__scaledx')
+        variables.LB = (_input.LB - mean)/scale
+        variables.UB = (_input.UB - mean)/scale
+        self.model.addConstrs((_input[:, i] - variables[:, i] * scale[i] == mean[i]
                                for i in range(nfeat)), name='__scaling')
         end = self.get_stats_()
         self.update(begin, end)
-        self.output_ = variables
+        self._output = variables
         return self
 
     def output(self):
         '''Return the scaled variable features'''
-        return self.output_
+        return self._output
 
 
 class LinearRegression2Gurobi(BaseNNRegression2Gurobi):
@@ -65,8 +65,8 @@ class LinearRegression2Gurobi(BaseNNRegression2Gurobi):
         takes another Gurobi matrix variable as input.
         '''
 
-    def __init__(self, model, regressor, input, output, **kwargs):
-        super().__init__(model, regressor, input, output, **kwargs)
+    def __init__(self, model, regressor, input_vars, output_vars, **kwargs):
+        super().__init__(model, regressor, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
         '''Add the prediction constraints to Gurobi'''
@@ -80,8 +80,8 @@ class LogisticRegression2Gurobi(BaseNNRegression2Gurobi):
         takes another Gurobi matrix variable as input.
         '''
 
-    def __init__(self, model, regressor, input, output, **kwargs):
-        super().__init__(model, regressor, input, output, **kwargs)
+    def __init__(self, model, regressor, input_vars, output_vars, **kwargs):
+        super().__init__(model, regressor, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
         '''Add the prediction constraints to Gurobi'''
@@ -95,8 +95,8 @@ class MLPRegressor2Gurobi(BaseNNRegression2Gurobi):
         takes another Gurobi matrix variable as input.
         '''
 
-    def __init__(self, model, regressor, input, output, clean_regressor=False, **kwargs):
-        super().__init__(model, regressor, input, output,
+    def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
+        super().__init__(model, regressor, input_vars, output_vars,
                          clean_regressor=clean_regressor, **kwargs)
         assert regressor.out_activation_ in ('identity', 'relu', 'softmax')
 
@@ -108,32 +108,29 @@ class MLPRegressor2Gurobi(BaseNNRegression2Gurobi):
             raise BaseException(f'No implementation for activation function {neuralnet.activation}')
         activation = self.actdict[neuralnet.activation]
 
-        activations = self._input
+        input_vars = self._input
+        output = None
+
         for i in range(neuralnet.n_layers_ - 1):
             layer_coefs = neuralnet.coefs_[i]
             layer_intercept = neuralnet.intercepts_[i]
 
-            input_vars = activations
-
             # For last layer change activation
-            if i == neuralnet.n_layers_ - 2:
-                activations = self._output
-                if neuralnet.out_activation_ != neuralnet.activation:
-                    activation = self.actdict[neuralnet.out_activation_]
-            else:
-                activations = None
+            if i == neuralnet.n_layers_ -2:
+                activation = self.actdict[neuralnet.out_activation_]
+                output = self._output
 
             layer = self.addlayer(input_vars, layer_coefs,
-                                  layer_intercept, activation, activations,
+                                  layer_intercept, activation, output,
                                   name=f'{i}')
-            activations = layer._output
+            input_vars = layer._output  # pylint: disable=W0212
             self.model.update()
 
 
 class Pipe2Gurobi(MLSubModel):
     '''Use a scikit-learn pipeline to build constraints in Gurobi model.'''
-    def __init__(self, model, pipeline, input, output, **kwargs):
-        super().__init__(model, input, output)
+    def __init__(self, model, pipeline, input_vars, output_vars, **kwargs):
+        super().__init__(model, input_vars, output_vars)
         self.steps = []
         for name, obj in pipeline.steps:
             if name == 'standardscaler':
@@ -149,43 +146,51 @@ class Pipe2Gurobi(MLSubModel):
             elif name == 'decisiontreeregressor':
                 self.steps.append(DecisionTree2Gurobi(model, obj, None, None, **kwargs))
             elif name == 'gradientboostingregressor':
-                self.steps.append(GradientBoostingRegressor2Gurobi(model, obj, None, None, **kwargs))
+                self.steps.append(GradientBoostingRegressor2Gurobi(model, obj, None, None,
+                                                                   **kwargs))
             else:
                 raise BaseException(f"I don't know how to deal with that object: {name}")
 
     def mip_model(self):
-        X = self._input
+        _input = self._input  # pylint: disable=W0212
         for obj in self.steps[:-1]:
-            obj._set_input(X)
+            obj._set_input(_input)  # pylint: disable=W0212
             obj.transform()
-            X = obj.output()
-        self.steps[-1]._set_input(X)
-        self.steps[-1]._set_output(self._output)
+            _input = obj.output()
+        self.steps[-1]._set_input(_input)  # pylint: disable=W0212
+        self.steps[-1]._set_output(self._output)  # pylint: disable=W0212
         self.steps[-1].predict()
 
-def linearregression(model, regressor, X, y, **kwargs):
+def linearregression2gurobi(model, regressor, X, y, **kwargs):
+    ''' Add a linear regression from scikit learn to gurobipy model'''
     return LinearRegression2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def logisticregression(model, regressor, X, y, **kwargs):
+def logisticregression2gurobi(model, regressor, X, y, **kwargs):
+    ''' Add a logistic regression from scikit learn to gurobipy model'''
     return LogisticRegression2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def mlpclassifier(model, regressor, X, y, **kwargs):
+def mlpclassifier2gurobi(model, regressor, X, y, **kwargs):
+    ''' Add a neural network classifier from scikit learn to gurobipy model'''
     return MLPRegressor2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def mlpregressor(model, regressor, X, y, **kwargs):
+def mlpregressor2gurobi(model, regressor, X, y, **kwargs):
+    ''' Add a neural network regression from scikit learn to gurobipy model'''
     return MLPRegressor2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def decisiontreeregressor(model, regressor, X, y, **kwargs):
+def decisiontreeregressor2gurobi(model, regressor, X, y, **kwargs):
+    ''' Add a decision tree regressor from scikit learn to gurobipy model'''
     return DecisionTree2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def gradientboostingregressor(model, regressor, X, y, **kwargs):
+def gradientboostingregressor2gurobi(model, regressor, X, y, **kwargs):
+    ''' Add a gradient boosting tree regressor from scikit learn to gurobipy model'''
     return GradientBoostingRegressor2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def pipe(model, pipe, X, y, **kwargs):
-    return Pipe2Gurobi(model, pipe, X, y, **kwargs).predict()
+def pipe2gurobi(model, pipeline, X, y, **kwargs):
+    ''' Add a scikit learn pipeline to gurobipy model'''
+    return Pipe2Gurobi(model, pipeline, X, y, **kwargs).predict()

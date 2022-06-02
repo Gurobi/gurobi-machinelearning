@@ -14,9 +14,9 @@ from .utils import MLSubModel, addtosubmodel
 class NNLayer(MLSubModel):
     '''Class to build one layer of a neural network'''
 
-    def __init__(self, model, output, input, layer_coefs,
+    def __init__(self, model, output_vars, input_vars, layer_coefs,
                  layer_intercept, activation_function, name):
-        super().__init__(model, input, output, name)
+        super().__init__(model, input_vars, output_vars, name)
         self.coefs = layer_coefs
         self.intercept = layer_intercept
         self.activation = activation_function
@@ -50,11 +50,11 @@ class NNLayer(MLSubModel):
         model = self.model
         model.update()
         output = self._output
-        input = self._input
+        _input = self._input  # pylint: disable=W0212
         layer_coefs = self.coefs
         if activation is None:
             activation = self.activation
-        n, _ = input.shape
+        n, _ = _input.shape
         _, layer_size = layer_coefs.shape
 
         # Add activation variables if we don't have them
@@ -95,8 +95,8 @@ class NNLayer(MLSubModel):
 class BaseNNRegression2Gurobi(MLSubModel):
     ''' Base class for inserting a regressor based on neural-network/tensor into Gurobi'''
 
-    def __init__(self, model, regressor, input, output, name='', clean_regressor=False):
-        super().__init__(model, input, output, name)
+    def __init__(self, model, regressor, input_vars, output_vars, name='', clean_regressor=False):
+        super().__init__(model, input_vars, output_vars, name)
         self.regressor = regressor
         self.clean = clean_regressor
         self.actdict = {'relu': ReLUGC(), 'identity': Identity(), 'logit': LogitPWL()}

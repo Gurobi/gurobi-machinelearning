@@ -53,7 +53,7 @@ def addtosubmodel(function):
 
 class MLSubModel:
     ''' Class to define a submodel'''
-    def __init__(self, model, input, output, name=''):
+    def __init__(self, model, input_vars, output_vars, name=''):
         self.model = model
         self.name = name
         self.torec_ = {'NumConstrs': model.getConstrs,
@@ -64,28 +64,29 @@ class MLSubModel:
         for stat, func in model_stats.items():
             self.__dict__[func] = []
             self.__dict__[stat] = 0
-        if input is not None:
-            self._set_input(input)
+        if input_vars is not None:
+            self._set_input(input_vars)
         else:
             self._input = None
-        if output is not None:
-            self._set_output(output)
+        if output_vars is not None:
+            self._set_output(output_vars)
         else:
             self._output = None
 
     def get_stats_(self):
+        ''' Get model's statistics'''
         m = self.model
         m.update()
         rval = {}
-        for s in self.torec_.keys():
+        for s in self.torec_:
             rval[s] = m.getAttr(s)
         return rval
 
-    def _set_input(self, input):
-        self._input = validate_gpvars(input)
+    def _set_input(self, input_vars):
+        self._input = validate_gpvars(input_vars)
 
-    def _set_output(self, output):
-        self._output = validate_gpvars(output)
+    def _set_output(self, output_vars):
+        self._output = validate_gpvars(output_vars)
 
     @staticmethod
     def validate(input_vars, output_vars):

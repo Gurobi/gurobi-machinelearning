@@ -13,16 +13,19 @@ class Identity():
         self.setbounds = setbounds
 
     def mip_model(self, layer):
+        '''MIP model for identity activation (just apply afine transformation'''
+        output = layer._output # pylint: disable=W0212
+        _input = layer._input # pylint: disable=W0212
         if self.setbounds:
-            layer._output.LB = np.maximum(layer._output.LB, layer.wmin)
-            layer._output.UB = np.minimum(layer._output.UB, layer.wmax)
+            output.LB = np.maximum(output.LB, layer.wmin)
+            output.UB = np.minimum(output.UB, layer.wmax)
 
-        input_size = layer._input.shape[1]
-        for index in np.ndindex(layer._output.shape):
+        input_size = _input.shape[1]
+        for index in np.ndindex(output.shape):
             (k, j) = index
-            mixing = sum(layer._input[k, i] * layer.coefs[i, j]
+            mixing = sum(_input[k, i] * layer.coefs[i, j]
                          for i in range(input_size)) + layer.intercept[j]
-            layer.model.addConstr(layer._output[index] == mixing, name=layer.name+f'_mix[{index}]')
+            layer.model.addConstr(output[index] == mixing, name=layer.name+f'_mix[{index}]')
 
 
 class ReLUGC():
@@ -34,28 +37,31 @@ class ReLUGC():
 
     def mip_model(self, layer):
         ''' Add MIP formulation for ReLU for neuron in layer'''
+        output = layer._output # pylint: disable=W0212
+        _input = layer._input # pylint: disable=W0212
         if not hasattr(layer, 'mixing'):
-            mixing = layer.model.addMVar(layer._output.shape, lb=-GRB.INFINITY,
+            mixing = layer.model.addMVar(output.shape, lb=-GRB.INFINITY,
                                          vtype=GRB.CONTINUOUS,
                                          name=f'__mix[{layer.name}]')
             layer.mixing = mixing
         layer.model.update()
-        input_size = layer._input.shape[1]
+        input_size = _input.shape[1]
         if self.bigm is not None:
             layer.wmax = np.minimum(layer.wmax, self.bigm)
             layer.wmin = np.maximum(layer.wmin, -1*self.bigm)
         if self.setbounds and layer.wmax is not None:
-            layer._output.LB = 0.0
-            layer._output.UB = np.maximum(layer.wmax, 0.0)
+            output.LB = 0.0
+            output.UB = np.maximum(layer.wmax, 0.0)
             layer.mixing.LB = layer.wmin
             layer.mixing.UB = layer.wmax
 
-        for index in np.ndindex(layer._output.shape):
+        for index in np.ndindex(output.shape):
             (k, j) = index
-            mixing = sum(layer._input[k, i] * layer.coefs[i, j]
+            mixing = sum(_input[k, i] * layer.coefs[i, j]
                          for i in range(input_size)) + layer.intercept[j]
             layer.model.addConstr(layer.mixing[index] == mixing, name=layer.name+f'_mix[{index}]')
-            layer.model.addGenConstrMax(layer._output[index], [layer.mixing[index], ], constant=0.0, name=layer.name+'_relu')
+            layer.model.addGenConstrMax(output[index], [layer.mixing[index], ],
+                                        constant=0.0, name=layer.name+'_relu')
 
 
 class LogitPWL:
@@ -136,8 +142,11 @@ class LogitPWL:
     def mip_model(self, layer):
         '''Add formulation for logit for neuron of layer'''
         model = layer.model
+        output = layer._output # pylint: disable=W0212
+        _input = layer._input # pylint: disable=W0212
+
         if not layer.zvar:
-            z = layer.model.addMVar(layer._output.shape, lb=-GRB.INFINITY,
+            z = layer.model.addMVar(output.shape, lb=-GRB.INFINITY,
                                     name=f'__z[{layer.name}]')
             layer.zvar = z
         else:
@@ -145,11 +154,11 @@ class LogitPWL:
         z.LB = layer.wmin
         z.UB = layer.wmax
         model.update()
-        mixing = layer._input @ layer.coefs + layer.intercept
+        mixing = _input @ layer.coefs + layer.intercept
         model.addConstr(layer.zvar == mixing, name=layer.name+'_mix')
 
-        for index in np.ndindex(layer._output.shape):
-            vact = layer._output[index]
+        for index in np.ndindex(output.shape):
+            vact = output[index]
             vx = layer.zvar[index]
             if self.logitapprox == 'PWL':
                 xval, yval = self._logit_pwl_approx(vx, vact)
