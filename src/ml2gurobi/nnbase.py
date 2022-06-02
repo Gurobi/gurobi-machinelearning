@@ -24,9 +24,9 @@ class NNLayer(MLSubModel):
         self.wmax = None
         self.zvar = None
 
-    def getname(self, index, name):
+    def getname(self, index):
         '''Get a fancy name for a neuron in layer'''
-        return f'{name}[{self.name}][{index[0]},{index[1]}]'
+        return f'{self.name}][{index[0]},{index[1]}'
 
     def _wminmax(self):
         '''Compute min/max for w variable'''

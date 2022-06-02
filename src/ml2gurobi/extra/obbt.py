@@ -2,7 +2,7 @@
 from gurobipy import GRB
 
 
-def obbt_layer(layer, round_num, stats=None):
+def obbt_layer(layer, round_num, stats=None, verbose=True):
     ''' Perform OBBT on layer '''
     model = layer.model
     obj = model.getObjective()
@@ -14,8 +14,6 @@ def obbt_layer(layer, round_num, stats=None):
 
     vtypes = model.getAttr(GRB.Attr.VType, model.getVars())
     model.setAttr(GRB.Attr.VType, model.getVars(), GRB.CONTINUOUS)
-
-    verbose = model.Params.OutputFlag
 
     model.optimize()
     assert model.Status == GRB.OPTIMAL
@@ -103,9 +101,9 @@ def obbt(nn2gurobi, n_rounds=1, activation=None):
     for roundnum in range(n_rounds):
         n_strengthened = 0
         for layer in nn2gurobi:
-            if layer.activation is None:
+            if layer.activation in (None, 'identity'):
                 continue
-            n_strengthened += obbt_layer(layer, roundnum, stats=stats)
+            n_strengthened += obbt_layer(layer, roundnum, stats=stats, verbose=outputflag)
             nn2gurobi.rebuild_formulation(activation)
         if n_strengthened == 0:
             break

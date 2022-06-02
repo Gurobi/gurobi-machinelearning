@@ -18,11 +18,11 @@ class ReLUmin():
         if not hasattr(layer, 'mixing'):
             mixing = layer.model.addMVar(layer._output.shape, lb=-GRB.INFINITY,
                                          vtype=GRB.CONTINUOUS,
-                                         name='__mix[{}]'.format(layer.name))
+                                         name=f'{layer.name}__mix')
             layer.mixing = mixing
             minact = layer.model.addMVar(layer._output.shape, lb=-GRB.INFINITY, ub=0.0,
                                          vtype=GRB.CONTINUOUS,
-                                         name='__minact[{}]'.format(layer.name))
+                                         name=f'{layer.name}_minact')
             layer.minact = minact
         if layer.wmax is None:
             return
@@ -41,13 +41,12 @@ class ReLUmin():
             k, j = index
             vact = layer._output[index]
             minact = layer.minact[index]
-            constrname = layer.getname(index, 'relu')
             mixing = sum(layer._input[k, i] * layer.coefs[i, j]
                          for i in range(input_size)) + layer.intercept[j]
-            layer.model.addConstr(layer.mixing[index] == - mixing, name=constrname+'_mix')
+            layer.model.addConstr(layer.mixing[index] == - mixing, name=f'{layer.name}_mix[{index}]')
             mixing = layer.mixing[index]
             layer.model.addConstr(vact == -minact)
-            layer.model.addGenConstrMin(minact, [mixing, 0.0], name=constrname+'_relu')
+            layer.model.addGenConstrMin(minact, [mixing, 0.0], name=f'{layer.name}_relu[{index}]')
 
 
 class GRBReLU():
@@ -82,24 +81,24 @@ class GRBReLU():
             vact = layer._output[index]
             vmix = layer.mixing[index]
             assert ub >= lb
-            constrname = layer.getname(index, 'relu')
+
             mixing = sum(layer._input[k, i] * layer.coefs[i, j]
                          for i in range(input_size)) + layer.intercept[j]
             if ub > self.eps and lb < -self.eps:
-                layer.model.addConstr(vact - vmix == mixing, name=constrname+'_mix')
+                layer.model.addConstr(vact - vmix == mixing, name=f'{layer.name}_mix[{index}]')
                 mixing = layer.mixing[index]
                 vz = layer.zvar[index]
                 if self.complement or -lb < ub:
                     vz = 1 - vz
-                layer.model.addConstr(vmix <= -lb*(1-vz), name=constrname+'_low')
-                layer.model.addConstr(vact <= ub*vz, name=constrname+'_vub')
+                layer.model.addConstr(vmix <= -lb*(1-vz), name=f'{layer.name}_low[{index}]')
+                layer.model.addConstr(vact <= ub*vz, name=f'{layer.name}_vub[{index}]')
             elif ub <= self.eps:
                 vact.UB = 0.0
                 vact.LB = 0.0
                 vmix.UB = 0.0
             else:
                 assert lb >= -self.eps
-                layer.model.addConstr(vact == mixing, name=constrname)
+                layer.model.addConstr(vact == mixing, name=f'{layer.name}_mix[{index}]')
 
     @staticmethod
     def reset_bounds(layer):
@@ -143,18 +142,18 @@ class ReLUM():
             ub = layer.wmax[index]
             vact = layer._output[index]
             assert ub >= lb
-            constrname = layer.getname(index, 'relu')
+            constrname = layer.getname(index)
             mixing = sum(layer._input[k, i] * layer.coefs[i, j]
                          for i in range(input_size)) + layer.intercept[j]
             if ub > self.eps and lb < -self.eps:
                 if not self.expand:
-                    layer.model.addConstr(layer.mixing[index] == mixing, name=constrname+'_mix')
+                    layer.model.addConstr(layer.mixing[index] == mixing, name=f'{layer.name}_mix[{index}]')
                     mixing = layer.mixing[index]
                 vz = layer.zvar[index]
-                layer.model.addConstr(vact >= mixing, name=constrname+'_low')
-                layer.model.addConstr(vact <= ub*vz, name=constrname+'_vub')
+                layer.model.addConstr(vact >= mixing, name=f'{layer.name}_low[{index}]')
+                layer.model.addConstr(vact <= ub*vz, name=f'{layer.name}_vub[{index}]')
                 layer.model.addConstr(vact <= mixing - lb * (1 - vz),
-                                      name=constrname+'_vub2')
+                                      name=f'{layer.name}_vub2[{index}]')
             elif ub <= self.eps:
                 vact.UB = 0.0
                 vact.LB = 0.0
@@ -207,7 +206,7 @@ class reluOBBT():
             ub = layer.wmax[index]
             vact = layer._output[index]
 
-            constrname = layer.getname(index, 'reluOBBT')
+            constrname = f'{layer.name}[{index}]'
             mixing = sum(layer._input[k, i] * layer.coefs[i, j]
                          for i in range(input_size)) + layer.intercept[j]
             if ub < 1e-8:

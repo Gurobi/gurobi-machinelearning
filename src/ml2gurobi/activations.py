@@ -7,6 +7,18 @@ import numpy as np
 from gurobipy import GRB
 
 
+def get_mixing(layer, index):
+    '''Facilitator to compute:
+        _input @ layer.coefs + layer.intercept
+        for a given index
+       Should not be necesary when MVar dimensions are fixed
+    '''
+    k, j = index
+    _input = layer._input # pylint: disable=W0212
+    input_size = _input.shape[1]
+    return sum(_input[k, i] * layer.coefs[i, j]
+                     for i in range(input_size)) + layer.intercept[j]
+
 class Identity():
     '''Model identity activation (i.e. does nearly nothing'''
     def __init__(self, setbounds=True):
@@ -15,17 +27,13 @@ class Identity():
     def mip_model(self, layer):
         '''MIP model for identity activation (just apply afine transformation'''
         output = layer._output # pylint: disable=W0212
-        _input = layer._input # pylint: disable=W0212
         if self.setbounds:
             output.LB = np.maximum(output.LB, layer.wmin)
             output.UB = np.minimum(output.UB, layer.wmax)
 
-        input_size = _input.shape[1]
         for index in np.ndindex(output.shape):
-            (k, j) = index
-            mixing = sum(_input[k, i] * layer.coefs[i, j]
-                         for i in range(input_size)) + layer.intercept[j]
-            layer.model.addConstr(output[index] == mixing, name=layer.name+f'_mix[{index}]')
+            layer.model.addConstr(output[index] == get_mixing(layer, index),
+                                  name=f'{layer.name}_mix[{index}]')
 
 
 class ReLUGC():
@@ -38,14 +46,12 @@ class ReLUGC():
     def mip_model(self, layer):
         ''' Add MIP formulation for ReLU for neuron in layer'''
         output = layer._output # pylint: disable=W0212
-        _input = layer._input # pylint: disable=W0212
         if not hasattr(layer, 'mixing'):
             mixing = layer.model.addMVar(output.shape, lb=-GRB.INFINITY,
                                          vtype=GRB.CONTINUOUS,
-                                         name=f'__mix[{layer.name}]')
+                                         name=f'{layer.name}]+_mix')
             layer.mixing = mixing
         layer.model.update()
-        input_size = _input.shape[1]
         if self.bigm is not None:
             layer.wmax = np.minimum(layer.wmax, self.bigm)
             layer.wmin = np.maximum(layer.wmin, -1*self.bigm)
@@ -56,12 +62,10 @@ class ReLUGC():
             layer.mixing.UB = layer.wmax
 
         for index in np.ndindex(output.shape):
-            (k, j) = index
-            mixing = sum(_input[k, i] * layer.coefs[i, j]
-                         for i in range(input_size)) + layer.intercept[j]
-            layer.model.addConstr(layer.mixing[index] == mixing, name=layer.name+f'_mix[{index}]')
+            mixing = get_mixing(layer, index)
+            layer.model.addConstr(layer.mixing[index] == mixing, name=f'{layer.name}_mix[{index}]')
             layer.model.addGenConstrMax(output[index], [layer.mixing[index], ],
-                                        constant=0.0, name=layer.name+'_relu')
+                                        constant=0.0, name=f'{layer.name}_relu[{index}]')
 
 
 class LogitPWL:
@@ -154,10 +158,10 @@ class LogitPWL:
         z.LB = layer.wmin
         z.UB = layer.wmax
         model.update()
-        mixing = _input @ layer.coefs + layer.intercept
-        model.addConstr(layer.zvar == mixing, name=layer.name+'_mix')
 
         for index in np.ndindex(output.shape):
+            mixing = get_mixing(layer, index)
+            model.addConstr(layer.zvar[index] == mixing, name=f'{layer.name}_mix[{index}]')
             vact = output[index]
             vx = layer.zvar[index]
             if self.logitapprox == 'PWL':
@@ -166,4 +170,4 @@ class LogitPWL:
                 xval, yval = self._logit_pwl_3pieces(vx, vact)
             if len(xval) > 0:
                 layer.model.addGenConstrPWL(vx, vact, xval, yval,
-                                            name=layer.getname(index)+'_pwl')
+                                            name=f'{layer.name}_pwl[{index}]')
