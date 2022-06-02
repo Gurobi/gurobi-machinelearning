@@ -163,29 +163,29 @@ class Pipe2Gurobi(MLSubModel):
         self.steps[-1]._set_output(self._output)
         self.steps[-1].predict()
 
-def add_linearregression(model, regressor, X, y, **kwargs):
+def linearregression(model, regressor, X, y, **kwargs):
     return LinearRegression2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def add_logisticregression(model, regressor, X, y, **kwargs):
+def logisticregression(model, regressor, X, y, **kwargs):
     return LogisticRegression2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def add_mlpclassifier(model, regressor, X, y, **kwargs):
+def mlpclassifier(model, regressor, X, y, **kwargs):
     return MLPRegressor2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def add_mlpregressor(model, regressor, X, y, **kwargs):
+def mlpregressor(model, regressor, X, y, **kwargs):
     return MLPRegressor2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def add_decisiontreeregressor(model, regressor, X, y, **kwargs):
+def decisiontreeregressor(model, regressor, X, y, **kwargs):
     return DecisionTree2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def add_gradientboostingregressor(model, regressor, X, y, **kwargs):
+def gradientboostingregressor(model, regressor, X, y, **kwargs):
     return GradientBoostingRegressor2Gurobi(model, regressor, X, y, **kwargs).predict()
 
 
-def add_pipe(model, pipe, X, y, **kwargs):
+def pipe(model, pipe, X, y, **kwargs):
     return Pipe2Gurobi(model, pipe, X, y, **kwargs).predict()

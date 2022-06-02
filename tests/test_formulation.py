@@ -3,7 +3,13 @@ import random
 import unittest
 import warnings
 
-import gurobipy as gp
+try:
+    import gurobi.modeling as gp
+    HAS_MODELING=True
+except ImportError as e:
+    import gurobipy as gp
+    HAS_MODELING=False
+
 import numpy as np
 from joblib import load
 from sklearn import datasets
@@ -18,25 +24,27 @@ from ml2gurobi.extra import morerelu
 from ml2gurobi.extra.obbt import obbt
 from ml2gurobi.sklearn import (
     Pipe2Gurobi,
-    add_decisiontreeregressor,
-    add_gradientboostingregressor,
-    add_linearregression,
-    add_mlpregressor,
-    add_pipe,
+    decisiontreeregressor,
+    gradientboostingregressor,
+    linearregression,
+    mlpregressor,
+    pipe,
 )
-
-gp.gurobi._nd_unleashed = True
 
 
 class TestFormulations(unittest.TestCase):
-    def fixed_model(self, regressor, translator, X, y, exampleno):
+    def fixed_model(self, regressor, translator, X, exampleno, use_gurobi_modeling=False):
         with gp.Model() as m:
             x = m.addMVar(X.shape[1], lb=X[exampleno, :], ub=X[exampleno, :])
             y = m.addMVar(1, lb=-gp.GRB.INFINITY)
 
             m.Params.OutputFlag = 0
-            reg2gurobi = translator(m, regressor, x, y)
+            if use_gurobi_modeling:
+                m.add(translator, regressor, x, y)
+            else:
+                translator(m, regressor, x, y)
             m.optimize()
+            m.write('toto.lp')
 
             self.assertTrue(abs(y.X - regressor.predict(X[exampleno, :].reshape(1, -1))) < 1e-5)
 
@@ -46,26 +54,60 @@ class TestFormulations(unittest.TestCase):
         X = data['data']
         y = data['target']
 
-        to_test = [(LinearRegression(), add_linearregression),
-                   (DecisionTreeRegressor(max_leaf_nodes=50), add_decisiontreeregressor),
-                   (GradientBoostingRegressor(n_estimators=20), add_gradientboostingregressor),
-                   (MLPRegressor([20, 20]), add_mlpregressor)]
+        to_test = [(LinearRegression(), linearregression),
+                   (DecisionTreeRegressor(max_leaf_nodes=50), decisiontreeregressor),
+                   (GradientBoostingRegressor(n_estimators=20), gradientboostingregressor),
+                   (MLPRegressor([20, 20]), mlpregressor)]
 
         warnings.filterwarnings('ignore')
         for regressor, translator in to_test:
             regressor.fit(X, y)
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
-                with self.subTest(regressor=regressor, translator=translator, exampleno=exampleno):
-                    self.fixed_model(regressor, translator, X, y, exampleno)
+                with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=False):
+                    self.fixed_model(regressor, translator, X, exampleno)
+
+        if not HAS_MODELING:
+            return
+
+        for regressor, translator in to_test:
+            regressor.fit(X, y)
+            for _ in range(5):
+                exampleno = random.randint(0, X.shape[0]-1)
+                with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=True):
+                    self.fixed_model(regressor, translator, X, exampleno, use_gurobi_modeling=True)
+
+
+    def test_diabetes_with_pipes(self):
+        data = datasets.load_diabetes()
+
+        X = data['data']
+        y = data['target']
+
+        to_test = [(LinearRegression(), linearregression),
+                   (DecisionTreeRegressor(max_leaf_nodes=50), decisiontreeregressor),
+                   (GradientBoostingRegressor(n_estimators=20), gradientboostingregressor),
+                   (MLPRegressor([20, 20]), mlpregressor)]
+
+        warnings.filterwarnings('ignore')
+        for regressor, _ in to_test:
+            pipeline = make_pipeline(StandardScaler(), regressor)
+            pipeline.fit(X, y)
+            for _ in range(5):
+                exampleno = random.randint(0, X.shape[0]-1)
+                with self.subTest(regressor=regressor, exampleno=exampleno):
+                    self.fixed_model(pipeline, pipe, X, exampleno)
+
+        if not HAS_MODELING:
+            return
 
         for regressor, _ in to_test:
             pipeline = make_pipeline(StandardScaler(), regressor)
             pipeline.fit(X, y)
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
-                with self.subTest(regressor=regressor, translator=translator, exampleno=exampleno):
-                    self.fixed_model(pipeline, add_pipe, X, y, exampleno)
+                with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=True):
+                    self.fixed_model(pipeline, pipe, X, exampleno, True)
 
     def adversarial_model(self, m, pipe, example, epsilon, activation=None):
         ex_prob = pipe.predict_proba(example)

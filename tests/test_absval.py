@@ -82,7 +82,7 @@ class TestNNFormulation(unittest.TestCase):
     def dothetest(self, b, r):
         val1 = model(self.X, self.y, False, b, None)
         val2 = model(self.X, self.y, self.nn, b, r)
-        self.assertAlmostEqual(val1, val2)
+        self.assertAlmostEqual(val1, val2, places=5)
 
     def test_nobounds(self):
         self.dothetest(gp.GRB.INFINITY, None)

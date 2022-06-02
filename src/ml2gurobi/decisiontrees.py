@@ -7,7 +7,7 @@ from .utils import MLSubModel
 
 class DecisionTree2Gurobi(MLSubModel):
     ''' Class to model a trained decision tree in a Gurobi model'''
-    def __init__(self, model, regressor, input, output):
+    def __init__(self, model, regressor, input, output, **kwargs):
         super().__init__(model, input, output)
         self.tree = regressor.tree_
 
@@ -55,7 +55,7 @@ class DecisionTree2Gurobi(MLSubModel):
 
 
 class GradientBoostingRegressor2Gurobi(MLSubModel):
-    def __init__(self, model, regressor, input, output):
+    def __init__(self, model, regressor, input, output, **kwargs):
         super().__init__(model, input, output)
         self.regressor = regressor
 
