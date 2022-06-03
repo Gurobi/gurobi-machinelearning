@@ -12,8 +12,8 @@ from .nnbase import BaseNNRegression2Gurobi
 class Sequential2Gurobi(BaseNNRegression2Gurobi):
     '''Transform a pytorch Sequential Neural Network to Gurboi constraint with
        input and output as matrices of variables.'''
-    def __init__(self, regressor, model, input_vars, output_vars, clean_regressor=False):
-        BaseNNRegression2Gurobi.__init__(self, regressor, model, input_vars, output_vars,
+    def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False):
+        BaseNNRegression2Gurobi.__init__(self, model, regressor, input_vars, output_vars,
                                          clean_regressor)
 
         linear = None
@@ -57,3 +57,6 @@ class Sequential2Gurobi(BaseNNRegression2Gurobi):
                 elif name == 'bias':
                     layer_bias = param.detach().numpy()
             self.addlayer(_input, layer_weight, layer_bias, self.actdict['identity'], output)
+
+def sequential2gurobi(model, regressor, X, y):
+    return Sequential2Gurobi(model, regressor, X, y)

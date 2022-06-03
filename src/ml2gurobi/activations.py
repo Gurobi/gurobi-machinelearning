@@ -35,6 +35,20 @@ class Identity():
             layer.model.addConstr(output[index] == get_mixing(layer, index),
                                   name=f'{layer.name}_mix[{index}]')
 
+    @staticmethod
+    def forward(input_values):
+        '''Return input_values'''
+        return input_values
+
+    @staticmethod
+    def forward_fixing(layer, input_values, threshold=-20):   # pylint: disable=W0613
+        '''Fix variables according to input_values noop'''
+        return []
+
+    @staticmethod
+    def reset_bounds(layer):   # pylint: disable=W0613
+        '''Reset the bounds in layerReLU'''
+
 
 class ReLUGC():
     ''' Model the ReLU function (i.e max(x, 0)) using
@@ -66,6 +80,30 @@ class ReLUGC():
             layer.model.addConstr(layer.mixing[index] == mixing, name=f'{layer.name}_mix[{index}]')
             layer.model.addGenConstrMax(output[index], [layer.mixing[index], ],
                                         constant=0.0, name=f'{layer.name}_relu[{index}]')
+
+    @staticmethod
+    def forward(input_values):
+        '''Return ReLU of input_values'''
+        return np.maximum(0.0, input_values)
+
+    @staticmethod
+    def forward_fixing(layer, input_values, threshold=-20):
+        '''Fix binaries according to input_values'''
+        mixing = layer.mixing
+        if threshold < 0:
+            threshold = -int(threshold)
+            threshold = np.sort(np.abs(input_values))[0, threshold]
+        mixing[input_values < 0.0].UB = 0
+        mixing[input_values >= 0.0].LB = 0
+
+        closetozero = mixing[np.abs(input_values) <= threshold].tolist()
+        return closetozero
+
+    @staticmethod
+    def reset_bounds(layer):
+        '''Reset the bounds in layer corresponding to modeling ReLU'''
+        layer.mixing.UB = layer.wmax
+        layer.mixing.LB = layer.wmin
 
 
 class LogitPWL:

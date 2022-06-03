@@ -46,7 +46,7 @@ def prop_activities(layer, input, numfix=20):
         mixing = activation_function.forward(mixing)
     else:
         keep_list = []
-    return (mixing, keep_list)
+    return mixing
 
 
 def most_violated(layer):
@@ -78,20 +78,14 @@ def relax_act(nn2gurobi):
     nn2gurobi.model.update()
 
 
-def prop(nn2gurobi, X, reset=False):
+def prop(nn2gurobi, X, reset=True):
     '''Propagate fixings into the network'''
     # Iterate over the layers
-    torelax = list()
     activation = X
-    target = 20
     for layer in nn2gurobi:
         input_vals = activation
-        activation, keepopen = prop_activities(layer, input_vals, numfix=min(target, 50))
-        torelax += keepopen
+        activation = prop_activities(layer, input_vals)
 
     nn2gurobi.model.optimize()
-    nn2gurobi.canrelax = torelax
     if reset:
-        for layer in nn2gurobi._layers:
-            layer.reset_bounds()
-            nn2gurobi.model.update()
+        nn2gurobi.reset_bounds()

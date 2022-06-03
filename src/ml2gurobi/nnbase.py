@@ -95,12 +95,12 @@ class NNLayer(MLSubModel):
 class BaseNNRegression2Gurobi(MLSubModel):
     ''' Base class for inserting a regressor based on neural-network/tensor into Gurobi'''
 
-    def __init__(self, model, regressor, input_vars, output_vars, name='', clean_regressor=False):
-        super().__init__(model, input_vars, output_vars, name)
+    def __init__(self, model, regressor, input_vars, output_vars, name='', clean_regressor=False, **kwargs):
         self.regressor = regressor
         self.clean = clean_regressor
         self.actdict = {'relu': ReLUGC(), 'identity': Identity(), 'logit': LogitPWL()}
         self._layers = []
+        super().__init__(model, input_vars, output_vars, name, **kwargs)
 
     def __iter__(self):
         return self._layers.__iter__()
@@ -128,4 +128,10 @@ class BaseNNRegression2Gurobi(MLSubModel):
         for layer in self:
             if not isinstance(layer.activation, Identity):
                 layer.redolayer(activation)
+        self.model.update()
+
+    def reset_bounds(self):
+        ''' Reset bounds of variables in mip model'''
+        for layer in self:
+            layer.reset_bounds()
         self.model.update()

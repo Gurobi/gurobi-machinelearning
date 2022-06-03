@@ -34,6 +34,10 @@ class TestFixedModel(unittest.TestCase):
                 translator(gpm, predictor, x, y)
             gpm.optimize()
 
+            absdiff = abs(y.X - predictor.predict(example.reshape(1, -1)))
+            if absdiff > 1e-5:
+                print(f"Error: {y.X} != {predictor.predict(example.reshape(1, -1))}")
+
             self.assertTrue(abs(y.X - predictor.predict(example.reshape(1, -1))) < 1e-5)
 
     def test_diabetes(self):
@@ -102,12 +106,12 @@ class TestReLU(unittest.TestCase):
 
         self.assertEqual(pipe.steps[-1][1].out_activation_, 'identity')
         # Code to add the neural network to the constraints
-        pipe2gurobi = Pipe2Gurobi(m, pipe, x, output)
+        pipe2gurobi = Pipe2Gurobi(m, pipe, x, output, delayed_add=True)
         # For this example we should model softmax in the last layer using identity
         if activation is not None:
             pipe2gurobi.steps[-1].actdict['relu'] = activation
         # pipe2gurobi.steps[-1].actdict['softmax'] = Identity()
-        pipe2gurobi.predict()
+        pipe2gurobi._add()
         return pipe2gurobi
 
     def test_adversarial_activations(self):

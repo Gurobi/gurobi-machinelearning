@@ -12,8 +12,8 @@ from .utils import MLSubModel
 class DecisionTree2Gurobi(MLSubModel):
     ''' Class to model a trained decision tree in a Gurobi model'''
     def __init__(self, model, regressor, input_vars, output_vars, **kwargs):
-        super().__init__(model, input_vars, output_vars, **kwargs)
         self.tree = regressor.tree_
+        super().__init__(model, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
         tree = self.tree
@@ -61,8 +61,8 @@ class DecisionTree2Gurobi(MLSubModel):
 class GradientBoostingRegressor2Gurobi(MLSubModel):
     ''' Class to model a trained gradient boosting tree in a Gurobi model'''
     def __init__(self, model, regressor, input_vars, output_vars):
-        super().__init__(model, input_vars, output_vars)
         self.regressor = regressor
+        super().__init__(model, input_vars, output_vars)
 
     def mip_model(self):
         ''' Predict output variables y from input variables X using the
@@ -83,8 +83,7 @@ class GradientBoostingRegressor2Gurobi(MLSubModel):
         tree2gurobi = []
         for i in range(regressor.n_estimators_):
             tree = regressor.estimators_[i]
-            tree2gurobi.append(DecisionTree2Gurobi(model, tree[0], _input,treevars[:, i]))
-            tree2gurobi[-1].predict()
+            tree2gurobi.append(DecisionTree2Gurobi(model, tree[0], _input,treevars[:, i])._add())
         for k in range(nex):
             model.addConstr(output[k, :] == regressor.learning_rate * treevars[k, :].sum()
                             + constant)
