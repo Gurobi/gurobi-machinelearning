@@ -13,9 +13,6 @@ class Sequential2Gurobi(BaseNNRegression2Gurobi):
     '''Transform a pytorch Sequential Neural Network to Gurboi constraint with
        input and output as matrices of variables.'''
     def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False):
-        BaseNNRegression2Gurobi.__init__(self, model, regressor, input_vars, output_vars,
-                                         clean_regressor)
-
         linear = None
         for step in regressor:
             if isinstance(step, nn.ReLU):
@@ -27,6 +24,8 @@ class Sequential2Gurobi(BaseNNRegression2Gurobi):
             else:
                 print(step)
                 raise BaseException("Unsupported network structure")
+        BaseNNRegression2Gurobi.__init__(self, model, regressor, input_vars, output_vars,
+                                         clean_regressor)
 
     def mip_model(self):
         network = self.regressor

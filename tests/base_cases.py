@@ -19,6 +19,7 @@ from ml2gurobi.sklearn import (
 
 
 class DiabetesCases:
+    ''' Base class to have cases for testing regression models on diabetes set'''
     to_test = [(LinearRegression(), linearregression2gurobi),
                (DecisionTreeRegressor(max_leaf_nodes=50), decisiontreeregressor2gurobi),
                (GradientBoostingRegressor(n_estimators=20), gradientboostingregressor2gurobi),
