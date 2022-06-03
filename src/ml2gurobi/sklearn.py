@@ -163,34 +163,34 @@ class Pipe2Gurobi(MLSubModel):
 
 def linearregression2gurobi(model, regressor, X, y, **kwargs):
     ''' Add a linear regression from scikit learn to gurobipy model'''
-    return LinearRegression2Gurobi(model, regressor, X, y, **kwargs)._add()
+    return LinearRegression2Gurobi(model, regressor, X, y, **kwargs)
 
 
 def logisticregression2gurobi(model, regressor, X, y, **kwargs):
     ''' Add a logistic regression from scikit learn to gurobipy model'''
-    return LogisticRegression2Gurobi(model, regressor, X, y, **kwargs)._add()
+    return LogisticRegression2Gurobi(model, regressor, X, y, **kwargs)
 
 
 def mlpclassifier2gurobi(model, regressor, X, y, **kwargs):
     ''' Add a neural network classifier from scikit learn to gurobipy model'''
-    return MLPRegressor2Gurobi(model, regressor, X, y, **kwargs)._add()
+    return MLPRegressor2Gurobi(model, regressor, X, y, **kwargs)
 
 
 def mlpregressor2gurobi(model, regressor, X, y, **kwargs):
     ''' Add a neural network regression from scikit learn to gurobipy model'''
-    return MLPRegressor2Gurobi(model, regressor, X, y, **kwargs)._add()
+    return MLPRegressor2Gurobi(model, regressor, X, y, **kwargs)
 
 
 def decisiontreeregressor2gurobi(model, regressor, X, y, **kwargs):
     ''' Add a decision tree regressor from scikit learn to gurobipy model'''
-    return DecisionTree2Gurobi(model, regressor, X, y, **kwargs)._add()
+    return DecisionTree2Gurobi(model, regressor, X, y, **kwargs)
 
 
 def gradientboostingregressor2gurobi(model, regressor, X, y, **kwargs):
     ''' Add a gradient boosting tree regressor from scikit learn to gurobipy model'''
-    return GradientBoostingRegressor2Gurobi(model, regressor, X, y, **kwargs)._add()
+    return GradientBoostingRegressor2Gurobi(model, regressor, X, y, **kwargs)
 
 
 def pipe2gurobi(model, pipeline, X, y, **kwargs):
     ''' Add a scikit learn pipeline to gurobipy model'''
-    return Pipe2Gurobi(model, pipeline, X, y, **kwargs)._add()
+    return Pipe2Gurobi(model, pipeline, X, y, **kwargs)

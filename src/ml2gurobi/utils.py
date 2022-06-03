@@ -54,7 +54,7 @@ def addtosubmodel(function):
 
 class MLSubModel:
     ''' Class to define a submodel'''
-    def __init__(self, model, input_vars, output_vars, name='', **kwargs):
+    def __init__(self, model, input_vars, output_vars, name='', delayed_add=False, **kwargs):
         self.model = model
         self.name = name
         self.torec_ = {'NumConstrs': model.getConstrs,
@@ -75,7 +75,9 @@ class MLSubModel:
             self._output = None
         self._delayed_add = (input_vars is None or
                              output_vars is None or
-                             ('delayed_add' in kwargs and kwargs['delayed_add']))
+                             delayed_add)
+        if not self._delayed_add:
+            self._add()
 
     def get_stats_(self):
         ''' Get model's statistics'''

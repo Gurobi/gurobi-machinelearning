@@ -83,7 +83,7 @@ class GradientBoostingRegressor2Gurobi(MLSubModel):
         tree2gurobi = []
         for i in range(regressor.n_estimators_):
             tree = regressor.estimators_[i]
-            tree2gurobi.append(DecisionTree2Gurobi(model, tree[0], _input,treevars[:, i])._add())
+            tree2gurobi.append(DecisionTree2Gurobi(model, tree[0], _input,treevars[:, i]))
         for k in range(nex):
             model.addConstr(output[k, :] == regressor.learning_rate * treevars[k, :].sum()
                             + constant)
