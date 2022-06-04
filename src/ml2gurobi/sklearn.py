@@ -22,7 +22,11 @@ What we have so far:
 
 import numpy as np
 
-from .decisiontrees import DecisionTree2Gurobi, GradientBoostingRegressor2Gurobi
+from .decisiontrees import (
+    DecisionTree2Gurobi,
+    GradientBoostingRegressor2Gurobi,
+    RandomForestRegressor2Gurobi,
+)
 from .nnbase import BaseNNRegression2Gurobi
 from .utils import MLSubModel
 
@@ -146,6 +150,9 @@ class Pipe2Gurobi(MLSubModel):
                 self.steps.append(DecisionTree2Gurobi(model, obj, None, None, **kwargs))
             elif name == 'gradientboostingregressor':
                 self.steps.append(GradientBoostingRegressor2Gurobi(model, obj, None, None,
+                                                                   **kwargs))
+            elif name == 'randomforestregressor':
+                self.steps.append(RandomForestRegressor2Gurobi(model, obj, None, None,
                                                                    **kwargs))
             else:
                 raise BaseException(f"I don't know how to deal with that object: {name}")

@@ -87,3 +87,30 @@ class GradientBoostingRegressor2Gurobi(MLSubModel):
         for k in range(nex):
             model.addConstr(output[k, :] == regressor.learning_rate * treevars[k, :].sum()
                             + constant)
+class RandomForestRegressor2Gurobi(MLSubModel):
+    ''' Class to model a trained random forest regressor in a Gurobi model'''
+    def __init__(self, model, regressor, input_vars, output_vars):
+        self.regressor = regressor
+        super().__init__(model, input_vars, output_vars)
+
+    def mip_model(self):
+        ''' Predict output variables y from input variables X using the
+            decision tree.
+
+            Both X and y should be array or list of variables of conforming dimensions.
+        '''
+        model = self.model
+        regressor = self.regressor
+
+        _input = self._input
+        output = self._output
+        nex = _input.shape[0]
+
+        treevars = model.addMVar((nex, regressor.n_estimators), lb=-GRB.INFINITY)
+
+        tree2gurobi = []
+        for i in range(regressor.n_estimators):
+            tree = regressor.estimators_[i]
+            tree2gurobi.append(DecisionTree2Gurobi(model, tree, _input,treevars[:, i]))
+        for k in range(nex):
+            model.addConstr(regressor.n_estimators * output[k, :] == treevars[k, :].sum())
