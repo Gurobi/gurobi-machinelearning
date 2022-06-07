@@ -3,14 +3,16 @@ import numpy as np
 from joblib import Parallel, delayed, load
 
 from ml2gurobi.activations import Identity
+from ml2gurobi.extra.morerelu import reluOBBT
 from ml2gurobi.sklearn import Pipe2Gurobi
 
 
 def do_formulation(pipe, X, exampleno, filename, doobbt=0, docuts=False):
-    example = X[exampleno:exampleno+1, :]
+    example = X.loc[exampleno:exampleno+1, :]
     ex_prob = pipe.predict_proba(example)
     output_shape = ex_prob.shape
 
+    example = example.to_numpy()
     sortedidx = np.argsort(ex_prob)[0]
 
     m = gp.Model()
@@ -25,9 +27,9 @@ def do_formulation(pipe, X, exampleno, filename, doobbt=0, docuts=False):
     m.addConstr(absdiff[0, :] >= x[0, :] - example[0, :])
     m.addConstr(absdiff[0, :] >= - x[0, :] + example[0, :])
     m.addConstr(absdiff[0, :].sum() <= epsilon)
-    pipe2gurobi = Pipe2Gurobi(pipe, m)
-    pipe2gurobi.steps[-1].actdict['softmax'] = Identity()
-    pipe2gurobi.predict(x, output)
+    # Change last layer activation to identity
+    pipe.steps[-1][1].out_activation_ = 'identity'
+    pipe2gurobi = Pipe2Gurobi(m, pipe, x, output)
     m.setObjective(output[0, sortedidx[0]] -
                    output[0, sortedidx[-1]], gp.GRB.MAXIMIZE)
     m.update()
@@ -35,7 +37,7 @@ def do_formulation(pipe, X, exampleno, filename, doobbt=0, docuts=False):
     m.Params.OutputFlag = 1
     try:
         if doobbt:
-            pipe2gurobi.steps[0].obbt(doobbt)
+            pipe2gurobi.steps[0].obbt(doobbt, reluOBBT())
     except Exception:
         return
     m.update()
