@@ -3,6 +3,8 @@ import gurobipy as gp
 import numpy as np
 from gurobipy import GRB
 
+from ..activations import _name
+
 
 class ReLUmin():
     ''' Model the ReLU function in a twisted way (i.e min(-x, 0)) using
@@ -147,13 +149,13 @@ class ReLUM():
                          for i in range(input_size)) + layer.intercept[j]
             if ub > self.eps and lb < -self.eps:
                 if not self.expand:
-                    layer.model.addConstr(layer.mixing[index] == mixing, name=f'{layer.name}_mix[{index}]')
+                    layer.model.addConstr(layer.mixing[index] == mixing, name=_name(layer, index, 'mix'))
                     mixing = layer.mixing[index]
                 vz = layer.zvar[index]
-                layer.model.addConstr(vact >= mixing, name=f'{layer.name}_low[{index}]')
-                layer.model.addConstr(vact <= ub*vz, name=f'{layer.name}_vub[{index}]')
+                layer.model.addConstr(vact >= mixing, name=_name(layer, index, 'low'))
+                layer.model.addConstr(vact <= ub*vz, name=_name(layer, index, 'vub1'))
                 layer.model.addConstr(vact <= mixing - lb * (1 - vz),
-                                      name=f'{layer.name}_vub2[{index}]')
+                                      name=_name(layer, index, 'vub2'))
             elif ub <= self.eps:
                 vact.UB = 0.0
                 vact.LB = 0.0
