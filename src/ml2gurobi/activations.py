@@ -7,6 +7,11 @@ import numpy as np
 from gurobipy import GRB
 
 
+def _name(layer, index, name):
+    index = f'{index}'.replace(' ','')
+    return f'__{layer.name}_{name}[{index}]'
+
+
 def get_mixing(layer, index):
     '''Facilitator to compute:
         _input @ layer.coefs + layer.intercept
@@ -33,7 +38,7 @@ class Identity():
 
         for index in np.ndindex(output.shape):
             layer.model.addConstr(output[index] == get_mixing(layer, index),
-                                  name=f'{layer.name}_mix[{index}]')
+                                  name=_name(layer, index, 'mix'))
 
     @staticmethod
     def forward(input_values):
@@ -47,7 +52,7 @@ class Identity():
 
     @staticmethod
     def reset_bounds(layer):   # pylint: disable=W0613
-        '''Reset the bounds in layerReLU'''
+        '''Reset the bounds in layer'''
 
 
 class ReLUGC():
@@ -77,9 +82,9 @@ class ReLUGC():
 
         for index in np.ndindex(output.shape):
             mixing = get_mixing(layer, index)
-            layer.model.addConstr(layer.mixing[index] == mixing, name=f'{layer.name}_mix[{index}]')
-            layer.model.addGenConstrMax(output[index], [layer.mixing[index], ],
-                                        constant=0.0, name=f'{layer.name}_relu[{index}]')
+            layer.model.addConstr(layer.mixing[index] == mixing, name=_name(layer, index, 'mix'))
+            layer.model.addGenConstrMax(output[index], [layer.mixing[index], ], constant=0.0,
+                                        name=_name(layer, index, 'relu'))
 
     @staticmethod
     def forward(input_values):
