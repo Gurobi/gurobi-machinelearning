@@ -9,7 +9,7 @@ from torch import nn
 from .nnbase import BaseNNPredictor
 
 
-class SequentialConstraint(BaseNNPredictor):
+class SequentialPredictor(BaseNNPredictor):
     '''Transform a pytorch Sequential Neural Network to Gurboi constraint with
        input and output as matrices of variables.'''
     def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False):
