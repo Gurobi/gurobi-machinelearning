@@ -34,13 +34,6 @@ def transpose(gpvars):
     return gp.MVar(gpvars.tolist()[0], (gpvars.shape[1], gpvars.shape[0]))
 
 
-model_stats = {'NumConstrs': 'Constrs',
-               'NumQConstrs': 'QConstrs',
-               'NumVars': 'Vars',
-               'NumSOS': 'SOSs',
-               'NumGenConstrs': 'GenConstrs'}
-
-
 def addtosubmodel(function):
     ''' Wrapper function to add to submodel '''
     def wrapper(self, *args, **kwargs):
@@ -52,19 +45,22 @@ def addtosubmodel(function):
     return wrapper
 
 
-class MLSubModel:
+class AbstractPredictor:
     ''' Class to define a submodel'''
     def __init__(self, model, input_vars, output_vars, name='', delayed_add=False, **kwargs):
         self.model = model
         self.name = name
-        self.torec_ = {'NumConstrs': model.getConstrs,
-                       'NumQConstrs': model.getQConstrs,
-                       'NumVars': model.getVars,
-                       'NumSOS':  model.getSOSs,
-                       'NumGenConstrs': model.getGenConstrs}
-        for stat, func in model_stats.items():
-            self.__dict__[func] = []
-            self.__dict__[stat] = 0
+        self.torec_ = {'Constrs': model.getConstrs,
+                       'QConstrs': model.getQConstrs,
+                       'Vars': model.getVars,
+                       'SOS':  model.getSOSs,
+                       'GenConstrs': model.getGenConstrs}
+
+        self.list_ = {}
+        self.num_ = {}
+        for stat in self.torec_:
+            self.list_[stat] = []
+            self.num_[stat] = 0
         if input_vars is not None:
             self._set_input(input_vars)
         else:
@@ -85,8 +81,14 @@ class MLSubModel:
         m.update()
         rval = {}
         for s in self.torec_:
-            rval[s] = m.getAttr(s)
+            rval[s] = m.getAttr(f'Num{s}')
         return rval
+
+    def get_num(self, stat):
+        return self.num_[stat]
+
+    def get_list(self, stat):
+        return self.list_[stat]
 
     def _set_input(self, input_vars):
         self._input = validate_gpvars(input_vars)
@@ -122,13 +124,9 @@ class MLSubModel:
             added = end[s] - begin[s]
             if added == 0:
                 continue
-            self.__dict__[s] += added
+            self.num_[s] += added
             added = func()[begin[s]: end[s]]
-            self.__dict__[model_stats[s]] += added
-
-    def mip_model(self):
-        ''' Mip model for predict
-        (implemented in child classes)'''
+            self.list_[s] += added
 
     @addtosubmodel
     def _add(self):
@@ -140,13 +138,13 @@ class MLSubModel:
     def remove(self, what=None):
         '''Remove everything added by this object from Gurobi model'''
         if what is None:
-            for s, v in model_stats.items():
-                self.model.remove(self.__dict__[v])
-                self.__dict__[v] = []
-                self.__dict__[s] = 0
+            for s in self.torec_:
+                self.model.remove(self.list_[s])
+                self.list_[s] = []
+                self.num_[s] = 0
         else:
             for key in what:
-                self.model.remove(self.__dict__[key])
-                self.__dict__['Num'+key] = 0
-                self.__dict__[key] = []
+                self.model.remove(self.list_[key])
+                self.num_[key] = 0
+                self.list_[key] = []
         self.model.update()

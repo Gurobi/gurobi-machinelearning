@@ -16,7 +16,7 @@ from sklearn import datasets
 
 from ml2gurobi.extra import morerelu
 from ml2gurobi.extra.obbt import obbt
-from ml2gurobi.sklearn import Pipe2Gurobi, pipe2gurobi
+from ml2gurobi.sklearn import PipelinePredictor
 
 
 class TestFixedModel(unittest.TestCase):
@@ -73,7 +73,7 @@ class TestFixedModel(unittest.TestCase):
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=False):
-                    self.fixed_model(pipeline, pipe2gurobi, X[exampleno, :], False)
+                    self.fixed_model(pipeline, PipelinePredictor, X[exampleno, :], False)
 
         if not HAS_MODELING:
             return
@@ -83,7 +83,7 @@ class TestFixedModel(unittest.TestCase):
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=True):
-                    self.fixed_model(pipeline , pipe2gurobi, X[exampleno, :], True)
+                    self.fixed_model(pipeline , PipelinePredictor, X[exampleno, :], True)
 
 class TestReLU(unittest.TestCase):
     ''' Test that various versions of ReLU work and give the same results.'''
@@ -106,7 +106,7 @@ class TestReLU(unittest.TestCase):
 
         self.assertEqual(pipe.steps[-1][1].out_activation_, 'identity')
         # Code to add the neural network to the constraints
-        pipe2gurobi = Pipe2Gurobi(m, pipe, x, output, delayed_add=True)
+        pipe2gurobi = PipelinePredictor(m, pipe, x, output, delayed_add=True)
         # For this example we should model softmax in the last layer using identity
         if activation is not None:
             pipe2gurobi.steps[-1].actdict['relu'] = activation

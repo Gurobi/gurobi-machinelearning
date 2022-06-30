@@ -11,19 +11,19 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 
 from ml2gurobi.sklearn import (
-    decisiontreeregressor2gurobi,
-    gradientboostingregressor2gurobi,
-    linearregression2gurobi,
-    mlpregressor2gurobi,
+    DecisionTreeRegressorPredictor,
+    GradientBoostingRegressorPredictor,
+    LinearRegressionPredictor,
+    MLPRegressorPredictor,
 )
 
 
 class DiabetesCases:
     ''' Base class to have cases for testing regression models on diabetes set'''
-    to_test = [(LinearRegression(), linearregression2gurobi),
-               (DecisionTreeRegressor(max_leaf_nodes=50), decisiontreeregressor2gurobi),
-               (GradientBoostingRegressor(n_estimators=20), gradientboostingregressor2gurobi),
-               (MLPRegressor([20, 20]), mlpregressor2gurobi)]
+    to_test = [(LinearRegression(), LinearRegressionPredictor),
+               (DecisionTreeRegressor(max_leaf_nodes=50), DecisionTreeRegressorPredictor),
+               (GradientBoostingRegressor(n_estimators=20), GradientBoostingRegressorPredictor),
+               (MLPRegressor([20, 20]), MLPRegressorPredictor)]
 
     def __init__(self):
         self.basedir = os.path.join(os.path.dirname(__file__), 'predictors')

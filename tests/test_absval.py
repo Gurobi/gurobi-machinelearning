@@ -7,7 +7,7 @@ from sklearn.neural_network import MLPRegressor
 
 from ml2gurobi.activations import ReLUGC
 from ml2gurobi.extra.morerelu import ReLUmin
-from ml2gurobi.sklearn import MLPRegressor2Gurobi
+from ml2gurobi.sklearn import MLPRegressorPredictor
 
 gp.gurobi._nd_unleashed = True
 
@@ -52,7 +52,7 @@ def model(X, y, nn, infbound, relumodel=None):
 
         if nn:
             # create transforms to turn scikit-learn pipeline into Gurobi constraints
-            nn2gurobi = MLPRegressor2Gurobi(model, nn, diff, absdiff, delayed_add=True)
+            nn2gurobi = MLPRegressorPredictor(model, nn, diff, absdiff, delayed_add=True)
             if relumodel is not None:
                 nn2gurobi.actdict['relu'] = relumodel
 
@@ -82,7 +82,7 @@ class TestNNFormulation(unittest.TestCase):
     def dothetest(self, b, r):
         val1 = model(self.X, self.y, False, b, None)
         val2 = model(self.X, self.y, self.nn, b, r)
-        self.assertAlmostEqual(val1, val2, places=5)
+        self.assertAlmostEqual(val1, val2, places=4)
 
     def test_nobounds(self):
         self.dothetest(gp.GRB.INFINITY, None)

@@ -8,15 +8,15 @@ import gurobipy as gp
 import numpy as np
 
 from .activations import Identity, LogitPWL, ReLUGC
-from .utils import MLSubModel, addtosubmodel
+from .utils import AbstractPredictor, addtosubmodel
 
 
-class NNLayer(MLSubModel):
+class NNLayer(AbstractPredictor):
     '''Class to build one layer of a neural network'''
 
     def __init__(self, model, output_vars, input_vars, layer_coefs,
-                 layer_intercept, activation_function, name):
-        super().__init__(model, input_vars, output_vars, name)
+                 layer_intercept, activation_function, name,**kwargs):
+        super().__init__(model, input_vars, output_vars, name, kwargs)
         self.coefs = layer_coefs
         self.intercept = layer_intercept
         self.activation = activation_function
@@ -92,7 +92,7 @@ class NNLayer(MLSubModel):
         self.add(activation)
 
 
-class BaseNNRegression2Gurobi(MLSubModel):
+class BaseNNPredictor(AbstractPredictor):
     ''' Base class for inserting a regressor based on neural-network/tensor into Gurobi'''
 
     def __init__(self, model, regressor, input_vars, output_vars, name='', clean_regressor=False, **kwargs):
@@ -115,7 +115,7 @@ class BaseNNRegression2Gurobi(MLSubModel):
             name = f'{self.name}[{name}]'
 
         layer = NNLayer(self.model, activation_vars, input_vars, layer_coefs,
-                        layer_intercept, activation, name)
+                        layer_intercept, activation, name, delayed_add=True)
         if self.clean:
             mask = np.abs(layer.coefs) < 1e-8
             layer.coefs[mask] = 0.0
