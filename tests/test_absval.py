@@ -52,12 +52,8 @@ def model(X, y, nn, infbound, relumodel=None):
 
         if nn:
             # create transforms to turn scikit-learn pipeline into Gurobi constraints
-            nn2gurobi = MLPRegressorPredictor(model, nn, diff, absdiff, delayed_add=True)
-            if relumodel is not None:
-                nn2gurobi.actdict['relu'] = relumodel
-
-            # Add constraint to predict value of y using kwnown and to compute features
-            nn2gurobi._add()
+            nn2gurobi = MLPRegressorPredictor(model, nn, diff, absdiff,
+                                             activations_models={'relu':relumodel})
         else:
             for i in range(samples):
                 model.addConstr(absdiff[i, 0] == gp.abs_(diff[i, 0]))

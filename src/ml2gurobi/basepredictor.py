@@ -48,14 +48,14 @@ class AbstractPredictor(SubModel):
     """Class to define a submodel"""
 
     @addtomodel
-    def __init__(self, model, input_vars, *args, output_vars=None, **kwargs):
+    def __init__(self, model, input_vars, output_vars=None, *args, **kwargs):
         assert model == self._model
         self._input = validate_gpvars(input_vars)
         if output_vars is not None:
             self._output = validate_gpvars(output_vars)
         else:
             self._output = None
-        self._add(*args, **kwargs)
+        self._add()
 
     def _set_output(self, output_vars):
         self._output = validate_gpvars(output_vars)
@@ -85,25 +85,13 @@ class AbstractPredictor(SubModel):
 
         return (input_vars, output_vars)
 
-    def _add(self, *args, **kwargs):
+    def _add(self):
         """Predict output from input using regression/classifier"""
         if self._output is None:
-            self._create_output_vars(self._input, *args, **kwargs)
+            self._create_output_vars(self._input)
         self._input, self._output = self.validate(self._input, self._output)
-        self.mip_model(*args, **kwargs)
+        self.mip_model()
         return self
-
-    def _create_output_vars(self, input_vars):
-        """Impemented in child classes. Does nothing in the abstract class."""
-        assert input_vars is not None
-        assert self._model is not None
-        assert False
-
-    def mip_model(self, activation=None):
-        """Impemented in child classes. Does nothing in the abstract class."""
-        assert self._model is not None
-        assert activation is None or activation is not None
-        assert False
 
 
 class NNLayer(AbstractPredictor):
@@ -153,7 +141,7 @@ class NNLayer(AbstractPredictor):
             (input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act"
         )
         self._model.update()
-        return rval
+        self._output = rval
 
     def mip_model(self, activation=None):
         """Add the layer to model"""
@@ -214,7 +202,7 @@ class NNLayer(AbstractPredictor):
         self._model.remove(self.getGenConstrs())
         self._model.update()
         before = SubModel._modelstats(self._model)
-        self._add(activation)
+        self.mip_model(activation)
         self._update(self._model, before)
 
 
@@ -227,6 +215,12 @@ class BaseNNPredictor(AbstractPredictor):
         self.regressor = regressor
         self.clean = clean_regressor
         self.actdict = {"relu": ReLUGC(), "identity": Identity(), "logit": LogitPWL()}
+        try:
+            for activation, activation_model in kwargs['activation_models']:
+                print(f"Setting {activation} to {activation_model}")
+                self.actdict[activation] = activation_model
+        except KeyError:
+            pass
         self._layers = []
         super().__init__(model, input_vars, output_vars, **kwargs)
 

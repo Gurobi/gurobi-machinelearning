@@ -41,7 +41,7 @@ class StandardScalerPredictor(AbstractPredictor):
     def _create_output_vars(self, input_vars, *args, **kwargs):
         rval = self._model.addMVar(input_vars.shape, name="scaledx")
         self._model.update()
-        return rval
+        self._output = rval
 
     def mip_model(self):
         """Do the transormation on x"""

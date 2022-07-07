@@ -81,10 +81,12 @@ class TestReLU(unittest.TestCase):
 
         self.assertEqual(pipe.steps[-1][1].out_activation_, 'identity')
         # Code to add the neural network to the constraints
-        pipe2gurobi = PipelinePredictor(m, pipe, x, output, delayed_add=True)
-        # For this example we should model softmax in the last layer using identity
         if activation is not None:
-            pipe2gurobi.steps[-1].actdict['relu'] = activation
+            activation_models = {'relu':activation}
+        else:
+            activation_models = {}
+
+        pipe2gurobi = PipelinePredictor(m, pipe, x, output, activation_models=activation_models)
         # pipe2gurobi.steps[-1].actdict['softmax'] = Identity()
         pipe2gurobi._add()
         return pipe2gurobi
@@ -115,7 +117,7 @@ class TestReLU(unittest.TestCase):
                     else:
                         self.assertAlmostEqual(value, m.ObjVal, places=5)
 
-    @unittest.skip('Not working now and very long')
+    @unittest.skip('Not working currently')
     def test_adversarial_activations_obbt(self):
         # Load the trained network and the examples
         dirname = os.path.dirname(__file__)
@@ -136,12 +138,9 @@ class TestReLU(unittest.TestCase):
                 m.Params.OutputFlag = 0
                 with self.subTest(example=exampleno, epsilon=epsilon, activation=activation, obbt=True):
                     pipe2gurobi = self.adversarial_model(m, pipe, example, epsilon, activation=activation)
-                    print(m.NumVars, m.NumConstrs, m.NumGenConstrs)
                     if activation is None:
                         activation = morerelu.reluOBBT('both')
-                    print(m.NumVars, m.NumConstrs, m.NumGenConstrs)
                     obbt(pipe2gurobi.steps[-1], activation=activation)
-                    print(m.NumVars, m.NumConstrs, m.NumGenConstrs)
                     m.optimize()
                     if value is None:
                         value = m.ObjVal
