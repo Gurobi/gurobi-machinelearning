@@ -21,10 +21,7 @@ def get_mixing(layer, index):
     k, j = index
     _input = layer._input  # pylint: disable=W0212
     input_size = _input.shape[1]
-    return (
-        sum(_input[k, i] * layer.coefs[i, j] for i in range(input_size))
-        + layer.intercept[j]
-    )
+    return sum(_input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
 
 
 class Identity:
@@ -41,9 +38,7 @@ class Identity:
             output.UB = np.minimum(output.UB, layer.wmax)
 
         for index in np.ndindex(output.shape):
-            layer.getModel().addConstr(
-                output[index] == get_mixing(layer, index), name=_name(index, "mix")
-            )
+            layer.getModel().addConstr(output[index] == get_mixing(layer, index), name=_name(index, "mix"))
 
     @staticmethod
     def forward(input_values):
@@ -72,9 +67,7 @@ class ReLUGC:
         """Add MIP formulation for ReLU for neuron in layer"""
         output = layer._output  # pylint: disable=W0212
         if not hasattr(layer, "mixing"):
-            mixing = layer.getModel().addMVar(
-                output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix"
-            )
+            mixing = layer.getModel().addMVar(output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix")
             layer.mixing = mixing
         layer.getModel().update()
         if self.bigm is not None:
@@ -88,9 +81,7 @@ class ReLUGC:
 
         for index in np.ndindex(output.shape):
             mixing = get_mixing(layer, index)
-            layer.getModel().addConstr(
-                layer.mixing[index] == mixing, name=_name(index, "mix")
-            )
+            layer.getModel().addConstr(layer.mixing[index] == mixing, name=_name(index, "mix"))
             layer.getModel().addGenConstrMax(
                 output[index],
                 [
@@ -205,7 +196,6 @@ class LogitPWL:
         """Add formulation for logit for neuron of layer"""
         model = layer.getModel()
         output = layer._output  # pylint: disable=W0212
-        _input = layer._input  # pylint: disable=W0212
 
         if not layer.zvar:
             z = layer.getModel().addMVar(output.shape, lb=-GRB.INFINITY, name="z")
@@ -226,6 +216,4 @@ class LogitPWL:
             else:
                 xval, yval = self._logit_pwl_3pieces(vx, vact)
             if len(xval) > 0:
-                layer.getModel().addGenConstrPWL(
-                    vx, vact, xval, yval, name=f"pwl[{index}]"
-                )
+                layer.getModel().addGenConstrPWL(vx, vact, xval, yval, name=f"pwl[{index}]")

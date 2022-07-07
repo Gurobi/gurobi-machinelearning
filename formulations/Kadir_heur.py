@@ -78,9 +78,7 @@ def heuristic(modelname, seed):
 
 if __name__ == "__main__":
     results = dict()
-    files = [
-        "Networks_pytorch/" + f for f in os.listdir("Networks_pytorch") if f.startswith("Kadir") and f.endswith(".pkl")
-    ]
+    files = ["Networks_pytorch/" + f for f in os.listdir("Networks_pytorch") if f.startswith("Kadir") and f.endswith(".pkl")]
     for f in files:
         for i in range(1, 11):
             try:

@@ -42,10 +42,8 @@ def prop_activities(layer, input, numfix=20):
 
     # Compute activation
     if activation_function:
-        keep_list = activation_function.forward_fixing(layer, mixing, -numfix)
+        activation_function.forward_fixing(layer, mixing, -numfix)
         mixing = activation_function.forward(mixing)
-    else:
-        keep_list = []
     return mixing
 
 

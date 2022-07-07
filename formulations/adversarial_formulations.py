@@ -2,7 +2,6 @@ import gurobipy as gp
 import numpy as np
 from joblib import Parallel, delayed, load
 
-from ml2gurobi.activations import Identity
 from ml2gurobi.extra.morerelu import ReLUM, reluOBBT
 from ml2gurobi.extra.obbt import obbt
 from ml2gurobi.sklearn import Pipe2Gurobi

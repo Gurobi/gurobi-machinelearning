@@ -35,7 +35,7 @@ class SubModel:
             self.numGenConstrs = model.numGenConstrs
             try:
                 self.numCallbacks = model.numCallbacks()
-            except:  # pylint: disable=bare-except
+            except AttributeError:  # pylint: disable=bare-except
                 self.numCallbacks = 0
 
     def __init__(self):
@@ -75,9 +75,7 @@ class SubModel:
             self._QConstrs = []
         # range of GenConstrs
         if model.numGenConstrs > before.numGenConstrs:
-            self._GenConstrs = model.getGenConstrs()[
-                before.numGenConstrs : model.numGenConstrs
-            ]
+            self._GenConstrs = model.getGenConstrs()[before.numGenConstrs : model.numGenConstrs]
         else:
             self._GenConstrs = []
         # range of SOS
@@ -90,12 +88,8 @@ class SubModel:
         self._lastCallback = None
         try:
             if model.numCallbacks() > before.numCallbacks:
-                self._firstCallback = self._model.getCallback(
-                    before.numCallbacks, before.numCallbacks
-                )[0]
-                self._lastCallback = self._model.getCallback(
-                    model.numCallbacks() - 1, model.numCallbacks() - 1
-                )[0]
+                self._firstCallback = self._model.getCallback(before.numCallbacks, before.numCallbacks)[0]
+                self._lastCallback = self._model.getCallback(model.numCallbacks() - 1, model.numCallbacks() - 1)[0]
         except AttributeError:
             pass
 
@@ -108,9 +102,7 @@ class SubModel:
     def getConstrs(self):
         """Return the list of linear constraints in the submodel."""
         if self._firstConstr:
-            return self._model.getConstrs()[
-                self._firstConstr.index : self._lastConstr.index + 1
-            ]
+            return self._model.getConstrs()[self._firstConstr.index : self._lastConstr.index + 1]
         return []
 
     def getQConstrs(self):

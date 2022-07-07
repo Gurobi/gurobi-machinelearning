@@ -111,9 +111,7 @@ def simplecutloop(nn2gurobi, addAsCuts=False):
         if model.Status != GRB.OPTIMAL:
             break
         if output:
-            print(
-                f"Round {round}: objective value {model.ObjVal} cuts {len(nn2gurobi._cuts)} new {len(cuts)}"
-            )
+            print(f"Round {round}: objective value {model.ObjVal} cuts {len(nn2gurobi._cuts)} new {len(cuts)}")
         cuts = cut_round(nn2gurobi)
         if cuts:
             model.addConstrs(c for c in cuts)

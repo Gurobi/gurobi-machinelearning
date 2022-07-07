@@ -184,9 +184,7 @@ class PipelinePredictor(AbstractPredictor):
             elif name == "decisiontreeregressor":
                 self.steps.append(DecisionTreeRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
             elif name == "gradientboostingregressor":
-                self.steps.append(
-                    GradientBoostingRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs)
-                )
+                self.steps.append(GradientBoostingRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
             elif name == "randomforestregressor":
                 self.steps.append(RandomForestRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
             else:
