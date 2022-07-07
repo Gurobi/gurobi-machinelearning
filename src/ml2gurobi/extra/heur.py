@@ -7,14 +7,14 @@ def prop_layer(layer, input):
     layer_coefs = layer.coefs
     layer_intercept = layer.intercept
     activation_function = layer.activation
-    assert activation_function in ('relu', 'identity', 'softmax')
+    assert activation_function in ("relu", "identity", "softmax")
     (input_size, _) = layer_coefs.shape
     assert input_size == input.shape[1]
 
-    if activation_function == 'relu':
+    if activation_function == "relu":
         z = layer.zvar
         assert z is not None
-    elif activation_function == 'logit':
+    elif activation_function == "logit":
         z = layer.zvar
         assert z is not None
     else:
@@ -36,7 +36,7 @@ def prop_activities(layer, input, numfix=20):
     layer_intercept = layer.intercept
     activation_function = layer.activation
     input_size = layer_coefs.shape[0]
-    assert input_size == input.shape[1], f'{input_size} != {input.shape}'
+    assert input_size == input.shape[1], f"{input_size} != {input.shape}"
 
     mixing = input @ layer_coefs + layer_intercept
 
@@ -55,7 +55,7 @@ def most_violated(layer):
     layer_coefs = layer.coefs
     input = layer.invar.X
     activations = layer.actvar.X
-    if activation_function != 'relu':
+    if activation_function != "relu":
         return None
     input_size = layer_coefs.shape[0]
     assert input_size == input.shape[1]
@@ -67,8 +67,7 @@ def most_violated(layer):
     relu = np.maximum(mixing, 0.0)
     error = activations - relu
     rval = error.argmax()
-    print(
-        f'variable {rval} activation {activations[0, rval]} relu {relu[0,rval]}')
+    print(f"variable {rval} activation {activations[0, rval]} relu {relu[0,rval]}")
     return (rval, error[0, rval], relu[0, rval])
 
 
@@ -80,7 +79,7 @@ def relax_act(nn2gurobi):
 
 
 def prop(nn2gurobi, X, reset=True):
-    '''Propagate fixings into the network'''
+    """Propagate fixings into the network"""
     # Iterate over the layers
     activation = X
     for layer in nn2gurobi:

@@ -1,8 +1,8 @@
 # Copyright © 2022 Gurobi Optimization, LLC
 # pylint: disable=C0103
 
-''' To transform a sequential neural network of PyTorch
-in a Gurobi model '''
+""" To transform a sequential neural network of PyTorch
+in a Gurobi model """
 
 from torch import nn
 
@@ -10,10 +10,12 @@ from .basepredictor import BaseNNPredictor
 
 
 class SequentialPredictor(BaseNNPredictor):
-    '''Transform a pytorch Sequential Neural Network to Gurboi constraint with
-       input and output as matrices of variables.'''
+    """Transform a pytorch Sequential Neural Network to Gurboi constraint with
+    input and output as matrices of variables."""
 
-    def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False):
+    def __init__(
+        self, model, regressor, input_vars, output_vars, clean_regressor=False
+    ):
         linear = None
         for step in regressor:
             if isinstance(step, nn.ReLU):
@@ -25,8 +27,9 @@ class SequentialPredictor(BaseNNPredictor):
             else:
                 print(step)
                 raise BaseException("Unsupported network structure")
-        BaseNNPredictor.__init__(self, model, regressor, input_vars, output_vars,
-                                 clean_regressor)
+        BaseNNPredictor.__init__(
+            self, model, regressor, input_vars, output_vars, clean_regressor
+        )
 
     def mip_model(self, *args, **kwargs):
         network = self.regressor
@@ -37,12 +40,18 @@ class SequentialPredictor(BaseNNPredictor):
         for i, step in enumerate(network):
             if isinstance(step, nn.ReLU):
                 for name, param in linear.named_parameters():
-                    if name == 'weight':
+                    if name == "weight":
                         layer_weight = param.detach().numpy().T
-                    elif name == 'bias':
+                    elif name == "bias":
                         layer_bias = param.detach().numpy()
-                layer = self.addlayer(_input, layer_weight,
-                                      layer_bias, self.actdict['relu'], None, name=f'{i}')
+                layer = self.addlayer(
+                    _input,
+                    layer_weight,
+                    layer_bias,
+                    self.actdict["relu"],
+                    None,
+                    name=f"{i}",
+                )
                 linear = None
                 _input = layer._output  # pylint: disable=W0212
             elif isinstance(step, nn.Linear):
@@ -52,9 +61,10 @@ class SequentialPredictor(BaseNNPredictor):
                 raise BaseException("Unsupported network structure")
         if linear is not None:
             for name, param in linear.named_parameters():
-                if name == 'weight':
+                if name == "weight":
                     layer_weight = param.detach().numpy().T
-                elif name == 'bias':
+                elif name == "bias":
                     layer_bias = param.detach().numpy()
-            self.addlayer(_input, layer_weight, layer_bias,
-                          self.actdict['identity'], output)
+            self.addlayer(
+                _input, layer_weight, layer_bias, self.actdict["identity"], output
+            )

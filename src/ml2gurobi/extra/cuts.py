@@ -41,15 +41,21 @@ def layer_cuts(layer, model=None):
             negw = w < 0.0
             Lstar[negw] = UB[k, :][negw]
             Ustar[negw] = LB[k, :][negw]
-            Istar = w*X[k, :] < w*(Lstar + zX*(Ustar - Lstar))
+            Istar = w * X[k, :] < w * (Lstar + zX * (Ustar - Lstar))
 
-            viol = (outX -
-                    (zX*(w0 + w[~Istar]@Ustar[~Istar] + w[Istar]@Lstar[Istar]) +
-                     w[Istar]@X[k, Istar] - w[Istar]@Lstar[Istar]))
+            viol = outX - (
+                zX * (w0 + w[~Istar] @ Ustar[~Istar] + w[Istar] @ Lstar[Istar])
+                + w[Istar] @ X[k, Istar]
+                - w[Istar] @ Lstar[Istar]
+            )
 
             if viol > 1e-5:
-                cuts.append(out <= z*(w0 + w[~Istar]@Ustar[~Istar] + w[Istar]@Lstar[Istar]) +
-                            gp.LinExpr(w[Istar], input_vars[k, Istar].tolist()) - w[Istar] @ Lstar[Istar])
+                cuts.append(
+                    out
+                    <= z * (w0 + w[~Istar] @ Ustar[~Istar] + w[Istar] @ Lstar[Istar])
+                    + gp.LinExpr(w[Istar], input_vars[k, Istar].tolist())
+                    - w[Istar] @ Lstar[Istar]
+                )
     return cuts
 
 
@@ -65,8 +71,8 @@ def cut_round(nn2gurobi, model=None):
 
 
 def ReLUcb(model, where):
-    '''Generate cuts for the ReLU activation in the network
-    Also try to compute a feasible solution by forward propagation'''
+    """Generate cuts for the ReLU activation in the network
+    Also try to compute a feasible solution by forward propagation"""
     if where != GRB.Callback.MIPNODE:
         return
     if model.cbGet(GRB.Callback.MIPNODE_STATUS) != GRB.OPTIMAL:
@@ -95,23 +101,24 @@ def simplecutloop(nn2gurobi, addAsCuts=False):
     model.Params.OutputFlag = 0
     Vars = model.getVars()
     VTypes = model.getAttr(GRB.Attr.VType, Vars)
-    model.setAttr(GRB.Attr.VType, Vars, [GRB.CONTINUOUS]*len(Vars))
+    model.setAttr(GRB.Attr.VType, Vars, [GRB.CONTINUOUS] * len(Vars))
 
     rowsbefore = model.NumConstrs
     round = 0
     cuts = list()
-    while (1):
+    while 1:
         model.optimize()
         if model.Status != GRB.OPTIMAL:
             break
         if output:
             print(
-                f'Round {round}: objective value {model.ObjVal} cuts {len(nn2gurobi._cuts)} new {len(cuts)}')
+                f"Round {round}: objective value {model.ObjVal} cuts {len(nn2gurobi._cuts)} new {len(cuts)}"
+            )
         cuts = cut_round(nn2gurobi)
         if cuts:
             model.addConstrs(c for c in cuts)
             model.update()
-            nn2gurobi._cuts += model.getConstrs()[-len(cuts):]
+            nn2gurobi._cuts += model.getConstrs()[-len(cuts) :]
         else:
             break
         round += 1

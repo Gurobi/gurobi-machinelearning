@@ -3,7 +3,7 @@ from gurobipy import GRB
 
 
 def obbt_layer(layer, round_num, stats=None, verbose=True):
-    ''' Perform OBBT on layer '''
+    """Perform OBBT on layer"""
     model = layer.getModel()
     obj = model.getObjective()
     objsense = model.ModelSense
@@ -19,7 +19,7 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
     assert model.Status == GRB.OPTIMAL
     print(model.NumVars, model.NumConstrs, model.NumGenConstrs)
     if verbose:
-        print(f'Round {round_num} objval {model.ObjVal}')
+        print(f"Round {round_num} objval {model.ObjVal}")
     model.Params.Method = 0
 
     n = input_vars.shape[0]
@@ -36,23 +36,25 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
         for k in range(n):
             if alreadfixed[k, j]:
                 continue
-            if layer.zvar is not None and (layer.zvar[k, j].LB > 0.5 or layer.zvar[k, j].UB < 0.5):
+            if layer.zvar is not None and (
+                layer.zvar[k, j].LB > 0.5 or layer.zvar[k, j].UB < 0.5
+            ):
                 continue
             done += 1
-            model.setObjective(w0 + sum(input_vars[k, p] * w[p]
-                                        for p in range(input_vars.shape[1])),
-                               GRB.MAXIMIZE)
+            model.setObjective(
+                w0 + sum(input_vars[k, p] * w[p] for p in range(input_vars.shape[1])),
+                GRB.MAXIMIZE,
+            )
             model.optimize()
             newbound = model.Objval
             if newbound < wmax[k, j] - 2 * eps:
                 n_strengthened += 1
                 wmax[k, j] = newbound
             if stats is not None:
-                stats['done'] += 1
-                stats['iters'] += model.IterCount
+                stats["done"] += 1
+                stats["iters"] += model.IterCount
     if verbose:
-        print(
-            f'OBBT strengthened {n_strengthened} upper bounds on layer (did {done})')
+        print(f"OBBT strengthened {n_strengthened} upper bounds on layer (did {done})")
 
     total_strengthened = n_strengthened
     n_strengthened = 0
@@ -64,25 +66,27 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
         for k in range(n):
             if alreadfixed[k, j]:
                 continue
-            if layer.zvar is not None and (layer.zvar[k, j].LB > 0.5 or layer.zvar[k, j].UB < 0.5):
+            if layer.zvar is not None and (
+                layer.zvar[k, j].LB > 0.5 or layer.zvar[k, j].UB < 0.5
+            ):
                 continue
             done += 1
-            model.setObjective(w0 + sum(input_vars[k, p] * w[p]
-                                        for p in range(input_vars.shape[1])),
-                               GRB.MINIMIZE)
+            model.setObjective(
+                w0 + sum(input_vars[k, p] * w[p] for p in range(input_vars.shape[1])),
+                GRB.MINIMIZE,
+            )
             model.optimize()
             newbound = model.ObjVal
-            if newbound > wmin[k, j] + 2*eps:
+            if newbound > wmin[k, j] + 2 * eps:
                 n_strengthened += 1
                 wmin[k, j] = newbound
             if stats is not None:
-                stats['done'] += 1
-                stats['iters'] += model.IterCount
+                stats["done"] += 1
+                stats["iters"] += model.IterCount
             model.update()
 
     if verbose:
-        print(
-            f'OBBT strengthened {n_strengthened} lower bounds on layer (did {done})')
+        print(f"OBBT strengthened {n_strengthened} lower bounds on layer (did {done})")
 
     # Restore model
     model.Params.Method = savemethod
@@ -95,8 +99,8 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
 
 
 def obbt(nn2gurobi, n_rounds=1, activation=None):
-    '''Perform OBBT on model'''
-    stats = {'done': 0, 'iters': 0}
+    """Perform OBBT on model"""
+    stats = {"done": 0, "iters": 0}
     model = nn2gurobi.getModel()
     outputflag = model.Params.OutputFlag
     model.Params.OutputFlag = 0
@@ -104,10 +108,11 @@ def obbt(nn2gurobi, n_rounds=1, activation=None):
     for roundnum in range(n_rounds):
         n_strengthened = 0
         for layer in nn2gurobi:
-            if layer.activation in (None, 'identity'):
+            if layer.activation in (None, "identity"):
                 continue
-            n_strengthened += obbt_layer(layer, roundnum,
-                                         stats=stats, verbose=outputflag)
+            n_strengthened += obbt_layer(
+                layer, roundnum, stats=stats, verbose=outputflag
+            )
             nn2gurobi.rebuild_formulation(activation)
         if n_strengthened == 0:
             break

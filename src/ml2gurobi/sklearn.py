@@ -1,5 +1,5 @@
 # Copyright © 2022 Gurobi Optimization, LLC
-''' A set of classes for transforming Scikit-Learn objects
+""" A set of classes for transforming Scikit-Learn objects
 to constraints in Gurobi
 
 This tries to be very simple. Each object is constructed by passing
@@ -16,7 +16,7 @@ What we have so far:
   - MLSRegressionConstr: a neural network.
   - PipeConstr: convert a scikit-learn pipeline.
 
-'''
+"""
 
 # pylint: disable=C0103
 
@@ -31,20 +31,20 @@ from .decisiontrees import (
 
 
 class StandardScalerPredictor(AbstractPredictor):
-    ''' Class to use a StandardScale to create scaled version of
-        some Gurobi variables. '''
+    """Class to use a StandardScale to create scaled version of
+    some Gurobi variables."""
 
     def __init__(self, model, scaler, input_vars, *args, **kwargs):
         self.scaler = scaler
         super().__init__(model, input_vars, *args, **kwargs)
 
     def _create_output_vars(self, input_vars, *args, **kwargs):
-        rval = self._model.addMVar(input_vars.shape, name='scaledx')
+        rval = self._model.addMVar(input_vars.shape, name="scaledx")
         self._model.update()
         return rval
 
     def mip_model(self):
-        '''Do the transormation on x'''
+        """Do the transormation on x"""
         _input = self._input
         output = self._output
 
@@ -52,64 +52,83 @@ class StandardScalerPredictor(AbstractPredictor):
         scale = self.scaler.scale_
         mean = self.scaler.mean_
 
-        output.LB = (_input.LB - mean)/scale
-        output.UB = (_input.UB - mean)/scale
-        self._model.addConstrs((_input[:, i] - output[:, i] * scale[i] == mean[i]
-                               for i in range(nfeat)), name='s')
+        output.LB = (_input.LB - mean) / scale
+        output.UB = (_input.UB - mean) / scale
+        self._model.addConstrs(
+            (_input[:, i] - output[:, i] * scale[i] == mean[i] for i in range(nfeat)),
+            name="s",
+        )
         return self
 
     def output(self):
-        '''Return the scaled variable features'''
+        """Return the scaled variable features"""
         return self._output
 
 
 class LinearRegressionPredictor(BaseNNPredictor):
-    ''' Predict a Gurobi variable using a Linear Regression that
-        takes another Gurobi matrix variable as input.
-        '''
+    """Predict a Gurobi variable using a Linear Regression that
+    takes another Gurobi matrix variable as input.
+    """
 
     def __init__(self, model, regressor, input_vars, output_vars, **kwargs):
         super().__init__(model, regressor, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
-        '''Add the prediction constraints to Gurobi'''
-        self.addlayer(self._input, self.regressor.coef_.T.reshape(-1, 1),
-                      np.array(self.regressor.intercept_).reshape((-1,)),
-                      self.actdict['identity'], self._output)
+        """Add the prediction constraints to Gurobi"""
+        self.addlayer(
+            self._input,
+            self.regressor.coef_.T.reshape(-1, 1),
+            np.array(self.regressor.intercept_).reshape((-1,)),
+            self.actdict["identity"],
+            self._output,
+        )
 
 
 class LogisticRegressionPredictor(BaseNNPredictor):
-    ''' Predict a Gurobi variable using a Logistic Regression that
-        takes another Gurobi matrix variable as input.
-        '''
+    """Predict a Gurobi variable using a Logistic Regression that
+    takes another Gurobi matrix variable as input.
+    """
 
     def __init__(self, model, regressor, input_vars, output_vars, **kwargs):
         super().__init__(model, regressor, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
-        '''Add the prediction constraints to Gurobi'''
-        self.addlayer(self._input, self.regressor.coef_.T,
-                      self.regressor.intercept_, self.actdict['logit'],
-                      self._output)
+        """Add the prediction constraints to Gurobi"""
+        self.addlayer(
+            self._input,
+            self.regressor.coef_.T,
+            self.regressor.intercept_,
+            self.actdict["logit"],
+            self._output,
+        )
 
 
 class MLPRegressorPredictor(BaseNNPredictor):
-    ''' Predict a Gurobi matrix variable using a neural network that
-        takes another Gurobi matrix variable as input.
-        '''
+    """Predict a Gurobi matrix variable using a neural network that
+    takes another Gurobi matrix variable as input.
+    """
 
-    def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
-        super().__init__(model, regressor, input_vars, output_vars,
-                         clean_regressor=clean_regressor, **kwargs)
-        assert regressor.out_activation_ in ('identity', 'relu', 'softmax')
+    def __init__(
+        self, model, regressor, input_vars, output_vars, clean_regressor=False, **kwargs
+    ):
+        super().__init__(
+            model,
+            regressor,
+            input_vars,
+            output_vars,
+            clean_regressor=clean_regressor,
+            **kwargs,
+        )
+        assert regressor.out_activation_ in ("identity", "relu", "softmax")
 
     def mip_model(self):
-        '''Add the prediction constraints to Gurobi'''
+        """Add the prediction constraints to Gurobi"""
         neuralnet = self.regressor
         if neuralnet.activation not in self.actdict:
             print(self.actdict)
             raise BaseException(
-                f'No implementation for activation function {neuralnet.activation}')
+                f"No implementation for activation function {neuralnet.activation}"
+            )
         activation = self.actdict[neuralnet.activation]
 
         input_vars = self._input
@@ -124,15 +143,20 @@ class MLPRegressorPredictor(BaseNNPredictor):
                 activation = self.actdict[neuralnet.out_activation_]
                 output = self._output
 
-            layer = self.addlayer(input_vars, layer_coefs,
-                                  layer_intercept, activation, output,
-                                  name=f'layer{i}')
+            layer = self.addlayer(
+                input_vars,
+                layer_coefs,
+                layer_intercept,
+                activation,
+                output,
+                name=f"layer{i}",
+            )
             input_vars = layer._output  # pylint: disable=W0212
             self._model.update()
 
 
 class PipelinePredictor(AbstractPredictor):
-    '''Use a scikit-learn pipeline to build constraints in Gurobi model.'''
+    """Use a scikit-learn pipeline to build constraints in Gurobi model."""
 
     def __init__(self, model, pipeline, input_vars, output_vars, **kwargs):
         self.steps = []
@@ -145,36 +169,46 @@ class PipelinePredictor(AbstractPredictor):
         input_vars = self._input
         output_vars = self._output
         for name, obj in pipeline.steps[:-1]:
-            if name == 'standardscaler':
-                self.steps.append(
-                    StandardScalerPredictor(model, obj, input_vars))
+            if name == "standardscaler":
+                self.steps.append(StandardScalerPredictor(model, obj, input_vars))
             else:
                 raise BaseException(
-                    f"I don't know how to deal with that object: {name}")
+                    f"I don't know how to deal with that object: {name}"
+                )
             input_vars = self.steps[-1].output()
         else:
             name, obj = pipeline.steps[-1]
-            if name == 'linearregression':
-                self.steps.append(LinearRegressionPredictor(
-                    model, obj, input_vars, output_vars))
-            elif name == 'logisticregression':
-                self.steps.append(LogisticRegressionPredictor(
-                    model, obj, input_vars, output_vars))
-            elif name == 'mlpregressor':
-                self.steps.append(MLPRegressorPredictor(
-                    model, obj, input_vars, output_vars))
-            elif name == 'mlpclassifier':
-                self.steps.append(MLPRegressorPredictor(
-                    model, obj, input_vars, output_vars))
-            elif name == 'decisiontreeregressor':
-                self.steps.append(DecisionTreeRegressorPredictor(
-                    model, obj, input_vars, output_vars))
-            elif name == 'gradientboostingregressor':
-                self.steps.append(GradientBoostingRegressorPredictor(
-                    model, obj, input_vars, output_vars))
-            elif name == 'randomforestregressor':
-                self.steps.append(RandomForestRegressorPredictor(
-                    model, obj, input_vars, output_vars))
+            if name == "linearregression":
+                self.steps.append(
+                    LinearRegressionPredictor(model, obj, input_vars, output_vars)
+                )
+            elif name == "logisticregression":
+                self.steps.append(
+                    LogisticRegressionPredictor(model, obj, input_vars, output_vars)
+                )
+            elif name == "mlpregressor":
+                self.steps.append(
+                    MLPRegressorPredictor(model, obj, input_vars, output_vars)
+                )
+            elif name == "mlpclassifier":
+                self.steps.append(
+                    MLPRegressorPredictor(model, obj, input_vars, output_vars)
+                )
+            elif name == "decisiontreeregressor":
+                self.steps.append(
+                    DecisionTreeRegressorPredictor(model, obj, input_vars, output_vars)
+                )
+            elif name == "gradientboostingregressor":
+                self.steps.append(
+                    GradientBoostingRegressorPredictor(
+                        model, obj, input_vars, output_vars
+                    )
+                )
+            elif name == "randomforestregressor":
+                self.steps.append(
+                    RandomForestRegressorPredictor(model, obj, input_vars, output_vars)
+                )
             else:
                 raise BaseException(
-                    f"I don't know how to deal with that object: {name}")
+                    f"I don't know how to deal with that object: {name}"
+                )
