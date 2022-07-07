@@ -9,17 +9,12 @@ from ml2gurobi.sklearn import PipelinePredictor
 class TestFormulations(unittest.TestCase):
 
     def check_counts(self, m, reg2gurobi, numVars):
-        self.assertEqual(m.NumVars, numVars + reg2gurobi.get_num('Vars'))
-        self.assertEqual(m.NumSOS, reg2gurobi.get_num('SOS'))
-        self.assertEqual(m.NumConstrs, reg2gurobi.get_num('Constrs'))
-        self.assertEqual(m.NumQConstrs, reg2gurobi.get_num('QConstrs'))
-        self.assertEqual(m.NumGenConstrs, reg2gurobi.get_num('GenConstrs'))
+        self.assertEqual(m.NumVars, numVars + len(reg2gurobi.getVars()))
+        self.assertEqual(m.NumSOS, len(reg2gurobi.getSOSs()))
+        self.assertEqual(m.NumConstrs, len(reg2gurobi.getConstrs()))
+        self.assertEqual(m.NumQConstrs, len(reg2gurobi.getQConstrs()))
+        self.assertEqual(m.NumGenConstrs, len(reg2gurobi.getGenConstrs()))
 
-        self.assertEqual(reg2gurobi.get_num('Vars'), len(reg2gurobi.get_list('Vars')))
-        self.assertEqual(reg2gurobi.get_num('SOS'), len(reg2gurobi.get_list('SOS')))
-        self.assertEqual(reg2gurobi.get_num('Constrs'), len(reg2gurobi.get_list('Constrs')))
-        self.assertEqual(reg2gurobi.get_num('QConstrs'), len(reg2gurobi.get_list('QConstrs')))
-        self.assertEqual(reg2gurobi.get_num('GenConstrs'), len(reg2gurobi.get_list('GenConstrs')))
 
     def add_remove(self, predictor, translator, input_shape, output_shape):
         with gp.Model() as m:
@@ -33,13 +28,13 @@ class TestFormulations(unittest.TestCase):
 
             self.check_counts(m, pred2grb, numVars)
 
-            assert pred2grb.get_num('Vars') == len(pred2grb.get_list('Vars'))
-
             pred2grb.remove()
+            m.update()
             self.check_counts(m, pred2grb, numVars)
             assert m.NumConstrs == 0
             assert m.NumGenConstrs == 0
             assert m.NumQConstrs == 0
+            assert m.NumVars == numVars
 
     def test_add_remove(self):
         cases = DiabetesCases()
