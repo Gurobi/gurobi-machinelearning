@@ -67,7 +67,8 @@ def most_violated(layer):
     relu = np.maximum(mixing, 0.0)
     error = activations - relu
     rval = error.argmax()
-    print(f'variable {rval} activation {activations[0, rval]} relu {relu[0,rval]}')
+    print(
+        f'variable {rval} activation {activations[0, rval]} relu {relu[0,rval]}')
     return (rval, error[0, rval], relu[0, rval])
 
 

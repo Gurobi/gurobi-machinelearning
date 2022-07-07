@@ -1,5 +1,6 @@
 """Building Sub-models with gurobipy"""
 
+
 def addtomodel(function):
     """Decorator function for SobModels"""
 
@@ -67,19 +68,20 @@ class SubModel:
             self._lastConstr = None
         # range of Q constraints
         if model.numQConstrs > before.numQConstrs:
-            self._QConstrs = model.getQConstrs()[before.numQConstrs : model.numQConstrs]
+            self._QConstrs = model.getQConstrs(
+            )[before.numQConstrs: model.numQConstrs]
         else:
             self._QConstrs = []
         # range of GenConstrs
         if model.numGenConstrs > before.numGenConstrs:
             self._GenConstrs = model.getGenConstrs()[
-                before.numGenConstrs : model.numGenConstrs
+                before.numGenConstrs: model.numGenConstrs
             ]
         else:
             self._GenConstrs = []
         # range of SOS
         if model.numSOS > before.numSOS:
-            self._SOSs = model.getSOSs()[before.numSOS : model.numSOS]
+            self._SOSs = model.getSOSs()[before.numSOS: model.numSOS]
         else:
             self._SOSs = []
         # range of Callbacks
@@ -99,14 +101,14 @@ class SubModel:
     def getVars(self):
         """Return the list of variables in the submodel."""
         if self._firstVar:
-            return self._model.getVars()[self._firstVar.index : self._lastVar.index + 1]
+            return self._model.getVars()[self._firstVar.index: self._lastVar.index + 1]
         return []
 
     def getConstrs(self):
         """Return the list of linear constraints in the submodel."""
         if self._firstConstr:
             return self._model.getConstrs()[
-                self._firstConstr.index : self._lastConstr.index + 1
+                self._firstConstr.index: self._lastConstr.index + 1
             ]
         return []
 

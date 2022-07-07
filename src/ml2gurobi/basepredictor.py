@@ -79,13 +79,12 @@ class AbstractPredictor(SubModel):
     def _add(self,  *args, **kwargs):
         '''Predict output from input using regression/classifier'''
         if self._output is None:
-            output_vars = self._create_output_vars(self._input, *args, **kwargs)
+            output_vars = self._create_output_vars(
+                self._input, *args, **kwargs)
             self._set_output(output_vars)
         self._input, self._output = self.validate(self._input, self._output)
         self.mip_model(*args, **kwargs)
         return self
-
-
 
 
 class NNLayer(AbstractPredictor):
@@ -170,13 +169,15 @@ class NNLayer(AbstractPredictor):
             self._lastConstr = model.getConstrs()[model.numConstrs - 1]
         # range of Q constraints
         if model.numQConstrs > before.numQConstrs:
-            self._QConstrs = model.getQConstrs()[before.numQConstrs : model.numQConstrs]
+            self._QConstrs = model.getQConstrs(
+            )[before.numQConstrs: model.numQConstrs]
         # range of GenConstrs
         if model.numGenConstrs > before.numGenConstrs:
-            self._GenConstrs = model.getGenConstrs()[before.numGenConstrs : model.numGenConstrs]
+            self._GenConstrs = model.getGenConstrs(
+            )[before.numGenConstrs: model.numGenConstrs]
         # range of SOS
         if model.numSOS > before.numSOS:
-            self._SOS = model.getSOSs()[before.numSOS : model.numSOS]
+            self._SOS = model.getSOSs()[before.numSOS: model.numSOS]
 
     def redolayer(self, activation=None):
         ''' Rebuild the layer (possibly using a different model for activation)'''
@@ -192,6 +193,7 @@ class NNLayer(AbstractPredictor):
 
 class BaseNNPredictor(AbstractPredictor):
     ''' Base class for inserting a regressor based on neural-network/tensor into Gurobi'''
+
     def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
         self.regressor = regressor
         self.clean = clean_regressor

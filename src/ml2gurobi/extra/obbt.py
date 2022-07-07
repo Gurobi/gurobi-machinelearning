@@ -51,7 +51,8 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
                 stats['done'] += 1
                 stats['iters'] += model.IterCount
     if verbose:
-        print(f'OBBT strengthened {n_strengthened} upper bounds on layer (did {done})')
+        print(
+            f'OBBT strengthened {n_strengthened} upper bounds on layer (did {done})')
 
     total_strengthened = n_strengthened
     n_strengthened = 0
@@ -104,7 +105,8 @@ def obbt(nn2gurobi, n_rounds=1, activation=None):
         for layer in nn2gurobi:
             if layer.activation in (None, 'identity'):
                 continue
-            n_strengthened += obbt_layer(layer, roundnum, stats=stats, verbose=outputflag)
+            n_strengthened += obbt_layer(layer, roundnum,
+                                         stats=stats, verbose=outputflag)
             nn2gurobi.rebuild_formulation(activation)
         if n_strengthened == 0:
             break

@@ -8,7 +8,7 @@ from gurobipy import GRB
 
 
 def _name(index, name):
-    index = f'{index}'.replace(' ','')
+    index = f'{index}'.replace(' ', '')
     return f'{name}[{index}]'
 
 
@@ -19,26 +19,28 @@ def get_mixing(layer, index):
        Should not be necesary when MVar dimensions are fixed
     '''
     k, j = index
-    _input = layer._input # pylint: disable=W0212
+    _input = layer._input  # pylint: disable=W0212
     input_size = _input.shape[1]
     return sum(_input[k, i] * layer.coefs[i, j]
-                     for i in range(input_size)) + layer.intercept[j]
+               for i in range(input_size)) + layer.intercept[j]
+
 
 class Identity():
     '''Model identity activation (i.e. does nearly nothing'''
+
     def __init__(self, setbounds=True):
         self.setbounds = setbounds
 
     def mip_model(self, layer):
         '''MIP model for identity activation (just apply afine transformation'''
-        output = layer._output # pylint: disable=W0212
+        output = layer._output  # pylint: disable=W0212
         if self.setbounds:
             output.LB = np.maximum(output.LB, layer.wmin)
             output.UB = np.minimum(output.UB, layer.wmax)
 
         for index in np.ndindex(output.shape):
             layer._model.addConstr(output[index] == get_mixing(layer, index),
-                                  name=_name(index, 'mix'))
+                                   name=_name(index, 'mix'))
 
     @staticmethod
     def forward(input_values):
@@ -58,17 +60,18 @@ class Identity():
 class ReLUGC():
     ''' Model the ReLU function (i.e max(x, 0)) using
         Gurobi max general constraints.'''
+
     def __init__(self, bigm=None, setbounds=True):
         self.bigm = bigm
         self.setbounds = setbounds
 
     def mip_model(self, layer):
         ''' Add MIP formulation for ReLU for neuron in layer'''
-        output = layer._output # pylint: disable=W0212
+        output = layer._output  # pylint: disable=W0212
         if not hasattr(layer, 'mixing'):
             mixing = layer._model.addMVar(output.shape, lb=-GRB.INFINITY,
-                                         vtype=GRB.CONTINUOUS,
-                                         name='_mix')
+                                          vtype=GRB.CONTINUOUS,
+                                          name='_mix')
             layer.mixing = mixing
         layer._model.update()
         if self.bigm is not None:
@@ -82,9 +85,10 @@ class ReLUGC():
 
         for index in np.ndindex(output.shape):
             mixing = get_mixing(layer, index)
-            layer._model.addConstr(layer.mixing[index] == mixing, name=_name(index, 'mix'))
+            layer._model.addConstr(
+                layer.mixing[index] == mixing, name=_name(index, 'mix'))
             layer._model.addGenConstrMax(output[index], [layer.mixing[index], ], constant=0.0,
-                                        name=_name(index, 'relu'))
+                                         name=_name(index, 'relu'))
 
     @staticmethod
     def forward(input_values):
@@ -113,6 +117,7 @@ class ReLUGC():
 
 class LogitPWL:
     '''Model Logit in a MIP using some PWL formulation'''
+
     def __init__(self):
         self.zerologit = 1e-1
         self.trouble = 15
@@ -189,12 +194,12 @@ class LogitPWL:
     def mip_model(self, layer):
         '''Add formulation for logit for neuron of layer'''
         model = layer._model
-        output = layer._output # pylint: disable=W0212
-        _input = layer._input # pylint: disable=W0212
+        output = layer._output  # pylint: disable=W0212
+        _input = layer._input  # pylint: disable=W0212
 
         if not layer.zvar:
             z = layer._model.addMVar(output.shape, lb=-GRB.INFINITY,
-                                    name=f'z')
+                                     name=f'z')
             layer.zvar = z
         else:
             z = layer.zvar
@@ -213,4 +218,4 @@ class LogitPWL:
                 xval, yval = self._logit_pwl_3pieces(vx, vact)
             if len(xval) > 0:
                 layer._model.addGenConstrPWL(vx, vact, xval, yval,
-                                            name=f'pwl[{index}]')
+                                             name=f'pwl[{index}]')

@@ -108,7 +108,8 @@ class MLPRegressorPredictor(BaseNNPredictor):
         neuralnet = self.regressor
         if neuralnet.activation not in self.actdict:
             print(self.actdict)
-            raise BaseException(f'No implementation for activation function {neuralnet.activation}')
+            raise BaseException(
+                f'No implementation for activation function {neuralnet.activation}')
         activation = self.actdict[neuralnet.activation]
 
         input_vars = self._input
@@ -119,7 +120,7 @@ class MLPRegressorPredictor(BaseNNPredictor):
             layer_intercept = neuralnet.intercepts_[i]
 
             # For last layer change activation
-            if i == neuralnet.n_layers_ -2:
+            if i == neuralnet.n_layers_ - 2:
                 activation = self.actdict[neuralnet.out_activation_]
                 output = self._output
 
@@ -132,6 +133,7 @@ class MLPRegressorPredictor(BaseNNPredictor):
 
 class PipelinePredictor(AbstractPredictor):
     '''Use a scikit-learn pipeline to build constraints in Gurobi model.'''
+
     def __init__(self, model, pipeline, input_vars, output_vars, **kwargs):
         self.steps = []
         self.pipeline = pipeline
@@ -144,25 +146,35 @@ class PipelinePredictor(AbstractPredictor):
         output_vars = self._output
         for name, obj in pipeline.steps[:-1]:
             if name == 'standardscaler':
-                self.steps.append(StandardScalerPredictor(model, obj, input_vars))
+                self.steps.append(
+                    StandardScalerPredictor(model, obj, input_vars))
             else:
-                raise BaseException(f"I don't know how to deal with that object: {name}")
+                raise BaseException(
+                    f"I don't know how to deal with that object: {name}")
             input_vars = self.steps[-1].output()
         else:
             name, obj = pipeline.steps[-1]
             if name == 'linearregression':
-                self.steps.append(LinearRegressionPredictor(model, obj, input_vars, output_vars))
+                self.steps.append(LinearRegressionPredictor(
+                    model, obj, input_vars, output_vars))
             elif name == 'logisticregression':
-                self.steps.append(LogisticRegressionPredictor(model, obj, input_vars, output_vars))
+                self.steps.append(LogisticRegressionPredictor(
+                    model, obj, input_vars, output_vars))
             elif name == 'mlpregressor':
-                self.steps.append(MLPRegressorPredictor(model, obj, input_vars, output_vars))
+                self.steps.append(MLPRegressorPredictor(
+                    model, obj, input_vars, output_vars))
             elif name == 'mlpclassifier':
-                self.steps.append(MLPRegressorPredictor(model, obj, input_vars, output_vars))
+                self.steps.append(MLPRegressorPredictor(
+                    model, obj, input_vars, output_vars))
             elif name == 'decisiontreeregressor':
-                self.steps.append(DecisionTreeRegressorPredictor(model, obj, input_vars, output_vars))
+                self.steps.append(DecisionTreeRegressorPredictor(
+                    model, obj, input_vars, output_vars))
             elif name == 'gradientboostingregressor':
-                self.steps.append(GradientBoostingRegressorPredictor(model, obj, input_vars, output_vars))
+                self.steps.append(GradientBoostingRegressorPredictor(
+                    model, obj, input_vars, output_vars))
             elif name == 'randomforestregressor':
-                self.steps.append(RandomForestRegressorPredictor(model, obj, input_vars, output_vars))
+                self.steps.append(RandomForestRegressorPredictor(
+                    model, obj, input_vars, output_vars))
             else:
-                raise BaseException(f"I don't know how to deal with that object: {name}")
+                raise BaseException(
+                    f"I don't know how to deal with that object: {name}")

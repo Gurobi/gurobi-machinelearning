@@ -12,6 +12,7 @@ from .nnbase import BaseNNPredictor
 class SequentialPredictor(BaseNNPredictor):
     '''Transform a pytorch Sequential Neural Network to Gurboi constraint with
        input and output as matrices of variables.'''
+
     def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False):
         linear = None
         for step in regressor:
@@ -25,7 +26,7 @@ class SequentialPredictor(BaseNNPredictor):
                 print(step)
                 raise BaseException("Unsupported network structure")
         BaseNNPredictor.__init__(self, model, regressor, input_vars, output_vars,
-                                         clean_regressor)
+                                 clean_regressor)
 
     def mip_model(self):
         network = self.regressor
@@ -55,4 +56,5 @@ class SequentialPredictor(BaseNNPredictor):
                     layer_weight = param.detach().numpy().T
                 elif name == 'bias':
                     layer_bias = param.detach().numpy()
-            self.addlayer(_input, layer_weight, layer_bias, self.actdict['identity'], output)
+            self.addlayer(_input, layer_weight, layer_bias,
+                          self.actdict['identity'], output)
