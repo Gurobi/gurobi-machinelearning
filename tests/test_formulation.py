@@ -109,7 +109,12 @@ class TestReLU(unittest.TestCase):
         for activation in activations:
             with gp.Model() as m:
                 m.Params.OutputFlag = 0
-                with self.subTest(example=exampleno, epsilon=epsilon, activation=activation, obbt=False):
+                with self.subTest(
+                    example=exampleno,
+                    epsilon=epsilon,
+                    activation=activation,
+                    obbt=False,
+                ):
                     self.adversarial_model(m, pipe, example, epsilon, activation=activation)
                     m.optimize()
                     if value is None:

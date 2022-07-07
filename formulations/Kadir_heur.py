@@ -17,8 +17,8 @@ from ml2gurobi.nnalgs import prop
 from ml2gurobi.pytorch import Sequential2Gurobi
 
 # Load data
-X = torch.from_numpy(np.genfromtxt('X.csv')).float()
-Y = torch.from_numpy(np.genfromtxt('Y.csv')).float()
+X = torch.from_numpy(np.genfromtxt("X.csv")).float()
+Y = torch.from_numpy(np.genfromtxt("Y.csv")).float()
 
 
 def heuristic(modelname, seed):
@@ -41,10 +41,10 @@ def heuristic(modelname, seed):
 
     print(f"Starting heuristic on {modelname} obj seed {seed}")
 
-    tottime = - time.monotonic()
+    tottime = -time.monotonic()
     prediction = model.forward(X)
     feasibles = X[((prediction >= 20) & (prediction <= 30)).all(axis=1), :]
-    sortedinputs = np.argsort(nn2gurobi._layers[0].invar.Obj@feasibles.numpy().T)
+    sortedinputs = np.argsort(nn2gurobi._layers[0].invar.Obj @ feasibles.numpy().T)
 
     xin = feasibles[sortedinputs[0, 0]].numpy().reshape(1, -1)
 
@@ -62,7 +62,7 @@ def heuristic(modelname, seed):
 
         xin = x.X
         obj = m.ObjVal
-        print(f'Iteration {it} obj: {obj:.2f}')
+        print(f"Iteration {it} obj: {obj:.2f}")
         if m.ObjVal < 1e-2:
             break
         for layer in nn2gurobi._layers:
@@ -70,15 +70,17 @@ def heuristic(modelname, seed):
             layer.zvar.LB = 0.0
     tottime += time.monotonic()
     print()
-    print(f'Heuristic finished value {obj} time {tottime:.2f}')
+    print(f"Heuristic finished value {obj} time {tottime:.2f}")
     print()
     m.dispose()
     return {"status": "Worked", "time": tottime, "obj": obj}
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     results = dict()
-    files = ['Networks_pytorch/'+f for f in os.listdir('Networks_pytorch') if f.startswith('Kadir') and f.endswith('.pkl')]
+    files = [
+        "Networks_pytorch/" + f for f in os.listdir("Networks_pytorch") if f.startswith("Kadir") and f.endswith(".pkl")
+    ]
     for f in files:
         for i in range(1, 11):
             try:

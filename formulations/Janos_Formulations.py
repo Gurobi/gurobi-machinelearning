@@ -9,27 +9,26 @@ from sklearn.preprocessing import StandardScaler
 
 from ml2gurobi.sklearn import Pipe2Gurobi
 
-KNOWN_FEATURES = ['SAT', 'GPA']
-DEC_FEATURES = ['scholarship']
+KNOWN_FEATURES = ["SAT", "GPA"]
+DEC_FEATURES = ["scholarship"]
 
 
 def do_regression(layers, seed, known_features, dec_features):
     # Retrieve historical data used to do the regression
-    historical_data = pd.read_csv(
-        'data/college_student_enroll-s1-1.csv', index_col=0)
+    historical_data = pd.read_csv("data/college_student_enroll-s1-1.csv", index_col=0)
 
     # Classify our features between the ones that are fixed and the ones that will be
     # part of the optimization problem
     features = known_features + dec_features
 
     # The target for training
-    target = 'enroll'
+    target = "enroll"
 
     historical_data = historical_data[features + [target]]
 
     # Run our regression
     X = historical_data.loc[:, features]
-    Y = historical_data.loc[:, 'enroll']
+    Y = historical_data.loc[:, "enroll"]
     scaler = StandardScaler()
 
     regression = MLPRegressor(hidden_layer_sizes=layers, random_state=seed)
@@ -43,7 +42,7 @@ def do_regression(layers, seed, known_features, dec_features):
 def do_model(pipe, decidx, known_features, dec_features, reluformulation=None):
     # ### Do the optimization model
     # Retrieve new data used for the optimization
-    studentsdata = pd.read_csv('data/admissions500.csv', index_col=0)
+    studentsdata = pd.read_csv("data/admissions500.csv", index_col=0)
     studentsdata = studentsdata[known_features]
     # Check that features are in identical order
 
@@ -55,23 +54,23 @@ def do_model(pipe, decidx, known_features, dec_features, reluformulation=None):
     m = gp.Model()
 
     knownidx = studentsdata.columns.get_indexer(known_features)
-    assert(max(knownidx) + 1 == len(knownidx))
+    assert max(knownidx) + 1 == len(knownidx)
     decidx = np.arange(len(dec_features)) + len(knownidx)
 
     lb = np.zeros((nstudents, len(features)))
-    ub = np.ones((nstudents, len(features)))*2.5
+    ub = np.ones((nstudents, len(features))) * 2.5
     lb[:, knownidx] = studentsdata.loc[:, known_features]
     ub[:, knownidx] = studentsdata.loc[:, known_features]
-    x = m.addMVar((nstudents, len(features)), lb=lb, ub=ub, name='x')
-    y = m.addMVar((nstudents, 1), lb=-GRB.INFINITY, name='y')
+    x = m.addMVar((nstudents, len(features)), lb=lb, ub=ub, name="x")
+    y = m.addMVar((nstudents, 1), lb=-GRB.INFINITY, name="y")
 
     m.setObjective(y[:, 0].sum(), gp.GRB.MAXIMIZE)
-    m.addConstr(x[:, decidx].sum() <= 0.2*nstudents)
+    m.addConstr(x[:, decidx].sum() <= 0.2 * nstudents)
 
     # create transforms to turn scikit-learn pipeline into Gurobi constraints
     pipe2gurobi = Pipe2Gurobi(pipe, m)
     if reluformulation is not None:
-        pipe2gurobi.steps[-1].actdict['relu'] = reluformulation
+        pipe2gurobi.steps[-1].actdict["relu"] = reluformulation
 
     # Add constraint to predict value of y using kwnown and to compute features
     pipe2gurobi.predict(X=x, y=y)
@@ -87,10 +86,7 @@ def dojanosformulation(pipe):
 
 
 def gen_nn(layers, seed):
-    filename = "{}_nn-{}_seed{}.joblib".format(
-        "Janos",
-        '-'.join([f'{n}' for n in layers]),
-        seed)
+    filename = "{}_nn-{}_seed{}.joblib".format("Janos", "-".join([f"{n}" for n in layers]), seed)
     try:
         load(filename)
         return
@@ -105,11 +101,20 @@ def gen_nn(layers, seed):
 
 def gen_all_nn():
     do = gen_nn
-    with parallel_backend('multiprocessing'):
-        Parallel(n_jobs=4, verbose=10)(delayed(do)(hidden_layers, seed)
-                                       for hidden_layers in ([5]*2, [5]*3, [10]*2, [10]*3, [15]*2, [15]*3)
-                                       for seed in range(10))
+    with parallel_backend("multiprocessing"):
+        Parallel(n_jobs=4, verbose=10)(
+            delayed(do)(hidden_layers, seed)
+            for hidden_layers in (
+                [5] * 2,
+                [5] * 3,
+                [10] * 2,
+                [10] * 3,
+                [15] * 2,
+                [15] * 3,
+            )
+            for seed in range(10)
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     gen_all_nn()

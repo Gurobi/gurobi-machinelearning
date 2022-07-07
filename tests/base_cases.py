@@ -19,53 +19,63 @@ from ml2gurobi.sklearn import (
 
 
 class DiabetesCases:
-    ''' Base class to have cases for testing regression models on diabetes set'''
-    to_test = [(LinearRegression(), LinearRegressionPredictor),
-               (DecisionTreeRegressor(max_leaf_nodes=50), DecisionTreeRegressorPredictor),
-               (GradientBoostingRegressor(n_estimators=20), GradientBoostingRegressorPredictor),
-               (MLPRegressor([20, 20]), MLPRegressorPredictor)]
+    """Base class to have cases for testing regression models on diabetes set"""
+
+    to_test = [
+        (LinearRegression(), LinearRegressionPredictor),
+        (DecisionTreeRegressor(max_leaf_nodes=50), DecisionTreeRegressorPredictor),
+        (
+            GradientBoostingRegressor(n_estimators=20),
+            GradientBoostingRegressorPredictor,
+        ),
+        (MLPRegressor([20, 20]), MLPRegressorPredictor),
+    ]
 
     def __init__(self):
-        self.basedir = os.path.join(os.path.dirname(__file__), 'predictors')
+        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
         version = None
-        with open(os.path.join(self.basedir, 'sklearn_version')) as filein:
+        with open(os.path.join(self.basedir, "sklearn_version")) as filein:
             version = filein.read().strip()
         if version != sklearn_version:
             print("Scikit learn version changed. Regenerate predictors")
             self.build_predictors()
-            with open(os.path.join(self.basedir, 'sklearn_version'), 'w') as fileout:
+            with open(os.path.join(self.basedir, "sklearn_version"), "w") as fileout:
                 print(sklearn_version, file=fileout)
 
     def build_predictors(self):
         data = datasets.load_diabetes()
 
-        X = data['data']
-        y = data['target']
+        X = data["data"]
+        y = data["target"]
 
         for predictor, _ in self.to_test:
             predictor.fit(X, y)
-            filename = f'diabetes_none_{type(predictor).__name__}.joblib'
-            rval = {'predictor': predictor,
-                    'input_shape': X.shape,
-                    'output_shape': y.shape}
+            filename = f"diabetes_none_{type(predictor).__name__}.joblib"
+            rval = {
+                "predictor": predictor,
+                "input_shape": X.shape,
+                "output_shape": y.shape,
+            }
 
-            dump(rval, os.path.join(self.basedir,filename))
+            dump(rval, os.path.join(self.basedir, filename))
 
         for predictor, _ in self.to_test:
             pipeline = make_pipeline(StandardScaler(), predictor)
             pipeline.fit(X, y)
-            filename = f'diabetes_pipe_{type(predictor).__name__}.joblib'
-            rval = {'predictor': pipeline,
-                    'input_shape': X.shape,
-                    'output_shape': y.shape}
+            filename = f"diabetes_pipe_{type(predictor).__name__}.joblib"
+            rval = {
+                "predictor": pipeline,
+                "input_shape": X.shape,
+                "output_shape": y.shape,
+            }
 
-            dump(rval, os.path.join(self.basedir,filename))
+            dump(rval, os.path.join(self.basedir, filename))
 
     def get_case(self, predictor, withpipe):
         if withpipe:
-            withpipe = 'pipe'
+            withpipe = "pipe"
         else:
-            withpipe = 'none'
-        filename = f'diabetes_{withpipe}_{type(predictor).__name__}.joblib'
+            withpipe = "none"
+        filename = f"diabetes_{withpipe}_{type(predictor).__name__}.joblib"
         predictor = load(os.path.join(self.basedir, filename))
         return predictor

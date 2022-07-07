@@ -7,14 +7,12 @@ from ml2gurobi.sklearn import PipelinePredictor
 
 
 class TestFormulations(unittest.TestCase):
-
     def check_counts(self, m, reg2gurobi, numVars):
         self.assertEqual(m.NumVars, numVars + len(reg2gurobi.getVars()))
         self.assertEqual(m.NumSOS, len(reg2gurobi.getSOSs()))
         self.assertEqual(m.NumConstrs, len(reg2gurobi.getConstrs()))
         self.assertEqual(m.NumQConstrs, len(reg2gurobi.getQConstrs()))
         self.assertEqual(m.NumGenConstrs, len(reg2gurobi.getGenConstrs()))
-
 
     def add_remove(self, predictor, translator, input_shape, output_shape):
         with gp.Model() as m:
@@ -43,8 +41,8 @@ class TestFormulations(unittest.TestCase):
             for pipeline in [False, True]:
                 case = cases.get_case(regressor, pipeline)
                 if pipeline:
-                    case['translator'] = PipelinePredictor
+                    case["translator"] = PipelinePredictor
                 else:
-                    case['translator'] = translator
-                with self.subTest(predictor=case['predictor'], pipeline=pipeline):
+                    case["translator"] = translator
+                with self.subTest(predictor=case["predictor"], pipeline=pipeline):
                     self.add_remove(**case)

@@ -13,7 +13,7 @@ gp.gurobi._nd_unleashed = True
 
 
 def build_abs_network():
-    ''' Make a scikit-learn neural network for computing absolute value'''
+    """Make a scikit-learn neural network for computing absolute value"""
     # We fakely fit a neural network and then set the correct coefficients by hand
     x = np.arange(-10, 10, 1)
     z = np.abs(x)
@@ -21,13 +21,12 @@ def build_abs_network():
     X = np.concatenate([x.ravel().reshape(-1, 1)], axis=1)
     y = z.ravel()
 
-    regression = MLPRegressor(hidden_layer_sizes=[2], max_iter=5, activation='relu', verbose=0)
+    regression = MLPRegressor(hidden_layer_sizes=[2], max_iter=5, activation="relu", verbose=0)
     regression.fit(X=X, y=y)
 
     regression.intercepts_ = [np.array([0, 0]), np.array([0])]
 
-    regression.coefs_ = [np.array([[1.0, -1.0]]),
-                         np.array([[1.0], [1.0]])]
+    regression.coefs_ = [np.array([[1.0, -1.0]]), np.array([[1.0], [1.0]])]
 
     checkvals = np.array([-10, -1, 0, 1, 12])
     assert (regression.predict(checkvals.reshape(-1, 1)) == np.abs(checkvals)).all()
@@ -44,16 +43,15 @@ def model(X, y, nn, infbound, relumodel=None):
 
         # Decision variables
         beta = model.addMVar(dim + 1, lb=-bound, ub=bound, name="beta")  # Weights
-        diff = model.addMVar((samples, 1), lb=-infbound, ub=infbound, name='diff')
-        absdiff = model.addMVar((samples, 1), lb=-infbound, ub=infbound, name='absdiff')
+        diff = model.addMVar((samples, 1), lb=-infbound, ub=infbound, name="diff")
+        absdiff = model.addMVar((samples, 1), lb=-infbound, ub=infbound, name="absdiff")
 
         model.addConstr(X @ beta - y == diff[:, 0])
         model.setObjective(absdiff.sum(), gp.GRB.MINIMIZE)
 
         if nn:
             # create transforms to turn scikit-learn pipeline into Gurobi constraints
-            nn2gurobi = MLPRegressorPredictor(model, nn, diff, absdiff,
-                                             activations_models={'relu':relumodel})
+            nn2gurobi = MLPRegressorPredictor(model, nn, diff, absdiff, activations_models={"relu": relumodel})
         else:
             for i in range(samples):
                 model.addConstr(absdiff[i, 0] == gp.abs_(diff[i, 0]))
@@ -66,7 +64,6 @@ def model(X, y, nn, infbound, relumodel=None):
 
 
 class TestNNFormulation(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         X, y = make_regression(n_samples=30, n_features=3, random_state=0)

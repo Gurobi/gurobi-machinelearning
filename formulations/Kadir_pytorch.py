@@ -18,8 +18,8 @@ from ml2gurobi.pytorch import Sequential2Gurobi
 
 
 def do_regression(seed):
-    X = torch.from_numpy(np.genfromtxt('X.csv')).float()
-    Y = torch.from_numpy(np.genfromtxt('Y.csv')).float()
+    X = torch.from_numpy(np.genfromtxt("X.csv")).float()
+    Y = torch.from_numpy(np.genfromtxt("Y.csv")).float()
 
     hs = 128
     torch.manual_seed(seed)
@@ -46,13 +46,13 @@ def do_regression(seed):
         # Compute and print loss
         loss = criterion(pred, Y)
         if t % 100 == 0:
-            print(f'iteration {t} loss: {loss.item()}')
+            print(f"iteration {t} loss: {loss.item()}")
         if loss.item() < 1e-4:
             break
         loss.backward()
         optimizer.step()
     else:
-        print(f'iteration {t} loss: {loss.item()}')
+        print(f"iteration {t} loss: {loss.item()}")
 
     return model
 
@@ -72,9 +72,7 @@ def do_model(nnmodel, seed):
 
 
 def gen_nn(seed):
-    filename = "{}-seed{}.pkl".format(
-        'Kadir_torch',
-        seed)
+    filename = "{}-seed{}.pkl".format("Kadir_torch", seed)
     try:
         torch.load(filename)
         return
@@ -85,26 +83,26 @@ def gen_nn(seed):
 
 
 def heuristic(nn, nn2gurobi):
-    X = torch.from_numpy(np.genfromtxt('X.csv')).float()
+    X = torch.from_numpy(np.genfromtxt("X.csv")).float()
 
     prediction = nn.forward(X)
     feasibles = X[((prediction >= 20) & (prediction <= 30)).all(axis=1), :]
-    sortedinputs = np.argsort(nn2gurobi._layers[0].invar.Obj@feasibles.numpy().T)
+    sortedinputs = np.argsort(nn2gurobi._layers[0].invar.Obj @ feasibles.numpy().T)
 
     prop(nn2gurobi, feasibles[sortedinputs[0, 0]].numpy().reshape(1, -1), reset=True)
 
 
 def doone(filename, doobbt=None, doheuristic=None, seed=None):
-    outputfile = filename.strip('.joblib') + f'-objseed{seed}.lp.bz2'
+    outputfile = filename.strip(".joblib") + f"-objseed{seed}.lp.bz2"
     try:
         with gp.read(outputfile) as m:
             return
     except Exception:
         pass
 
-    model = torch.load(f'Networks_pytorch/{filename}')
+    model = torch.load(f"Networks_pytorch/{filename}")
 
-    if filename.startswith('Kadir'):
+    if filename.startswith("Kadir"):
         m, nn2gurobi = do_model(model, seed)
     else:
         return
@@ -112,21 +110,19 @@ def doone(filename, doobbt=None, doheuristic=None, seed=None):
         nn2gurobi.obbt(1)
     if doheuristic:
         heuristic(model, nn2gurobi)
-        m.write(outputfile[:-len('lp.bz2')]+'attr')
+        m.write(outputfile[: -len("lp.bz2")] + "attr")
     m.write(outputfile)
 
 
 def gen_all_nn():
-    with parallel_backend('multiprocessing'):
+    with parallel_backend("multiprocessing"):
         do = gen_nn
-        Parallel(n_jobs=8, verbose=10)(delayed(do)(seed)
-                                       for seed in range(10))
+        Parallel(n_jobs=8, verbose=10)(delayed(do)(seed) for seed in range(10))
 
 
 if __name__ == "__main__":
-    files = [f for f in os.listdir('Networks_pytorch') if f.startswith('Kadir') and f.endswith('.pkl')]
+    files = [f for f in os.listdir("Networks_pytorch") if f.startswith("Kadir") and f.endswith(".pkl")]
     doobbt = False
     doheuristic = False
 
-    Parallel(n_jobs=5, verbose=10)(
-        delayed(doone)(f, doobbt, doheuristic, seed) for f in files for seed in range(1, 11))
+    Parallel(n_jobs=5, verbose=10)(delayed(doone)(f, doobbt, doheuristic, seed) for f in files for seed in range(1, 11))
