@@ -22,28 +22,31 @@ What we have so far:
 
 import numpy as np
 
+from .basepredictor import AbstractPredictor, BaseNNPredictor
 from .decisiontrees import (
     DecisionTreeRegressorPredictor,
     GradientBoostingRegressorPredictor,
     RandomForestRegressorPredictor,
 )
-from .nnbase import BaseNNPredictor
-from .utils import AbstractPredictor
 
 
 class StandardScalerPredictor(AbstractPredictor):
     ''' Class to use a StandardScale to create scaled version of
         some Gurobi variables. '''
 
-    def __init__(self, model, scaler, input_vars, **kwargs):
+    def __init__(self, model, scaler, input_vars, *args, **kwargs):
         self.scaler = scaler
-        out_vars = model.addMVar(input_vars.shape, name='__scaledx')
-        super().__init__(model, input_vars, out_vars, **kwargs)
+        super().__init__(model, input_vars, *args, **kwargs)
+
+    def _create_output_vars(self, input_vars, *args, **kwargs):
+        rval = self._model.addMVar(input_vars.shape, name='scaledx')
+        self._model.update()
+        return rval
 
     def mip_model(self):
         '''Do the transormation on x'''
         _input = self._input
-        output = self.output
+        output = self._output
 
         nfeat = _input.shape[1]
         scale = self.scaler.scale_
@@ -51,8 +54,8 @@ class StandardScalerPredictor(AbstractPredictor):
 
         output.LB = (_input.LB - mean)/scale
         output.UB = (_input.UB - mean)/scale
-        self.model.addConstrs((_input[:, i] - output[:, i] * scale[i] == mean[i]
-                               for i in range(nfeat)), name='__scaling')
+        self._model.addConstrs((_input[:, i] - output[:, i] * scale[i] == mean[i]
+                               for i in range(nfeat)), name='s')
         return self
 
     def output(self):
@@ -100,6 +103,14 @@ class MLPRegressorPredictor(BaseNNPredictor):
                          clean_regressor=clean_regressor, **kwargs)
         assert regressor.out_activation_ in ('identity', 'relu', 'softmax')
 
+    def _create_output_vars(self, input_vars, *args, **kwargs):
+        last = self.regressor.n_layers_ - 2
+        rval = self._model.addMVar((input_vars.shape[0], self.regressor.coef_[last].shape[1]),
+                                   lb=-gp.GRB.INFINITY,
+                                   name=f'regvar')
+        self._model.update()
+        return rval
+
     def mip_model(self):
         '''Add the prediction constraints to Gurobi'''
         neuralnet = self.regressor
@@ -122,9 +133,9 @@ class MLPRegressorPredictor(BaseNNPredictor):
 
             layer = self.addlayer(input_vars, layer_coefs,
                                   layer_intercept, activation, output,
-                                  name=f'{i}')
+                                  name=f'layer{i}')
             input_vars = layer._output  # pylint: disable=W0212
-            self.model.update()
+            self._model.update()
 
 
 class PipelinePredictor(AbstractPredictor):
@@ -136,7 +147,7 @@ class PipelinePredictor(AbstractPredictor):
 
     def mip_model(self):
         pipeline = self.pipeline
-        model = self.model
+        model = self._model
         input_vars = self._input
         output_vars = self._output
         for name, obj in pipeline.steps[:-1]:
@@ -144,7 +155,7 @@ class PipelinePredictor(AbstractPredictor):
                 self.steps.append(StandardScalerPredictor(model, obj, input_vars))
             else:
                 raise BaseException(f"I don't know how to deal with that object: {name}")
-            input_vars = self.steps[-1]
+            input_vars = self.steps[-1].output()
         else:
             name, obj = pipeline.steps[-1]
             if name == 'linearregression':
@@ -163,5 +174,3 @@ class PipelinePredictor(AbstractPredictor):
                 self.steps.append(RandomForestRegressorPredictor(model, obj, input_vars, output_vars))
             else:
                 raise BaseException(f"I don't know how to deal with that object: {name}")
-        # This is called from the base class but in this case I think that nothing
-        # has to be done

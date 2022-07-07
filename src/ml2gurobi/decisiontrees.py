@@ -6,7 +6,7 @@
 import numpy as np
 from gurobipy import GRB, quicksum
 
-from .utils import AbstractPredictor
+from .basepredictor import AbstractPredictor
 
 
 class DecisionTreeRegressorPredictor(AbstractPredictor):
@@ -17,7 +17,7 @@ class DecisionTreeRegressorPredictor(AbstractPredictor):
 
     def mip_model(self):
         tree = self.tree
-        model = self.model
+        model = self._model
 
         _input = self._input
         output = self._output
@@ -70,7 +70,7 @@ class GradientBoostingRegressorPredictor(AbstractPredictor):
 
             Both X and y should be array or list of variables of conforming dimensions.
         '''
-        model = self.model
+        model = self._model
         regressor = self.regressor
 
         _input = self._input
@@ -99,7 +99,7 @@ class RandomForestRegressorPredictor(AbstractPredictor):
 
             Both X and y should be array or list of variables of conforming dimensions.
         '''
-        model = self.model
+        model = self._model
         regressor = self.regressor
 
         _input = self._input

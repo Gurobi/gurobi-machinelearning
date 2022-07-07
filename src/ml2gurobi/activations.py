@@ -7,9 +7,9 @@ import numpy as np
 from gurobipy import GRB
 
 
-def _name(layer, index, name):
+def _name(index, name):
     index = f'{index}'.replace(' ','')
-    return f'__{layer.name}_{name}[{index}]'
+    return f'{name}[{index}]'
 
 
 def get_mixing(layer, index):
@@ -37,8 +37,8 @@ class Identity():
             output.UB = np.minimum(output.UB, layer.wmax)
 
         for index in np.ndindex(output.shape):
-            layer.model.addConstr(output[index] == get_mixing(layer, index),
-                                  name=_name(layer, index, 'mix'))
+            layer._model.addConstr(output[index] == get_mixing(layer, index),
+                                  name=_name(index, 'mix'))
 
     @staticmethod
     def forward(input_values):
@@ -66,11 +66,11 @@ class ReLUGC():
         ''' Add MIP formulation for ReLU for neuron in layer'''
         output = layer._output # pylint: disable=W0212
         if not hasattr(layer, 'mixing'):
-            mixing = layer.model.addMVar(output.shape, lb=-GRB.INFINITY,
+            mixing = layer._model.addMVar(output.shape, lb=-GRB.INFINITY,
                                          vtype=GRB.CONTINUOUS,
-                                         name=f'{layer.name}]+_mix')
+                                         name='_mix')
             layer.mixing = mixing
-        layer.model.update()
+        layer._model.update()
         if self.bigm is not None:
             layer.wmax = np.minimum(layer.wmax, self.bigm)
             layer.wmin = np.maximum(layer.wmin, -1*self.bigm)
@@ -82,9 +82,9 @@ class ReLUGC():
 
         for index in np.ndindex(output.shape):
             mixing = get_mixing(layer, index)
-            layer.model.addConstr(layer.mixing[index] == mixing, name=_name(layer, index, 'mix'))
-            layer.model.addGenConstrMax(output[index], [layer.mixing[index], ], constant=0.0,
-                                        name=_name(layer, index, 'relu'))
+            layer._model.addConstr(layer.mixing[index] == mixing, name=_name(index, 'mix'))
+            layer._model.addGenConstrMax(output[index], [layer.mixing[index], ], constant=0.0,
+                                        name=_name(index, 'relu'))
 
     @staticmethod
     def forward(input_values):
@@ -188,13 +188,13 @@ class LogitPWL:
 
     def mip_model(self, layer):
         '''Add formulation for logit for neuron of layer'''
-        model = layer.model
+        model = layer._model
         output = layer._output # pylint: disable=W0212
         _input = layer._input # pylint: disable=W0212
 
         if not layer.zvar:
-            z = layer.model.addMVar(output.shape, lb=-GRB.INFINITY,
-                                    name=f'__z[{layer.name}]')
+            z = layer._model.addMVar(output.shape, lb=-GRB.INFINITY,
+                                    name=f'z')
             layer.zvar = z
         else:
             z = layer.zvar
@@ -204,7 +204,7 @@ class LogitPWL:
 
         for index in np.ndindex(output.shape):
             mixing = get_mixing(layer, index)
-            model.addConstr(layer.zvar[index] == mixing, name=f'{layer.name}_mix[{index}]')
+            model.addConstr(layer.zvar[index] == mixing, name=f'_mix[{index}]')
             vact = output[index]
             vx = layer.zvar[index]
             if self.logitapprox == 'PWL':
@@ -212,5 +212,5 @@ class LogitPWL:
             else:
                 xval, yval = self._logit_pwl_3pieces(vx, vact)
             if len(xval) > 0:
-                layer.model.addGenConstrPWL(vx, vact, xval, yval,
-                                            name=f'{layer.name}_pwl[{index}]')
+                layer._model.addGenConstrPWL(vx, vact, xval, yval,
+                                            name=f'pwl[{index}]')

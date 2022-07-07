@@ -4,7 +4,7 @@ from gurobipy import GRB
 
 def obbt_layer(layer, round_num, stats=None, verbose=True):
     ''' Perform OBBT on layer '''
-    model = layer.model
+    model = layer._model
     obj = model.getObjective()
     objsense = model.ModelSense
     savemethod = model.Params.Method
@@ -17,6 +17,7 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
 
     model.optimize()
     assert model.Status == GRB.OPTIMAL
+    print(model.NumVars, model.NumConstrs, model.NumGenConstrs)
     if verbose:
         print(f'Round {round_num} objval {model.ObjVal}')
     model.Params.Method = 0
@@ -50,7 +51,7 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
                 stats['done'] += 1
                 stats['iters'] += model.IterCount
     if verbose:
-        print(f'OBBT strengthened {n_strengthened} upper bounds on layer {layer.name} (did {done})')
+        print(f'OBBT strengthened {n_strengthened} upper bounds on layer (did {done})')
 
     total_strengthened = n_strengthened
     n_strengthened = 0
@@ -80,7 +81,7 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
 
     if verbose:
         print(
-            f'OBBT strengthened {n_strengthened} lower bounds on layer {layer.name} (did {done})')
+            f'OBBT strengthened {n_strengthened} lower bounds on layer (did {done})')
 
     # Restore model
     model.Params.Method = savemethod
@@ -95,8 +96,8 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
 def obbt(nn2gurobi, n_rounds=1, activation=None):
     '''Perform OBBT on model'''
     stats = {'done': 0, 'iters': 0}
-    outputflag = nn2gurobi.model.Params.OutputFlag
-    nn2gurobi.model.Params.OutputFlag = 0
+    outputflag = nn2gurobi._model.Params.OutputFlag
+    nn2gurobi._model.Params.OutputFlag = 0
     nn2gurobi.rebuild_formulation(activation)
     for roundnum in range(n_rounds):
         n_strengthened = 0
@@ -108,5 +109,5 @@ def obbt(nn2gurobi, n_rounds=1, activation=None):
         if n_strengthened == 0:
             break
     nn2gurobi.rebuild_formulation()
-    nn2gurobi.model.Params.OutputFlag = outputflag
+    nn2gurobi._model.Params.OutputFlag = outputflag
     return stats
