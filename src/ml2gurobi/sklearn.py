@@ -103,14 +103,6 @@ class MLPRegressorPredictor(BaseNNPredictor):
                          clean_regressor=clean_regressor, **kwargs)
         assert regressor.out_activation_ in ('identity', 'relu', 'softmax')
 
-    def _create_output_vars(self, input_vars, *args, **kwargs):
-        last = self.regressor.n_layers_ - 2
-        rval = self._model.addMVar((input_vars.shape[0], self.regressor.coef_[last].shape[1]),
-                                   lb=-gp.GRB.INFINITY,
-                                   name=f'regvar')
-        self._model.update()
-        return rval
-
     def mip_model(self):
         '''Add the prediction constraints to Gurobi'''
         neuralnet = self.regressor

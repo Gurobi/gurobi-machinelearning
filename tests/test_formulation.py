@@ -2,13 +2,7 @@ import os
 import random
 import unittest
 
-try:
-    import gurobi.modeling as gp
-    HAS_MODELING=True
-except ImportError as e:
-    import gurobipy as gp
-    HAS_MODELING=False
-
+import gurobipy as gp
 import numpy as np
 from base_cases import DiabetesCases
 from joblib import load
@@ -53,15 +47,6 @@ class TestFixedModel(unittest.TestCase):
                 with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=False):
                     self.fixed_model(regressor, translator, X[exampleno,:])
 
-        if not HAS_MODELING:
-            return
-
-        for regressor, translator in cases.to_test:
-            regressor = cases.get_case(regressor, False)['predictor']
-            for _ in range(5):
-                exampleno = random.randint(0, X.shape[0]-1)
-                with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=True):
-                    self.fixed_model(regressor, translator, X[exampleno,:], use_gurobi_modeling=True)
 
     def test_diabetes_with_pipes(self):
         data = datasets.load_diabetes()
@@ -74,16 +59,6 @@ class TestFixedModel(unittest.TestCase):
                 exampleno = random.randint(0, X.shape[0]-1)
                 with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=False):
                     self.fixed_model(pipeline, PipelinePredictor, X[exampleno, :], False)
-
-        if not HAS_MODELING:
-            return
-
-        for regressor, _ in cases.to_test:
-            pipeline = cases.get_case(regressor, True)['predictor']
-            for _ in range(5):
-                exampleno = random.randint(0, X.shape[0]-1)
-                with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=True):
-                    self.fixed_model(pipeline , PipelinePredictor, X[exampleno, :], True)
 
 class TestReLU(unittest.TestCase):
     ''' Test that various versions of ReLU work and give the same results.'''
