@@ -68,19 +68,13 @@ class AbstractPredictor(SubModel):
         if output_vars is None:
             raise BaseException("No output variables")
 
-        if (
-            output_vars.shape[0] != input_vars.shape[0]
-            and output_vars.shape[1] != input_vars.shape[0]
-        ):
+        if output_vars.shape[0] != input_vars.shape[0] and output_vars.shape[1] != input_vars.shape[0]:
             raise BaseException(
                 "Non-conforming dimension between "
                 + "input variable and output variable: "
                 + f"{output_vars.shape[0]} != {input_vars.shape[0]}"
             )
-        if (
-            input_vars.shape[0] != output_vars.shape[0]
-            and output_vars.shape[1] == input_vars.shape[0]
-        ):
+        if input_vars.shape[0] != output_vars.shape[0] and output_vars.shape[1] == input_vars.shape[0]:
             output_vars = transpose(output_vars)
 
         return (input_vars, output_vars)
@@ -137,9 +131,7 @@ class NNLayer(AbstractPredictor):
         return (wmin, wmax)
 
     def _create_output_vars(self, input_vars):
-        rval = self._model.addMVar(
-            (input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act"
-        )
+        rval = self._model.addMVar((input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act")
         self._model.update()
         self._output = rval
 
@@ -188,9 +180,7 @@ class NNLayer(AbstractPredictor):
             self._QConstrs = model.getQConstrs()[before.numQConstrs : model.numQConstrs]
         # range of GenConstrs
         if model.numGenConstrs > before.numGenConstrs:
-            self._GenConstrs = model.getGenConstrs()[
-                before.numGenConstrs : model.numGenConstrs
-            ]
+            self._GenConstrs = model.getGenConstrs()[before.numGenConstrs : model.numGenConstrs]
         # range of SOS
         if model.numSOS > before.numSOS:
             self._SOSs = model.getSOSs()[before.numSOS : model.numSOS]
@@ -209,15 +199,12 @@ class NNLayer(AbstractPredictor):
 class BaseNNPredictor(AbstractPredictor):
     """Base class for inserting a regressor based on neural-network/tensor into Gurobi"""
 
-    def __init__(
-        self, model, regressor, input_vars, output_vars, clean_regressor=False, **kwargs
-    ):
+    def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
         self.regressor = regressor
         self.clean = clean_regressor
         self.actdict = {"relu": ReLUGC(), "identity": Identity(), "logit": LogitPWL()}
         try:
-            for activation, activation_model in kwargs['activation_models']:
-                print(f"Setting {activation} to {activation_model}")
+            for activation, activation_model in kwargs["activation_models"].items():
                 self.actdict[activation] = activation_model
         except KeyError:
             pass

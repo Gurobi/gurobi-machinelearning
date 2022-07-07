@@ -33,4 +33,3 @@ repos:
         language: python
         types: [python]
         args: ["--line-length=120"]
-        files: "gurobitest/pythonAPI"

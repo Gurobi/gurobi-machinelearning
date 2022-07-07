@@ -108,9 +108,7 @@ class MLPRegressorPredictor(BaseNNPredictor):
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(
-        self, model, regressor, input_vars, output_vars, clean_regressor=False, **kwargs
-    ):
+    def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
         super().__init__(
             model,
             regressor,
@@ -126,9 +124,7 @@ class MLPRegressorPredictor(BaseNNPredictor):
         neuralnet = self.regressor
         if neuralnet.activation not in self.actdict:
             print(self.actdict)
-            raise BaseException(
-                f"No implementation for activation function {neuralnet.activation}"
-            )
+            raise BaseException(f"No implementation for activation function {neuralnet.activation}")
         activation = self.actdict[neuralnet.activation]
 
         input_vars = self._input
@@ -161,6 +157,7 @@ class PipelinePredictor(AbstractPredictor):
     def __init__(self, model, pipeline, input_vars, output_vars, **kwargs):
         self.steps = []
         self.pipeline = pipeline
+        self._kwargs = kwargs
         super().__init__(model, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
@@ -170,45 +167,27 @@ class PipelinePredictor(AbstractPredictor):
         output_vars = self._output
         for name, obj in pipeline.steps[:-1]:
             if name == "standardscaler":
-                self.steps.append(StandardScalerPredictor(model, obj, input_vars))
+                self.steps.append(StandardScalerPredictor(model, obj, input_vars, **self._kwargs))
             else:
-                raise BaseException(
-                    f"I don't know how to deal with that object: {name}"
-                )
+                raise BaseException(f"I don't know how to deal with that object: {name}")
             input_vars = self.steps[-1].output()
         else:
             name, obj = pipeline.steps[-1]
             if name == "linearregression":
-                self.steps.append(
-                    LinearRegressionPredictor(model, obj, input_vars, output_vars)
-                )
+                self.steps.append(LinearRegressionPredictor(model, obj, input_vars, output_vars, **self._kwargs))
             elif name == "logisticregression":
-                self.steps.append(
-                    LogisticRegressionPredictor(model, obj, input_vars, output_vars)
-                )
+                self.steps.append(LogisticRegressionPredictor(model, obj, input_vars, output_vars, **self._kwargs))
             elif name == "mlpregressor":
-                self.steps.append(
-                    MLPRegressorPredictor(model, obj, input_vars, output_vars)
-                )
+                self.steps.append(MLPRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
             elif name == "mlpclassifier":
-                self.steps.append(
-                    MLPRegressorPredictor(model, obj, input_vars, output_vars)
-                )
+                self.steps.append(MLPRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
             elif name == "decisiontreeregressor":
-                self.steps.append(
-                    DecisionTreeRegressorPredictor(model, obj, input_vars, output_vars)
-                )
+                self.steps.append(DecisionTreeRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
             elif name == "gradientboostingregressor":
                 self.steps.append(
-                    GradientBoostingRegressorPredictor(
-                        model, obj, input_vars, output_vars
-                    )
+                    GradientBoostingRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs)
                 )
             elif name == "randomforestregressor":
-                self.steps.append(
-                    RandomForestRegressorPredictor(model, obj, input_vars, output_vars)
-                )
+                self.steps.append(RandomForestRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
             else:
-                raise BaseException(
-                    f"I don't know how to deal with that object: {name}"
-                )
+                raise BaseException(f"I don't know how to deal with that object: {name}")

@@ -17,7 +17,6 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
 
     model.optimize()
     assert model.Status == GRB.OPTIMAL
-    print(model.NumVars, model.NumConstrs, model.NumGenConstrs)
     if verbose:
         print(f"Round {round_num} objval {model.ObjVal}")
     model.Params.Method = 0
@@ -36,9 +35,7 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
         for k in range(n):
             if alreadfixed[k, j]:
                 continue
-            if layer.zvar is not None and (
-                layer.zvar[k, j].LB > 0.5 or layer.zvar[k, j].UB < 0.5
-            ):
+            if layer.zvar is not None and (layer.zvar[k, j].LB > 0.5 or layer.zvar[k, j].UB < 0.5):
                 continue
             done += 1
             model.setObjective(
@@ -66,9 +63,7 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
         for k in range(n):
             if alreadfixed[k, j]:
                 continue
-            if layer.zvar is not None and (
-                layer.zvar[k, j].LB > 0.5 or layer.zvar[k, j].UB < 0.5
-            ):
+            if layer.zvar is not None and (layer.zvar[k, j].LB > 0.5 or layer.zvar[k, j].UB < 0.5):
                 continue
             done += 1
             model.setObjective(
@@ -105,14 +100,13 @@ def obbt(nn2gurobi, n_rounds=1, activation=None):
     outputflag = model.Params.OutputFlag
     model.Params.OutputFlag = 0
     nn2gurobi.rebuild_formulation(activation)
+    assert model.NumGenConstrs == 0
     for roundnum in range(n_rounds):
         n_strengthened = 0
         for layer in nn2gurobi:
             if layer.activation in (None, "identity"):
                 continue
-            n_strengthened += obbt_layer(
-                layer, roundnum, stats=stats, verbose=outputflag
-            )
+            n_strengthened += obbt_layer(layer, roundnum, stats=stats, verbose=outputflag)
             nn2gurobi.rebuild_formulation(activation)
         if n_strengthened == 0:
             break
