@@ -181,22 +181,18 @@ class NNLayer(AbstractPredictor):
     def redolayer(self, activation=None):
         ''' Rebuild the layer (possibly using a different model for activation)'''
         model = self._model
-        print(model.NumVars, model.NumConstrs, model.NumGenConstrs)
         self._model.remove(self.getConstrs())
         self._model.remove(self.getQConstrs())
         self._model.remove(self.getGenConstrs())
         self._model.update()
-        print(model.NumVars, model.NumConstrs, model.NumGenConstrs)
         before = SubModel._modelstats(self._model)
         self._add(activation)
         self._update(self._model, before)
-        print(model.NumVars, model.NumConstrs, model.NumGenConstrs)
 
 
 class BaseNNPredictor(AbstractPredictor):
     ''' Base class for inserting a regressor based on neural-network/tensor into Gurobi'''
-
-    def __init__(self, model, regressor, input_vars, output_vars, name='', clean_regressor=False, **kwargs):
+    def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
         self.regressor = regressor
         self.clean = clean_regressor
         self.actdict = {'relu': ReLUGC(), 'identity': Identity(),
