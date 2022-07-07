@@ -212,8 +212,8 @@ class BaseNNPredictor(AbstractPredictor):
                  activation_vars=None, name=None):
         '''Add a layer to model'''
         if self.clean:
-            mask = np.abs(layer.coefs) < 1e-8
-            layer.coefs[mask] = 0.0
+            mask = np.abs(layer_coefs) < 1e-8
+            layer_coefs[mask] = 0.0
         layer = NNLayer(self._model, activation_vars, input_vars, layer_coefs,
                         layer_intercept, activation, name)
         self._layers.append(layer)
