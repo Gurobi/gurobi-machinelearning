@@ -34,7 +34,7 @@ def transpose(gpvars):
     return gp.MVar(gpvars.tolist()[0], (gpvars.shape[1], gpvars.shape[0]))
 
 
-def addtosubmodel(function):
+def addtomodel(function):
     ''' Wrapper function to add to submodel '''
     def wrapper(self, *args, **kwargs):
         begin = self.get_stats_()
@@ -47,7 +47,7 @@ def addtosubmodel(function):
 
 class AbstractPredictor:
     ''' Class to define a submodel'''
-    def __init__(self, model, input_vars, output_vars, name='', delayed_add=False, **kwargs):
+    def __init__(self, model, input_vars, output_vars, name='', **kwargs):
         self.model = model
         self.name = name
         self.torec_ = {'Constrs': model.getConstrs,
@@ -61,19 +61,9 @@ class AbstractPredictor:
         for stat in self.torec_:
             self.list_[stat] = []
             self.num_[stat] = 0
-        if input_vars is not None:
-            self._set_input(input_vars)
-        else:
-            self._input = None
-        if output_vars is not None:
-            self._set_output(output_vars)
-        else:
-            self._output = None
-        self._delayed_add = (input_vars is None or
-                             output_vars is None or
-                             delayed_add)
-        if not self._delayed_add:
-            self._add()
+        self._set_input(input_vars)
+        self._set_output(output_vars)
+        self._add()
 
     def get_stats_(self):
         ''' Get model's statistics'''
@@ -120,6 +110,7 @@ class AbstractPredictor:
 
         (i.e. record what happened between begin and end).
         '''
+        self.model.update()
         for s, func in self.torec_.items():
             added = end[s] - begin[s]
             if added == 0:
@@ -128,11 +119,11 @@ class AbstractPredictor:
             added = func()[begin[s]: end[s]]
             self.list_[s] += added
 
-    @addtosubmodel
-    def _add(self):
+    @addtomodel
+    def _add(self,*args, **kwargs):
         '''Predict output from input using regression/classifier'''
         self._input, self._output = self.validate(self._input, self._output)
-        self.mip_model()
+        self.mip_model(*args, **kwargs)
         return self
 
     def remove(self, what=None):

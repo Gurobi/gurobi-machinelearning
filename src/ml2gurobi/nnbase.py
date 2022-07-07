@@ -8,21 +8,20 @@ import gurobipy as gp
 import numpy as np
 
 from .activations import Identity, LogitPWL, ReLUGC
-from .utils import AbstractPredictor, addtosubmodel
+from .utils import AbstractPredictor
 
 
 class NNLayer(AbstractPredictor):
     '''Class to build one layer of a neural network'''
-
     def __init__(self, model, output_vars, input_vars, layer_coefs,
                  layer_intercept, activation_function, name,**kwargs):
-        super().__init__(model, input_vars, output_vars, name, kwargs)
         self.coefs = layer_coefs
         self.intercept = layer_intercept
         self.activation = activation_function
         self.wmin = None
         self.wmax = None
         self.zvar = None
+        super().__init__(model, input_vars, output_vars, name, **kwargs)
 
     def getname(self, index):
         '''Get a fancy name for a neuron in layer'''
@@ -44,25 +43,16 @@ class NNLayer(AbstractPredictor):
 
         return (wmin, wmax)
 
-    @addtosubmodel
-    def add(self, activation=None):
+    def mip_model(self, activation=None):
         ''' Add the layer to model'''
         model = self.model
         model.update()
-        output = self._output
         _input = self._input  # pylint: disable=W0212
         layer_coefs = self.coefs
         if activation is None:
             activation = self.activation
         n, _ = _input.shape
         _, layer_size = layer_coefs.shape
-
-        # Add activation variables if we don't have them
-        if output is None:
-            output = model.addMVar((n, layer_size),
-                                            lb=-gp.GRB.INFINITY,
-                                            name=f'__act[{self.name}]')
-            self._output = output
 
         # Compute bounds on weighted sums by propagation
         wmin, wmax = self._wminmax()
@@ -89,7 +79,7 @@ class NNLayer(AbstractPredictor):
     def redolayer(self, activation=None):
         ''' Rebuild the layer (possibly using a different model for activation)'''
         self.remove(['Constrs', 'QConstrs', 'GenConstrs'])
-        self.add(activation)
+        self._add(activation)
 
 
 class BaseNNPredictor(AbstractPredictor):
@@ -114,12 +104,16 @@ class BaseNNPredictor(AbstractPredictor):
         if self.name != '':
             name = f'{self.name}[{name}]'
 
-        layer = NNLayer(self.model, activation_vars, input_vars, layer_coefs,
-                        layer_intercept, activation, name, delayed_add=True)
+        # Add activation variables if we don't have them
+        if activation_vars is None:
+            activation_vars = self.model.addMVar((input_vars.shape[0], layer_coefs.shape[1]),
+                                                 lb=-gp.GRB.INFINITY,
+                                                 name=f'__act[{self.name}]')
         if self.clean:
             mask = np.abs(layer.coefs) < 1e-8
             layer.coefs[mask] = 0.0
-        layer.add()
+        layer = NNLayer(self.model, activation_vars, input_vars, layer_coefs,
+                        layer_intercept, activation, name)
         self._layers.append(layer)
         return layer
 
