@@ -42,17 +42,14 @@ def transpose(gpvars):
 class AbstractPredictor(SubModel):
     ''' Class to define a submodel'''
     @addtomodel
-    def __init__(self, model, input_vars, output_vars=None, *args, **kwargs):
+    def __init__(self, model, input_vars, *args, output_vars=None, **kwargs):
         assert model == self._model
-        self._set_input(input_vars)
+        self._input = validate_gpvars(input_vars)
         if output_vars is not None:
-            self._set_output(output_vars)
+            self._output = validate_gpvars(output_vars)
         else:
             self._output = None
-        self._add()
-
-    def _set_input(self, input_vars):
-        self._input = validate_gpvars(input_vars)
+        self._add(*args, **kwargs)
 
     def _set_output(self, output_vars):
         self._output = validate_gpvars(output_vars)
@@ -68,8 +65,8 @@ class AbstractPredictor(SubModel):
         if (output_vars.shape[0] != input_vars.shape[0] and
                 output_vars.shape[1] != input_vars.shape[0]):
             raise BaseException("Non-conforming dimension between " +
-                                "input variable and output variable: {} != {}".
-                                format(output_vars.shape[0], input_vars.shape[0]))
+                                "input variable and output variable: " +
+                                f"{output_vars.shape[0]} != {input_vars.shape[0]}")
         if (input_vars.shape[0] != output_vars.shape[0] and
                 output_vars.shape[1] == input_vars.shape[0]):
             output_vars = transpose(output_vars)
@@ -79,26 +76,37 @@ class AbstractPredictor(SubModel):
     def _add(self,  *args, **kwargs):
         '''Predict output from input using regression/classifier'''
         if self._output is None:
-            output_vars = self._create_output_vars(
-                self._input, *args, **kwargs)
-            self._set_output(output_vars)
+            self._create_output_vars(self._input, *args, **kwargs)
         self._input, self._output = self.validate(self._input, self._output)
         self.mip_model(*args, **kwargs)
         return self
+
+
+    def _create_output_vars(self, input_vars):
+        '''Impemented in child classes. Does nothing in the abstract class.'''
+        assert input_vars is not None
+        assert self._model is not None
+        assert False
+
+    def mip_model(self, activation=None):
+        '''Impemented in child classes. Does nothing in the abstract class.'''
+        assert self._model is not None
+        assert activation is None or activation is not None
+        assert False
 
 
 class NNLayer(AbstractPredictor):
     '''Class to build one layer of a neural network'''
 
     def __init__(self, model, output_vars, input_vars, layer_coefs,
-                 layer_intercept, activation_function, name, **kwargs):
+                 layer_intercept, activation_function, *args, **kwargs):
         self.coefs = layer_coefs
         self.intercept = layer_intercept
         self.activation = activation_function
         self.wmin = None
         self.wmax = None
         self.zvar = None
-        super().__init__(model, input_vars, output_vars, name, **kwargs)
+        super().__init__(model, input_vars, output_vars, *args, **kwargs)
 
     def _wminmax(self):
         '''Compute min/max for w variable'''
@@ -116,10 +124,10 @@ class NNLayer(AbstractPredictor):
 
         return (wmin, wmax)
 
-    def _create_output_vars(self, input_vars, *args, **kwargs):
+    def _create_output_vars(self, input_vars):
         rval = self._model.addMVar((input_vars.shape[0], self.coefs.shape[1]),
                                    lb=-gp.GRB.INFINITY,
-                                   name=f'act')
+                                   name='act')
         self._model.update()
         return rval
 
@@ -127,12 +135,8 @@ class NNLayer(AbstractPredictor):
         ''' Add the layer to model'''
         model = self._model
         model.update()
-        _input = self._input  # pylint: disable=W0212
-        layer_coefs = self.coefs
         if activation is None:
             activation = self.activation
-        n, _ = _input.shape
-        _, layer_size = layer_coefs.shape
 
         # Compute bounds on weighted sums by propagation
         wmin, wmax = self._wminmax()
@@ -177,11 +181,10 @@ class NNLayer(AbstractPredictor):
             )[before.numGenConstrs: model.numGenConstrs]
         # range of SOS
         if model.numSOS > before.numSOS:
-            self._SOS = model.getSOSs()[before.numSOS: model.numSOS]
+            self._SOSs = model.getSOSs()[before.numSOS: model.numSOS]
 
     def redolayer(self, activation=None):
         ''' Rebuild the layer (possibly using a different model for activation)'''
-        model = self._model
         self._model.remove(self.getConstrs())
         self._model.remove(self.getQConstrs())
         self._model.remove(self.getGenConstrs())
@@ -200,7 +203,7 @@ class BaseNNPredictor(AbstractPredictor):
         self.actdict = {'relu': ReLUGC(), 'identity': Identity(),
                         'logit': LogitPWL()}
         self._layers = []
-        super().__init__(model, input_vars, output_vars, name, **kwargs)
+        super().__init__(model, input_vars, output_vars, **kwargs)
 
     def __iter__(self):
         return self._layers.__iter__()

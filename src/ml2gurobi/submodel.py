@@ -1,5 +1,6 @@
 """Building Sub-models with gurobipy"""
 
+# pylint: disable=C0103
 
 def addtomodel(function):
     """Decorator function for SobModels"""
@@ -162,7 +163,7 @@ class SubModel:
                     name = type(obj).__name__
                 try:
                     num = self.name[name]
-                except:
+                except KeyError:
                     num = 1
                 self.name[name] = num + 1
                 return f"{name}{num}"

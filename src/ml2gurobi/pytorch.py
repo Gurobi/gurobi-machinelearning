@@ -6,7 +6,7 @@ in a Gurobi model '''
 
 from torch import nn
 
-from .nnbase import BaseNNPredictor
+from .basepredictor import BaseNNPredictor
 
 
 class SequentialPredictor(BaseNNPredictor):
@@ -28,7 +28,7 @@ class SequentialPredictor(BaseNNPredictor):
         BaseNNPredictor.__init__(self, model, regressor, input_vars, output_vars,
                                  clean_regressor)
 
-    def mip_model(self):
+    def mip_model(self, *args, **kwargs):
         network = self.regressor
         _input = self._input
         output = self._output
