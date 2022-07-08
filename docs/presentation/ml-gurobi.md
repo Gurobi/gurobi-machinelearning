@@ -88,16 +88,17 @@ Currently named `ml2gurobi`
 
 ---
 
-## Name of objects defined by package
+## Name of objects we define
 ### Current naming convention
 
-We take an trained object of class `<class>` from a package.
-By convention the class to insert that object in a Gurobi model will
+We take an trained object of class `<class>`.
+The class that inserts that object in a Gurobi model will
 be `<class><suffix>`:
 - Current `<suffix>` is `Predictor`.
 - for e.g. `LogisiticRegression` becomes `LogisiticRegressionPredictor`
-- Could change the suffix (`2Gurobi`, `Constr`, ...), but not too many times (updating all example and tests takes at least an hour)
+- Could change the suffix (previously `2Gurobi`, `Constr`, ...), but not too many times (updating all example and tests takes at least an hour)
 - Long names for e.g. with `scikit-learn`'s `GradientBoostingRegressor`.
+- `Regressor` and `Predictor` are redundant.
 
 --
 
