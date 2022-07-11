@@ -9,8 +9,6 @@ from ml2gurobi.activations import ReLUGC
 from ml2gurobi.extra.morerelu import ReLUmin
 from ml2gurobi.sklearn import MLPRegressorPredictor
 
-gp.gurobi._nd_unleashed = True
-
 
 def build_abs_network():
     """Make a scikit-learn neural network for computing absolute value"""
@@ -33,7 +31,7 @@ def build_abs_network():
     return regression
 
 
-def model(X, y, nn, infbound, relumodel=None):
+def absmodel(X, y, nn, infbound, relumodel=None):
     bound = 100
     with gp.Model() as model:
         samples, dim = X.shape
@@ -66,15 +64,17 @@ def model(X, y, nn, infbound, relumodel=None):
 class TestNNFormulation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        """Set up the test"""
         X, y = make_regression(n_samples=30, n_features=3, random_state=0)
         y += np.random.normal(size=(30))
         cls.X = X
         cls.y = y
         cls.nn = build_abs_network()
 
-    def dothetest(self, b, r):
-        val1 = model(self.X, self.y, False, b, None)
-        val2 = model(self.X, self.y, self.nn, b, r)
+    def dothetest(self, bound, relu):
+        """Test the network for absolute value with relu formulation"""
+        val1 = absmodel(self.X, self.y, False, bound, None)
+        val2 = absmodel(self.X, self.y, self.nn, bound, relu)
         self.assertAlmostEqual(val1, val2, places=4)
 
     def test_nobounds(self):
@@ -84,25 +84,33 @@ class TestNNFormulation(unittest.TestCase):
         self.dothetest(100, None)
 
     def test_prop_without_bounds(self):
+        """Test with propagation and without bounds"""
         self.dothetest(gp.GRB.INFINITY, ReLUGC(setbounds=True))
 
     def test_prop_with_bounds(self):
+        """Test with propagation and with bounds"""
         self.dothetest(100, ReLUGC(setbounds=True))
 
     def test_noprop_without_bounds(self):
+        """Test without propagation and without bounds"""
         self.dothetest(gp.GRB.INFINITY, ReLUGC(setbounds=False))
 
     def test_noprop_with_bounds(self):
+        """Test without propagation and with bounds"""
         self.dothetest(100, ReLUGC(setbounds=False))
 
     def test_min_prop_without_bounds(self):
+        """Test min formulation with propagation and without bounds"""
         self.dothetest(gp.GRB.INFINITY, ReLUmin(setbounds=True))
 
     def test_min_prop_with_bounds(self):
+        """Test min formulation with propagation and with bounds"""
         self.dothetest(100, ReLUmin(setbounds=True))
 
     def test_min_noprop_without_bounds(self):
+        """Test min formulation without propagation and without bounds"""
         self.dothetest(gp.GRB.INFINITY, ReLUmin(setbounds=False))
 
     def test_min_noprop_with_bounds(self):
+        """Test min formulation without propagation and with bounds"""
         self.dothetest(100, ReLUmin(setbounds=False))
