@@ -34,11 +34,11 @@ class StandardScalerPredictor(AbstractPredictor):
     """Class to use a StandardScale to create scaled version of
     some Gurobi variables."""
 
-    def __init__(self, model, scaler, input_vars, *args, **kwargs):
+    def __init__(self, model, scaler, input_vars, **kwargs):
         self.scaler = scaler
-        super().__init__(model, input_vars, *args, **kwargs)
+        super().__init__(model, input_vars, **kwargs)
 
-    def _create_output_vars(self, input_vars, *args, **kwargs):
+    def _create_output_vars(self, input_vars, **kwargs):
         rval = self._model.addMVar(input_vars.shape, name="scaledx")
         self._model.update()
         self._output = rval
@@ -139,14 +139,7 @@ class MLPRegressorPredictor(BaseNNPredictor):
                 activation = self.actdict[neuralnet.out_activation_]
                 output = self._output
 
-            layer = self.addlayer(
-                input_vars,
-                layer_coefs,
-                layer_intercept,
-                activation,
-                output,
-                name=f"layer{i}",
-            )
+            layer = self.addlayer(input_vars, layer_coefs, layer_intercept, activation, output, name=f"layer{i}")
             input_vars = layer._output  # pylint: disable=W0212
             self._model.update()
 

@@ -9,7 +9,7 @@ import gurobipy as gp
 import numpy as np
 
 from .activations import Identity, LogitPWL, ReLUGC
-from .submodel import SubModel, addtomodel
+from .submodel import SubModel
 
 
 def validate_gpvars(gpvars):
@@ -47,15 +47,13 @@ def transpose(gpvars):
 class AbstractPredictor(SubModel):
     """Class to define a submodel"""
 
-    @addtomodel
-    def __init__(self, model, input_vars, output_vars=None, *args, **kwargs):
-        assert model == self._model
+    def __init__(self, model, input_vars, output_vars=None, **kwargs):
         self._input = validate_gpvars(input_vars)
         if output_vars is not None:
             self._output = validate_gpvars(output_vars)
         else:
             self._output = None
-        self._add()
+        super().__init__(model, **kwargs)
 
     def _set_output(self, output_vars):
         self._output = validate_gpvars(output_vars)
@@ -79,7 +77,7 @@ class AbstractPredictor(SubModel):
 
         return (input_vars, output_vars)
 
-    def _add(self):
+    def _build_submodel(self, model, **kwargs):
         """Predict output from input using regression/classifier"""
         if self._output is None:
             self._create_output_vars(self._input)
@@ -99,7 +97,6 @@ class NNLayer(AbstractPredictor):
         layer_coefs,
         layer_intercept,
         activation_function,
-        *args,
         **kwargs,
     ):
         self.coefs = layer_coefs
@@ -108,7 +105,7 @@ class NNLayer(AbstractPredictor):
         self.wmin = None
         self.wmax = None
         self.zvar = None
-        super().__init__(model, input_vars, output_vars, *args, **kwargs)
+        super().__init__(model, input_vars, output_vars, **kwargs)
 
     def _wminmax(self):
         """Compute min/max for w variable"""
@@ -214,28 +211,12 @@ class BaseNNPredictor(AbstractPredictor):
     def __iter__(self):
         return self._layers.__iter__()
 
-    def addlayer(
-        self,
-        input_vars,
-        layer_coefs,
-        layer_intercept,
-        activation,
-        activation_vars=None,
-        name=None,
-    ):
+    def addlayer(self, input_vars, layer_coefs, layer_intercept, activation, activation_vars=None, **kwargs):
         """Add a layer to model"""
         if self.clean:
             mask = np.abs(layer_coefs) < 1e-8
             layer_coefs[mask] = 0.0
-        layer = NNLayer(
-            self._model,
-            activation_vars,
-            input_vars,
-            layer_coefs,
-            layer_intercept,
-            activation,
-            name,
-        )
+        layer = NNLayer(self._model, activation_vars, input_vars, layer_coefs, layer_intercept, activation, **kwargs)
         self._layers.append(layer)
         return layer
 

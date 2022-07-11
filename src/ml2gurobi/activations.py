@@ -38,7 +38,7 @@ class Identity:
             output.UB = np.minimum(output.UB, layer.wmax)
 
         for index in np.ndindex(output.shape):
-            layer.getModel().addConstr(output[index] == get_mixing(layer, index), name=_name(index, "mix"))
+            layer.model.addConstr(output[index] == get_mixing(layer, index), name=_name(index, "mix"))
 
     @staticmethod
     def forward(input_values):
@@ -67,9 +67,9 @@ class ReLUGC:
         """Add MIP formulation for ReLU for neuron in layer"""
         output = layer._output  # pylint: disable=W0212
         if not hasattr(layer, "mixing"):
-            mixing = layer.getModel().addMVar(output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix")
+            mixing = layer.model.addMVar(output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix")
             layer.mixing = mixing
-        layer.getModel().update()
+        layer.model.update()
         if self.bigm is not None:
             layer.wmax = np.minimum(layer.wmax, self.bigm)
             layer.wmin = np.maximum(layer.wmin, -1 * self.bigm)
@@ -81,8 +81,8 @@ class ReLUGC:
 
         for index in np.ndindex(output.shape):
             mixing = get_mixing(layer, index)
-            layer.getModel().addConstr(layer.mixing[index] == mixing, name=_name(index, "mix"))
-            layer.getModel().addGenConstrMax(
+            layer.model.addConstr(layer.mixing[index] == mixing, name=_name(index, "mix"))
+            layer.model.addGenConstrMax(
                 output[index],
                 [
                     layer.mixing[index],
@@ -194,11 +194,11 @@ class LogitPWL:
 
     def mip_model(self, layer):
         """Add formulation for logit for neuron of layer"""
-        model = layer.getModel()
+        model = layer.model
         output = layer._output  # pylint: disable=W0212
 
         if not layer.zvar:
-            z = layer.getModel().addMVar(output.shape, lb=-GRB.INFINITY, name="z")
+            z = layer.model.addMVar(output.shape, lb=-GRB.INFINITY, name="z")
             layer.zvar = z
         else:
             z = layer.zvar
@@ -216,4 +216,4 @@ class LogitPWL:
             else:
                 xval, yval = self._logit_pwl_3pieces(vx, vact)
             if len(xval) > 0:
-                layer.getModel().addGenConstrPWL(vx, vact, xval, yval, name=f"pwl[{index}]")
+                layer.model.addGenConstrPWL(vx, vact, xval, yval, name=f"pwl[{index}]")

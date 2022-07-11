@@ -4,7 +4,7 @@ from gurobipy import GRB
 
 def obbt_layer(layer, round_num, stats=None, verbose=True):
     """Perform OBBT on layer"""
-    model = layer.getModel()
+    model = layer.model
     obj = model.getObjective()
     objsense = model.ModelSense
     savemethod = model.Params.Method
@@ -96,7 +96,7 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
 def obbt(nn2gurobi, n_rounds=1, activation=None):
     """Perform OBBT on model"""
     stats = {"done": 0, "iters": 0}
-    model = nn2gurobi.getModel()
+    model = nn2gurobi.model
     outputflag = model.Params.OutputFlag
     model.Params.OutputFlag = 0
     nn2gurobi.rebuild_formulation(activation)

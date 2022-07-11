@@ -18,9 +18,9 @@ class ReLUmin:
     def mip_model(self, layer):
         """Add weird MIP formulation for ReLU for neuron in layer"""
         if not hasattr(layer, "mixing"):
-            mixing = layer.getModel().addMVar(layer._output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="mix")
+            mixing = layer.model.addMVar(layer._output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="mix")
             layer.mixing = mixing
-            minact = layer.getModel().addMVar(
+            minact = layer.model.addMVar(
                 layer._output.shape,
                 lb=-GRB.INFINITY,
                 ub=0.0,
@@ -46,10 +46,10 @@ class ReLUmin:
             vact = layer._output[index]
             minact = layer.minact[index]
             mixing = sum(layer._input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
-            layer.getModel().addConstr(layer.mixing[index] == -mixing, name=_name(index, "mix"))
+            layer.model.addConstr(layer.mixing[index] == -mixing, name=_name(index, "mix"))
             mixing = layer.mixing[index]
-            layer.getModel().addConstr(vact == -minact)
-            layer.getModel().addGenConstrMin(minact, [mixing, 0.0], name=_name(index, "relu"))
+            layer.model.addConstr(vact == -minact)
+            layer.model.addGenConstrMin(minact, [mixing, 0.0], name=_name(index, "relu"))
 
 
 class GRBReLU:
@@ -63,9 +63,9 @@ class GRBReLU:
     def mip_model(self, layer):
         """Add MIP formulation for ReLU for neuron in layer"""
         if not layer.zvar:
-            z = layer.getModel().addMVar(layer._output.shape, ub=1.0, vtype=GRB.BINARY, name="z")
+            z = layer.model.addMVar(layer._output.shape, ub=1.0, vtype=GRB.BINARY, name="z")
             layer.zvar = z
-            mixing = layer.getModel().addMVar(
+            mixing = layer.model.addMVar(
                 layer._output.shape,
                 lb=0.0,
                 ub=-layer.wmin,
@@ -92,20 +92,20 @@ class GRBReLU:
 
             mixing = sum(layer._input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
             if ub > self.eps and lb < -self.eps:
-                layer.getModel().addConstr(vact - vmix == mixing, name=_name(index, "mix"))
+                layer.model.addConstr(vact - vmix == mixing, name=_name(index, "mix"))
                 mixing = layer.mixing[index]
                 vz = layer.zvar[index]
                 if self.complement or -lb < ub:
                     vz = 1 - vz
-                layer.getModel().addConstr(vmix <= -lb * (1 - vz), name=_name(index, "low"))
-                layer.getModel().addConstr(vact <= ub * vz, name=_name(index, "vub"))
+                layer.model.addConstr(vmix <= -lb * (1 - vz), name=_name(index, "low"))
+                layer.model.addConstr(vact <= ub * vz, name=_name(index, "vub"))
             elif ub <= self.eps:
                 vact.UB = 0.0
                 vact.LB = 0.0
                 vmix.UB = 0.0
             else:
                 assert lb >= -self.eps
-                layer.getModel().addConstr(vact == mixing, name=_name(index, "mix"))
+                layer.model.addConstr(vact == mixing, name=_name(index, "mix"))
 
     @staticmethod
     def reset_bounds(layer):
@@ -127,10 +127,10 @@ class ReLUM:
     def mip_model(self, layer):
         """Add MIP formulation for ReLU for neuron in layer"""
         if not layer.zvar:
-            z = layer.getModel().addMVar(layer._output.shape, ub=1.0, vtype=GRB.BINARY, name="z")
+            z = layer.model.addMVar(layer._output.shape, ub=1.0, vtype=GRB.BINARY, name="z")
             layer.zvar = z
             if not self.expand:
-                mixing = layer.getModel().addMVar(
+                mixing = layer.model.addMVar(
                     layer._output.shape,
                     lb=layer.wmin,
                     ub=layer.wmax,
@@ -157,18 +157,18 @@ class ReLUM:
             mixing = sum(layer._input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
             if ub > self.eps and lb < -self.eps:
                 if not self.expand:
-                    layer.getModel().addConstr(layer.mixing[index] == mixing, name=_name(index, "mix"))
+                    layer.model.addConstr(layer.mixing[index] == mixing, name=_name(index, "mix"))
                     mixing = layer.mixing[index]
                 vz = layer.zvar[index]
-                layer.getModel().addConstr(vact >= mixing, name=_name(index, "low"))
-                layer.getModel().addConstr(vact <= ub * vz, name=_name(index, "vub1"))
-                layer.getModel().addConstr(vact <= mixing - lb * (1 - vz), name=_name(index, "vub2"))
+                layer.model.addConstr(vact >= mixing, name=_name(index, "low"))
+                layer.model.addConstr(vact <= ub * vz, name=_name(index, "vub1"))
+                layer.model.addConstr(vact <= mixing - lb * (1 - vz), name=_name(index, "vub2"))
             elif ub <= self.eps:
                 vact.UB = 0.0
                 vact.LB = 0.0
             else:
                 assert lb >= -self.eps
-                layer.getModel().addConstr(vact == mixing, name=_name(index, "mix"))
+                layer.model.addConstr(vact == mixing, name=_name(index, "mix"))
 
     @staticmethod
     def forward(input_values):
@@ -218,23 +218,23 @@ class reluOBBT:
             constrname = f"[{index}]".replace(" ", "")
             mixing = sum(layer._input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
             if ub < 1e-8:
-                layer.getModel().addConstr(vact <= 0, name=constrname + "_inactive")
+                layer.model.addConstr(vact <= 0, name=constrname + "_inactive")
                 return
             elif lb > -1e-8:
-                layer.getModel().addConstr(mixing == vact, name=constrname + "_active")
+                layer.model.addConstr(mixing == vact, name=constrname + "_active")
                 return
 
             alpha = ub / (ub - lb)
 
             if self.obbt_rel == "comb":
-                layer.getModel().addConstr(vact >= alpha * mixing, name=constrname + "_low")
+                layer.model.addConstr(vact >= alpha * mixing, name=constrname + "_low")
             elif self.obbt_rel == "either":
                 if abs(ub) > abs(lb):
-                    layer.getModel().addConstr(vact >= mixing, name=constrname + "_low")
+                    layer.model.addConstr(vact >= mixing, name=constrname + "_low")
                 else:
-                    layer.getModel().addConstr(vact >= 0, name=constrname + "_low")
+                    layer.model.addConstr(vact >= 0, name=constrname + "_low")
             else:
-                layer.getModel().addConstr(vact >= mixing, name=constrname + "_low1")
-                layer.getModel().addConstr(vact >= 0, name=constrname + "_low2")
+                layer.model.addConstr(vact >= mixing, name=constrname + "_low1")
+                layer.model.addConstr(vact >= 0, name=constrname + "_low2")
 
-            layer.getModel().addConstr(vact <= alpha * mixing - lb * alpha, name=constrname + "_up")
+            layer.model.addConstr(vact <= alpha * mixing - lb * alpha, name=constrname + "_up")
