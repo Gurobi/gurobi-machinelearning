@@ -1,7 +1,5 @@
 """Building Sub-models with gurobipy"""
 
-# pylint: disable=C0103
-
 
 class SubModel:
     """Base class for building and representing a sub-model of a gurobipy.Model.
@@ -78,15 +76,15 @@ class SubModel:
     def __init__(self, grbmodel, *args, model_function=None, default_name=None, name=None, **kwargs):
         self._model = None
         self._objects = {}
-        self._firstVar = None
-        self._lastVar = None
-        self._firstConstr = None
-        self._lastConstr = None
-        self._QConstrs = []
-        self._GenConstrs = []
-        self._SOSs = []
-        self._firstCallback = None
-        self._lastCallback = None
+        self._firstvar = None
+        self._lastvar = None
+        self._firstconstr = None
+        self._lastconstr = None
+        self._qconstrs = []
+        self._genconstrs = []
+        self._sos = []
+        self._first_callback = None
+        self._last_callback = None
         self._model_function = model_function
 
         if default_name is not None:
@@ -131,90 +129,95 @@ class SubModel:
 
         def __init__(self, model):
             model.update()
-            self.numVars = model.numVars
-            self.numConstrs = model.numConstrs
-            self.numSOS = model.numSOS
-            self.numQConstrs = model.numQConstrs
-            self.numGenConstrs = model.numGenConstrs
+            self.numvars = model.numVars
+            self.numconstrs = model.numConstrs
+            self.numsos = model.numSOS
+            self.numqconstrs = model.numQConstrs
+            self.numgenconstrs = model.numGenConstrs
             try:
-                self.numCallbacks = model.numCallbacks
+                self.numcallbacks = model.numcallbacks
             except AttributeError:
-                self.numCallbacks = 0
+                self.numcallbacks = 0
 
     def _record(self, model, before):
         """Record added modeling objects compared to status before."""
         model.update()
         # range of variables
-        if model.numVars > before.numVars:
-            self._firstVar = model.getVars()[before.numVars]
-            self._lastVar = model.getVars()[model.numVars - 1]
+        if model.numvars > before.numvars:
+            self._firstvar = model.getVars()[before.numvars]
+            self._lastvar = model.getVars()[model.numvars - 1]
         else:
-            self._firstVar = None
-            self._lastVar = None
+            self._firstvar = None
+            self._lastvar = None
         # range of constraints
-        if model.numConstrs > before.numConstrs:
-            self._firstConstr = model.getConstrs()[before.numConstrs]
-            self._lastConstr = model.getConstrs()[model.numConstrs - 1]
+        if model.numconstrs > before.numconstrs:
+            self._firstconstr = model.getConstrs()[before.numconstrs]
+            self._lastconstr = model.getConstrs()[model.numconstrs - 1]
         else:
-            self._firstConstr = None
-            self._lastConstr = None
+            self._firstconstr = None
+            self._lastconstr = None
         # range of Q constraints
-        if model.numQConstrs > before.numQConstrs:
-            self._QConstrs = model.getQConstrs()[before.numQConstrs : model.numQConstrs]
+        if model.numqconstrs > before.numqconstrs:
+            self._qconstrs = model.getQConstrs()[before.numqconstrs : model.numqconstrs]
         else:
-            self._QConstrs = []
+            self._qconstrs = []
         # range of GenConstrs
-        if model.numGenConstrs > before.numGenConstrs:
-            self._GenConstrs = model.getGenConstrs()[before.numGenConstrs : model.numGenConstrs]
+        if model.numgenconstrs > before.numgenconstrs:
+            self._genconstrs = model.getGenConstrs()[before.numgenconstrs : model.numgenconstrs]
         else:
-            self._GenConstrs = []
+            self._genconstrs = []
         # range of SOS
-        if model.numSOS > before.numSOS:
-            self._SOSs = model.getSOSs()[before.numSOS : model.numSOS]
+        if model.numsos > before.numsos:
+            self._sos = model.getSOSs()[before.numsos : model.numsos]
         else:
-            self._SOSs = []
+            self._sos = []
         # range of Callbacks
-        self._firstCallback = None
-        self._lastCallback = None
+        self._first_callback = None
+        self._last_callback = None
         try:
-            if model.numCallbacks > before.numCallbacks:
-                self._firstCallback = self._model.getCallback(before.numCallbacks, before.numCallbacks)[0]
-                self._lastCallback = self._model.getCallback(model.numCallbacks - 1, model.numCallbacks - 1)[0]
+            if model.numcallbacks > before.numcallbacks:
+                self._first_callback = self._model.getCallback(before.numcallbacks, before.numcallbacks)[0]
+                self._last_callback = self._model.getCallback(model.numcallbacks - 1, model.numcallbacks - 1)[0]
         except AttributeError:
             pass
 
-    def getVars(self):
+    @property
+    def vars(self):
         """Return the list of variables in the submodel."""
-        if self._firstVar:
-            return self._model.getVars()[self._firstVar.index : self._lastVar.index + 1]
+        if self._firstvar:
+            return self._model.getVars()[self._firstvar.index : self._lastvar.index + 1]
         return []
 
-    def getConstrs(self):
+    @property
+    def constrs(self):
         """Return the list of linear constraints in the submodel."""
-        if self._firstConstr:
-            return self._model.getConstrs()[self._firstConstr.index : self._lastConstr.index + 1]
+        if self._firstconstr:
+            return self._model.getConstrs()[self._firstconstr.index : self._lastconstr.index + 1]
         return []
 
-    def getQConstrs(self):
+    @property
+    def qconstrs(self):
         """Return the list of quadratic constraints in the submodel."""
-        return self._QConstrs
+        return self._qconstrs
 
-    def getGenConstrs(self):
+    @property
+    def genconstrs(self):
         """Return the list of general constraints in the submodel."""
-        return self._GenConstrs
+        return self._genconstrs
 
-    def getSOSs(self):
+    @property
+    def sos(self):
         """Return the list of SOS constraints in the submodel."""
-        return self._SOSs
+        return self._sos
 
     def _open(self, model):
         """Start registering modeling object that are added to the gurobipy.Model"""
         self._model = model
         try:
-            md = model._modeling_data
+            modeling_data = model._modeling_data
         except AttributeError:
-            md = SubModel._ModelingData()
-        model._modeling_data = md
+            modeling_data = SubModel._ModelingData()
+        model._modeling_data = modeling_data
 
         return (self._modelstats(model), model._modeling_data.pop_name_handler())
 
@@ -231,14 +234,14 @@ class SubModel:
                 self.submodel = submodel
                 self.name = {}
 
-            def getName(self, name=None):
+            def get_name(self, name=None):
                 """Return a default name for specified obj.
                 If a name is provided it will be used as is, otherwise a
                 numbered default name will be generated.
                 """
                 if name is not None:
                     return name
-                name = self.submodel.defaultName
+                name = self.submodel.default_name
                 try:
                     num = self.name[name]
                 except KeyError:
@@ -248,9 +251,9 @@ class SubModel:
 
         def prefix_names(objs, attr, name):
             """Prefix all modeling object names with name"""
-            for o in objs:
-                nm = o.getAttr(attr)
-                o.setAttr(attr, f"{name}.{nm}")
+            for object in objs:
+                object_name = object.getAttr(attr)
+                object.setAttr(attr, f"{name}.{object_name}")
 
         # re-install name handler
         self._model._modeling_data.push_name_handler(before[1])
@@ -265,12 +268,12 @@ class SubModel:
                 if name_handler is None:
                     name_handler = NameHandler(self)
                     self._model._modeling_data.push_name_handler(name_handler)
-                name = name_handler.getName()
-            prefix_names(self.getVars(), "VarName", name)
-            prefix_names(self.getConstrs(), "ConstrName", name)
-            prefix_names(self.getQConstrs(), "QCName", name)
-            prefix_names(self.getGenConstrs(), "GenConstrName", name)
-            prefix_names(self.getSOSs(), "SOSName", name)
+                name = name_handler.get_name()
+            prefix_names(self.vars, "VarName", name)
+            prefix_names(self.constrs, "ConstrName", name)
+            prefix_names(self.qconstrs, "QCName", name)
+            prefix_names(self.genconstrs, "GenConstrName", name)
+            prefix_names(self.sos, "SOSName", name)
 
     @property
     def model(self):
@@ -283,32 +286,32 @@ class SubModel:
         return self._objects
 
     @property
-    def defaultName(self):
+    def default_name(self):
         """Access the default name base used for automatic name generation."""
         return self._default_name
 
     def remove(self):
         """Remove the submodel from the model"""
         if self._model:
-            self._model.remove(self.getVars())
-            self._model.remove(self.getConstrs())
-            self._model.remove(self._QConstrs)
-            self._model.remove(self._GenConstrs)
-            self._model.remove(self._SOSs)
-            if self._firstCallback:
-                beg = self._model.getCallbackIndex(self._firstCallback)
-                end = self._model.getCallbackIndex(self._lastCallback)
+            self._model.remove(self.vars)
+            self._model.remove(self.constrs)
+            self._model.remove(self.qconstrs)
+            self._model.remove(self.genconstrs)
+            self._model.remove(self.sos)
+            if self._first_callback:
+                beg = self._model.getCallbackIndex(self._first_callback)
+                end = self._model.getCallbackIndex(self._last_callback)
                 self._model.removeCallbacks(beg, end)
 
-            self._firstVar = None
-            self._lastVar = None
-            self._firstConstr = None
-            self._lastConstr = None
-            self._QConstrs = []
-            self._GenConstrs = []
-            self._SOSs = []
-            self._firstCallback = None
-            self._lastCallback = None
+            self._firstvar = None
+            self._lastvar = None
+            self._firstconstr = None
+            self._lastconstr = None
+            self._qconstrs = []
+            self._genconstrs = []
+            self._sos = []
+            self._first_callback = None
+            self._last_callback = None
             self._model = None
             self._objects = None
 

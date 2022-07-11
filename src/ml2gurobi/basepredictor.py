@@ -4,8 +4,6 @@
 models"""
 
 import gurobipy as gp
-
-# pylint: disable=C0103
 import numpy as np
 
 from .activations import Identity, LogitPWL, ReLUGC
@@ -172,31 +170,32 @@ class NNLayer(AbstractPredictor):
         model.update()
         # range of variables
         if model.numVars > before.numVars:
-            self._firstVar = model.getVars()[before.numVars]
-            self._lastVar = model.getVars()[model.numVars - 1]
+            self._firstvar = model.getVars()[before.numVars]
+            self._lastvar = model.getVars()[model.numVars - 1]
         # range of constraints
         if model.numConstrs > before.numConstrs:
-            self._firstConstr = model.getConstrs()[before.numConstrs]
-            self._lastConstr = model.getConstrs()[model.numConstrs - 1]
+            self._firstconstr = model.getConstrs()[before.numConstrs]
+            self._lastconstr = model.getConstrs()[model.numConstrs - 1]
         # range of Q constraints
         if model.numQConstrs > before.numQConstrs:
-            self._QConstrs = model.getQConstrs()[before.numQConstrs : model.numQConstrs]
+            self._qconstrs = model.getQConstrs()[before.numQConstrs : model.numQConstrs]
         # range of GenConstrs
         if model.numGenConstrs > before.numGenConstrs:
-            self._GenConstrs = model.getGenConstrs()[before.numGenConstrs : model.numGenConstrs]
+            self._genconstrs = model.getGenConstrs()[before.numGenConstrs : model.numGenConstrs]
         # range of SOS
         if model.numSOS > before.numSOS:
-            self._SOSs = model.getSOSs()[before.numSOS : model.numSOS]
+            self._sos = model.getSOSs()[before.numSOS : model.numSOS]
 
     def redolayer(self, activation=None):
         """Rebuild the layer (possibly using a different model for activation)"""
-        self.model.remove(self.getConstrs())
-        self.model.remove(self.getQConstrs())
-        self.model.remove(self.getGenConstrs())
+        self.model.remove(self.constrs)
+        self.model.remove(self.qconstrs)
+        self.model.remove(self.genconstrs)
+        self.model.remove(self.sos)
         self.model.update()
-        before = SubModel._modelstats(self._model)
+        before = SubModel._modelstats(self.model)
         self.mip_model(activation)
-        self._update(self._model, before)
+        self._update(self.model, before)
 
 
 class BaseNNPredictor(AbstractPredictor):

@@ -1,8 +1,6 @@
 # Copyright © 2022 Gurobi Optimization, LLC
 """Internal module to make MIP modeling of activation functions"""
 
-# pylint: disable=C0103
-
 import numpy as np
 from gurobipy import GRB
 
@@ -129,65 +127,65 @@ class LogitPWL:
     def preprocess(layer):
         """Prepare to add logit activation to layer"""
 
-    def _logit_pwl_3pieces(self, vx, vy):
+    def _logit_pwl_3pieces(self, xvar, yvar):
         """Do a 3 pieces approximation of logit"""
         zero = self.zerologit
         yval = np.array([zero, 1.0 - zero])
         xval = np.log(yval / (1 - yval))
 
-        if vx.UB < xval[0]:
-            vy.UB = 0.0
+        if xvar.UB < xval[0]:
+            yvar.UB = 0.0
             return (np.array([]), np.array([]))
-        if vx.LB > xval[-1]:
-            vy.LB = 1.0
+        if xvar.LB > xval[-1]:
+            yvar.LB = 1.0
             return (np.array([]), np.array([]))
-        if vx.LB <= xval[0]:
-            xval = np.concatenate(([vx.LB], xval))
+        if xvar.LB <= xval[0]:
+            xval = np.concatenate(([xvar.LB], xval))
             yval = np.concatenate(([0], yval))
         else:
-            xval[0] = vx.LB
-            yval[0] = 1 / (1 + np.exp(-vx.LB))
+            xval[0] = xvar.LB
+            yval[0] = 1 / (1 + np.exp(-xvar.LB))
 
-        if vx.UB >= xval[-1]:
-            xval = np.concatenate((xval, [vx.UB]))
+        if xvar.UB >= xval[-1]:
+            xval = np.concatenate((xval, [xvar.UB]))
             yval = np.concatenate((yval, [1.0]))
         else:
-            xval[-1] = vx.UB
-            yval[-1] = 1 / (1 + np.exp(-vx.UB))
+            xval[-1] = xvar.UB
+            yval[-1] = 1 / (1 + np.exp(-xvar.UB))
         return (xval, yval)
 
-    def _logit_pwl_approx(self, vx, vy):
+    def _logit_pwl_approx(self, xvar, yvar):
         """Do a piecewise approximation of logit"""
         shiftlb = False
         shiftub = False
-        lb = vx.LB
-        ub = vx.UB
+        lower = xvar.LB
+        upper = xvar.UB
         careful = True
         if careful:
-            if ub < -self.trouble:
-                vy.UB = 0.0
+            if upper < -self.trouble:
+                yvar.UB = 0.0
                 return (np.array([]), np.array([]))
-            if lb > self.trouble:
-                vy.LB = 1.0
+            if lower > self.trouble:
+                yvar.LB = 1.0
                 return (np.array([]), np.array([]))
 
-            if lb < -self.trouble:
+            if lower < -self.trouble:
                 shiftlb = True
-                lb = -self.trouble
-            if ub > self.trouble:
+                lower = -self.trouble
+            if upper > self.trouble:
                 shiftub = True
-                ub = self.trouble
-        beg = 1 / (1 + np.exp(-lb))
-        end = 1 / (1 + np.exp(-ub))
+                upper = self.trouble
+        beg = 1 / (1 + np.exp(-lower))
+        end = 1 / (1 + np.exp(-upper))
 
         yval = np.linspace(beg, end, self.nbreak)
         xval = np.minimum(np.log(yval / (1 - yval)), 1e10)
         xval = np.maximum(xval, -1e10)
         if shiftlb:
-            xval = np.concatenate(([vx.LB], xval))
+            xval = np.concatenate(([xvar.LB], xval))
             yval = np.concatenate(([0], yval))
         if shiftub:
-            xval = np.concatenate((xval, [vx.UB]))
+            xval = np.concatenate((xval, [xvar.UB]))
             yval = np.concatenate((yval, [1.0]))
 
         return (xval, yval)
@@ -198,22 +196,22 @@ class LogitPWL:
         output = layer._output  # pylint: disable=W0212
 
         if not layer.zvar:
-            z = layer.model.addMVar(output.shape, lb=-GRB.INFINITY, name="z")
-            layer.zvar = z
+            zvar = layer.model.addMVar(output.shape, lb=-GRB.INFINITY, name="z")
+            layer.zvar = zvar
         else:
-            z = layer.zvar
-        z.LB = layer.wmin
-        z.UB = layer.wmax
+            zvar = layer.zvar
+        zvar.LB = layer.wmin
+        zvar.UB = layer.wmax
         model.update()
 
         for index in np.ndindex(output.shape):
             mixing = get_mixing(layer, index)
             model.addConstr(layer.zvar[index] == mixing, name=f"_mix[{index}]")
             vact = output[index]
-            vx = layer.zvar[index]
+            xvar = layer.zvar[index]
             if self.logitapprox == "PWL":
-                xval, yval = self._logit_pwl_approx(vx, vact)
+                xval, yval = self._logit_pwl_approx(xvar, vact)
             else:
-                xval, yval = self._logit_pwl_3pieces(vx, vact)
+                xval, yval = self._logit_pwl_3pieces(xvar, vact)
             if len(xval) > 0:
-                layer.model.addGenConstrPWL(vx, vact, xval, yval, name=f"pwl[{index}]")
+                layer.model.addGenConstrPWL(xvar, vact, xval, yval, name=f"pwl[{index}]")

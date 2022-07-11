@@ -18,8 +18,6 @@ What we have so far:
 
 """
 
-# pylint: disable=C0103
-
 import numpy as np
 
 from .basepredictor import AbstractPredictor, BaseNNPredictor
