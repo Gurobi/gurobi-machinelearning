@@ -47,13 +47,13 @@ def transpose(gpvars):
 class AbstractPredictor(SubModel):
     """Class to define a submodel"""
 
-    def __init__(self, model, input_vars, output_vars=None, **kwargs):
+    def __init__(self, grbmodel, input_vars, output_vars=None, **kwargs):
         self._input = validate_gpvars(input_vars)
         if output_vars is not None:
             self._output = validate_gpvars(output_vars)
         else:
             self._output = None
-        super().__init__(model, **kwargs)
+        super().__init__(grbmodel, **kwargs)
 
     def _set_output(self, output_vars):
         self._output = validate_gpvars(output_vars)
@@ -77,7 +77,7 @@ class AbstractPredictor(SubModel):
 
         return (input_vars, output_vars)
 
-    def _build_submodel(self, model, **kwargs):
+    def _build_submodel(self, grbmodel, **kwargs):
         """Predict output from input using regression/classifier"""
         if self._output is None:
             self._create_output_vars(self._input)
@@ -85,13 +85,19 @@ class AbstractPredictor(SubModel):
         self.mip_model()
         return self
 
+    def mip_model(self):
+        """Defined in derived class the mip_model for the predictor"""
+
+    def _create_output_vars(self, input_vars):
+        """May be defined in derived class to create the output variables of predictor"""
+
 
 class NNLayer(AbstractPredictor):
     """Class to build one layer of a neural network"""
 
     def __init__(
         self,
-        model,
+        grbmodel,
         output_vars,
         input_vars,
         layer_coefs,
@@ -105,7 +111,7 @@ class NNLayer(AbstractPredictor):
         self.wmin = None
         self.wmax = None
         self.zvar = None
-        super().__init__(model, input_vars, output_vars, **kwargs)
+        super().__init__(grbmodel, input_vars, output_vars, **kwargs)
 
     def _wminmax(self):
         """Compute min/max for w variable"""
@@ -184,10 +190,10 @@ class NNLayer(AbstractPredictor):
 
     def redolayer(self, activation=None):
         """Rebuild the layer (possibly using a different model for activation)"""
-        self._model.remove(self.getConstrs())
-        self._model.remove(self.getQConstrs())
-        self._model.remove(self.getGenConstrs())
-        self._model.update()
+        self.model.remove(self.getConstrs())
+        self.model.remove(self.getQConstrs())
+        self.model.remove(self.getGenConstrs())
+        self.model.update()
         before = SubModel._modelstats(self._model)
         self.mip_model(activation)
         self._update(self._model, before)
@@ -196,7 +202,7 @@ class NNLayer(AbstractPredictor):
 class BaseNNPredictor(AbstractPredictor):
     """Base class for inserting a regressor based on neural-network/tensor into Gurobi"""
 
-    def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
+    def __init__(self, grbmodel, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
         self.regressor = regressor
         self.clean = clean_regressor
         self.actdict = {"relu": ReLUGC(), "identity": Identity(), "logit": LogitPWL()}
@@ -206,7 +212,7 @@ class BaseNNPredictor(AbstractPredictor):
         except KeyError:
             pass
         self._layers = []
-        super().__init__(model, input_vars, output_vars, **kwargs)
+        super().__init__(grbmodel, input_vars, output_vars, **kwargs)
 
     def __iter__(self):
         return self._layers.__iter__()

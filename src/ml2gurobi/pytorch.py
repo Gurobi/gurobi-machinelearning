@@ -13,7 +13,7 @@ class SequentialPredictor(BaseNNPredictor):
     """Transform a pytorch Sequential Neural Network to Gurboi constraint with
     input and output as matrices of variables."""
 
-    def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False):
+    def __init__(self, grbmodel, regressor, input_vars, output_vars, clean_regressor=False):
         linear = None
         for step in regressor:
             if isinstance(step, nn.ReLU):
@@ -25,9 +25,9 @@ class SequentialPredictor(BaseNNPredictor):
             else:
                 print(step)
                 raise BaseException("Unsupported network structure")
-        BaseNNPredictor.__init__(self, model, regressor, input_vars, output_vars, clean_regressor)
+        BaseNNPredictor.__init__(self, grbmodel, regressor, input_vars, output_vars, clean_regressor)
 
-    def mip_model(self, *args, **kwargs):
+    def mip_model(self):
         network = self.regressor
         _input = self._input
         output = self._output

@@ -34,9 +34,9 @@ class StandardScalerPredictor(AbstractPredictor):
     """Class to use a StandardScale to create scaled version of
     some Gurobi variables."""
 
-    def __init__(self, model, scaler, input_vars, **kwargs):
+    def __init__(self, grbmodel, scaler, input_vars, **kwargs):
         self.scaler = scaler
-        super().__init__(model, input_vars, **kwargs)
+        super().__init__(grbmodel, input_vars, **kwargs)
 
     def _create_output_vars(self, input_vars, **kwargs):
         rval = self._model.addMVar(input_vars.shape, name="scaledx")
@@ -70,8 +70,8 @@ class LinearRegressionPredictor(BaseNNPredictor):
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, model, regressor, input_vars, output_vars, **kwargs):
-        super().__init__(model, regressor, input_vars, output_vars, **kwargs)
+    def __init__(self, grbmodel, regressor, input_vars, output_vars, **kwargs):
+        super().__init__(grbmodel, regressor, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
         """Add the prediction constraints to Gurobi"""
@@ -89,8 +89,8 @@ class LogisticRegressionPredictor(BaseNNPredictor):
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, model, regressor, input_vars, output_vars, **kwargs):
-        super().__init__(model, regressor, input_vars, output_vars, **kwargs)
+    def __init__(self, grbmodel, regressor, input_vars, output_vars, **kwargs):
+        super().__init__(grbmodel, regressor, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
         """Add the prediction constraints to Gurobi"""
@@ -108,9 +108,9 @@ class MLPRegressorPredictor(BaseNNPredictor):
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, model, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
+    def __init__(self, grbmodel, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
         super().__init__(
-            model,
+            grbmodel,
             regressor,
             input_vars,
             output_vars,
@@ -147,11 +147,11 @@ class MLPRegressorPredictor(BaseNNPredictor):
 class PipelinePredictor(AbstractPredictor):
     """Use a scikit-learn pipeline to build constraints in Gurobi model."""
 
-    def __init__(self, model, pipeline, input_vars, output_vars, **kwargs):
+    def __init__(self, grbmodel, pipeline, input_vars, output_vars, **kwargs):
         self.steps = []
         self.pipeline = pipeline
         self._kwargs = kwargs
-        super().__init__(model, input_vars, output_vars, **kwargs)
+        super().__init__(grbmodel, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
         pipeline = self.pipeline
@@ -164,21 +164,20 @@ class PipelinePredictor(AbstractPredictor):
             else:
                 raise BaseException(f"I don't know how to deal with that object: {name}")
             input_vars = self.steps[-1].output()
+        name, obj = pipeline.steps[-1]
+        if name == "linearregression":
+            self.steps.append(LinearRegressionPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+        elif name == "logisticregression":
+            self.steps.append(LogisticRegressionPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+        elif name == "mlpregressor":
+            self.steps.append(MLPRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+        elif name == "mlpclassifier":
+            self.steps.append(MLPRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+        elif name == "decisiontreeregressor":
+            self.steps.append(DecisionTreeRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+        elif name == "gradientboostingregressor":
+            self.steps.append(GradientBoostingRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+        elif name == "randomforestregressor":
+            self.steps.append(RandomForestRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
         else:
-            name, obj = pipeline.steps[-1]
-            if name == "linearregression":
-                self.steps.append(LinearRegressionPredictor(model, obj, input_vars, output_vars, **self._kwargs))
-            elif name == "logisticregression":
-                self.steps.append(LogisticRegressionPredictor(model, obj, input_vars, output_vars, **self._kwargs))
-            elif name == "mlpregressor":
-                self.steps.append(MLPRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
-            elif name == "mlpclassifier":
-                self.steps.append(MLPRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
-            elif name == "decisiontreeregressor":
-                self.steps.append(DecisionTreeRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
-            elif name == "gradientboostingregressor":
-                self.steps.append(GradientBoostingRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
-            elif name == "randomforestregressor":
-                self.steps.append(RandomForestRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
-            else:
-                raise BaseException(f"I don't know how to deal with that object: {name}")
+            raise BaseException(f"I don't know how to deal with that object: {name}")

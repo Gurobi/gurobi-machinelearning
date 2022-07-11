@@ -12,9 +12,9 @@ from .basepredictor import AbstractPredictor
 class DecisionTreeRegressorPredictor(AbstractPredictor):
     """Class to model a trained decision tree in a Gurobi model"""
 
-    def __init__(self, model, regressor, input_vars, output_vars, **kwargs):
+    def __init__(self, grbmodel, regressor, input_vars, output_vars, **kwargs):
         self.tree = regressor.tree_
-        super().__init__(model, input_vars, output_vars, **kwargs)
+        super().__init__(grbmodel, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
         tree = self.tree
