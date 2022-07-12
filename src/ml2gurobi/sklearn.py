@@ -20,6 +20,7 @@ What we have so far:
 
 # pylint: disable=C0103
 
+import gurobipy as gp
 import numpy as np
 
 from .basepredictor import AbstractPredictor, BaseNNPredictor
@@ -30,7 +31,7 @@ from .decisiontrees import (
 )
 
 
-class StandardScalerPredictor(AbstractPredictor):
+class StandardScalerTransform(AbstractPredictor):
     """Class to use a StandardScale to create scaled version of
     some Gurobi variables."""
 
@@ -59,6 +60,49 @@ class StandardScalerPredictor(AbstractPredictor):
             name="s",
         )
         return self
+
+    def output(self):
+        """Return the scaled variable features"""
+        return self._output
+
+
+class PolynomialFeaturesTransform(AbstractPredictor):
+    """Class to use a PolynomialFeatures to create transforms of
+    some Gurobi variables."""
+
+    def __init__(self, grbmodel, polytrans, input_vars, **kwargs):
+        if polytrans.degree > 2:
+            raise BaseException("Can only handle polynomials of degree < 2")
+        self.polytrans = polytrans
+        super().__init__(grbmodel, input_vars, **kwargs)
+
+    def _create_output_vars(self, input_vars, **kwargs):
+        out_shape = (input_vars.shape[0], self.polytrans.n_output_features_)
+        rval = self._model.addMVar(out_shape, name="polyx", lb=-gp.GRB.INFINITY)
+        self._model.update()
+        self._output = rval
+
+    def mip_model(self):
+        """Do the transormation on x"""
+        _input = self._input
+        output = self._output
+
+        nexamples, nfeat = _input.shape
+        powers = self.polytrans.powers_
+        assert powers.shape[0] == self.polytrans.n_output_features_
+        assert powers.shape[1] == nfeat
+
+        for k in range(nexamples):
+            for i, p in enumerate(powers):
+                q = gp.QuadExpr()
+                q += 1.0
+                for j, feat in enumerate(_input[k, :]):
+                    if p[j] == 2:
+                        q *= feat
+                        q *= feat
+                    elif p[j] == 1:
+                        q *= feat
+                self.model.addConstr(output[k, i] == q, name=f"polyfeat[{k},{i}]")
 
     def output(self):
         """Return the scaled variable features"""
@@ -160,7 +204,9 @@ class PipelinePredictor(AbstractPredictor):
         output_vars = self._output
         for name, obj in pipeline.steps[:-1]:
             if name == "standardscaler":
-                self.steps.append(StandardScalerPredictor(model, obj, input_vars, **self._kwargs))
+                self.steps.append(StandardScalerTransform(model, obj, input_vars, **self._kwargs))
+            elif name == "polynomialfeatures":
+                self.steps.append(PolynomialFeaturesTransform(model, obj, input_vars, **self._kwargs))
             else:
                 raise BaseException(f"I don't know how to deal with that object: {name}")
             input_vars = self.steps[-1].output()
