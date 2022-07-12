@@ -22,7 +22,7 @@ class SubModel:
 
     class MySubModel(SubModel):
         def __init__(self, model, ...., **kwargs):
-            super().__init__(self, model, ...., **kwargs)
+            super().__init(self, model, ...., **kwargs)
 
         def _build_submodel(self, model, ...., **kwargs):
             ...
@@ -75,7 +75,15 @@ class SubModel:
     names following your call hierarchy.
     """
 
-    def __init__(self, grbmodel, *args, model_function=None, default_name=None, name=None, **kwargs):
+    def __init__(
+        self,
+        grbmodel,
+        *args,
+        model_function=None,
+        default_name=None,
+        name=None,
+        **kwargs,
+    ):
         self._model = None
         self._objects = {}
         self._firstVar = None
@@ -227,18 +235,12 @@ class SubModel:
         class NameHandler:
             """Handle automatic name generation in gp.Model"""
 
-            def __init__(self, submodel: SubModel):
-                self.submodel = submodel
+            def __init__(self):
                 self.name = {}
 
-            def getName(self, name=None):
-                """Return a default name for specified obj.
-                If a name is provided it will be used as is, otherwise a
-                numbered default name will be generated.
-                """
-                if name is not None:
-                    return name
-                name = self.submodel.defaultName
+            def getName(self, sub: SubModel):
+                """Return a default name for specified submodel sub."""
+                name = sub.defaultName
                 try:
                     num = self.name[name]
                 except KeyError:
@@ -263,9 +265,10 @@ class SubModel:
             if name is None:
                 name_handler = self._model._modeling_data.name_handler
                 if name_handler is None:
-                    name_handler = NameHandler(self)
+                    name_handler = NameHandler()
                     self._model._modeling_data.push_name_handler(name_handler)
-                name = name_handler.getName()
+                name = name_handler.getName(self)
+
             prefix_names(self.getVars(), "VarName", name)
             prefix_names(self.getConstrs(), "ConstrName", name)
             prefix_names(self.getQConstrs(), "QCName", name)

@@ -7,8 +7,9 @@ in a scikit-learn object we want to transform and the model we want
 to transform it into.
 
 What we have so far:
-  - StandardScalerConstr: would create scaled version of a set of variables
+  - StandardScalerTransform: would create scaled version of a set of variables
     in a Gurobi model: xscale = scaled(x)
+  - PolynomialFeaturesTransform: creates monomials from input variables.
   - LinearRegressionConstr: insert a constraint of the form y = g(x, psi)
     where g is the regressor prediticted by a logitstic regression.
   - LogisticRegressionConstr: insert a constraint of the form y = g(x, psi)
