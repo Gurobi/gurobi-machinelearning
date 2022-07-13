@@ -10,7 +10,7 @@ from sklearn import datasets
 
 from ml2gurobi.extra import morerelu
 from ml2gurobi.extra.obbt import obbt
-from ml2gurobi.sklearn import PipelinePredictor
+from ml2gurobi.sklearn import PipelineConstr
 
 
 class TestFixedModel(unittest.TestCase):
@@ -58,7 +58,7 @@ class TestFixedModel(unittest.TestCase):
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0] - 1)
                 with self.subTest(regressor=regressor, exampleno=exampleno, use_gurobi_modeling=False):
-                    self.fixed_model(pipeline, PipelinePredictor, X[exampleno, :], False)
+                    self.fixed_model(pipeline, PipelineConstr, X[exampleno, :], False)
 
 
 class TestReLU(unittest.TestCase):
@@ -87,7 +87,7 @@ class TestReLU(unittest.TestCase):
         else:
             activation_models = {}
 
-        pipe2gurobi = PipelinePredictor(m, pipe, x, output, activation_models=activation_models)
+        pipe2gurobi = PipelineConstr(m, pipe, x, output, activation_models=activation_models)
         # pipe2gurobi.steps[-1].actdict['softmax'] = Identity()
         return pipe2gurobi
 

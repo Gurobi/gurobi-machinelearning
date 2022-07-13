@@ -6,10 +6,10 @@ in a Gurobi model """
 
 from torch import nn
 
-from .basepredictor import BaseNNPredictor
+from .basepredictor import BaseNNConstr
 
 
-class SequentialPredictor(BaseNNPredictor):
+class SequentialConstr(BaseNNConstr):
     """Transform a pytorch Sequential Neural Network to Gurboi constraint with
     input and output as matrices of variables."""
 
@@ -25,7 +25,7 @@ class SequentialPredictor(BaseNNPredictor):
             else:
                 print(step)
                 raise BaseException("Unsupported network structure")
-        BaseNNPredictor.__init__(self, grbmodel, regressor, input_vars, output_vars, clean_regressor)
+        BaseNNConstr.__init__(self, grbmodel, regressor, input_vars, output_vars, clean_regressor)
 
     def mip_model(self):
         network = self.regressor

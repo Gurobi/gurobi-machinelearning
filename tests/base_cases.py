@@ -11,10 +11,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 
 from ml2gurobi.sklearn import (
-    DecisionTreeRegressorPredictor,
-    GradientBoostingRegressorPredictor,
-    LinearRegressionPredictor,
-    MLPRegressorPredictor,
+    DecisionTreeRegressorConstr,
+    GradientBoostingRegressorConstr,
+    LinearRegressionConstr,
+    MLPRegressorConstr,
 )
 
 
@@ -22,13 +22,13 @@ class DiabetesCases:
     """Base class to have cases for testing regression models on diabetes set"""
 
     to_test = [
-        (LinearRegression(), LinearRegressionPredictor),
-        (DecisionTreeRegressor(max_leaf_nodes=50), DecisionTreeRegressorPredictor),
+        (LinearRegression(), LinearRegressionConstr),
+        (DecisionTreeRegressor(max_leaf_nodes=50), DecisionTreeRegressorConstr),
         (
             GradientBoostingRegressor(n_estimators=20),
-            GradientBoostingRegressorPredictor,
+            GradientBoostingRegressorConstr,
         ),
-        (MLPRegressor([20, 20]), MLPRegressorPredictor),
+        (MLPRegressor([20, 20]), MLPRegressorConstr),
     ]
 
     def __init__(self):

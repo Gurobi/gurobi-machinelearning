@@ -7,7 +7,7 @@ in a scikit-learn object we want to transform and the model we want
 to transform it into.
 
 What we have so far:
-  - StandardScalerTransform: would create scaled version of a set of variables
+  - StandardScalerConstr: would create scaled version of a set of variables
     in a Gurobi model: xscale = scaled(x)
   - PolynomialFeaturesTransform: creates monomials from input variables.
   - LinearRegressionConstr: insert a constraint of the form y = g(x, psi)
@@ -24,15 +24,15 @@ What we have so far:
 import gurobipy as gp
 import numpy as np
 
-from .basepredictor import AbstractPredictor, BaseNNPredictor
+from .basepredictor import AbstractPredictorConstr, BaseNNConstr
 from .decisiontrees import (
-    DecisionTreeRegressorPredictor,
-    GradientBoostingRegressorPredictor,
-    RandomForestRegressorPredictor,
+    DecisionTreeRegressorConstr,
+    GradientBoostingRegressorConstr,
+    RandomForestRegressorConstr,
 )
 
 
-class StandardScalerTransform(AbstractPredictor):
+class StandardScalerConstr(AbstractPredictorConstr):
     """Class to use a StandardScale to create scaled version of
     some Gurobi variables."""
 
@@ -67,7 +67,7 @@ class StandardScalerTransform(AbstractPredictor):
         return self._output
 
 
-class PolynomialFeaturesTransform(AbstractPredictor):
+class PolynomialFeaturesConstr(AbstractPredictorConstr):
     """Class to use a PolynomialFeatures to create transforms of
     some Gurobi variables."""
 
@@ -110,7 +110,7 @@ class PolynomialFeaturesTransform(AbstractPredictor):
         return self._output
 
 
-class LinearRegressionPredictor(BaseNNPredictor):
+class LinearRegressionConstr(BaseNNConstr):
     """Predict a Gurobi variable using a Linear Regression that
     takes another Gurobi matrix variable as input.
     """
@@ -129,7 +129,7 @@ class LinearRegressionPredictor(BaseNNPredictor):
         )
 
 
-class LogisticRegressionPredictor(BaseNNPredictor):
+class LogisticRegressionConstr(BaseNNConstr):
     """Predict a Gurobi variable using a Logistic Regression that
     takes another Gurobi matrix variable as input.
     """
@@ -148,7 +148,7 @@ class LogisticRegressionPredictor(BaseNNPredictor):
         )
 
 
-class MLPRegressorPredictor(BaseNNPredictor):
+class MLPRegressorConstr(BaseNNConstr):
     """Predict a Gurobi matrix variable using a neural network that
     takes another Gurobi matrix variable as input.
     """
@@ -189,7 +189,7 @@ class MLPRegressorPredictor(BaseNNPredictor):
             self._model.update()
 
 
-class PipelinePredictor(AbstractPredictor):
+class PipelineConstr(AbstractPredictorConstr):
     """Use a scikit-learn pipeline to build constraints in Gurobi model."""
 
     def __init__(self, grbmodel, pipeline, input_vars, output_vars, **kwargs):
@@ -205,26 +205,26 @@ class PipelinePredictor(AbstractPredictor):
         output_vars = self._output
         for name, obj in pipeline.steps[:-1]:
             if name == "standardscaler":
-                self.steps.append(StandardScalerTransform(model, obj, input_vars, **self._kwargs))
+                self.steps.append(StandardScalerConstr(model, obj, input_vars, **self._kwargs))
             elif name == "polynomialfeatures":
-                self.steps.append(PolynomialFeaturesTransform(model, obj, input_vars, **self._kwargs))
+                self.steps.append(PolynomialFeaturesConstr(model, obj, input_vars, **self._kwargs))
             else:
                 raise BaseException(f"I don't know how to deal with that object: {name}")
             input_vars = self.steps[-1].output()
         name, obj = pipeline.steps[-1]
         if name == "linearregression":
-            self.steps.append(LinearRegressionPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+            self.steps.append(LinearRegressionConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "logisticregression":
-            self.steps.append(LogisticRegressionPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+            self.steps.append(LogisticRegressionConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "mlpregressor":
-            self.steps.append(MLPRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+            self.steps.append(MLPRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "mlpclassifier":
-            self.steps.append(MLPRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+            self.steps.append(MLPRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "decisiontreeregressor":
-            self.steps.append(DecisionTreeRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+            self.steps.append(DecisionTreeRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "gradientboostingregressor":
-            self.steps.append(GradientBoostingRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+            self.steps.append(GradientBoostingRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "randomforestregressor":
-            self.steps.append(RandomForestRegressorPredictor(model, obj, input_vars, output_vars, **self._kwargs))
+            self.steps.append(RandomForestRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
         else:
             raise BaseException(f"I don't know how to deal with that object: {name}")

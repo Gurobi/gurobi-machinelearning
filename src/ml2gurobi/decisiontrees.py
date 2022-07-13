@@ -6,10 +6,10 @@
 import numpy as np
 from gurobipy import GRB, quicksum
 
-from .basepredictor import AbstractPredictor
+from .basepredictor import AbstractPredictorConstr
 
 
-class DecisionTreeRegressorPredictor(AbstractPredictor):
+class DecisionTreeRegressorConstr(AbstractPredictorConstr):
     """Class to model a trained decision tree in a Gurobi model"""
 
     def __init__(self, grbmodel, regressor, input_vars, output_vars, **kwargs):
@@ -57,7 +57,7 @@ class DecisionTreeRegressorPredictor(AbstractPredictor):
         output.UB = np.max(tree.value)
 
 
-class GradientBoostingRegressorPredictor(AbstractPredictor):
+class GradientBoostingRegressorConstr(AbstractPredictorConstr):
     """Class to model a trained gradient boosting tree in a Gurobi model"""
 
     def __init__(self, model, regressor, input_vars, output_vars):
@@ -83,12 +83,12 @@ class GradientBoostingRegressorPredictor(AbstractPredictor):
         tree2gurobi = []
         for i in range(regressor.n_estimators_):
             tree = regressor.estimators_[i]
-            tree2gurobi.append(DecisionTreeRegressorPredictor(model, tree[0], _input, treevars[:, i]))
+            tree2gurobi.append(DecisionTreeRegressorConstr(model, tree[0], _input, treevars[:, i]))
         for k in range(nex):
             model.addConstr(output[k, :] == regressor.learning_rate * treevars[k, :].sum() + constant)
 
 
-class RandomForestRegressorPredictor(AbstractPredictor):
+class RandomForestRegressorConstr(AbstractPredictorConstr):
     """Class to model a trained random forest regressor in a Gurobi model"""
 
     def __init__(self, model, regressor, input_vars, output_vars):
@@ -113,6 +113,6 @@ class RandomForestRegressorPredictor(AbstractPredictor):
         tree2gurobi = []
         for i in range(regressor.n_estimators):
             tree = regressor.estimators_[i]
-            tree2gurobi.append(DecisionTreeRegressorPredictor(model, tree, _input, treevars[:, i]))
+            tree2gurobi.append(DecisionTreeRegressorConstr(model, tree, _input, treevars[:, i]))
         for k in range(nex):
             model.addConstr(regressor.n_estimators * output[k, :] == treevars[k, :].sum())

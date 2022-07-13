@@ -12,18 +12,21 @@ from .activations import Identity, LogitPWL, ReLUGC
 from .submodel import SubModel
 
 
-def validate_gpvars(gpvars):
+def validate_gpvars(gpvars, isinput):
     """Put variables into appropriate form (matrix of variable)"""
     if isinstance(gpvars, gp.MVar):
-        if gpvars.ndim == 1:
+        if gpvars.ndim == 1 and isinput:
             return gp.MVar(gpvars.tolist(), shape=(1, gpvars.shape[0]))
-        if gpvars.ndim == 2:
+        if gpvars.ndim in (1, 2):
             return gpvars
         raise BaseException("Variables should be an MVar of dimension 1 or 2")
     if isinstance(gpvars, dict):
         gpvars = gpvars.values()
     if isinstance(gpvars, list):
-        return gp.MVar(gpvars, shape=(1, len(gpvars)))
+        if isinput:
+            return gp.MVar(gpvars, shape=(1, len(gpvars)))
+        else:
+            return gp.MVar(gpvars, shape=(len(gpvars)))
     if isinstance(gpvars, gp.Var):
         return gp.MVar(
             [
@@ -34,29 +37,19 @@ def validate_gpvars(gpvars):
     raise BaseException("Could not validate variables")
 
 
-def transpose(gpvars):
-    """Transpose a matrix of variables
-
-    Should I really do this?
-    """
-    assert isinstance(gpvars, gp.MVar)
-    assert gpvars.ndim == 2
-    return gp.MVar(gpvars.tolist()[0], (gpvars.shape[1], gpvars.shape[0]))
-
-
-class AbstractPredictor(SubModel):
+class AbstractPredictorConstr(SubModel):
     """Class to define a submodel"""
 
     def __init__(self, grbmodel, input_vars, output_vars=None, **kwargs):
-        self._input = validate_gpvars(input_vars)
+        self._input = validate_gpvars(input_vars, True)
         if output_vars is not None:
-            self._output = validate_gpvars(output_vars)
+            self._output = validate_gpvars(output_vars, False)
         else:
             self._output = None
         super().__init__(grbmodel, **kwargs)
 
     def _set_output(self, output_vars):
-        self._output = validate_gpvars(output_vars)
+        self._output = validate_gpvars(output_vars, False)
 
     @staticmethod
     def validate(input_vars, output_vars):
@@ -65,15 +58,18 @@ class AbstractPredictor(SubModel):
             raise BaseException("No input variables")
         if output_vars is None:
             raise BaseException("No output variables")
+        if output_vars.ndim == 1:
+            if input_vars.shape[0] == 1:
+                output_vars = gp.MVar(output_vars.tolist(), shape=(1, output_vars.shape[0]))
+            else:
+                output_vars = gp.MVar(output_vars.tolist(), shape=(output_vars.shape[0], 1))
 
-        if output_vars.shape[0] != input_vars.shape[0] and output_vars.shape[1] != input_vars.shape[0]:
+        if output_vars.shape[0] != input_vars.shape[0]:
             raise BaseException(
                 "Non-conforming dimension between "
                 + "input variable and output variable: "
                 + f"{output_vars.shape[0]} != {input_vars.shape[0]}"
             )
-        if input_vars.shape[0] != output_vars.shape[0] and output_vars.shape[1] == input_vars.shape[0]:
-            output_vars = transpose(output_vars)
 
         return (input_vars, output_vars)
 
@@ -92,7 +88,7 @@ class AbstractPredictor(SubModel):
         """May be defined in derived class to create the output variables of predictor"""
 
 
-class NNLayer(AbstractPredictor):
+class NNLayer(AbstractPredictorConstr):
     """Class to build one layer of a neural network"""
 
     def __init__(
@@ -199,7 +195,7 @@ class NNLayer(AbstractPredictor):
         self._update(self._model, before)
 
 
-class BaseNNPredictor(AbstractPredictor):
+class BaseNNConstr(AbstractPredictorConstr):
     """Base class for inserting a regressor based on neural-network/tensor into Gurobi"""
 
     def __init__(self, grbmodel, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):

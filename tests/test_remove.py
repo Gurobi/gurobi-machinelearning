@@ -4,7 +4,7 @@ import unittest
 import gurobipy as gp
 from base_cases import DiabetesCases
 
-from ml2gurobi.sklearn import PipelinePredictor
+from ml2gurobi.sklearn import PipelineConstr
 
 
 class TestAddRemove(unittest.TestCase):
@@ -50,7 +50,7 @@ class TestAddRemove(unittest.TestCase):
             for pipeline in [False, True]:
                 case = cases.get_case(regressor, pipeline)
                 if pipeline:
-                    case["translator"] = PipelinePredictor
+                    case["translator"] = PipelineConstr
                 else:
                     case["translator"] = translator
                 with self.subTest(predictor=case["predictor"], pipeline=pipeline):
