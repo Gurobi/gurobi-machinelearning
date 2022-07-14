@@ -89,8 +89,8 @@ class AbstractPredictorConstr(SubModel):
 
     def print_stats(self, file=None):
         super().print_stats(file)
-        print(f"   Input has shape {self.input.shape}", file=file)
-        print(f"   Output has shape {self.output.shape}", file=file)
+        print(f"Input has shape {self.input.shape}", file=file)
+        print(f"Output has shape {self.output.shape}", file=file)
 
     def mip_model(self):
         """Defined in derived class the mip_model for the predictor"""
@@ -214,6 +214,11 @@ class NNLayer(AbstractPredictorConstr):
         self.mip_model(activation)
         self._update(self.model, before)
 
+    def print_stats(self, file=None):
+        """Print statistics about submodel created"""
+        super().print_stats(file)
+        print(f"Activation is {_default_name(self.activation)}")
+
 
 class BaseNNConstr(AbstractPredictorConstr):
     """Base class for inserting a regressor based on neural-network/tensor into Gurobi"""
@@ -254,3 +259,15 @@ class BaseNNConstr(AbstractPredictorConstr):
         for layer in self:
             layer.reset_bounds()
         self._model.update()
+
+    def print_stats(self, file=None):
+        """Print statistics about submodel created"""
+        name = self._name
+        if name == "":
+            name = self.default_name
+        super().print_stats(file)
+        print()
+        print(f"{name} has {len(self._layers)} layers:")
+        for layer in self:
+            layer.print_stats(file)
+            print()

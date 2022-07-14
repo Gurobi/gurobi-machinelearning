@@ -229,11 +229,22 @@ class PipelineConstr(AbstractPredictorConstr):
         if self._output is None:
             self._output = steps[-1].output
 
+    def print_stats(self, file=None):
+        super().print_stats(file=file)
+        print()
+        print(f"Pipeline has {len(self._steps)} steps", file=file)
+        for step in self:
+            step.print_stats(file)
+            print()
+
     def __getitem__(self, key):
+        """Get an item from the pipeline steps"""
         return self._steps[key]
 
     def __iter__(self):
+        """Iterate through pipeline steps"""
         return self._steps.__iter__()
 
     def __len__(self):
+        """Get number of pipeline steps"""
         return self._steps.__len__()

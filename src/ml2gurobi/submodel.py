@@ -286,17 +286,17 @@ class SubModel:
             name = self.default_name
 
         print(f"Model for {name}:", file=file)
-        print(f"   {len(self.vars)} variables", file=file)
-        print(f"   {len(self.constrs)} constraints", file=file)
+        print(f"{len(self.vars)} variables", file=file)
+        print(f"{len(self.constrs)} constraints", file=file)
         qconstr = len(self.qconstrs)
         if qconstr > 0:
-            print(f"   {qconstr} quadratic constraints", file=file)
+            print(f"{qconstr} quadratic constraints", file=file)
         genconstr = len(self.genconstrs)
         if genconstr > 0:
-            print(f"   {genconstr} general constraints", file=file)
+            print(f"{genconstr} general constraints", file=file)
         sosconstr = len(self.sos)
         if sosconstr > 0:
-            print(f"   {sosconstr} SOS constraints", file=file)
+            print(f"{sosconstr} SOS constraints", file=file)
 
     @property
     def model(self):
