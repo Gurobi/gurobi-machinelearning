@@ -31,6 +31,25 @@ from .decisiontrees import (
 )
 
 
+def sklearn_transformers():
+    return {
+        "StandardScaler": StandardScalerConstr,
+        "PolynomialFeatures": PolynomialFeaturesConstr,
+    }
+
+
+def sklearn_predictors():
+    return {
+        "LinearRegression": LinearRegressionConstr,
+        "LogisticRegression": LogisticRegressionConstr,
+        "DecisionTreeRegressor": DecisionTreeRegressorConstr,
+        "GradientBoostingRegressor": GradientBoostingRegressorConstr,
+        "RandomForestRegressor": RandomForestRegressorConstr,
+        "MLPRegressor": MLPRegressorConstr,
+        "MLPClassifier": MLPRegressorConstr,
+    }
+
+
 class StandardScalerConstr(AbstractPredictorConstr):
     """Class to use a StandardScale to create scaled version of
     some Gurobi variables."""
@@ -201,30 +220,22 @@ class PipelineConstr(AbstractPredictorConstr):
         input_vars = self._input
         output_vars = self._output
         steps = self._steps
+        transformers = {}
+        for key, item in sklearn_transformers().items():
+            transformers[key.lower()] = item
         for name, obj in pipeline.steps[:-1]:
-            if name == "standardscaler":
-                steps.append(StandardScalerConstr(model, obj, input_vars, **self._kwargs))
-            elif name == "polynomialfeatures":
-                steps.append(PolynomialFeaturesConstr(model, obj, input_vars, **self._kwargs))
-            else:
+            try:
+                steps.append(transformers[name](model, obj, input_vars, **self._kwargs))
+            except KeyError:
                 raise BaseException(f"I don't know how to deal with that object: {name}")
             input_vars = steps[-1].output
         name, obj = pipeline.steps[-1]
-        if name == "linearregression":
-            steps.append(LinearRegressionConstr(model, obj, input_vars, output_vars, **self._kwargs))
-        elif name == "logisticregression":
-            steps.append(LogisticRegressionConstr(model, obj, input_vars, output_vars, **self._kwargs))
-        elif name == "mlpregressor":
-            steps.append(MLPRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
-        elif name == "mlpclassifier":
-            steps.append(MLPRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
-        elif name == "decisiontreeregressor":
-            steps.append(DecisionTreeRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
-        elif name == "gradientboostingregressor":
-            steps.append(GradientBoostingRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
-        elif name == "randomforestregressor":
-            steps.append(RandomForestRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
-        else:
+        predictors = {}
+        for key, item in sklearn_predictors().items():
+            predictors[key.lower()] = item
+        try:
+            steps.append(predictors[name](model, obj, input_vars, output_vars, **self._kwargs))
+        except KeyError:
             raise BaseException(f"I don't know how to deal with that object: {name}")
         if self._output is None:
             self._output = steps[-1].output
