@@ -115,7 +115,7 @@ class LinearRegressionConstr(BaseNNConstr):
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, grbmodel, regressor, input_vars, output_vars, **kwargs):
+    def __init__(self, grbmodel, regressor, input_vars, output_vars=None, **kwargs):
         super().__init__(grbmodel, regressor, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
@@ -127,6 +127,8 @@ class LinearRegressionConstr(BaseNNConstr):
             self.actdict["identity"],
             self._output,
         )
+        if self._output is None:
+            self._output = self._layers[-1]._output
 
 
 class LogisticRegressionConstr(BaseNNConstr):
@@ -134,7 +136,7 @@ class LogisticRegressionConstr(BaseNNConstr):
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, grbmodel, regressor, input_vars, output_vars, **kwargs):
+    def __init__(self, grbmodel, regressor, input_vars, output_vars=None, **kwargs):
         super().__init__(grbmodel, regressor, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
@@ -146,6 +148,8 @@ class LogisticRegressionConstr(BaseNNConstr):
             self.actdict["logit"],
             self._output,
         )
+        if self._output is None:
+            self._output = self._layers[-1]._output
 
 
 class MLPRegressorConstr(BaseNNConstr):
@@ -153,7 +157,7 @@ class MLPRegressorConstr(BaseNNConstr):
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, grbmodel, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
+    def __init__(self, grbmodel, regressor, input_vars, output_vars=None, clean_regressor=False, **kwargs):
         super().__init__(
             grbmodel,
             regressor,
@@ -187,12 +191,14 @@ class MLPRegressorConstr(BaseNNConstr):
             layer = self.addlayer(input_vars, layer_coefs, layer_intercept, activation, output, name=f"layer{i}")
             input_vars = layer._output  # pylint: disable=W0212
             self._model.update()
+        if self._output is None:
+            self._output = layer._output
 
 
 class PipelineConstr(AbstractPredictorConstr):
     """Use a scikit-learn pipeline to build constraints in Gurobi model."""
 
-    def __init__(self, grbmodel, pipeline, input_vars, output_vars, **kwargs):
+    def __init__(self, grbmodel, pipeline, input_vars, output_vars=None, **kwargs):
         self.steps = []
         self.pipeline = pipeline
         self._kwargs = kwargs
@@ -228,3 +234,5 @@ class PipelineConstr(AbstractPredictorConstr):
             self.steps.append(RandomForestRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
         else:
             raise BaseException(f"I don't know how to deal with that object: {name}")
+        if self._output is None:
+            self._output = self.steps[-1]._output

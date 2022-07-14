@@ -77,8 +77,12 @@ class AbstractPredictorConstr(SubModel):
         """Predict output from input using regression/classifier"""
         if self._output is None:
             self._create_output_vars(self._input)
-        self._input, self._output = self.validate(self._input, self._output)
+        if self._output is not None:
+            self._input, self._output = self.validate(self._input, self._output)
+        else:
+            self._input = validate_gpvars(self._input, True)
         self.mip_model()
+        assert self._output is not None
         return self
 
     def mip_model(self):
@@ -193,6 +197,14 @@ class NNLayer(AbstractPredictorConstr):
         before = SubModel._modelstats(self._model)
         self.mip_model(activation)
         self._update(self._model, before)
+
+    @property
+    def output(self):
+        return self._output
+
+    @property
+    def input(self):
+        return self._input
 
 
 class BaseNNConstr(AbstractPredictorConstr):
