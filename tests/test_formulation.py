@@ -74,6 +74,7 @@ class TestFixedModel(unittest.TestCase):
                 exampleno = random.randint(0, X.shape[0] - 1)
                 with self.subTest(regressor=regressor, exampleno=exampleno):
                     self.fixed_model(pipeline, PipelineConstr, X[exampleno, :], True)
+            break
 
 
 class TestReLU(unittest.TestCase):
