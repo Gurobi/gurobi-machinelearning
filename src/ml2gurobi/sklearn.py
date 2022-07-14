@@ -19,7 +19,6 @@ What we have so far:
 
 """
 
-# pylint: disable=C0103
 
 import gurobipy as gp
 import numpy as np
