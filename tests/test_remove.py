@@ -71,7 +71,7 @@ class TestAddRemove(unittest.TestCase):
         cases = DiabetesCases()
 
         for regressor, translator in cases.to_test:
-            for pipeline in [False, True]:
+            for pipeline in [False, 1]:
                 case = cases.get_case(regressor, pipeline)
                 if pipeline:
                     case["translator"] = PipelineConstr

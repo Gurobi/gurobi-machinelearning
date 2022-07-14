@@ -7,7 +7,7 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 
 from ml2gurobi.sklearn import (
@@ -62,7 +62,18 @@ class DiabetesCases:
         for predictor, _ in self.to_test:
             pipeline = make_pipeline(StandardScaler(), predictor)
             pipeline.fit(X, y)
-            filename = f"diabetes_pipe_{type(predictor).__name__}.joblib"
+            filename = f"diabetes_pipe1_{type(predictor).__name__}.joblib"
+            rval = {
+                "predictor": pipeline,
+                "input_shape": X.shape,
+                "output_shape": y.shape,
+            }
+            dump(rval, os.path.join(self.basedir, filename))
+
+        for predictor, _ in self.to_test:
+            pipeline = make_pipeline(PolynomialFeatures(), StandardScaler(), predictor)
+            pipeline.fit(X, y)
+            filename = f"diabetes_pipe2_{type(predictor).__name__}.joblib"
             rval = {
                 "predictor": pipeline,
                 "input_shape": X.shape,
@@ -73,7 +84,7 @@ class DiabetesCases:
 
     def get_case(self, predictor, withpipe):
         if withpipe:
-            withpipe = "pipe"
+            withpipe = f"pipe{withpipe}"
         else:
             withpipe = "none"
         filename = f"diabetes_{withpipe}_{type(predictor).__name__}.joblib"
