@@ -61,10 +61,6 @@ class StandardScalerConstr(AbstractPredictorConstr):
         )
         return self
 
-    def output(self):
-        """Return the scaled variable features"""
-        return self._output
-
 
 class PolynomialFeaturesConstr(AbstractPredictorConstr):
     """Class to use a PolynomialFeatures to create transforms of
@@ -93,20 +89,16 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
         assert powers.shape[1] == nfeat
 
         for k in range(nexamples):
-            for i, p in enumerate(powers):
-                q = gp.QuadExpr()
-                q += 1.0
+            for i, power in enumerate(powers):
+                qexpr = gp.QuadExpr()
+                qexpr += 1.0
                 for j, feat in enumerate(_input[k, :]):
-                    if p[j] == 2:
-                        q *= feat
-                        q *= feat
-                    elif p[j] == 1:
-                        q *= feat
-                self.model.addConstr(output[k, i] == q, name=f"polyfeat[{k},{i}]")
-
-    def output(self):
-        """Return the scaled variable features"""
-        return self._output
+                    if power[j] == 2:
+                        qexpr *= feat
+                        qexpr *= feat
+                    elif power[j] == 1:
+                        qexpr *= feat
+                self.model.addConstr(output[k, i] == qexpr, name=f"polyfeat[{k},{i}]")
 
 
 class LinearRegressionConstr(BaseNNConstr):
@@ -127,7 +119,7 @@ class LinearRegressionConstr(BaseNNConstr):
             self._output,
         )
         if self._output is None:
-            self._output = self._layers[-1]._output
+            self._output = self._layers[-1].output
 
 
 class LogisticRegressionConstr(BaseNNConstr):
@@ -148,7 +140,7 @@ class LogisticRegressionConstr(BaseNNConstr):
             self._output,
         )
         if self._output is None:
-            self._output = self._layers[-1]._output
+            self._output = self._layers[-1].output
 
 
 class MLPRegressorConstr(BaseNNConstr):
@@ -165,7 +157,7 @@ class MLPRegressorConstr(BaseNNConstr):
             clean_regressor=clean_regressor,
             **kwargs,
         )
-        assert regressor.out_activation_ in ("identity", "relu", "softmax")
+        assert regressor.out_activation_ in ("identity", "relu")
 
     def mip_model(self):
         """Add the prediction constraints to Gurobi"""
@@ -191,14 +183,14 @@ class MLPRegressorConstr(BaseNNConstr):
             input_vars = layer._output  # pylint: disable=W0212
             self._model.update()
         if self._output is None:
-            self._output = layer._output
+            self._output = layer.output
 
 
 class PipelineConstr(AbstractPredictorConstr):
     """Use a scikit-learn pipeline to build constraints in Gurobi model."""
 
     def __init__(self, grbmodel, pipeline, input_vars, output_vars=None, **kwargs):
-        self.steps = []
+        self._steps = []
         self.pipeline = pipeline
         self._kwargs = kwargs
         super().__init__(grbmodel, input_vars, output_vars, **kwargs)
@@ -208,30 +200,40 @@ class PipelineConstr(AbstractPredictorConstr):
         model = self._model
         input_vars = self._input
         output_vars = self._output
+        steps = self._steps
         for name, obj in pipeline.steps[:-1]:
             if name == "standardscaler":
-                self.steps.append(StandardScalerConstr(model, obj, input_vars, **self._kwargs))
+                steps.append(StandardScalerConstr(model, obj, input_vars, **self._kwargs))
             elif name == "polynomialfeatures":
-                self.steps.append(PolynomialFeaturesConstr(model, obj, input_vars, **self._kwargs))
+                steps.append(PolynomialFeaturesConstr(model, obj, input_vars, **self._kwargs))
             else:
                 raise BaseException(f"I don't know how to deal with that object: {name}")
-            input_vars = self.steps[-1].output()
+            input_vars = steps[-1].output
         name, obj = pipeline.steps[-1]
         if name == "linearregression":
-            self.steps.append(LinearRegressionConstr(model, obj, input_vars, output_vars, **self._kwargs))
+            steps.append(LinearRegressionConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "logisticregression":
-            self.steps.append(LogisticRegressionConstr(model, obj, input_vars, output_vars, **self._kwargs))
+            steps.append(LogisticRegressionConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "mlpregressor":
-            self.steps.append(MLPRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
+            steps.append(MLPRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "mlpclassifier":
-            self.steps.append(MLPRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
+            steps.append(MLPRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "decisiontreeregressor":
-            self.steps.append(DecisionTreeRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
+            steps.append(DecisionTreeRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "gradientboostingregressor":
-            self.steps.append(GradientBoostingRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
+            steps.append(GradientBoostingRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
         elif name == "randomforestregressor":
-            self.steps.append(RandomForestRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
+            steps.append(RandomForestRegressorConstr(model, obj, input_vars, output_vars, **self._kwargs))
         else:
             raise BaseException(f"I don't know how to deal with that object: {name}")
         if self._output is None:
-            self._output = self.steps[-1]._output
+            self._output = steps[-1].output
+
+    def __getitem__(self, key):
+        return self._steps[key]
+
+    def __iter__(self):
+        return self._steps.__iter__()
+
+    def __len__(self):
+        return self._steps.__len__()

@@ -23,8 +23,7 @@ def validate_gpvars(gpvars, isinput):
     if isinstance(gpvars, list):
         if isinput:
             return gp.MVar(gpvars, shape=(1, len(gpvars)))
-        else:
-            return gp.MVar(gpvars, shape=(len(gpvars)))
+        return gp.MVar(gpvars, shape=(len(gpvars)))
     if isinstance(gpvars, gp.Var):
         return gp.MVar(
             [
@@ -71,7 +70,7 @@ class AbstractPredictorConstr(SubModel):
 
         return (input_vars, output_vars)
 
-    def _build_submodel(self, grbmodel, **kwargs):
+    def _build_submodel(self, model, *args, **kwargs):
         """Predict output from input using regression/classifier"""
         if self._output is None:
             self._create_output_vars(self._input)
@@ -83,11 +82,24 @@ class AbstractPredictorConstr(SubModel):
         assert self._output is not None
         return self
 
+    def print_stats(self, file=None):
+        super().print_stats(file)
+        print(f"   Input has shape {self.input.shape}", file=file)
+        print(f"   Output has shape {self.output.shape}", file=file)
+
     def mip_model(self):
         """Defined in derived class the mip_model for the predictor"""
 
     def _create_output_vars(self, input_vars):
         """May be defined in derived class to create the output variables of predictor"""
+
+    @property
+    def output(self):
+        return self._output
+
+    @property
+    def input(self):
+        return self._input
 
 
 class NNLayer(AbstractPredictorConstr):
@@ -169,22 +181,22 @@ class NNLayer(AbstractPredictorConstr):
         """Update added modeling objects compared to status before."""
         model.update()
         # range of variables
-        if model.numVars > before.numVars:
+        if model.numvars > before.numvars:
             self._firstvar = model.getVars()[before.numVars]
             self._lastvar = model.getVars()[model.numVars - 1]
         # range of constraints
-        if model.numConstrs > before.numConstrs:
-            self._firstconstr = model.getConstrs()[before.numConstrs]
-            self._lastconstr = model.getConstrs()[model.numConstrs - 1]
+        if model.numconstrs > before.numconstrs:
+            self._firstconstr = model.getConstrs()[before.numconstrs]
+            self._lastconstr = model.getConstrs()[model.numconstrs - 1]
         # range of Q constraints
-        if model.numQConstrs > before.numQConstrs:
+        if model.numqconstrs > before.numqconstrs:
             self._qconstrs = model.getQConstrs()[before.numQConstrs : model.numQConstrs]
         # range of GenConstrs
-        if model.numGenConstrs > before.numGenConstrs:
-            self._genconstrs = model.getGenConstrs()[before.numGenConstrs : model.numGenConstrs]
+        if model.numgenconstrs > before.numgenconstrs:
+            self._genconstrs = model.getGenConstrs()[before.numgenconstrs : model.numgenconstrs]
         # range of SOS
-        if model.numSOS > before.numSOS:
-            self._sos = model.getSOSs()[before.numSOS : model.numSOS]
+        if model.numsos > before.numsos:
+            self._sos = model.getSOSs()[before.numsos : model.numsos]
 
     def redolayer(self, activation=None):
         """Rebuild the layer (possibly using a different model for activation)"""
@@ -196,14 +208,6 @@ class NNLayer(AbstractPredictorConstr):
         before = SubModel._modelstats(self.model)
         self.mip_model(activation)
         self._update(self.model, before)
-
-    @property
-    def output(self):
-        return self._output
-
-    @property
-    def input(self):
-        return self._input
 
 
 class BaseNNConstr(AbstractPredictorConstr):

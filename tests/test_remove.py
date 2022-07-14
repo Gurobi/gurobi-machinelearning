@@ -13,11 +13,11 @@ class TestAddRemove(unittest.TestCase):
 
     def check_counts(self, model, reg2gurobi, numvars):
         """Assert counts are ok"""
-        self.assertEqual(m.NumVars, numVars + len(reg2gurobi.vars))
-        self.assertEqual(m.NumSOS, len(reg2gurobi.sos))
-        self.assertEqual(m.NumConstrs, len(reg2gurobi.constrs))
-        self.assertEqual(m.NumQConstrs, len(reg2gurobi.qconstrs))
-        self.assertEqual(m.NumGenConstrs, len(reg2gurobi.genconstrs))
+        self.assertEqual(model.NumVars, numvars + len(reg2gurobi.vars))
+        self.assertEqual(model.NumSOS, len(reg2gurobi.sos))
+        self.assertEqual(model.NumConstrs, len(reg2gurobi.constrs))
+        self.assertEqual(model.NumQConstrs, len(reg2gurobi.qconstrs))
+        self.assertEqual(model.NumGenConstrs, len(reg2gurobi.genconstrs))
 
     def add_remove(self, predictor, translator, input_shape, output_shape):
         """Add and remove the predictor to model"""

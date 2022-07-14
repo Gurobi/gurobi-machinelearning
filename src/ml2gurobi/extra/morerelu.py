@@ -18,10 +18,10 @@ class ReLUmin:
     def mip_model(self, layer):
         """Add weird MIP formulation for ReLU for neuron in layer"""
         if not hasattr(layer, "mixing"):
-            mixing = layer.model.addMVar(layer._output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="mix")
+            mixing = layer.model.addMVar(layer.output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="mix")
             layer.mixing = mixing
             minact = layer.model.addMVar(
-                layer._output.shape,
+                layer.output.shape,
                 lb=-GRB.INFINITY,
                 ub=0.0,
                 vtype=GRB.CONTINUOUS,
@@ -34,18 +34,18 @@ class ReLUmin:
             layer.wmax = np.minimum(layer.wmax, self.bigm)
             layer.wmin = np.maximum(layer.wmin, -1 * self.bigm)
         if self.setbounds:
-            layer._output.LB = 0.0
-            layer._output.UB = np.maximum(layer.wmax, 0.0)
+            layer.output.LB = 0.0
+            layer.output.UB = np.maximum(layer.wmax, 0.0)
             layer.minact.LB = -np.maximum(layer.wmax, 0.0)
             layer.mixing.LB = -layer.wmax
             layer.mixing.UB = -layer.wmin
 
-        input_size = layer._input.shape[1]
-        for index in np.ndindex(layer._output.shape):
+        input_size = layer.input.shape[1]
+        for index in np.ndindex(layer.output.shape):
             k, j = index
-            vact = layer._output[index]
+            vact = layer.output[index]
             minact = layer.minact[index]
-            mixing = sum(layer._input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
+            mixing = sum(layer.input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
             layer.model.addConstr(layer.mixing[index] == -mixing, name=_name(index, "mix"))
             mixing = layer.mixing[index]
             layer.model.addConstr(vact == -minact)
@@ -63,10 +63,10 @@ class GRBReLU:
     def mip_model(self, layer):
         """Add MIP formulation for ReLU for neuron in layer"""
         if not layer.zvar:
-            z = layer.model.addMVar(layer._output.shape, ub=1.0, vtype=GRB.BINARY, name="z")
+            z = layer.model.addMVar(layer.output.shape, ub=1.0, vtype=GRB.BINARY, name="z")
             layer.zvar = z
             mixing = layer.model.addMVar(
-                layer._output.shape,
+                layer.output.shape,
                 lb=0.0,
                 ub=-layer.wmin,
                 vtype=GRB.CONTINUOUS,
@@ -76,21 +76,21 @@ class GRBReLU:
         if self.bigm is not None:
             layer.wmax = np.minimum(layer.wmax, self.bigm)
             layer.wmin = np.maximum(layer.wmin, -1 * self.bigm)
-        layer._output.LB = 0.0
-        layer._output.UB = np.maximum(layer.wmax, 0.0)
+        layer.output.LB = 0.0
+        layer.output.UB = np.maximum(layer.wmax, 0.0)
         layer.mixing.LB = 0.0
         layer.mixing.UB = np.maximum(-layer.wmin, 0.0)
 
-        input_size = layer._input.shape[1]
-        for index in np.ndindex(layer._output.shape):
+        input_size = layer.input.shape[1]
+        for index in np.ndindex(layer.output.shape):
             k, j = index
             lb = layer.wmin[index]
             ub = layer.wmax[index]
-            vact = layer._output[index]
+            vact = layer.output[index]
             vmix = layer.mixing[index]
             assert ub >= lb
 
-            mixing = sum(layer._input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
+            mixing = sum(layer.input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
             if ub > self.eps and lb < -self.eps:
                 layer.model.addConstr(vact - vmix == mixing, name=_name(index, "mix"))
                 mixing = layer.mixing[index]
@@ -112,8 +112,8 @@ class GRBReLU:
         """Reset the bounds in layer corresponding to modeling ReLU"""
         layer.zvar.UB = 1.0
         layer.zvar.LB = 0.0
-        layer._output.LB = 0.0
-        layer._output.UB = np.maximum(layer.wmax, 0.0)
+        layer.output.LB = 0.0
+        layer.output.UB = np.maximum(layer.wmax, 0.0)
 
 
 class ReLUM:
@@ -127,11 +127,11 @@ class ReLUM:
     def mip_model(self, layer):
         """Add MIP formulation for ReLU for neuron in layer"""
         if not layer.zvar:
-            z = layer.model.addMVar(layer._output.shape, ub=1.0, vtype=GRB.BINARY, name="z")
+            z = layer.model.addMVar(layer.output.shape, ub=1.0, vtype=GRB.BINARY, name="z")
             layer.zvar = z
             if not self.expand:
                 mixing = layer.model.addMVar(
-                    layer._output.shape,
+                    layer.output.shape,
                     lb=layer.wmin,
                     ub=layer.wmax,
                     vtype=GRB.CONTINUOUS,
@@ -141,20 +141,20 @@ class ReLUM:
         if self.bigm is not None:
             layer.wmax = np.minimum(layer.wmax, self.bigm)
             layer.wmin = np.maximum(layer.wmin, -1 * self.bigm)
-        layer._output.LB = 0.0
-        layer._output.UB = np.maximum(layer.wmax, 0.0)
+        layer.output.LB = 0.0
+        layer.output.UB = np.maximum(layer.wmax, 0.0)
         if not self.expand:
             layer.mixing.LB = layer.wmin
             layer.mixing.UB = layer.wmax
 
-        input_size = layer._input.shape[1]
-        for index in np.ndindex(layer._output.shape):
+        input_size = layer.input.shape[1]
+        for index in np.ndindex(layer.output.shape):
             k, j = index
             lb = layer.wmin[index]
             ub = layer.wmax[index]
-            vact = layer._output[index]
+            vact = layer.output[index]
             assert ub >= lb
-            mixing = sum(layer._input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
+            mixing = sum(layer.input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
             if ub > self.eps and lb < -self.eps:
                 if not self.expand:
                     layer.model.addConstr(layer.mixing[index] == mixing, name=_name(index, "mix"))
@@ -193,8 +193,8 @@ class ReLUM:
         """Reset the bounds in layer corresponding to modeling ReLU"""
         layer.zvar.UB = 1.0
         layer.zvar.LB = 0.0
-        layer._output.LB = 0.0
-        layer._output.UB = np.maximum(layer.wmax, 0.0)
+        layer.output.LB = 0.0
+        layer.output.UB = np.maximum(layer.wmax, 0.0)
 
 
 class reluOBBT:
@@ -205,18 +205,18 @@ class reluOBBT:
     def mip_model(self, layer):
         """This is the convex hull of ReLU without binary (just for doing OBBT)"""
         if layer.wmax is not None:
-            layer._output.LB = 0.0
-            layer._output.UB = np.maximum(layer.wmax, 0.0)
+            layer.output.LB = 0.0
+            layer.output.UB = np.maximum(layer.wmax, 0.0)
 
-        input_size = layer._input.shape[1]
-        for index in np.ndindex(layer._output.shape):
+        input_size = layer.input.shape[1]
+        for index in np.ndindex(layer.output.shape):
             k, j = index
             lb = layer.wmin[index]
             ub = layer.wmax[index]
-            vact = layer._output[index]
+            vact = layer.output[index]
 
             constrname = f"[{index}]".replace(" ", "")
-            mixing = sum(layer._input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
+            mixing = sum(layer.input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
             if ub < 1e-8:
                 layer.model.addConstr(vact <= 0, name=constrname + "_inactive")
                 return

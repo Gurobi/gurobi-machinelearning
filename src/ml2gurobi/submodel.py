@@ -93,6 +93,7 @@ class SubModel:
         self._sos = []
         self._first_callback = None
         self._last_callback = None
+        self._name = None
         self._model_function = model_function
 
         if default_name is not None:
@@ -243,7 +244,7 @@ class SubModel:
 
             def get_name(self, sub: SubModel):
                 """Return a default name for specified submodel sub."""
-                name = sub.defaultName
+                name = sub.default_name
                 try:
                     num = self.name[name]
                 except KeyError:
@@ -270,12 +271,32 @@ class SubModel:
                 if name_handler is None:
                     name_handler = NameHandler()
                     self._model._modeling_data.push_name_handler(name_handler)
-                name = name_handler.get_name()
+                name = name_handler.get_name(self)
+            self._name = name
             prefix_names(self.vars, "VarName", name)
             prefix_names(self.constrs, "ConstrName", name)
             prefix_names(self.qconstrs, "QCName", name)
             prefix_names(self.genconstrs, "GenConstrName", name)
             prefix_names(self.sos, "SOSName", name)
+
+    def print_stats(self, file=None):
+        """Print statistics about submodel created"""
+        name = self._name
+        if name == "":
+            name = self.default_name
+
+        print(f"Model for {name}:", file=file)
+        print(f"   {len(self.vars)} variables", file=file)
+        print(f"   {len(self.constrs)} constraints", file=file)
+        qconstr = len(self.qconstrs)
+        if qconstr > 0:
+            print(f"   {qconstr} quadratic constraints", file=file)
+        genconstr = len(self.genconstrs)
+        if genconstr > 0:
+            print(f"   {genconstr} general constraints", file=file)
+        sosconstr = len(self.sos)
+        if sosconstr > 0:
+            print(f"   {sosconstr} SOS constraints", file=file)
 
     @property
     def model(self):

@@ -49,7 +49,7 @@ class SequentialConstr(BaseNNConstr):
                     name=f"{i}",
                 )
                 linear = None
-                _input = layer._output  # pylint: disable=W0212
+                _input = layer.output
             elif isinstance(step, nn.Linear):
                 assert linear is None
                 linear = step

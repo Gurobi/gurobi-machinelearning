@@ -146,7 +146,7 @@ class TestReLU(unittest.TestCase):
                         activation = morerelu.reluOBBT("both")
                     else:
                         activation = None
-                    obbt(pipe2gurobi.steps[-1], activation=activation)
+                    obbt(pipe2gurobi[-1], activation=activation)
                     m.optimize()
                     if value is None:
                         value = m.ObjVal

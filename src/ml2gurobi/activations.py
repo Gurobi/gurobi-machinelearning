@@ -17,7 +17,7 @@ def get_mixing(layer, index):
     Should not be necesary when MVar dimensions are fixed
     """
     k, j = index
-    _input = layer._input  # pylint: disable=W0212
+    _input = layer.input
     input_size = _input.shape[1]
     return sum(_input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
 
@@ -30,7 +30,7 @@ class Identity:
 
     def mip_model(self, layer):
         """MIP model for identity activation (just apply afine transformation"""
-        output = layer._output  # pylint: disable=W0212
+        output = layer.output
         if self.setbounds:
             output.LB = np.maximum(output.LB, layer.wmin)
             output.UB = np.minimum(output.UB, layer.wmax)
@@ -63,7 +63,7 @@ class ReLUGC:
 
     def mip_model(self, layer):
         """Add MIP formulation for ReLU for neuron in layer"""
-        output = layer._output  # pylint: disable=W0212
+        output = layer.output
         if not hasattr(layer, "mixing"):
             mixing = layer.model.addMVar(output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix")
             layer.mixing = mixing
@@ -193,7 +193,7 @@ class LogitPWL:
     def mip_model(self, layer):
         """Add formulation for logit for neuron of layer"""
         model = layer.model
-        output = layer._output  # pylint: disable=W0212
+        output = layer.output
 
         if not layer.zvar:
             zvar = layer.model.addMVar(output.shape, lb=-GRB.INFINITY, name="z")
