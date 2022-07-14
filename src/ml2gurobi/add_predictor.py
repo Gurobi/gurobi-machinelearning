@@ -1,6 +1,6 @@
 """ Define generic function that can add any known trained predictor
 """
-from .sklearn import sklearn_predictors, sklearn_transformers
+from .sklearn import PipelineConstr, sklearn_predictors, sklearn_transformers
 
 HASPYTORCH = False
 try:
