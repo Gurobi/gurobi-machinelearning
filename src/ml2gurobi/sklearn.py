@@ -23,7 +23,7 @@ What we have so far:
 import gurobipy as gp
 import numpy as np
 
-from .basepredictor import AbstractPredictorConstr, BaseNNConstr
+from .basepredictor import AbstractPredictorConstr, BaseNNConstr, _default_name
 from .decisiontrees import (
     DecisionTreeRegressorConstr,
     GradientBoostingRegressorConstr,
@@ -37,7 +37,7 @@ class StandardScalerConstr(AbstractPredictorConstr):
 
     def __init__(self, grbmodel, scaler, input_vars, **kwargs):
         self.scaler = scaler
-        super().__init__(grbmodel, input_vars, **kwargs)
+        super().__init__(grbmodel, input_vars, default_name=_default_name(scaler), **kwargs)
 
     def _create_output_vars(self, input_vars, **kwargs):
         rval = self._model.addMVar(input_vars.shape, name="scaledx")
@@ -70,7 +70,7 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
         if polytrans.degree > 2:
             raise BaseException("Can only handle polynomials of degree < 2")
         self.polytrans = polytrans
-        super().__init__(grbmodel, input_vars, **kwargs)
+        super().__init__(grbmodel, input_vars, default_name=_default_name(polytrans), **kwargs)
 
     def _create_output_vars(self, input_vars, **kwargs):
         out_shape = (input_vars.shape[0], self.polytrans.n_output_features_)
@@ -193,7 +193,7 @@ class PipelineConstr(AbstractPredictorConstr):
         self._steps = []
         self.pipeline = pipeline
         self._kwargs = kwargs
-        super().__init__(grbmodel, input_vars, output_vars, **kwargs)
+        super().__init__(grbmodel, input_vars, output_vars, default_name=_default_name(pipeline), **kwargs)
 
     def mip_model(self):
         pipeline = self.pipeline

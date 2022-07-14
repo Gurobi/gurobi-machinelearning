@@ -10,6 +10,11 @@ from .activations import Identity, LogitPWL, ReLUGC
 from .submodel import SubModel
 
 
+def _default_name(predictor):
+    """Make a default name for predictor constraint."""
+    return type(predictor).__name__.lower()
+
+
 def validate_gpvars(gpvars, isinput):
     """Put variables into appropriate form (matrix of variable)"""
     if isinstance(gpvars, gp.MVar):
@@ -223,7 +228,7 @@ class BaseNNConstr(AbstractPredictorConstr):
         except KeyError:
             pass
         self._layers = []
-        super().__init__(grbmodel, input_vars, output_vars, **kwargs)
+        super().__init__(grbmodel, input_vars, output_vars, default_name=_default_name(regressor), **kwargs)
 
     def __iter__(self):
         return self._layers.__iter__()
