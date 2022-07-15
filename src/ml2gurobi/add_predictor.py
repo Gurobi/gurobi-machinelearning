@@ -13,6 +13,8 @@ except ImportError:
 if HASPYTORCH:
     from .pytorch import SequentialConstr
 
+USER_PREDICTORS = {}
+
 
 def sklearn_convertors():
     """Collect known convertors for scikit learn objects"""
@@ -32,6 +34,10 @@ def pytorch_convertors():
     return {}
 
 
+def register_predictor_constr(predictor, predictor_constr):
+    USER_PREDICTORS[predictor] = predictor_constr
+
+
 def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwargs):
     """Use predictor to make the value of y predicted from the values of x
     in the model.
@@ -39,8 +45,9 @@ def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwarg
     convertors = {}
     convertors |= sklearn_convertors()
     convertors |= pytorch_convertors()
+    convertors |= USER_PREDICTORS
     try:
-        convertor = convertors[predictor]
+        convertor = convertors[type(predictor)]
     except KeyError:
         convertor = None
     if convertor is None:
