@@ -28,30 +28,27 @@ class DecisionTreeRegressorConstr(AbstractPredictorConstr):
         # Intermediate nodes constraints
         # Can be added all at once
         notleafs = [i for i, j in enumerate(tree.children_left) if j >= 0]
+        leafs = [i for i, j in enumerate(tree.children_left) if j < 0]
         model.addConstrs(nodes[:, i] >= nodes[:, tree.children_left[i]] for i in notleafs)
         model.addConstrs(nodes[:, i] >= nodes[:, tree.children_right[i]] for i in notleafs)
         model.addConstrs(nodes[:, i] <= nodes[:, tree.children_right[i]] + nodes[:, tree.children_left[i]] for i in notleafs)
         model.addConstrs(nodes[:, tree.children_right[i]] + nodes[:, tree.children_left[i]] <= 1 for i in notleafs)
 
         # Node splitting
-        for node in range(tree.capacity):
+        for node in notleafs:
             left = tree.children_left[node]
             right = tree.children_right[node]
-            if left < 0:
-                model.addConstrs((nodes[k, node] == 1) >> (output[k, 0] == tree.value[node][0][0]) for k in range(nex))
-                continue
             model.addConstrs(
                 (nodes[k, left] == 1) >> (_input[k, tree.feature[node]] <= tree.threshold[node]) for k in range(nex)
             )
             model.addConstrs(
                 (nodes[k, right] == 1) >> (_input[k, tree.feature[node]] >= tree.threshold[node] + 1e-8) for k in range(nex)
             )
+        for node in leafs:
+            model.addConstrs((nodes[k, node] == 1) >> (output[k, 0] == tree.value[node][0][0]) for k in range(nex))
 
         # We should attain 1 leaf
-        model.addConstrs(
-            quicksum([nodes[k, i] for i in range(tree.capacity) if tree.children_left[i] < 0]) == 1
-            for k in range(_input.shape[0])
-        )
+        model.addConstrs(quicksum([nodes[k, i] for i in leafs]) == 1 for k in range(nex))
 
         output.LB = np.min(tree.value)
         output.UB = np.max(tree.value)

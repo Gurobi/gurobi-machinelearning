@@ -252,11 +252,13 @@ class SubModel:
                 self.name[name] = num + 1
                 return f"{name}{num}"
 
-        def prefix_names(objs, attr, name):
+        def prefix_names(model, objs, attr, name):
             """Prefix all modeling object names with name"""
-            for object in objs:
-                object_name = object.getAttr(attr)
-                object.setAttr(attr, f"{name}.{object_name}")
+            if len(objs) == 0:
+                return
+            object_names = model.getAttr(attr, objs)
+            new_names = [f"{name}.{obj_name}" for obj_name in object_names]
+            model.setAttr(attr, objs, new_names)
 
         # re-install name handler
         self._model._modeling_data.push_name_handler(before[1])
@@ -273,11 +275,12 @@ class SubModel:
                     self._model._modeling_data.push_name_handler(name_handler)
                 name = name_handler.get_name(self)
             self._name = name
-            prefix_names(self.vars, "VarName", name)
-            prefix_names(self.constrs, "ConstrName", name)
-            prefix_names(self.qconstrs, "QCName", name)
-            prefix_names(self.genconstrs, "GenConstrName", name)
-            prefix_names(self.sos, "SOSName", name)
+            prefix_names(self._model, self.vars, "VarName", name)
+            prefix_names(self._model, self.constrs, "ConstrName", name)
+            prefix_names(self._model, self.qconstrs, "QCName", name)
+            prefix_names(self._model, self.genconstrs, "GenConstrName", name)
+            # SOS can't have a name! :-O
+            # prefix_names(self._model, self.sos, "SOSName", name)
 
     def print_stats(self, file=None):
         """Print statistics about submodel created"""
