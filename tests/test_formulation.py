@@ -8,6 +8,7 @@ from base_cases import DiabetesCases
 from joblib import load
 from sklearn import datasets
 
+from ml2gurobi import add_predictor_constr
 from ml2gurobi.extra import morerelu
 from ml2gurobi.extra.obbt import obbt
 from ml2gurobi.sklearn import PipelineConstr
@@ -17,7 +18,7 @@ class TestFixedModel(unittest.TestCase):
     """Test that if we fix the input of the predictor the feasible solution from
     Gurobi is identical to what the predict function would return."""
 
-    def fixed_model(self, predictor, translator, example, nonconvex):
+    def fixed_model(self, predictor, example, nonconvex):
         with gp.Model() as gpm:
             x = gpm.addMVar(example.shape, lb=example, ub=example)
             y = gpm.addMVar(1, lb=-gp.GRB.INFINITY)
@@ -25,7 +26,7 @@ class TestFixedModel(unittest.TestCase):
             gpm.Params.OutputFlag = 0
             if nonconvex:
                 gpm.Params.NonConvex = 2
-            translator(gpm, predictor, x, y)
+            add_predictor_constr(gpm, predictor, x, y)
             gpm.optimize()
 
             if nonconvex:
@@ -44,37 +45,14 @@ class TestFixedModel(unittest.TestCase):
         X = data["data"]
         cases = DiabetesCases()
 
-        for regressor, translator in cases.to_test:
-            regressor = cases.get_case(regressor, False)["predictor"]
+        for regressor in cases:
+            print(regressor)
+            onecase = cases.get_case(regressor)
+            regressor = onecase["predictor"]
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0] - 1)
                 with self.subTest(regressor=regressor, exampleno=exampleno):
-                    self.fixed_model(regressor, translator, X[exampleno, :], False)
-
-    def test_diabetes_with_pipes(self):
-        data = datasets.load_diabetes()
-
-        X = data["data"]
-        cases = DiabetesCases()
-        for regressor, _ in cases.to_test:
-            pipeline = cases.get_case(regressor, 1)["predictor"]
-            for _ in range(5):
-                exampleno = random.randint(0, X.shape[0] - 1)
-                with self.subTest(regressor=regressor, exampleno=exampleno):
-                    self.fixed_model(pipeline, PipelineConstr, X[exampleno, :], False)
-
-    def test_diabetes_with_pipes_2(self):
-        data = datasets.load_diabetes()
-
-        X = data["data"]
-        cases = DiabetesCases()
-        for regressor, _ in cases.to_test:
-            pipeline = cases.get_case(regressor, 2)["predictor"]
-            for _ in range(5):
-                exampleno = random.randint(0, X.shape[0] - 1)
-                with self.subTest(regressor=regressor, exampleno=exampleno):
-                    self.fixed_model(pipeline, PipelineConstr, X[exampleno, :], True)
-            break
+                    self.fixed_model(regressor, X[exampleno, :], onecase["nonconvex"])
 
 
 class TestReLU(unittest.TestCase):
