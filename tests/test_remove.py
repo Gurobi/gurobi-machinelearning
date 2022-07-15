@@ -49,8 +49,7 @@ class TestAddRemove(unittest.TestCase):
             model.Params.OutputFlag = 0
             pred2grb = add_predictor_constr(model, predictor, x)
 
-            self.assertIsInstance(pred2grb, predictor)
-            self.assertEqual(pred2grb.output.shape, output_shape)
+            self.assertEqual(pred2grb.output.shape[0], output_shape[0])
 
             self.check_counts(model, pred2grb, numvars)
 
