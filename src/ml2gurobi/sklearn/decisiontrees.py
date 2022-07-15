@@ -6,7 +6,7 @@
 import numpy as np
 from gurobipy import GRB, quicksum
 
-from .basepredictor import AbstractPredictorConstr
+from ..basepredictor import AbstractPredictorConstr
 
 
 class DecisionTreeRegressorConstr(AbstractPredictorConstr):
@@ -14,6 +14,7 @@ class DecisionTreeRegressorConstr(AbstractPredictorConstr):
 
     def __init__(self, grbmodel, regressor, input_vars, output_vars, **kwargs):
         self.tree = regressor.tree_
+        self.n_outputs_ = regressor.n_outputs_
         super().__init__(grbmodel, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
@@ -59,6 +60,7 @@ class GradientBoostingRegressorConstr(AbstractPredictorConstr):
 
     def __init__(self, model, regressor, input_vars, output_vars):
         self.regressor = regressor
+        self.n_outputs_ = 1
         super().__init__(model, input_vars, output_vars)
 
     def mip_model(self):
@@ -90,6 +92,7 @@ class RandomForestRegressorConstr(AbstractPredictorConstr):
 
     def __init__(self, model, regressor, input_vars, output_vars):
         self.regressor = regressor
+        self.n_outputs_ = regressor.n_outputs_
         super().__init__(model, input_vars, output_vars)
 
     def mip_model(self):

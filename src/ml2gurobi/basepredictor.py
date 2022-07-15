@@ -97,6 +97,13 @@ class AbstractPredictorConstr(SubModel):
 
     def _create_output_vars(self, input_vars):
         """May be defined in derived class to create the output variables of predictor"""
+        try:
+            n_outputs = self.n_outputs_
+        except AttributeError:
+            return
+        rval = self._model.addMVar((input_vars.shape[0], n_outputs), lb=-gp.GRB.INFINITY, name="output")
+        self._model.update()
+        self._output = rval
 
     @property
     def output(self):
