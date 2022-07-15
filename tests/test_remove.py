@@ -5,7 +5,6 @@ import gurobipy as gp
 from base_cases import DiabetesCases
 
 from ml2gurobi import add_predictor_constr
-from ml2gurobi.sklearn import PipelineConstr
 
 
 class TestAddRemove(unittest.TestCase):
@@ -19,7 +18,7 @@ class TestAddRemove(unittest.TestCase):
         self.assertEqual(model.NumQConstrs, len(reg2gurobi.qconstrs))
         self.assertEqual(model.NumGenConstrs, len(reg2gurobi.genconstrs))
 
-    def add_remove(self, predictor, translator, input_shape, output_shape):
+    def add_remove(self, predictor, input_shape, output_shape, nonconvex):
         """Add and remove the predictor to model"""
         with gp.Model() as model:
             x = model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
@@ -28,7 +27,7 @@ class TestAddRemove(unittest.TestCase):
             numvars = model.numvars
 
             model.Params.OutputFlag = 0
-            pred2grb = translator(model, predictor, x, y)
+            pred2grb = add_predictor_constr(model, predictor, x, y)
 
             self.check_counts(model, pred2grb, numvars)
 
@@ -40,7 +39,7 @@ class TestAddRemove(unittest.TestCase):
             self.assertEqual(model.NumQConstrs, 0)
             self.assertEqual(model.NumVars, numvars)
 
-    def add_remove_no_output(self, translator, predictor, input_shape, output_shape):
+    def add_remove_no_output(self, predictor, input_shape, output_shape):
         """Add and remove the predictor to model"""
         with gp.Model() as model:
             x = model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
@@ -70,14 +69,10 @@ class TestAddRemove(unittest.TestCase):
         """
         cases = DiabetesCases()
 
-        for regressor, translator in cases.to_test:
-            for pipeline in [False, 1]:
-                case = cases.get_case(regressor, pipeline)
-                if pipeline:
-                    case["translator"] = PipelineConstr
-                else:
-                    case["translator"] = translator
-                with self.subTest(predictor=case["predictor"], outputvar=True, pipeline=pipeline):
-                    self.add_remove(**case)
-                with self.subTest(predictor=case["predictor"], outputvar=False, pipeline=pipeline):
-                    self.add_remove(**case)
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            print(onecase["predictor"])
+            with self.subTest(predictor=onecase["predictor"], outputvar=True):
+                self.add_remove(**onecase)
+            with self.subTest(predictor=onecase["predictor"], outputvar=False):
+                self.add_remove(**onecase)

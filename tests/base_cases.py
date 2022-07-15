@@ -3,9 +3,15 @@ import os
 from joblib import dump, load
 from sklearn import __version__ as sklearn_version
 from sklearn import datasets
-from sklearn.neural_network import MLPRegressor
-from sklearn.pipeline import Pipeline, make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.ensemble import GradientBoostingRegressor  # noqa
+from sklearn.ensemble import RandomForestRegressor  # noqa
+from sklearn.linear_model import LinearRegression  # noqa
+from sklearn.neural_network import MLPRegressor  # noqa
+from sklearn.pipeline import Pipeline  # noqa
+from sklearn.pipeline import make_pipeline  # noqa
+from sklearn.preprocessing import PolynomialFeatures  # noqa
+from sklearn.preprocessing import StandardScaler  # noqa
+from sklearn.tree import DecisionTreeRegressor  # noqa
 
 from ml2gurobi.sklearn import sklearn_predictors, sklearn_transformers
 
@@ -14,9 +20,11 @@ def predictor_params(name):
     if name == "MLPRegressor":
         return "[20, 20]"
     if name == "GradientBoostingRegressor":
-        return "n_estimators=20, max_depth=4"
+        return "n_estimators=10, max_depth=4, max_leaf_nodes=10"
     if name == "RandomForestRegressor":
-        return "n_estimators=20, max_depth=4"
+        return "n_estimators=10, max_depth=4, max_leaf_nodes=10"
+    if name == "DecisionTreeRegressor":
+        return "max_leaf_nodes=50"
     return ""
 
 
