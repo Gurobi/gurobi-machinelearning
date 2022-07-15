@@ -5,6 +5,7 @@ import unittest
 import gurobipy as gp
 import numpy as np
 from base_cases import DiabetesCases
+from gurobipy import GurobiError
 from joblib import load
 from sklearn import datasets
 
@@ -27,7 +28,13 @@ class TestFixedModel(unittest.TestCase):
             if nonconvex:
                 gpm.Params.NonConvex = 2
             add_predictor_constr(gpm, predictor, x, y)
-            gpm.optimize()
+            try:
+                gpm.optimize()
+            except GurobiError as E:
+                if E.errno == 10010:
+                    self.skipTest("Model too large for limited license")
+                else:
+                    raise
 
             if nonconvex:
                 tol = 5e-3
