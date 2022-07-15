@@ -39,7 +39,7 @@ class TestAddRemove(unittest.TestCase):
             self.assertEqual(model.NumQConstrs, 0)
             self.assertEqual(model.NumVars, numvars)
 
-    def add_remove_no_output(self, predictor, input_shape, output_shape):
+    def add_remove_no_output(self, predictor, input_shape, output_shape, nonconvex):
         """Add and remove the predictor to model"""
         with gp.Model() as model:
             x = model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
@@ -62,7 +62,7 @@ class TestAddRemove(unittest.TestCase):
             self.assertEqual(model.NumQConstrs, 0)
             self.assertEqual(model.NumVars, numvars)
 
-    def test_diabetes(self):
+    def test_diabetes_with_outputvar(self):
         """Test adding and removing a predictor for diabetes
 
         Checks that variables/constraints/... counts match.
@@ -71,8 +71,17 @@ class TestAddRemove(unittest.TestCase):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            print(onecase["predictor"])
-            with self.subTest(predictor=onecase["predictor"], outputvar=True):
+            with self.subTest(predictor=onecase["predictor"]):
                 self.add_remove(**onecase)
-            with self.subTest(predictor=onecase["predictor"], outputvar=False):
-                self.add_remove(**onecase)
+
+    def test_diabetes_without_outputvar(self):
+        """Test adding and removing a predictor for diabetes
+
+        Checks that variables/constraints/... counts match.
+        """
+        cases = DiabetesCases()
+
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            with self.subTest(predictor=onecase["predictor"]):
+                self.add_remove_no_output(**onecase)
