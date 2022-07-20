@@ -20,13 +20,26 @@ class TestFixedModel(unittest.TestCase):
     Gurobi is identical to what the predict function would return."""
 
     def fixed_model(self, predictor, example, nonconvex):
-        with gp.Model() as gpm:
+        params = {
+            "OutputFlag": 0,
+            "NonConvex": 2,
+        }
+        try:
+            wlsvars = os.environ["WLS_VARIABLES"].split()
+            for param in wlsvars:
+                params[param] = os.environ[param]
+        except KeyError:
+            print("Can't find WLS")
+        for param in params:
+            try:
+                params[param] = int(params[param])
+            except ValueError:
+                pass
+
+        with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
             x = gpm.addMVar(example.shape, lb=example, ub=example)
             y = gpm.addMVar(1, lb=-gp.GRB.INFINITY)
 
-            gpm.Params.OutputFlag = 0
-            if nonconvex:
-                gpm.Params.NonConvex = 2
             add_predictor_constr(gpm, predictor, x, y)
             try:
                 gpm.optimize()
