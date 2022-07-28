@@ -10,10 +10,11 @@ import numpy as np
 import torch
 from gurobipy import GRB
 from joblib import Parallel, delayed, parallel_backend
-from ml2gurobi.nnalgs import prop
+
+from gurobi.machinelearning.nnalgs import prop
 
 # import my functions
-from ml2gurobi.pytorch import Sequential2Gurobi
+from gurobi.machinelearning.pytorch import Sequential2Gurobi
 
 
 def do_regression(seed):
