@@ -2,10 +2,9 @@ import gurobipy as gp
 import numpy as np
 from gurobipy import GRB
 from joblib import Parallel, delayed, dump, load, parallel_backend
+from ml2gurobi.sklearn import Pipe2Gurobi
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
-
-from ml2gurobi.sklearn import Pipe2Gurobi
 
 
 def GoldsteinPrice(x1, x2):

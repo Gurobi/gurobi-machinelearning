@@ -10,7 +10,6 @@ import numpy as np
 import torch
 from gurobipy import GRB
 from joblib import Parallel, delayed, parallel_backend
-
 from ml2gurobi.nnalgs import prop
 
 # import my functions

@@ -3,11 +3,10 @@ import numpy as np
 import pandas as pd
 from gurobipy import GRB
 from joblib import Parallel, delayed, dump, load, parallel_backend
+from ml2gurobi.sklearn import Pipe2Gurobi
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-
-from ml2gurobi.sklearn import Pipe2Gurobi
 
 KNOWN_FEATURES = ["SAT", "GPA"]
 DEC_FEATURES = ["scholarship"]

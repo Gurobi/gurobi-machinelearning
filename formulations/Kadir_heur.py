@@ -12,7 +12,6 @@ import gurobipy as gp
 import numpy as np
 import torch
 from gurobipy import GRB
-
 from ml2gurobi.nnalgs import prop
 from ml2gurobi.pytorch import Sequential2Gurobi
 

@@ -5,7 +5,10 @@ import unittest
 import gurobipy as gp
 from sklearn.svm import LinearSVC
 
-from gurobi.machinelearning.add_predictor import add_predictor_constr, register_predictor_constr
+from gurobi.machinelearning.add_predictor import (
+    add_predictor_constr,
+    register_predictor_constr,
+)
 from gurobi.machinelearning.basepredictor import AbstractPredictorConstr
 
 
