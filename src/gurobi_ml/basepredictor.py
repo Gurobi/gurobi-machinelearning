@@ -117,6 +117,9 @@ class AbstractPredictorConstr(SubModel):
     def input(self):
         return self._input
 
+    def __str__(self):
+        return self._name
+
 
 class AbstractNNLayer(AbstractPredictorConstr):
     """Abstract class for NN layers"""

@@ -44,7 +44,11 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
     def print_stats(self, file=None):
         super().print_stats(file=file)
         print()
-        print(f"Pipeline has {len(self._steps)} steps", file=file)
+        print(f"Pipeline has {len(self._steps)} steps:", file=file)
+        for step in self:
+            print(step, end=" ", file=file)
+        print()
+        print()
         for step in self:
             step.print_stats(file)
             print()
