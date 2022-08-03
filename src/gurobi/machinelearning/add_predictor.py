@@ -11,7 +11,18 @@ except ImportError:
     pass
 
 if HASPYTORCH:
-    from .pytorch import SequentialConstr
+    from .pytorch import Sequential as TorchSequential
+
+HASTFKERAS = False
+try:
+    from tensorflow import keras
+
+    HASTFKERAS = True
+except ImportError:
+    pass
+
+if HASTFKERAS:
+    from .keras import Sequential as KerasSequential
 
 USER_PREDICTORS = {}
 
@@ -30,8 +41,13 @@ def sklearn_convertors():
 def pytorch_convertors():
     """Collect known convertors for pytorch objects"""
     if HASPYTORCH:
-        return {pytorchnn.Sequential: SequentialConstr}
+        return {pytorchnn.Sequential: TorchSequential}
     return {}
+
+
+def keras_convertors():
+    if HASTFKERAS:
+        return {keras.Sequential: KerasSequential}
 
 
 def register_predictor_constr(predictor, predictor_constr):
@@ -45,6 +61,7 @@ def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwarg
     convertors = {}
     convertors |= sklearn_convertors()
     convertors |= pytorch_convertors()
+    convertors |= keras_convertors()
     convertors |= USER_PREDICTORS
     try:
         convertor = convertors[type(predictor)]
