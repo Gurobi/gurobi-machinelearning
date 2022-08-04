@@ -15,6 +15,8 @@ if HASPYTORCH:
 
 HASTFKERAS = False
 try:
+    from keras.engine.functional import Functional
+    from keras.engine.training import Model
     from tensorflow import keras
 
     HASTFKERAS = True
@@ -22,7 +24,7 @@ except ImportError:
     pass
 
 if HASTFKERAS:
-    from .keras import Sequential as KerasSequential
+    from .keras import Predictor as KerasPredictor
 
 USER_PREDICTORS = {}
 
@@ -47,7 +49,7 @@ def pytorch_convertors():
 
 def keras_convertors():
     if HASTFKERAS:
-        return {keras.Sequential: KerasSequential}
+        return {keras.Sequential: KerasPredictor, Functional: KerasPredictor, Model: KerasPredictor}
 
 
 def register_predictor_constr(predictor, predictor_constr):
@@ -67,6 +69,12 @@ def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwarg
         convertor = convertors[type(predictor)]
     except KeyError:
         convertor = None
+    for parent in type(predictor).mro():
+        try:
+            convertor = convertors[parent]
+            break
+        except KeyError:
+            pass
     if convertor is None:
         try:
             convertor = convertors[type(predictor).__name__]
