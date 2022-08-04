@@ -50,6 +50,7 @@ def pytorch_convertors():
 def keras_convertors():
     if HASTFKERAS:
         return {keras.Sequential: KerasPredictor, Functional: KerasPredictor, Model: KerasPredictor}
+    return {}
 
 
 def register_predictor_constr(predictor, predictor_constr):
