@@ -16,6 +16,8 @@ class Predictor(BaseNNConstr):
                 config = step.get_config()
                 if config["activation"] not in ("relu", "linear"):
                     raise Exception("Unsupported network structure")
+            elif isinstance(step, keras.layers.ReLU):
+                pass
             elif isinstance(step, keras.layers.InputLayer):
                 pass
             else:
@@ -30,15 +32,25 @@ class Predictor(BaseNNConstr):
         numlayers = len(network.layers)
 
         for i, step in enumerate(network.layers):
+            if i == numlayers - 1:
+                output = self._output
             if isinstance(step, keras.layers.InputLayer):
                 pass
+            elif isinstance(step, keras.layers.ReLU):
+                layer = self.addlayer(
+                    _input,
+                    None,
+                    None,
+                    self.actdict["relu"],
+                    output,
+                    name=f"{i}",
+                )
+                _input = layer.output
             else:
                 config = step.get_config()
                 activation = config["activation"]
                 if activation == "linear":
                     activation = "identity"
-                if i == numlayers - 1:
-                    output = self._output
                 weights, bias = step.get_weights()
                 layer = self.addlayer(
                     _input,

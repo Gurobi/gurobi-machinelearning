@@ -114,7 +114,7 @@ class AbstractPredictorConstr(SubModel):
         return self._input
 
 
-class NNLayer(AbstractPredictorConstr):
+class DenseLayer(AbstractPredictorConstr):
     """Class to build one layer of a neural network"""
 
     def __init__(
@@ -137,6 +137,8 @@ class NNLayer(AbstractPredictorConstr):
 
     def _wminmax(self):
         """Compute min/max for w variable"""
+        if self.coefs is None:
+            return (self._input.LB, self._input.UB)
         if (self._input.UB >= gp.GRB.INFINITY).any():
             return (
                 -gp.GRB.INFINITY * np.ones(self._output.shape),
@@ -156,9 +158,14 @@ class NNLayer(AbstractPredictorConstr):
         return (wmin, wmax)
 
     def _create_output_vars(self, input_vars):
-        rval = self._model.addMVar((input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act")
-        self._model.update()
-        self._output = rval
+        if self.coefs is None:
+            rval = self._model.addMVar(input_vars.shape, lb=-gp.GRB.INFINITY, name="act")
+            self._model.update()
+            self._output = rval
+        else:
+            rval = self._model.addMVar((input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act")
+            self._model.update()
+            self._output = rval
 
     def mip_model(self, activation=None):
         """Add the layer to model"""
@@ -250,7 +257,7 @@ class BaseNNConstr(AbstractPredictorConstr):
         if self.clean:
             mask = np.abs(layer_coefs) < 1e-8
             layer_coefs[mask] = 0.0
-        layer = NNLayer(self._model, activation_vars, input_vars, layer_coefs, layer_intercept, activation, **kwargs)
+        layer = DenseLayer(self._model, activation_vars, input_vars, layer_coefs, layer_intercept, activation, **kwargs)
         self._layers.append(layer)
         return layer
 
