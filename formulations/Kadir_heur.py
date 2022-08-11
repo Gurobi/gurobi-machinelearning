@@ -13,8 +13,8 @@ import numpy as np
 import torch
 from gurobipy import GRB
 
-from ml2gurobi.nnalgs import prop
-from ml2gurobi.pytorch import Sequential2Gurobi
+from gurobi.machinelearning.nnalgs import prop
+from gurobi.machinelearning.pytorch import Sequential2Gurobi
 
 # Load data
 X = torch.from_numpy(np.genfromtxt("X.csv")).float()

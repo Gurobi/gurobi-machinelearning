@@ -1,4 +1,4 @@
-# ml2gurobi
+# gurobi.machinelearning
 A framework to add trained machine learning models as constraints to a gurobipy model.
 
 Namely allow to insert a function of the form *y = g(x)*, where *x* and *y* are decision variables

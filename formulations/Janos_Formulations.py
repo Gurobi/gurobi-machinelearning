@@ -7,7 +7,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from ml2gurobi.sklearn import Pipe2Gurobi
+from gurobi.machinelearning.sklearn import Pipe2Gurobi
 
 KNOWN_FEATURES = ["SAT", "GPA"]
 DEC_FEATURES = ["scholarship"]

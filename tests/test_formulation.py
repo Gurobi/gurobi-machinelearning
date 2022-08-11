@@ -9,10 +9,10 @@ from gurobipy import GurobiError
 from joblib import load
 from sklearn import datasets
 
-from ml2gurobi import add_predictor_constr
-from ml2gurobi.extra import morerelu
-from ml2gurobi.extra.obbt import obbt
-from ml2gurobi.sklearn import PipelineConstr
+from gurobi.machinelearning import add_predictor_constr
+from gurobi.machinelearning.extra import morerelu
+from gurobi.machinelearning.extra.obbt import obbt
+from gurobi.machinelearning.sklearn import PipelineConstr
 
 
 class TestFixedModel(unittest.TestCase):
