@@ -66,7 +66,7 @@ class ReLUGC:
     def mip_model(self, layer):
         """Add MIP formulation for ReLU for neuron in layer"""
         output = layer.output
-        if layer.coefs is not None:
+        if hasattr(layer, "coefs"):
             if not hasattr(layer, "mixing"):
                 mixing = layer.model.addMVar(output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix")
                 layer.mixing = mixing

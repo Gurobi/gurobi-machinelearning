@@ -37,10 +37,8 @@ class Predictor(BaseNNConstr):
             if isinstance(step, keras.layers.InputLayer):
                 pass
             elif isinstance(step, keras.layers.ReLU):
-                layer = self.addlayer(
+                layer = self.add_activation_layer(
                     _input,
-                    None,
-                    None,
                     self.actdict["relu"],
                     output,
                     name=f"{i}",
@@ -52,7 +50,7 @@ class Predictor(BaseNNConstr):
                 if activation == "linear":
                     activation = "identity"
                 weights, bias = step.get_weights()
-                layer = self.addlayer(
+                layer = self.add_dense_layer(
                     _input,
                     weights,
                     bias,

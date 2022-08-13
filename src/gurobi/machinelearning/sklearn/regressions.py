@@ -26,7 +26,7 @@ class LinearRegressionConstr(BaseNNConstr):
 
     def mip_model(self):
         """Add the prediction constraints to Gurobi"""
-        self.addlayer(
+        self.add_dense_layer(
             self._input,
             self.regressor.coef_.T.reshape(-1, 1),
             np.array(self.regressor.intercept_).reshape((-1,)),
@@ -47,7 +47,7 @@ class LogisticRegressionConstr(BaseNNConstr):
 
     def mip_model(self):
         """Add the prediction constraints to Gurobi"""
-        self.addlayer(
+        self.add_dense_layer(
             self._input,
             self.regressor.coef_.T,
             self.regressor.intercept_,
@@ -94,7 +94,7 @@ class MLPRegressorConstr(BaseNNConstr):
                 activation = self.actdict[neuralnet.out_activation_]
                 output = self._output
 
-            layer = self.addlayer(input_vars, layer_coefs, layer_intercept, activation, output, name=f"layer{i}")
+            layer = self.add_dense_layer(input_vars, layer_coefs, layer_intercept, activation, output, name=f"layer{i}")
             input_vars = layer._output  # pylint: disable=W0212
             self._model.update()
         if self._output is None:

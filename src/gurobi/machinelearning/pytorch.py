@@ -42,7 +42,7 @@ class Sequential(BaseNNConstr):
                         layer_weight = param.detach().numpy().T
                     elif name == "bias":
                         layer_bias = param.detach().numpy()
-                layer = self.addlayer(
+                layer = self.add_dense_layer(
                     _input,
                     layer_weight,
                     layer_bias,
@@ -63,4 +63,4 @@ class Sequential(BaseNNConstr):
                     layer_weight = param.detach().numpy().T
                 elif name == "bias":
                     layer_bias = param.detach().numpy()
-            self.addlayer(_input, layer_weight, layer_bias, self.actdict["identity"], output)
+            self.add_dense_layer(_input, layer_weight, layer_bias, self.actdict["identity"], output)
