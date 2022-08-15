@@ -18,6 +18,8 @@ def get_mixing(layer, index):
     """
     k, j = index
     _input = layer.input
+    if layer.coefs is None:
+        return _input
     input_size = _input.shape[1]
     return sum(_input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
 
@@ -64,26 +66,30 @@ class ReLUGC:
     def mip_model(self, layer):
         """Add MIP formulation for ReLU for neuron in layer"""
         output = layer.output
-        if not hasattr(layer, "mixing"):
-            mixing = layer.model.addMVar(output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix")
-            layer.mixing = mixing
-        layer.model.update()
-        if self.bigm is not None:
-            layer.wmax = np.minimum(layer.wmax, self.bigm)
-            layer.wmin = np.maximum(layer.wmin, -1 * self.bigm)
-        if self.setbounds and layer.wmax is not None:
-            output.LB = 0.0
-            output.UB = np.maximum(layer.wmax, 0.0)
-            layer.mixing.LB = layer.wmin
-            layer.mixing.UB = layer.wmax
+        if hasattr(layer, "coefs"):
+            if not hasattr(layer, "mixing"):
+                mixing = layer.model.addMVar(output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix")
+                layer.mixing = mixing
+            layer.model.update()
+            if self.bigm is not None:
+                layer.wmax = np.minimum(layer.wmax, self.bigm)
+                layer.wmin = np.maximum(layer.wmin, -1 * self.bigm)
 
+            if self.setbounds and layer.wmax is not None:
+                output.LB = 0.0
+                output.UB = np.maximum(layer.wmax, 0.0)
+                layer.mixing.LB = layer.wmin
+                layer.mixing.UB = layer.wmax
+            for index in np.ndindex(output.shape):
+                layer.model.addConstr(layer.mixing[index] == get_mixing(layer, index), name=_name(index, "mix"))
+            mixing = layer.mixing
+        else:
+            mixing = layer._input
         for index in np.ndindex(output.shape):
-            mixing = get_mixing(layer, index)
-            layer.model.addConstr(layer.mixing[index] == mixing, name=_name(index, "mix"))
             layer.model.addGenConstrMax(
                 output[index],
                 [
-                    layer.mixing[index],
+                    mixing[index],
                 ],
                 constant=0.0,
                 name=_name(index, "relu"),

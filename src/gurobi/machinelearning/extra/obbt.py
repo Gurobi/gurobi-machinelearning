@@ -12,6 +12,8 @@ def obbt_layer(layer, round_num, stats=None, verbose=True):
     layer_coefs = layer.coefs
     layer_intercept = layer.intercept
 
+    if layer_coefs is None:
+        return 0
     vtypes = model.getAttr(GRB.Attr.VType, model.getVars())
     model.setAttr(GRB.Attr.VType, model.getVars(), GRB.CONTINUOUS)
 
