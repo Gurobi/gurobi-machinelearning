@@ -73,7 +73,7 @@ class ReLUGC:
             layer.model.update()
             if self.bigm is not None:
                 layer.wmax = np.minimum(layer.wmax, self.bigm)
-            layer.wmin = np.maximum(layer.wmin, -1 * self.bigm)
+                layer.wmin = np.maximum(layer.wmin, -1 * self.bigm)
 
             if self.setbounds and layer.wmax is not None:
                 output.LB = 0.0
