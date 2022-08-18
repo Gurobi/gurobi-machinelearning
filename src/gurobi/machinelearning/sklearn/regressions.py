@@ -51,7 +51,7 @@ class LogisticRegressionConstr(BaseNNConstr):
             self._input,
             self.regressor.coef_.T,
             self.regressor.intercept_,
-            self.actdict["logit"],
+            self.actdict["logistic"],
             self._output,
         )
         if self._output is None:

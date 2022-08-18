@@ -6,7 +6,7 @@ models"""
 import gurobipy as gp
 import numpy as np
 
-from .activations import Identity, LogitPWL, ReLUGC
+from .activations import Identity, LogisticGC, ReLUGC
 from .submodel import SubModel
 
 
@@ -19,7 +19,7 @@ def validate_gpvars(gpvars, isinput):
     """Put variables into appropriate form (matrix of variable)"""
     if isinstance(gpvars, gp.MVar):
         if gpvars.ndim == 1 and isinput:
-            return gp.MVar(gpvars.tolist(), shape=(1, gpvars.shape[0]))
+            return gp.MVar([gpvars.tolist()])
         if gpvars.ndim in (1, 2):
             return gpvars
         raise BaseException("Variables should be an MVar of dimension 1 or 2")
@@ -27,12 +27,14 @@ def validate_gpvars(gpvars, isinput):
         gpvars = gpvars.values()
     if isinstance(gpvars, list):
         if isinput:
-            return gp.MVar(gpvars, shape=(1, len(gpvars)))
-        return gp.MVar(gpvars, shape=(len(gpvars)))
+            return gp.MVar([gpvars])
+        return gp.MVar(gpvars)
     if isinstance(gpvars, gp.Var):
         return gp.MVar(
             [
-                gpvars,
+                [
+                    gpvars,
+                ],
             ],
             shape=(1, 1),
         )
@@ -278,7 +280,7 @@ class BaseNNConstr(AbstractPredictorConstr):
     def __init__(self, grbmodel, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
         self.regressor = regressor
         self.clean = clean_regressor
-        self.actdict = {"relu": ReLUGC(), "identity": Identity(), "logit": LogitPWL()}
+        self.actdict = {"relu": ReLUGC(), "identity": Identity(), "logistic": LogisticGC()}
         try:
             for activation, activation_model in kwargs["activation_models"].items():
                 self.actdict[activation] = activation_model
