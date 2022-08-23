@@ -123,9 +123,13 @@ class ReLUGC:
 class LogisticGC:
     """Model Logit in a MIP using some PWL formulation"""
 
-    def __init__(self, bigm=None, setbounds=True):
+    def __init__(self, bigm=None, setbounds=True, gc_attributes=None):
         self.bigm = bigm
         self.setbounds = setbounds
+        if gc_attributes is None:
+            self.attributes = {"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 0.1, "FuncPieceRatio": -1.0}
+        else:
+            self.attributes = gc_attributes
 
     def mip_model(self, layer):
         """Add formulation for logit for neuron of layer"""
@@ -150,10 +154,13 @@ class LogisticGC:
         else:
             mixing = layer._input
         for index in np.ndindex(output.shape):
-            layer.model.addGenConstrLogistic(
+            gc = layer.model.addGenConstrLogistic(
                 mixing[index],
                 output[index],
                 name=_name(index, "logistic"),
             )
-        model = layer.model
-        output = layer.output
+        numgc = layer.model.NumGenConstrs
+        layer.model.update()
+        for gc in layer.model.getGenConstrs()[numgc:]:
+            for attr, val in self.attributes.items():
+                gc.setAttr(attr, val)
