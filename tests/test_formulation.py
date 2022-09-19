@@ -10,8 +10,6 @@ from joblib import load
 from sklearn import datasets
 
 from gurobi.machinelearning import add_predictor_constr
-from gurobi.machinelearning.extra import morerelu
-from gurobi.machinelearning.extra.obbt import obbt
 from gurobi.machinelearning.sklearn import PipelineConstr
 
 
@@ -53,7 +51,6 @@ class TestFixedModel(unittest.TestCase):
         cases = DiabetesCases()
 
         for regressor in cases:
-            print(regressor)
             onecase = cases.get_case(regressor)
             regressor = onecase["predictor"]
             for _ in range(5):
@@ -105,7 +102,7 @@ class TestReLU(unittest.TestCase):
         exampleno = random.randint(0, 99)
         example = X.iloc[exampleno : exampleno + 1, :]
         epsilon = 0.01
-        activations = (None, morerelu.ReLUmin(), morerelu.GRBReLU(), morerelu.ReLUM())
+        activations = (None,)
         value = None
         for activation in activations:
             with gp.Model() as m:
@@ -117,37 +114,6 @@ class TestReLU(unittest.TestCase):
                     obbt=False,
                 ):
                     self.adversarial_model(m, pipe, example, epsilon, activation=activation)
-                    m.optimize()
-                    if value is None:
-                        value = m.ObjVal
-                    else:
-                        self.assertAlmostEqual(value, m.ObjVal, places=5)
-
-    def test_adversarial_activations_obbt(self):
-        # Load the trained network and the examples
-        dirname = os.path.dirname(__file__)
-        pipe = load(os.path.join(dirname, "predictors/MNIST_50_50.joblib"))
-        X = load(os.path.join(dirname, "predictors/MNIST_first100.joblib"))
-
-        # Change the out_activation of neural network to identity
-        pipe.steps[-1][1].out_activation_ = "identity"
-
-        # Choose an example
-        exampleno = random.randint(0, 99)
-        example = X.iloc[exampleno : exampleno + 1, :]
-        activations = (None, morerelu.GRBReLU(), morerelu.ReLUM())
-        epsilon = 0.1
-        value = None
-        for activation in activations:
-            with gp.Model() as m:
-                m.Params.OutputFlag = 0
-                with self.subTest(example=exampleno, epsilon=epsilon, activation=activation, obbt=True):
-                    pipe2gurobi = self.adversarial_model(m, pipe, example, epsilon, activation=activation)
-                    if activation is None:
-                        activation = morerelu.reluOBBT("both")
-                    else:
-                        activation = None
-                    obbt(pipe2gurobi[-1], activation=activation)
                     m.optimize()
                     if value is None:
                         value = m.ObjVal

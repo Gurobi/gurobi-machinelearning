@@ -47,12 +47,14 @@ def absmodel(X, y, nn, infbound, relumodel=None):
         model.addConstr(X @ beta - y == diff[:, 0])
         model.setObjective(absdiff.sum(), gp.GRB.MINIMIZE)
 
+        model.update()
+
         if nn:
             # create transforms to turn scikit-learn pipeline into Gurobi constraints
             MLPRegressorConstr(model, nn, diff, absdiff, activations_models={"relu": relumodel})
         else:
             for i in range(samples):
-                model.addConstr(absdiff[i, 0] == gp.abs_(diff[i, 0]))
+                model.addConstr(absdiff[i, 0].item() == gp.abs_(diff[i, 0].item()))
 
         model.Params.OutputFlag = 0
         model.Params.WorkLimit = 100

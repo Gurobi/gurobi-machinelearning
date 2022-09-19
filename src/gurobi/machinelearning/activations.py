@@ -10,20 +10,6 @@ def _name(index, name):
     return f"{name}[{index}]"
 
 
-def get_mixing(layer, index):
-    """Facilitator to compute:
-     _input @ layer.coefs + layer.intercept
-     for a given index
-    Should not be necesary when MVar dimensions are fixed
-    """
-    k, j = index
-    _input = layer.input
-    if layer.coefs is None:
-        return _input
-    input_size = _input.shape[1]
-    return sum(_input[k, i] * layer.coefs[i, j] for i in range(input_size)) + layer.intercept[j]
-
-
 class Identity:
     """Model identity activation (i.e. does nearly nothing"""
 
@@ -36,9 +22,7 @@ class Identity:
         if self.setbounds:
             output.LB = np.maximum(output.LB, layer.wmin)
             output.UB = np.minimum(output.UB, layer.wmax)
-
-        for index in np.ndindex(output.shape):
-            layer.model.addConstr(output[index] == get_mixing(layer, index), name=_name(index, "mix"))
+        layer.model.addConstr(output == layer.input @ layer.coefs + layer.intercept)
 
     @staticmethod
     def forward(input_values):
@@ -80,9 +64,8 @@ class ReLUGC:
                 output.UB = np.maximum(layer.wmax, 0.0)
                 layer.mixing.LB = layer.wmin
                 layer.mixing.UB = layer.wmax
-            for index in np.ndindex(output.shape):
-                layer.model.addConstr(layer.mixing[index] == get_mixing(layer, index), name=_name(index, "mix"))
             mixing = layer.mixing
+            layer.model.addConstr(mixing == layer.input @ layer.coefs + layer.intercept)
         else:
             mixing = layer._input
         for index in np.ndindex(output.shape):
@@ -151,6 +134,7 @@ class LogisticGC:
             for index in np.ndindex(output.shape):
                 layer.model.addConstr(layer.mixing[index] == get_mixing(layer, index), name=_name(index, "mix"))
             mixing = layer.mixing
+            layer.model.addConstr(mixing == layer.input @ layer.coefs + layer.intercept)
         else:
             mixing = layer._input
         for index in np.ndindex(output.shape):
