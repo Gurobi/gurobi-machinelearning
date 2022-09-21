@@ -44,6 +44,8 @@ class AbstractPredictorConstr(SubModel):
     """Class to define a submodel"""
 
     def __init__(self, grbmodel, input_vars, output_vars=None, **kwargs):
+        print(input_vars)
+        print(output_vars)
         self._input = validate_gpvars(input_vars, True)
         if output_vars is not None:
             self._output = validate_gpvars(output_vars, False)
@@ -220,30 +222,8 @@ class DenseLayer(AbstractNNLayer):
     ):
         self.coefs = layer_coefs
         self.intercept = layer_intercept
-        self.wmin = None
-        self.wmax = None
         self.zvar = None
         super().__init__(grbmodel, output_vars, input_vars, activation_function, **kwargs)
-
-    def _wminmax(self):
-        """Compute min/max for w variable"""
-        if (self._input.UB >= gp.GRB.INFINITY).any():
-            return (
-                -gp.GRB.INFINITY * np.ones(self._output.shape),
-                gp.GRB.INFINITY * np.ones(self._output.shape),
-            )
-        if (self._input.LB <= -gp.GRB.INFINITY).any():
-            return (
-                -gp.GRB.INFINITY * np.ones(self._output.shape),
-                gp.GRB.INFINITY * np.ones(self._output.shape),
-            )
-        wpos = np.maximum(self.coefs, 0.0)
-        wneg = np.minimum(self.coefs, 0.0)
-        wmin = self._input.LB @ wpos + self._input.UB @ wneg + self.intercept
-        wmax = self._input.UB @ wpos + self._input.LB @ wneg + self.intercept
-        wmax = np.maximum(wmin, wmax)
-
-        return (wmin, wmax)
 
     def _create_output_vars(self, input_vars):
         rval = self._model.addMVar((input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act")
@@ -256,17 +236,6 @@ class DenseLayer(AbstractNNLayer):
         model.update()
         if activation is None:
             activation = self.activation
-
-        # Compute bounds on weighted sums by propagation
-        wmin, wmax = self._wminmax()
-
-        # Take best bound from what we have stored and what we propagated
-        if wmax is not None and self.wmax is not None:
-            wmax = np.minimum(wmax, self.wmax)
-        if wmin is not None and self.wmin is not None:
-            wmin = np.maximum(wmin, self.wmin)
-        self.wmin = wmin
-        self.wmax = wmax
 
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
@@ -286,7 +255,9 @@ class BaseNNConstr(AbstractPredictorConstr):
         except KeyError:
             pass
         self._layers = []
-        super().__init__(grbmodel, input_vars, output_vars, default_name=_default_name(regressor), **kwargs)
+        if "default_name" not in kwargs:
+            kwargs["default_name"] = _default_name(regressor)
+        super().__init__(grbmodel, input_vars, output_vars, **kwargs)
 
     def __iter__(self):
         return self._layers.__iter__()

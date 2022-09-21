@@ -25,8 +25,8 @@ class Sequential(BaseNNConstr):
             else:
                 print(step)
                 raise BaseException("Unsupported network structure")
-        BaseNNConstr.__init__(
-            self, grbmodel, regressor, input_vars, output_vars, clean_regressor=clean_regressor, default_name="torchsequential"
+        super().__init__(
+            grbmodel, regressor, input_vars, output_vars, clean_regressor=clean_regressor, default_name="torchsequential"
         )
 
     def mip_model(self):
