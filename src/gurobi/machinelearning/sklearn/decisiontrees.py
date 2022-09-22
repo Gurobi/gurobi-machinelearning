@@ -24,7 +24,8 @@ class DecisionTreeRegressorConstr(AbstractPredictorConstr):
         _input = self._input
         output = self._output
         nex = _input.shape[0]
-        nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY)
+        nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name="node")
+        self.nodevars = nodes
 
         # Intermediate nodes constraints
         # Can be added all at once
@@ -44,14 +45,14 @@ class DecisionTreeRegressorConstr(AbstractPredictorConstr):
                     (nodes[k, left].item() == 1) >> (_input[k, tree.feature[node]] <= tree.threshold[node]) for k in range(nex)
                 )
                 model.addConstrs(
-                    (nodes[k, right].item() == 1) >> (_input[k, tree.feature[node]] >= tree.threshold[node] + 1e-8)
+                    (nodes[k, right].item() == 1) >> (_input[k, tree.feature[node]] >= tree.threshold[node] + 1e-6)
                     for k in range(nex)
                 )
             else:
                 model.addConstrs((nodes[k, node].item() == 1) >> (output[k, 0] == tree.value[node][0][0]) for k in range(nex))
 
         # We should attain 1 leaf
-        model.addConstr(nodes[:, leafs].sum() == 1)
+        model.addConstr(nodes[:, leafs].sum(axis=1) == 1)
 
         output.LB = np.min(tree.value)
         output.UB = np.max(tree.value)

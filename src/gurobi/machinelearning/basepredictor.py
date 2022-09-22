@@ -44,8 +44,6 @@ class AbstractPredictorConstr(SubModel):
     """Class to define a submodel"""
 
     def __init__(self, grbmodel, input_vars, output_vars=None, **kwargs):
-        print(input_vars)
-        print(output_vars)
         self._input = validate_gpvars(input_vars, True)
         if output_vars is not None:
             self._output = validate_gpvars(output_vars, False)

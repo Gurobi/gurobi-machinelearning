@@ -2,9 +2,9 @@ import gurobipy as gp
 import numpy as np
 from joblib import Parallel, delayed, load
 
+from gurobi.machinelearning import add_predictor_constr
 from gurobi.machinelearning.extra.morerelu import ReLUM, reluOBBT
 from gurobi.machinelearning.extra.obbt import obbt
-from gurobi.machinelearning.sklearn import Pipe2Gurobi
 
 
 def do_formulation(pipe, X, exampleno, filename, doobbt, otherrelu=None):
@@ -14,34 +14,34 @@ def do_formulation(pipe, X, exampleno, filename, doobbt, otherrelu=None):
 
     sortedidx = np.argsort(ex_prob)[0]
 
-    m = gp.Model()
-    epsilon = 5
-    lb = np.maximum(example - epsilon, 0)
-    ub = np.minimum(example + epsilon, 1)
+    with gp.Env() as env, gp.Model(env=env) as m:
+        epsilon = 5
+        lb = np.maximum(example - epsilon, 0)
+        ub = np.minimum(example + epsilon, 1)
 
-    x = m.addMVar(example.shape, lb=lb, ub=ub, name="X")
-    absdiff = m.addMVar(example.shape, lb=0, ub=1, name="dplus")
-    output = m.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="y")
+        x = m.addMVar(example.shape, lb=lb, ub=ub, name="X")
+        absdiff = m.addMVar(example.shape, lb=0, ub=1, name="dplus")
+        output = m.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="y")
 
-    m.addConstr(absdiff[0, :] >= x[0, :] - example.iloc[0, :].to_numpy())
-    m.addConstr(absdiff[0, :] >= -x[0, :] + example.iloc[0, :].to_numpy())
-    m.addConstr(absdiff[0, :].sum() <= epsilon)
-    # Change last layer activation to identity
-    pipe.steps[-1][1].out_activation_ = "identity"
-    if otherrelu is not None:
-        pipe2gurobi = Pipe2Gurobi(m, pipe, x, output, delayed_add=True)
-        pipe2gurobi.steps[-1].actdict["relu"] = ReLUM()
-        pipe2gurobi._add()
-    else:
-        pipe2gurobi = Pipe2Gurobi(m, pipe, x, output)
-    m.setObjective(output[0, sortedidx[0]] - output[0, sortedidx[-1]], gp.GRB.MAXIMIZE)
-    m.update()
+        m.addConstr(absdiff[0, :] >= x[0, :] - example.iloc[0, :].to_numpy())
+        m.addConstr(absdiff[0, :] >= -x[0, :] + example.iloc[0, :].to_numpy())
+        m.addConstr(absdiff[0, :].sum() <= epsilon)
+        # Change last layer activation to identity
+        pipe.steps[-1][1].out_activation_ = "identity"
+        if otherrelu is not None:
+            pipe2gurobi = Pipe2Gurobi(m, pipe, x, output, delayed_add=True)
+            pipe2gurobi.steps[-1].actdict["relu"] = ReLUM()
+            pipe2gurobi._add()
+        else:
+            pipe2gurobi = add_predictor_constr(m, pipe, x, output)
+        m.setObjective(output[0, sortedidx[0]] - output[0, sortedidx[-1]], gp.GRB.MAXIMIZE)
+        m.update()
 
-    m.Params.OutputFlag = 1
-    if doobbt:
-        obbt(pipe2gurobi.steps[-1], doobbt, reluOBBT("both"))
-    m.update()
-    m.write(filename)
+        m.Params.OutputFlag = 1
+        if doobbt:
+            obbt(pipe2gurobi[-1], doobbt, reluOBBT("both"))
+        m.update()
+        m.write(filename)
 
 
 def doone(filename, exampleno, doobbt):
@@ -57,7 +57,7 @@ def doone(filename, exampleno, doobbt):
 
 
 if __name__ == "__main__":
-    files = ("MNIST_50_50.joblib", "MNIST_100_100.joblib")
-    doobbt = True
+    files = ("MNIST_50_50.joblib", "MNIST_100_100.joblib", "MNIST_500_6.joblib")
+    doobbt = False
 
     r = Parallel(n_jobs=4, verbose=10)(delayed(doone)(f, n, doobbt) for f in files for n in range(100))
