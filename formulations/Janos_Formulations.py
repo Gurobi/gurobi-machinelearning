@@ -3,17 +3,23 @@ import numpy as np
 import pandas as pd
 from gurobipy import GRB
 from joblib import Parallel, delayed, dump, load, parallel_backend
-from sklearn.neural_network import MLPRegressor
+from sklearn.ensemble import GradientBoostingRegressor  # noqa
+from sklearn.ensemble import RandomForestRegressor  # noqa
+from sklearn.linear_model import LinearRegression  # noqa
+from sklearn.linear_model import LogisticRegression  # noqa
+from sklearn.neural_network import MLPRegressor  # noqa
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.tree import DecisionTreeRegressor  # noqa
 
-from gurobi.machinelearning.sklearn import Pipe2Gurobi
+from gurobi.machinelearning import add_predictor_constr
+from gurobi.machinelearning.sklearn import sklearn_predictors
 
 KNOWN_FEATURES = ["SAT", "GPA"]
 DEC_FEATURES = ["scholarship"]
 
 
-def do_regression(layers, seed, known_features, dec_features):
+def do_regression(regressor, known_features, dec_features, **kwargs):
     # Retrieve historical data used to do the regression
     historical_data = pd.read_csv("data/college_student_enroll-s1-1.csv", index_col=0)
 
@@ -31,8 +37,7 @@ def do_regression(layers, seed, known_features, dec_features):
     Y = historical_data.loc[:, "enroll"]
     scaler = StandardScaler()
 
-    regression = MLPRegressor(hidden_layer_sizes=layers, random_state=seed)
-    pipe = make_pipeline(scaler, regression)
+    pipe = make_pipeline(scaler, regressor)
     pipe.fit(X=X, y=Y)
 
     decidx = historical_data.columns.get_indexer(dec_features)
@@ -68,14 +73,7 @@ def do_model(pipe, decidx, known_features, dec_features, reluformulation=None):
     m.addConstr(x[:, decidx].sum() <= 0.2 * nstudents)
 
     # create transforms to turn scikit-learn pipeline into Gurobi constraints
-    pipe2gurobi = Pipe2Gurobi(pipe, m)
-    if reluformulation is not None:
-        pipe2gurobi.steps[-1].actdict["relu"] = reluformulation
-
-    # Add constraint to predict value of y using kwnown and to compute features
-    pipe2gurobi.predict(X=x, y=y)
-
-    m._pipe2gurobi = pipe2gurobi
+    pipe2gurobi = add_predictor_constr(m, pipe, x, y)
     return m
 
 
@@ -85,35 +83,91 @@ def dojanosformulation(pipe):
     return model
 
 
-def gen_nn(layers, seed):
-    filename = "{}_nn-{}_seed{}.joblib".format("Janos", "-".join([f"{n}" for n in layers]), seed)
+def paramstring(params):
+    rval = {}
+    for name, value in params.items():
+        if isinstance(value, list):
+            value = "x".join([f"{v}" for v in value])
+        rval[name] = value
+    if len(rval):
+        return "_{}".format("-".join([f"{n}={v}" for n, v in rval.items()]))
+    else:
+        return ""
+
+
+def gen_nn(totest):
+    regressor = totest["regressor"]
+    kwargs = totest["kwargs"]
+    print(regressor, kwargs)
+    filename = "{}_{}{}.joblib".format("Janos", regressor.lower(), paramstring(kwargs))
     try:
         load(filename)
         return
     except Exception:
         pass
-    pipe, decidx = do_regression(layers, seed, KNOWN_FEATURES, DEC_FEATURES)
+    regressor = eval(regressor)(**kwargs)
+    pipe, decidx = do_regression(regressor, KNOWN_FEATURES, DEC_FEATURES)
     nn = pipe.steps[-1][1]
-    for layer in nn.coefs_:
-        layer[np.abs(layer) < 1e-8] = 0.0
     dump((pipe, decidx), filename)
+
+
+def regressor_params(name):
+    if name == "MLPRegressor":
+        return [
+            {"hidden_layer_sizes": [5] * 2},
+            {"hidden_layer_sizes": [5] * 3},
+            {"hidden_layer_sizes": [10] * 2},
+            {"hidden_layer_sizes": [10] * 3},
+            {"hidden_layer_sizes": [15] * 2},
+            {"hidden_layer_sizes": [15] * 3},
+        ]
+    if name == "GradientBoostingRegressor":
+        rval = []
+        for n_estimators in [5, 10, 15, 20]:
+            for depth in [4, 5]:
+                for max_leaf in [5, 7]:
+                    rval.append({"n_estimators": n_estimators, "max_depth": depth, "max_leaf_nodes": max_leaf})
+        return rval
+    if name == "RandomForestRegressor":
+        rval = []
+        for n_estimators in [5, 10, 15, 20]:
+            for depth in [4, 5]:
+                for max_leaf in [5, 7]:
+                    rval.append({"n_estimators": n_estimators, "max_depth": depth, "max_leaf_nodes": max_leaf})
+        return rval
+    if name == "DecisionTreeRegressor":
+        rval = []
+        for depth in [5, 10, 15]:
+            for max_leaf in [5, 10, 20, 30, 40]:
+                rval.append({"max_depth": depth, "max_leaf_nodes": max_leaf})
+        return rval
+    if name == "LogisticRegression":
+        rval = []
+        for penalty in ["l1", "l2", "elasticnet"]:
+            for c in [1e-2, 1e-1, 1e0, 1e1]:
+                rval.append({"solver": "saga", "C": c, "penalty": penalty, "l1_ratio": 0.5})
+        return rval
+    return [{}]
 
 
 def gen_all_nn():
     do = gen_nn
+    excluded = ["LinearRegression", "MLPClassifier"]
+    regressors = [r for r in sklearn_predictors().keys() if r not in excluded]
+    to_test = []
+    noseed = ["GradientBoostingRegressor", "RandomForestRegressor", "DecisionTreeRegressor", "LogisticRegression"]
+    for reg in regressors:
+        params = regressor_params(reg)
+        if reg in noseed:
+            for par in params:
+                to_test.append({"regressor": reg, "kwargs": par})
+        else:
+            for par in params:
+                for seed in range(10):
+                    par["random_state"] = seed
+                    to_test.append({"regressor": reg, "kwargs": par})
     with parallel_backend("multiprocessing"):
-        Parallel(n_jobs=4, verbose=10)(
-            delayed(do)(hidden_layers, seed)
-            for hidden_layers in (
-                [5] * 2,
-                [5] * 3,
-                [10] * 2,
-                [10] * 3,
-                [15] * 2,
-                [15] * 3,
-            )
-            for seed in range(10)
-        )
+        Parallel(n_jobs=4, verbose=10)(delayed(do)(test) for test in to_test)
 
 
 if __name__ == "__main__":
