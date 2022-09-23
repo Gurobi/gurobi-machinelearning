@@ -19,7 +19,7 @@ def validate_gpvars(gpvars, isinput):
     """Put variables into appropriate form (matrix of variable)"""
     if isinstance(gpvars, gp.MVar):
         if gpvars.ndim == 1 and isinput:
-            return gp.MVar([gpvars.tolist()])
+            return gp.MVar.fromlist([gpvars.tolist()])
         if gpvars.ndim in (1, 2):
             return gpvars
         raise BaseException("Variables should be an MVar of dimension 1 or 2")
@@ -27,16 +27,15 @@ def validate_gpvars(gpvars, isinput):
         gpvars = gpvars.values()
     if isinstance(gpvars, list):
         if isinput:
-            return gp.MVar([gpvars])
-        return gp.MVar(gpvars)
+            return gp.MVar.fromlist([gpvars])
+        return gp.MVar.fromlist(gpvars)
     if isinstance(gpvars, gp.Var):
-        return gp.MVar(
+        return gp.MVar.fromlist(
             [
                 [
                     gpvars,
                 ],
-            ],
-            shape=(1, 1),
+            ]
         )
     raise BaseException("Could not validate variables")
 
@@ -64,9 +63,9 @@ class AbstractPredictorConstr(SubModel):
             raise BaseException("No output variables")
         if output_vars.ndim == 1:
             if input_vars.shape[0] == 1:
-                output_vars = gp.MVar(output_vars.tolist(), shape=(1, output_vars.shape[0]))
+                output_vars = gp.MVar.fromlist([output_vars.tolist()])
             else:
-                output_vars = gp.MVar(output_vars.tolist(), shape=(output_vars.shape[0], 1))
+                output_vars = gp.MVar.fromlist([[v] for v in output_vars.tolist()])
 
         if output_vars.shape[0] != input_vars.shape[0]:
             raise BaseException(
@@ -221,30 +220,8 @@ class DenseLayer(AbstractNNLayer):
     ):
         self.coefs = layer_coefs
         self.intercept = layer_intercept
-        self.wmin = None
-        self.wmax = None
         self.zvar = None
         super().__init__(grbmodel, output_vars, input_vars, activation_function, **kwargs)
-
-    def _wminmax(self):
-        """Compute min/max for w variable"""
-        if (self._input.UB >= gp.GRB.INFINITY).any():
-            return (
-                -gp.GRB.INFINITY * np.ones(self._output.shape),
-                gp.GRB.INFINITY * np.ones(self._output.shape),
-            )
-        if (self._input.LB <= -gp.GRB.INFINITY).any():
-            return (
-                -gp.GRB.INFINITY * np.ones(self._output.shape),
-                gp.GRB.INFINITY * np.ones(self._output.shape),
-            )
-        wpos = np.maximum(self.coefs, 0.0)
-        wneg = np.minimum(self.coefs, 0.0)
-        wmin = self._input.LB @ wpos + self._input.UB @ wneg + self.intercept
-        wmax = self._input.UB @ wpos + self._input.LB @ wneg + self.intercept
-        wmax = np.maximum(wmin, wmax)
-
-        return (wmin, wmax)
 
     def _create_output_vars(self, input_vars):
         rval = self._model.addMVar((input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act")
@@ -257,17 +234,6 @@ class DenseLayer(AbstractNNLayer):
         model.update()
         if activation is None:
             activation = self.activation
-
-        # Compute bounds on weighted sums by propagation
-        wmin, wmax = self._wminmax()
-
-        # Take best bound from what we have stored and what we propagated
-        if wmax is not None and self.wmax is not None:
-            wmax = np.minimum(wmax, self.wmax)
-        if wmin is not None and self.wmin is not None:
-            wmin = np.maximum(wmin, self.wmin)
-        self.wmin = wmin
-        self.wmax = wmax
 
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
@@ -287,7 +253,9 @@ class BaseNNConstr(AbstractPredictorConstr):
         except KeyError:
             pass
         self._layers = []
-        super().__init__(grbmodel, input_vars, output_vars, default_name=_default_name(regressor), **kwargs)
+        if "default_name" not in kwargs:
+            kwargs["default_name"] = _default_name(regressor)
+        super().__init__(grbmodel, input_vars, output_vars, **kwargs)
 
     def __iter__(self):
         return self._layers.__iter__()

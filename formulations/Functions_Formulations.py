@@ -5,7 +5,7 @@ from joblib import Parallel, delayed, dump, load, parallel_backend
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
 
-from gurobi.machinelearning.sklearn import Pipe2Gurobi
+from gurobi.machinelearning import add_predictor_constr
 
 
 def GoldsteinPrice(x1, x2):
@@ -52,12 +52,7 @@ def do_model(pipe, reluformulation=None):
 
     m.setObjective(y.sum(), gp.GRB.MINIMIZE)
 
-    pipe2gurobi = Pipe2Gurobi(pipe, m)
-    if reluformulation is not None:
-        pipe2gurobi.steps[-1].actdict["relu"] = reluformulation
-    pipe2gurobi.predict(X=x, y=y)
-
-    m._pipe2gurobi = pipe2gurobi
+    pipe2gurobi = add_predictor_constr(m, pipe, x, y)
     return m
 
 

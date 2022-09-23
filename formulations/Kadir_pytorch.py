@@ -11,10 +11,8 @@ import torch
 from gurobipy import GRB
 from joblib import Parallel, delayed, parallel_backend
 
-from gurobi.machinelearning.nnalgs import prop
-
 # import my functions
-from gurobi.machinelearning.pytorch import Sequential2Gurobi
+from gurobi.machinelearning.pytorch import Sequential
 
 
 def do_regression(seed):
@@ -65,8 +63,7 @@ def do_model(nnmodel, seed):
     y = m.addMVar((1, 24), lb=20, ub=30, vtype=GRB.CONTINUOUS, name="y")
     m.setObjective(p @ x[0, 24:], GRB.MINIMIZE)
 
-    nn2gurobi = Sequential2Gurobi(nnmodel, m)
-    nn2gurobi.predict(x, y)
+    nn2gurobi = Sequential(m, nnmodel, x, y)
 
     return (m, nn2gurobi)
 
@@ -125,4 +122,4 @@ if __name__ == "__main__":
     doobbt = False
     doheuristic = False
 
-    Parallel(n_jobs=5, verbose=10)(delayed(doone)(f, doobbt, doheuristic, seed) for f in files for seed in range(1, 11))
+    Parallel(n_jobs=1, verbose=10)(delayed(doone)(f, doobbt, doheuristic, seed) for f in files for seed in range(1, 11))

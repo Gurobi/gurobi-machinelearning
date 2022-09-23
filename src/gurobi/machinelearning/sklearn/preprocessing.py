@@ -69,8 +69,8 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
                 qexpr += 1.0
                 for j, feat in enumerate(_input[k, :]):
                     if power[j] == 2:
-                        qexpr *= feat
-                        qexpr *= feat
+                        qexpr *= feat.item()
+                        qexpr *= feat.item()
                     elif power[j] == 1:
-                        qexpr *= feat
+                        qexpr *= feat.item()
                 self.model.addConstr(output[k, i] == qexpr, name=f"polyfeat[{k},{i}]")
