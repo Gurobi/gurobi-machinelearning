@@ -23,6 +23,9 @@ class DecisionTreeRegressorConstr(AbstractPredictorConstr):
 
         _input = self._input
         output = self._output
+        outdim = output.shape[1]
+        if outdim != 1:
+            raise Exception("Can only deal with 1-dimensional regression. Output dimension {}".format(outdim))
         nex = _input.shape[0]
         nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name="node")
         self.nodevars = nodes
@@ -79,14 +82,18 @@ class GradientBoostingRegressorConstr(AbstractPredictorConstr):
         output = self._output
         nex = _input.shape[0]
 
-        treevars = model.addMVar((nex, regressor.n_estimators_), lb=-GRB.INFINITY)
+        outdim = output.shape[1]
+        if outdim != 1:
+            raise Exception("Can only deal with 1-dimensional regression. Output dimension {}".format(outdim))
+        treevars = model.addMVar((nex, regressor.n_estimators_), lb=-GRB.INFINITY, name="estimator")
         constant = regressor.init_.constant_
 
         tree2gurobi = []
         for i in range(regressor.n_estimators_):
             tree = regressor.estimators_[i]
-            tree2gurobi.append(DecisionTreeRegressorConstr(model, tree[0], _input, treevars[:, i]))
-        model.addConstr(output == regressor.learning_rate * treevars.sum(axis=1) + constant)
+            tree2gurobi.append(DecisionTreeRegressorConstr(model, tree[0], _input, treevars[:, i], default_name="gbt_tree"))
+
+        model.addConstr(output[:, 0] == regressor.learning_rate * treevars.sum(axis=1) + constant[0][0])
 
 
 class RandomForestRegressorConstr(AbstractPredictorConstr):
@@ -110,11 +117,14 @@ class RandomForestRegressorConstr(AbstractPredictorConstr):
         output = self._output
         nex = _input.shape[0]
 
-        treevars = model.addMVar((nex, regressor.n_estimators), lb=-GRB.INFINITY)
+        outdim = output.shape[1]
+        if outdim != 1:
+            raise Exception("Can only deal with 1-dimensional regression. Output dimension {}".format(outdim))
+        treevars = model.addMVar((nex, regressor.n_estimators), lb=-GRB.INFINITY, name="estimator")
 
         tree2gurobi = []
         for i in range(regressor.n_estimators):
             tree = regressor.estimators_[i]
-            tree2gurobi.append(DecisionTreeRegressorConstr(model, tree, _input, treevars[:, i]))
-        for k in range(nex):
-            model.addConstr(regressor.n_estimators * output[k, :] == treevars[k, :].sum())
+            tree2gurobi.append(DecisionTreeRegressorConstr(model, tree, _input, treevars[:, i], default_name="rf_tree"))
+
+        model.addConstr(regressor.n_estimators * output[:, 0] == treevars.sum(axis=1))
