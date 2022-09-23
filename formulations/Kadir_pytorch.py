@@ -86,7 +86,7 @@ def heuristic(nn, nn2gurobi):
     feasibles = X[((prediction >= 20) & (prediction <= 30)).all(axis=1), :]
     sortedinputs = np.argsort(nn2gurobi._layers[0].invar.Obj @ feasibles.numpy().T)
 
-    prop(nn2gurobi, feasibles[sortedinputs[0, 0]].numpy().reshape(1, -1), reset=True)
+    # prop(nn2gurobi, feasibles[sortedinputs[0, 0]].numpy().reshape(1, -1), reset=True)
 
 
 def doone(filename, doobbt=None, doheuristic=None, seed=None):
