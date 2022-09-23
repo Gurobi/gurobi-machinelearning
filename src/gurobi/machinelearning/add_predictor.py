@@ -1,36 +1,14 @@
 """ Define generic function that can add any known trained predictor
 """
+import sys
+
 from .sklearn import PipelineConstr, sklearn_predictors, sklearn_transformers
-
-HASPYTORCH = False
-try:
-    from pytorch import nn as pytorchnn
-
-    HASPYTORCH = True
-except ImportError:
-    pass
-
-if HASPYTORCH:
-    from .pytorch import Sequential as TorchSequential
-
-HASTFKERAS = False
-try:
-    from keras.engine.functional import Functional
-    from keras.engine.training import Model
-    from tensorflow import keras
-
-    HASTFKERAS = True
-except ImportError:
-    pass
-
-if HASTFKERAS:
-    from .keras import Predictor as KerasPredictor
 
 USER_PREDICTORS = {}
 
 
 def sklearn_convertors():
-    """Collect known convertors for scikit learn objects"""
+    """Collect known scikit-learn objects that can be embeded and the conversion class"""
     return (
         sklearn_transformers()
         | sklearn_predictors()
@@ -41,19 +19,40 @@ def sklearn_convertors():
 
 
 def pytorch_convertors():
-    """Collect known convertors for pytorch objects"""
-    if HASPYTORCH:
+    """Collect known PyTorch objects that can be embeded and the conversion class"""
+    if "pytorch" in sys.modules:
+        from pytorch import nn as pytorchnn
+
+        from .pytorch import Sequential as TorchSequential
+
         return {pytorchnn.Sequential: TorchSequential}
     return {}
 
 
 def keras_convertors():
-    if HASTFKERAS:
+    """Collect known Keras objects that can be embeded and the conversion class"""
+    if "tensorflow" in sys.modules:
+        from keras.engine.functional import Functional
+        from keras.engine.training import Model
+        from tensorflow import keras
+
+        from .keras import Predictor as KerasPredictor
+
         return {keras.Sequential: KerasPredictor, Functional: KerasPredictor, Model: KerasPredictor}
     return {}
 
 
 def register_predictor_constr(predictor, predictor_constr):
+    """Register a new perdictor that can be added using use_predictor_constr
+
+    Parameters
+    ----------
+    predictor:
+        Class of the predictor
+    predictor_constr:
+        Class implementing the MIP model that embeds a trained object of
+        class predictor in a gurobi Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>
+    """
     USER_PREDICTORS[predictor] = predictor_constr
 
 

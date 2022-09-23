@@ -2,7 +2,7 @@
 
 
 class SubModel:
-    """Base class for building and representing a sub-model of a gurobipy.Model.
+    """Base class for building and representing a sub-model embeded in a gurobipy.Model.
 
     When instantiating this class, a (sub-)model is created in the provided
     gurobipy.Model.  The instance represents the sub-model that was created,
@@ -71,6 +71,10 @@ class SubModel:
     within the model construction method or function of a SubModel itself.
     In this case, the automatic name handling will '.'-separated generate
     names following your call hierarchy.
+
+    Parameters
+    ----------
+
     """
 
     def __init__(
@@ -134,7 +138,26 @@ class SubModel:
             self.name_handler = name_handler
 
     class _modelstats:
-        """Helper class for recording gurobi model dimensions"""
+        """Helper class for recording gurobi model dimensions
+
+        Parameters
+        ----------
+        model: gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>
+            A gurobipy model
+
+        Attributes
+        ----------
+        numvars: int
+            Number of variables in `model`.
+        numconstrs: int
+            Number of constraints in `model`.
+        numsos: int
+            Number of SOS constraints in `model`
+        numqconstrs: int
+            Number of quadratic constraints in `model`
+        numgenconstrs: int
+            Number of general constraints in `model`
+        """
 
         def __init__(self, model):
             model.update()
@@ -143,10 +166,6 @@ class SubModel:
             self.numsos = model.numSOS
             self.numqconstrs = model.numQConstrs
             self.numgenconstrs = model.numGenConstrs
-            try:
-                self.numcallbacks = model.numcallbacks
-            except AttributeError:
-                self.numcallbacks = 0
 
     def _record(self, model, before):
         """Record added modeling objects compared to status before."""
@@ -180,15 +199,6 @@ class SubModel:
             self._sos = model.getSOSs()[before.numsos : model.numsos]
         else:
             self._sos = []
-        # range of Callbacks
-        self._first_callback = None
-        self._last_callback = None
-        try:
-            if model.numcallbacks > before.numcallbacks:
-                self._first_callback = self._model.getCallback(before.numcallbacks, before.numcallbacks)[0]
-                self._last_callback = self._model.getCallback(model.numcallbacks - 1, model.numcallbacks - 1)[0]
-        except AttributeError:
-            pass
 
     @property
     def vars(self):

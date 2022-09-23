@@ -14,7 +14,12 @@ def get_mixing(layer, index):
     """Facilitator to compute:
      _input @ layer.coefs + layer.intercept
      for a given index
-    Should not be necesary when MVar dimensions are fixed
+    Should not be necesary with Gurobi 10
+
+    Parameters
+    ----------
+    layer
+
     """
     k, j = index
     _input = layer.input
