@@ -11,42 +11,75 @@ def _name(index, name):
 
 
 class Identity:
-    """Model identity activation (i.e. does nearly nothing"""
+    """Class to apply identity activation on a neural network layer
+
+    Parameters
+    ----------
+    setbounds: Bool
+        Optional flag not to set bounds on the output variables.
+
+    Attributes
+    ----------
+    setbounds: Bool
+        Optional flag not to set bounds on the output variables.
+    """
 
     def __init__(self):
         pass
 
     def mip_model(self, layer):
-        """MIP model for identity activation (just apply afine transformation"""
+        """MIP model for identity activation on a layer
+
+        Parameters
+        ----------
+        layer: AbstractNNLayer
+            Layer to which activation is applied.
+        """
         output = layer.output
         layer.model.addConstr(output == layer.input @ layer.coefs + layer.intercept)
 
     @staticmethod
-    def forward(input_values):
-        """Return input_values"""
-        return input_values
+    def reset_bounds(layer):
+        """Reset the bounds in layer
 
-    @staticmethod
-    def forward_fixing(layer, input_values, threshold=-20):  # pylint: disable=W0613
-        """Fix variables according to input_values noop"""
-        return []
-
-    @staticmethod
-    def reset_bounds(layer):  # pylint: disable=W0613
-        """Reset the bounds in layer"""
+        Parameters
+        ----------
+        layer: AbstractNNLayer
+            Layer to which activation is applied.
+        """
         output.LB = -GRB.Infinity
         output.UB = GRB.Infinity
 
 
 class ReLUGC:
-    """Model the ReLU function (i.e max(x, 0)) using
-    Gurobi max general constraints."""
+    """Class to apply the ReLU activation on a neural network layer
+
+    Parameters
+    ----------
+    setbounds: Bool
+        Optional flag not to set bounds on the output variables.
+    bigm: Float
+        Optional maximal value for bounds use in the formulation
+
+    Attributes
+    ----------
+    setbounds: Bool
+        Optional flag not to set bounds on the output variables.
+    bigm: Float
+        Optional maximal value for bounds use in the formulation
+    """
 
     def __init__(self):
         pass
 
     def mip_model(self, layer):
-        """Add MIP formulation for ReLU for neuron in layer"""
+        """MIP model for ReLU activation on a layer
+
+        Parameters
+        ----------
+        layer: AbstractNNLayer
+            Layer to which activation is applied.
+        """
         output = layer.output
         if hasattr(layer, "coefs"):
             if not hasattr(layer, "mixing"):
