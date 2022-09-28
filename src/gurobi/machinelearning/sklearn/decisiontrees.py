@@ -5,6 +5,7 @@
 
 import numpy as np
 from gurobipy import GRB
+from sklearn.utils.validation import check_is_fitted
 
 from ..basepredictor import AbstractPredictorConstr
 
@@ -14,6 +15,7 @@ class DecisionTreeRegressorConstr(AbstractPredictorConstr):
 
     def __init__(self, grbmodel, regressor, input_vars, output_vars, **kwargs):
         self.tree = regressor.tree_
+        check_is_fitted(regressor)
         self.n_outputs_ = regressor.n_outputs_
         super().__init__(grbmodel, input_vars, output_vars, **kwargs)
 
@@ -100,6 +102,7 @@ class RandomForestRegressorConstr(AbstractPredictorConstr):
     """Class to model a trained random forest regressor in a Gurobi model"""
 
     def __init__(self, model, regressor, input_vars, output_vars):
+        check_is_fitted(regressor)
         self.regressor = regressor
         self.n_outputs_ = regressor.n_outputs_
         super().__init__(model, input_vars, output_vars)

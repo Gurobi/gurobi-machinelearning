@@ -1,5 +1,7 @@
 """ Implementation for the scikit learn pipeline """
 
+from sklearn.utils.validation import check_is_fitted
+
 from ..basepredictor import AbstractPredictorConstr, _default_name
 from .list import sklearn_predictors, sklearn_transformers
 
@@ -10,6 +12,7 @@ class PipelineConstr(AbstractPredictorConstr):
     def __init__(self, grbmodel, pipeline, input_vars, output_vars=None, **kwargs):
         self._steps = []
         self.pipeline = pipeline
+        check_is_fitted(pipeline)
         self._kwargs = kwargs
         super().__init__(grbmodel, input_vars, output_vars, default_name=_default_name(pipeline), **kwargs)
 

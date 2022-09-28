@@ -12,6 +12,7 @@ What we have so far:
 
 
 import numpy as np
+from sklearn.utils.validation import check_is_fitted
 
 from ..basepredictor import BaseNNConstr
 
@@ -22,6 +23,7 @@ class LinearRegressionConstr(BaseNNConstr):
     """
 
     def __init__(self, grbmodel, regressor, input_vars, output_vars=None, **kwargs):
+        check_is_fitted(regressor)
         super().__init__(grbmodel, regressor, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
@@ -43,6 +45,7 @@ class LogisticRegressionConstr(BaseNNConstr):
     """
 
     def __init__(self, grbmodel, regressor, input_vars, output_vars=None, **kwargs):
+        check_is_fitted(regressor)
         super().__init__(grbmodel, regressor, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
@@ -64,6 +67,7 @@ class MLPRegressorConstr(BaseNNConstr):
     """
 
     def __init__(self, grbmodel, regressor, input_vars, output_vars=None, clean_regressor=False, **kwargs):
+        check_is_fitted(regressor)
         super().__init__(
             grbmodel,
             regressor,
