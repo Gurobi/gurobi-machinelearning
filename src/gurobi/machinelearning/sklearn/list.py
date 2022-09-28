@@ -21,6 +21,8 @@ def sklearn_transformers():
 def sklearn_predictors():
     return {
         "LinearRegression": LinearRegressionConstr,
+        "Ridge": LinearRegressionConstr,
+        "Lasso": LinearRegressionConstr,
         "LogisticRegression": LogisticRegressionConstr,
         "DecisionTreeRegressor": DecisionTreeRegressorConstr,
         "GradientBoostingRegressor": GradientBoostingRegressorConstr,
