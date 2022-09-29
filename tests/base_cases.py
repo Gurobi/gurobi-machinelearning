@@ -5,8 +5,7 @@ from sklearn import __version__ as sklearn_version
 from sklearn import datasets
 from sklearn.ensemble import GradientBoostingRegressor  # noqa
 from sklearn.ensemble import RandomForestRegressor  # noqa
-from sklearn.linear_model import LinearRegression  # noqa
-from sklearn.linear_model import Ridge  # noqa
+from sklearn.linear_model import Lasso, LinearRegression, Ridge  # noqa
 from sklearn.neural_network import MLPRegressor  # noqa
 from sklearn.pipeline import Pipeline  # noqa
 from sklearn.pipeline import make_pipeline  # noqa
