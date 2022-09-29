@@ -13,7 +13,7 @@ from sklearn.preprocessing import PolynomialFeatures  # noqa
 from sklearn.preprocessing import StandardScaler  # noqa
 from sklearn.tree import DecisionTreeRegressor  # noqa
 
-from gurobi.machinelearning.sklearn import sklearn_predictors, sklearn_transformers
+from gurobi_ml.sklearn import sklearn_predictors, sklearn_transformers
 
 
 def predictor_params(name):
@@ -68,7 +68,6 @@ class DiabetesCases:
         self.all_test += [
             make_pipeline(init_predictor(trans), init_predictor(reg)) for trans in transformers for reg in regressors
         ]
-        print(self.all_test)
         with open(os.path.join(self.basedir, "sklearn_version")) as filein:
             version = filein.read().strip()
         if version != sklearn_version:

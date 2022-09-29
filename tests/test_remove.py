@@ -5,7 +5,7 @@ import unittest
 import gurobipy as gp
 from base_cases import DiabetesCases
 
-from gurobi.machinelearning import add_predictor_constr
+from gurobi_ml import add_predictor_constr
 
 
 class TestAddRemove(unittest.TestCase):

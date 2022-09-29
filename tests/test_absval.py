@@ -5,9 +5,9 @@ import numpy as np
 from sklearn.datasets import make_regression
 from sklearn.neural_network import MLPRegressor
 
-from gurobi.machinelearning.activations import ReLUGC
-from gurobi.machinelearning.extra.morerelu import ReLUmin
-from gurobi.machinelearning.sklearn import MLPRegressorConstr
+from gurobi_ml.activations import ReLUGC
+from gurobi_ml.extra.morerelu import ReLUmin
+from gurobi_ml.sklearn import MLPRegressorConstr
 
 
 def build_abs_network():
