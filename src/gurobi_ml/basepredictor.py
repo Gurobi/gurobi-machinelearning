@@ -285,7 +285,9 @@ class BaseNNConstr(AbstractPredictorConstr):
         except KeyError:
             pass
         self._layers = []
-        super().__init__(grbmodel, input_vars, output_vars, default_name=_default_name(regressor), **kwargs)
+
+        default_name = kwargs.pop('default_name', _default_name(regressor))
+        super().__init__(grbmodel, input_vars, output_vars, default_name=default_name, **kwargs)
 
     def __iter__(self):
         return self._layers.__iter__()

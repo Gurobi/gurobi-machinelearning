@@ -9,3 +9,8 @@ from .regressions import (
     LogisticRegressionConstr,
     MLPRegressorConstr,
 )
+from .decisiontrees import (
+    DecisionTreeRegressorConstr,
+    GradientBoostingRegressorConstr,
+    RandomForestRegressorConstr,
+)
