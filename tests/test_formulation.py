@@ -9,8 +9,8 @@ from gurobipy import GurobiError
 from joblib import load
 from sklearn import datasets
 
-from gurobi.machinelearning import add_predictor_constr
-from gurobi.machinelearning.sklearn import PipelineConstr
+from gurobi_ml import add_predictor_constr
+from gurobi_ml.sklearn import PipelineConstr
 
 
 class TestFixedModel(unittest.TestCase):
