@@ -19,7 +19,7 @@ def validate_gpvars(gpvars, isinput):
     """Put variables into appropriate form (matrix of variable)"""
     if isinstance(gpvars, gp.MVar):
         if gpvars.ndim == 1 and isinput:
-            return gp.MVar.fromlist([gpvars.tolist()])
+            return gpvars.reshape(1, -1)
         if gpvars.ndim in (1, 2):
             return gpvars
         raise BaseException("Variables should be an MVar of dimension 1 or 2")
@@ -27,16 +27,10 @@ def validate_gpvars(gpvars, isinput):
         gpvars = gpvars.values()
     if isinstance(gpvars, list):
         if isinput:
-            return gp.MVar.fromlist([gpvars])
+            return gp.MVar.fromlist(gpvars).reshape(1, -1)
         return gp.MVar.fromlist(gpvars)
     if isinstance(gpvars, gp.Var):
-        return gp.MVar.fromlist(
-            [
-                [
-                    gpvars,
-                ],
-            ]
-        )
+        return gp.MVar.fromlist([gpvars]).reshape(1, 1)
     raise BaseException("Could not validate variables")
 
 
