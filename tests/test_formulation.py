@@ -12,6 +12,8 @@ from sklearn import datasets
 from gurobi_ml import add_predictor_constr
 from gurobi_ml.sklearn import PipelineConstr
 
+VERBOSE = False
+
 
 class TestFixedModel(unittest.TestCase):
     """Test that if we fix the input of the predictor the feasible solution from
@@ -55,7 +57,9 @@ class TestFixedModel(unittest.TestCase):
             regressor = onecase["predictor"]
             for _ in range(5):
                 exampleno = random.randint(0, X.shape[0] - 1)
-                with self.subTest(regressor=regressor, exampleno=exampleno):
+                with super().subTest(regressor=regressor, exampleno=exampleno):
+                    if VERBOSE:
+                        print(f"Doing {regressor} with example {exampleno}")
                     self.fixed_model(regressor, X[exampleno, :], onecase["nonconvex"])
 
 
@@ -119,3 +123,8 @@ class TestReLU(unittest.TestCase):
                         value = m.ObjVal
                     else:
                         self.assertAlmostEqual(value, m.ObjVal, places=5)
+
+
+if __name__ == "__main__":
+    VERBOSE = True
+    unittest.main(verbosity=2)
