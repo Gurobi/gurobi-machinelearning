@@ -6,7 +6,6 @@ from sklearn.datasets import make_regression
 from sklearn.neural_network import MLPRegressor
 
 from gurobi_ml.activations import ReLUGC
-from gurobi_ml.extra.morerelu import ReLUmin
 from gurobi_ml.sklearn import MLPRegressorConstr
 
 
@@ -98,19 +97,3 @@ class TestNNFormulation(unittest.TestCase):
     def test_noprop_with_bounds(self):
         """Test without propagation and with bounds"""
         self.dothetest(100, ReLUGC(setbounds=False))
-
-    def test_min_prop_without_bounds(self):
-        """Test min formulation with propagation and without bounds"""
-        self.dothetest(gp.GRB.INFINITY, ReLUmin(setbounds=True))
-
-    def test_min_prop_with_bounds(self):
-        """Test min formulation with propagation and with bounds"""
-        self.dothetest(100, ReLUmin(setbounds=True))
-
-    def test_min_noprop_without_bounds(self):
-        """Test min formulation without propagation and without bounds"""
-        self.dothetest(gp.GRB.INFINITY, ReLUmin(setbounds=False))
-
-    def test_min_noprop_with_bounds(self):
-        """Test min formulation without propagation and with bounds"""
-        self.dothetest(100, ReLUmin(setbounds=False))
