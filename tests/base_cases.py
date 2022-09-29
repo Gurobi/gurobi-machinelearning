@@ -13,7 +13,7 @@ from sklearn.preprocessing import PolynomialFeatures  # noqa
 from sklearn.preprocessing import StandardScaler  # noqa
 from sklearn.tree import DecisionTreeRegressor  # noqa
 
-from gurobi.machinelearning.sklearn import sklearn_predictors, sklearn_transformers
+from gurobi_ml.sklearn import sklearn_predictors, sklearn_transformers
 
 
 def predictor_params(name):
