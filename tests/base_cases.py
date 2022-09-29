@@ -5,7 +5,7 @@ from sklearn import __version__ as sklearn_version
 from sklearn import datasets
 from sklearn.ensemble import GradientBoostingRegressor  # noqa
 from sklearn.ensemble import RandomForestRegressor  # noqa
-from sklearn.linear_model import LinearRegression  # noqa
+from sklearn.linear_model import Lasso, LinearRegression, Ridge  # noqa
 from sklearn.neural_network import MLPRegressor  # noqa
 from sklearn.pipeline import Pipeline  # noqa
 from sklearn.pipeline import make_pipeline  # noqa
@@ -68,6 +68,7 @@ class DiabetesCases:
         self.all_test += [
             make_pipeline(init_predictor(trans), init_predictor(reg)) for trans in transformers for reg in regressors
         ]
+        print(self.all_test)
         with open(os.path.join(self.basedir, "sklearn_version")) as filein:
             version = filein.read().strip()
         if version != sklearn_version:
@@ -84,7 +85,6 @@ class DiabetesCases:
 
         X = data["data"]
         y = data["target"]
-
         for predictor in self:
             predictor.fit(X, y)
             filename = f"diabetes_{predictor_as_string(predictor)}.joblib"
