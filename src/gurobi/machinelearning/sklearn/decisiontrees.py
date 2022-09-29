@@ -24,7 +24,8 @@ class DecisionTreeRegressorConstr(AbstractPredictorConstr):
         _input = self._input
         output = self._output
         nex = _input.shape[0]
-        nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY)
+        nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name="node")
+        self.nodevars = nodes
 
         # Intermediate nodes constraints
         # Can be added all at once

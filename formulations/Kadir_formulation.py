@@ -13,7 +13,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
 
 # import my functions
-from gurobi.machinelearning.sklearn import Pipe2Gurobi
+from gurobi.machinelearning import add_predictor_constr
 
 
 def do_regression(layers, seed):
@@ -38,18 +38,14 @@ def do_model(pipe, seed=None, reluformulation=None):
         np.random.seed = seed
     else:
         np.random.seed = pipe.steps[-1][1].random_state
-    p = np.random.randint(30, size=24)
     m = gp.Model()
+    p = np.random.randint(30, size=24)
     x = m.addMVar((1, 48), vtype=GRB.CONTINUOUS, name="x", lb=0, ub=410)
     y = m.addMVar((1, 24), lb=20, ub=30, vtype=GRB.CONTINUOUS, name="y")
     m.setObjective(p @ x[0, 24:], GRB.MINIMIZE)
 
-    pipe2gurobi = Pipe2Gurobi(pipe, m)
-    if reluformulation is not None:
-        pipe2gurobi.steps[-1].actdict["relu"] = reluformulation
-    pipe2gurobi.predict(x, y)
+    pipe2gurobi = add_predictor_constr(m, pipe, x, y)
 
-    m._pipe2gurobi = pipe2gurobi
     return m
 
 
