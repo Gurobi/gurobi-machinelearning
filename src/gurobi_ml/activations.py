@@ -47,8 +47,8 @@ class Identity:
         layer: AbstractNNLayer
             Layer to which activation is applied.
         """
-        output.LB = -GRB.Infinity
-        output.UB = GRB.Infinity
+        layer.output.LB = -GRB.Infinity
+        layer.output.UB = GRB.Infinity
 
 
 class ReLUGC:
