@@ -86,32 +86,8 @@ class TestNNFormulation(unittest.TestCase):
 
     def test_prop_without_bounds(self):
         """Test with propagation and without bounds"""
-        self.dothetest(gp.GRB.INFINITY, ReLUGC(setbounds=True))
+        self.dothetest(gp.GRB.INFINITY, ReLUGC())
 
     def test_prop_with_bounds(self):
         """Test with propagation and with bounds"""
-        self.dothetest(100, ReLUGC(setbounds=True))
-
-    def test_noprop_without_bounds(self):
-        """Test without propagation and without bounds"""
-        self.dothetest(gp.GRB.INFINITY, ReLUGC(setbounds=False))
-
-    def test_noprop_with_bounds(self):
-        """Test without propagation and with bounds"""
-        self.dothetest(100, ReLUGC(setbounds=False))
-
-    def test_min_prop_without_bounds(self):
-        """Test min formulation with propagation and without bounds"""
-        self.dothetest(gp.GRB.INFINITY, ReLUmin(setbounds=True))
-
-    def test_min_prop_with_bounds(self):
-        """Test min formulation with propagation and with bounds"""
-        self.dothetest(100, ReLUmin(setbounds=True))
-
-    def test_min_noprop_without_bounds(self):
-        """Test min formulation without propagation and without bounds"""
-        self.dothetest(gp.GRB.INFINITY, ReLUmin(setbounds=False))
-
-    def test_min_noprop_with_bounds(self):
-        """Test min formulation without propagation and with bounds"""
-        self.dothetest(100, ReLUmin(setbounds=False))
+        self.dothetest(100, ReLUGC())
