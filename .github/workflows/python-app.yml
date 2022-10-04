@@ -5,9 +5,9 @@ name: Python application
 
 on:
   push:
-    branches: [ main, renaming]
+    branches: [ main]
   pull_request:
-    branches: [ main, renaming]
+    branches: [ main]
 
 permissions:
   contents: read
@@ -41,8 +41,6 @@ jobs:
         WLSACCESSID : ${{ secrets.WLSACCESSID }}
         WLSSECRET   : ${{ secrets.WLSSECRET   }}
         LICENSEID   : ${{ secrets.LICENSEID   }}
-      run: |
-        echo "$LICENSEID"
     - name: Test with tox
       run: |
         tox
