@@ -24,12 +24,6 @@ class TestFixedModel(unittest.TestCase):
             "OutputFlag": 0,
             "NonConvex": 2,
         }
-        try:
-            wlsvars = os.environ["WLS_VARIABLES"].split()
-            for param in wlsvars:
-                params[param] = os.environ[param]
-        except KeyError:
-            print("Can't find WLS")
         for param in params:
             try:
                 params[param] = int(params[param])
