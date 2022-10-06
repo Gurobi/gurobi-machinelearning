@@ -5,9 +5,8 @@ name: Python application
 
 on:
   push:
-    branches: [ main, renaming]
-  pull_request:
-    branches: [ main, renaming]
+    branches: main
+  pull_request_target:
 
 permissions:
   contents: read
@@ -37,12 +36,14 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - shell: bash
+      id: write-license
       env:
-        WLSACCESSID : ${{ secrets.WLSACCESSID }}
-        WLSSECRET   : ${{ secrets.WLSSECRET   }}
-        LICENSEID   : ${{ secrets.LICENSEID   }}
+        LICENSE: ${{ secrets.LICENSE   }}
       run: |
-        echo "$LICENSEID"
+        echo "$LICENSE" > $PWD/gurobi.lic
+        echo "::set-output name=grb_license_file::$PWD/gurobi.lic"
     - name: Test with tox
+      env:
+        GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
       run: |
         tox
