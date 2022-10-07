@@ -101,9 +101,9 @@ class RandomForestRegressorConstr(AbstractPredictorConstr):
     """Class to model a trained random forest regressor in a Gurobi model"""
 
     def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
+        self.n_outputs_ = predictor.n_outputs_
         SKgetter.__init__(self, predictor)
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
-        self.n_outputs_ = predictor.n_outputs_
 
     def mip_model(self):
         """Predict output variables y from input variables X using the

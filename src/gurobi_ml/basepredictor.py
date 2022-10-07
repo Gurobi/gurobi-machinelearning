@@ -43,7 +43,6 @@ class AbstractPredictorConstr(SubModel):
             self._output = validate_gpvars(output_vars, False)
         else:
             self._output = None
-        print("Abstract predictor constructor")
         super().__init__(grbmodel, **kwargs)
 
     def _set_output(self, output_vars):
@@ -72,7 +71,7 @@ class AbstractPredictorConstr(SubModel):
         return (input_vars, output_vars)
 
     def _build_submodel(self, model, *args, **kwargs):
-        """Predict output from input using regression/classifier"""
+        """Predict output from input using predictor or transformer"""
         if self._output is None:
             self._create_output_vars(self._input)
         if self._output is not None:
