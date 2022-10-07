@@ -1,12 +1,13 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Python application
+name: Build and test
 
 on:
   push:
     branches: main
-  pull_request:
+  pull_request_target:
+    types: [labeled]
 
 permissions:
   contents: read
@@ -14,8 +15,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
+    if: contains(github.event.pull_request.labels.*.name, 'safe to test')
     - shell: bash
       run: cat tox.ini
