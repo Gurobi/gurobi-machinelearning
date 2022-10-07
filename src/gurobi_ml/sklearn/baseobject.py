@@ -11,4 +11,4 @@ class SKgetter:
     def get_error(self):
         if self.sol_available():
             return self.predictor.predict(self.input.X) - self.output.X.T
-        return 0.0
+        BaseException("No solution available")
