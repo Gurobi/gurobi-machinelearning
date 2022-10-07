@@ -43,6 +43,7 @@ class AbstractPredictorConstr(SubModel):
             self._output = validate_gpvars(output_vars, False)
         else:
             self._output = None
+        print("Abstract predictor constructor")
         super().__init__(grbmodel, **kwargs)
 
     def _set_output(self, output_vars):
@@ -57,9 +58,9 @@ class AbstractPredictorConstr(SubModel):
             raise BaseException("No output variables")
         if output_vars.ndim == 1:
             if input_vars.shape[0] == 1:
-                output_vars = gp.MVar.fromlist([output_vars.tolist()])
+                output_vars = output_vars.reshape((1, -1))
             else:
-                output_vars = gp.MVar.fromlist([[v] for v in output_vars.tolist()])
+                output_vars = output_vars.reshape((-1, 1))
 
         if output_vars.shape[0] != input_vars.shape[0]:
             raise BaseException(
@@ -99,6 +100,14 @@ class AbstractPredictorConstr(SubModel):
         rval = self._model.addMVar((input_vars.shape[0], n_outputs), lb=-gp.GRB.INFINITY, name="output")
         self._model.update()
         self._output = rval
+
+    def sol_available(self):
+        try:
+            v = self._input.X
+            return True
+        except AttributeError:
+            print("No solution available")
+        return False
 
     @property
     def output(self):
@@ -237,8 +246,8 @@ class DenseLayer(AbstractNNLayer):
 class BaseNNConstr(AbstractPredictorConstr):
     """Base class for inserting a regressor based on neural-network/tensor into Gurobi"""
 
-    def __init__(self, grbmodel, regressor, input_vars, output_vars, clean_regressor=False, **kwargs):
-        self.regressor = regressor
+    def __init__(self, grbmodel, predictor, input_vars, output_vars, clean_regressor=False, **kwargs):
+        self.predictor = predictor
         self.clean = clean_regressor
         self.actdict = {"relu": ReLUGC(), "identity": Identity(), "logistic": LogisticGC()}
         try:
@@ -248,8 +257,10 @@ class BaseNNConstr(AbstractPredictorConstr):
             pass
         self._layers = []
 
-        default_name = kwargs.pop("default_name", _default_name(regressor))
-        super().__init__(grbmodel, input_vars, output_vars, default_name=default_name, **kwargs)
+        default_name = kwargs.pop("default_name", _default_name(predictor))
+        super().__init__(
+            grbmodel=grbmodel, input_vars=input_vars, output_vars=output_vars, default_name=default_name, **kwargs
+        )
 
     def __iter__(self):
         return self._layers.__iter__()
