@@ -67,7 +67,7 @@ class Sequential(BaseNNConstr):
             self.add_dense_layer(_input, layer_weight, layer_bias, self.actdict["identity"], output)
 
     def get_error(self):
-        if self.sol_available():
+        if self.has_solution():
             t_in = torch.from_numpy(self.input.X).float()
             t_out = self.predictor.forward(t_in)
             return t_out.detach().numpy() - self.output.X

@@ -100,7 +100,7 @@ class AbstractPredictorConstr(SubModel):
         self._model.update()
         self._output = rval
 
-    def sol_available(self):
+    def has_solution(self):
         try:
             v = self._input.X
             return True

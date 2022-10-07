@@ -62,6 +62,6 @@ class Predictor(BaseNNConstr):
                 _input = layer.output
 
     def get_error(self):
-        if self.sol_available():
+        if self.has_solution():
             return self.predictor.predict(self.input.X) - self.output.X
         raise BaseException("No solution available")
