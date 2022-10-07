@@ -10,8 +10,9 @@ from .basepredictor import BaseNNConstr
 
 
 class Predictor(BaseNNConstr):
-    def __init__(self, grbmodel, regressor, input_vars, output_vars, clean_regressor=False):
-        for step in regressor.layers:
+    def __init__(self, grbmodel, predictor, input_vars, output_vars, clean_regressor=False):
+        assert predictor.built
+        for step in predictor.layers:
             if isinstance(step, keras.layers.Dense):
                 config = step.get_config()
                 if config["activation"] not in ("relu", "linear"):
@@ -23,10 +24,10 @@ class Predictor(BaseNNConstr):
             else:
                 raise Exception("Unsupported network structure")
 
-        super().__init__(grbmodel, regressor, input_vars, output_vars, clean_regressor=clean_regressor)
+        super().__init__(grbmodel, predictor, input_vars, output_vars, clean_regressor=clean_regressor)
 
     def mip_model(self):
-        network = self.regressor
+        network = self.predictor
         _input = self._input
         output = None
         numlayers = len(network.layers)
@@ -59,3 +60,8 @@ class Predictor(BaseNNConstr):
                     name=f"{i}",
                 )
                 _input = layer.output
+
+    def get_error(self):
+        if self.has_solution():
+            return self.predictor.predict(self.input.X) - self.output.X
+        raise BaseException("No solution available")

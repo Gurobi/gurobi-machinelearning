@@ -12,26 +12,33 @@ What we have so far:
 
 
 import numpy as np
-from sklearn.utils.validation import check_is_fitted
 
 from ..basepredictor import BaseNNConstr
+from .baseobject import SKgetter
 
 
-class LinearRegressionConstr(BaseNNConstr):
+class LinearRegressionConstr(SKgetter, BaseNNConstr):
     """Predict a Gurobi variable using a Linear Regression that
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, grbmodel, regressor, input_vars, output_vars=None, **kwargs):
-        check_is_fitted(regressor)
-        super().__init__(grbmodel, regressor, input_vars, output_vars, **kwargs)
+    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, **kwargs):
+        SKgetter.__init__(self, predictor)
+        BaseNNConstr.__init__(
+            self,
+            grbmodel,
+            predictor,
+            input_vars,
+            output_vars,
+            **kwargs,
+        )
 
     def mip_model(self):
         """Add the prediction constraints to Gurobi"""
         self.add_dense_layer(
             self._input,
-            self.regressor.coef_.T.reshape(-1, 1),
-            np.array(self.regressor.intercept_).reshape((-1,)),
+            self.predictor.coef_.T.reshape(-1, 1),
+            np.array(self.predictor.intercept_).reshape((-1,)),
             self.actdict["identity"],
             self._output,
         )
@@ -39,21 +46,28 @@ class LinearRegressionConstr(BaseNNConstr):
             self._output = self._layers[-1].output
 
 
-class LogisticRegressionConstr(BaseNNConstr):
+class LogisticRegressionConstr(SKgetter, BaseNNConstr):
     """Predict a Gurobi variable using a Logistic Regression that
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, grbmodel, regressor, input_vars, output_vars=None, **kwargs):
-        check_is_fitted(regressor)
-        super().__init__(grbmodel, regressor, input_vars, output_vars, **kwargs)
+    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, **kwargs):
+        SKgetter.__init__(self, predictor)
+        BaseNNConstr.__init__(
+            self,
+            grbmodel,
+            predictor,
+            input_vars,
+            output_vars,
+            **kwargs,
+        )
 
     def mip_model(self):
         """Add the prediction constraints to Gurobi"""
         self.add_dense_layer(
             self._input,
-            self.regressor.coef_.T,
-            self.regressor.intercept_,
+            self.predictor.coef_.T,
+            self.predictor.intercept_,
             self.actdict["logistic"],
             self._output,
         )
@@ -61,26 +75,27 @@ class LogisticRegressionConstr(BaseNNConstr):
             self._output = self._layers[-1].output
 
 
-class MLPRegressorConstr(BaseNNConstr):
+class MLPRegressorConstr(SKgetter, BaseNNConstr):
     """Predict a Gurobi matrix variable using a neural network that
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, grbmodel, regressor, input_vars, output_vars=None, clean_regressor=False, **kwargs):
-        check_is_fitted(regressor)
-        super().__init__(
+    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, clean_predictor=False, **kwargs):
+        SKgetter.__init__(self, predictor)
+        BaseNNConstr.__init__(
+            self,
             grbmodel,
-            regressor,
+            predictor,
             input_vars,
             output_vars,
-            clean_regressor=clean_regressor,
+            clean_predictor=clean_predictor,
             **kwargs,
         )
-        assert regressor.out_activation_ in ("identity", "relu")
+        assert predictor.out_activation_ in ("identity", "relu")
 
     def mip_model(self):
         """Add the prediction constraints to Gurobi"""
-        neuralnet = self.regressor
+        neuralnet = self.predictor
         if neuralnet.activation not in self.actdict:
             print(self.actdict)
             raise BaseException(f"No implementation for activation function {neuralnet.activation}")

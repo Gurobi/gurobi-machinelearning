@@ -5,22 +5,21 @@
 
 import numpy as np
 from gurobipy import GRB
-from sklearn.utils.validation import check_is_fitted
 
 from ..basepredictor import AbstractPredictorConstr
+from .baseobject import SKgetter
 
 
-class DecisionTreeRegressorConstr(AbstractPredictorConstr):
+class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model a trained decision tree in a Gurobi model"""
 
-    def __init__(self, grbmodel, regressor, input_vars, output_vars, **kwargs):
-        self.tree = regressor.tree_
-        check_is_fitted(regressor)
-        self.n_outputs_ = regressor.n_outputs_
-        super().__init__(grbmodel, input_vars, output_vars, **kwargs)
+    def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
+        self.n_outputs_ = predictor.n_outputs_
+        SKgetter.__init__(self, predictor)
+        AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
-        tree = self.tree
+        tree = self.predictor.tree_
         model = self._model
 
         _input = self._input
@@ -66,10 +65,10 @@ class DecisionTreeRegressorConstr(AbstractPredictorConstr):
 class GradientBoostingRegressorConstr(AbstractPredictorConstr):
     """Class to model a trained gradient boosting tree in a Gurobi model"""
 
-    def __init__(self, model, regressor, input_vars, output_vars):
-        self.regressor = regressor
+    def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
         self.n_outputs_ = 1
-        super().__init__(model, input_vars, output_vars)
+        SKgetter.__init__(self, predictor)
+        AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
         """Predict output variables y from input variables X using the
@@ -78,7 +77,7 @@ class GradientBoostingRegressorConstr(AbstractPredictorConstr):
         Both X and y should be array or list of variables of conforming dimensions.
         """
         model = self._model
-        regressor = self.regressor
+        predictor = self.predictor
 
         _input = self._input
         output = self._output
@@ -87,25 +86,24 @@ class GradientBoostingRegressorConstr(AbstractPredictorConstr):
         outdim = output.shape[1]
         if outdim != 1:
             raise Exception("Can only deal with 1-dimensional regression. Output dimension {}".format(outdim))
-        treevars = model.addMVar((nex, regressor.n_estimators_), lb=-GRB.INFINITY, name="estimator")
-        constant = regressor.init_.constant_
+        treevars = model.addMVar((nex, predictor.n_estimators_), lb=-GRB.INFINITY, name="estimator")
+        constant = predictor.init_.constant_
 
         tree2gurobi = []
-        for i in range(regressor.n_estimators_):
-            tree = regressor.estimators_[i]
+        for i in range(predictor.n_estimators_):
+            tree = predictor.estimators_[i]
             tree2gurobi.append(DecisionTreeRegressorConstr(model, tree[0], _input, treevars[:, i], default_name="gbt_tree"))
 
-        model.addConstr(output[:, 0] == regressor.learning_rate * treevars.sum(axis=1) + constant[0][0])
+        model.addConstr(output[:, 0] == predictor.learning_rate * treevars.sum(axis=1) + constant[0][0])
 
 
 class RandomForestRegressorConstr(AbstractPredictorConstr):
     """Class to model a trained random forest regressor in a Gurobi model"""
 
-    def __init__(self, model, regressor, input_vars, output_vars):
-        check_is_fitted(regressor)
-        self.regressor = regressor
-        self.n_outputs_ = regressor.n_outputs_
-        super().__init__(model, input_vars, output_vars)
+    def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
+        self.n_outputs_ = predictor.n_outputs_
+        SKgetter.__init__(self, predictor)
+        AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
         """Predict output variables y from input variables X using the
@@ -114,7 +112,7 @@ class RandomForestRegressorConstr(AbstractPredictorConstr):
         Both X and y should be array or list of variables of conforming dimensions.
         """
         model = self._model
-        regressor = self.regressor
+        predictor = self.predictor
 
         _input = self._input
         output = self._output
@@ -123,11 +121,11 @@ class RandomForestRegressorConstr(AbstractPredictorConstr):
         outdim = output.shape[1]
         if outdim != 1:
             raise Exception("Can only deal with 1-dimensional regression. Output dimension {}".format(outdim))
-        treevars = model.addMVar((nex, regressor.n_estimators), lb=-GRB.INFINITY, name="estimator")
+        treevars = model.addMVar((nex, predictor.n_estimators), lb=-GRB.INFINITY, name="estimator")
 
         tree2gurobi = []
-        for i in range(regressor.n_estimators):
-            tree = regressor.estimators_[i]
+        for i in range(predictor.n_estimators):
+            tree = predictor.estimators_[i]
             tree2gurobi.append(DecisionTreeRegressorConstr(model, tree, _input, treevars[:, i], default_name="rf_tree"))
 
-        model.addConstr(regressor.n_estimators * output[:, 0] == treevars.sum(axis=1))
+        model.addConstr(predictor.n_estimators * output[:, 0] == treevars.sum(axis=1))

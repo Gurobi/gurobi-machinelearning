@@ -1,23 +1,22 @@
 """ Implementation for the scikit learn pipeline """
 
-from sklearn.utils.validation import check_is_fitted
 
-from ..basepredictor import AbstractPredictorConstr, _default_name
+from ..basepredictor import AbstractPredictorConstr
+from .baseobject import SKgetter
 from .list import sklearn_predictors, sklearn_transformers
 
 
-class PipelineConstr(AbstractPredictorConstr):
+class PipelineConstr(SKgetter, AbstractPredictorConstr):
     """Use a scikit-learn pipeline to build constraints in Gurobi model."""
 
     def __init__(self, grbmodel, pipeline, input_vars, output_vars=None, **kwargs):
         self._steps = []
-        self.pipeline = pipeline
-        check_is_fitted(pipeline)
         self._kwargs = kwargs
-        super().__init__(grbmodel, input_vars, output_vars, default_name=_default_name(pipeline), **kwargs)
+        SKgetter.__init__(self, pipeline)
+        AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
     def mip_model(self):
-        pipeline = self.pipeline
+        pipeline = self.predictor
         model = self._model
         input_vars = self._input
         output_vars = self._output
