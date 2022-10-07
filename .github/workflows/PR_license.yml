@@ -46,3 +46,4 @@ jobs:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
       run: |
         tox
+        tox -e examples
