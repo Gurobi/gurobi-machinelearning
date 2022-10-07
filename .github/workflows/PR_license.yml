@@ -41,6 +41,9 @@ jobs:
       run: |
         echo "$LICENSE" > $PWD/gurobi.lic
         echo "::set-output name=grb_license_file::$PWD/gurobi.lic"
+    - shell: bash
+      run: |
+        echo "I changed PR_license"
     - name: Test with tox
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
