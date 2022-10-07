@@ -6,7 +6,7 @@
 # Since a subset of tests was already run in the nolicense workflow, this workflow runs skips the following tests:
 # - Lint with flake8.
 
-name: Build and test, license required
+name: Build and test PR, license required
 
 on:
   pull_request_target:
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  build_license:
+  build_pr_license:
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'safe to test')
     strategy:
