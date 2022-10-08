@@ -62,7 +62,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         output.UB = np.max(tree.value)
 
 
-class GradientBoostingRegressorConstr(AbstractPredictorConstr):
+class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model a trained gradient boosting tree in a Gurobi model"""
 
     def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
@@ -97,7 +97,7 @@ class GradientBoostingRegressorConstr(AbstractPredictorConstr):
         model.addConstr(output[:, 0] == predictor.learning_rate * treevars.sum(axis=1) + constant[0][0])
 
 
-class RandomForestRegressorConstr(AbstractPredictorConstr):
+class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model a trained random forest regressor in a Gurobi model"""
 
     def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):

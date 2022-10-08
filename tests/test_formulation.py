@@ -34,7 +34,7 @@ class TestFixedModel(unittest.TestCase):
             x = gpm.addMVar(example.shape, lb=example, ub=example)
             y = gpm.addMVar(1, lb=-gp.GRB.INFINITY)
 
-            add_predictor_constr(gpm, predictor, x, y)
+            pred_constr = add_predictor_constr(gpm, predictor, x, y)
             try:
                 gpm.optimize()
             except GurobiError as E:
@@ -47,11 +47,11 @@ class TestFixedModel(unittest.TestCase):
                 tol = 5e-3
             else:
                 tol = 1e-5
-            absdiff = abs(y.X - predictor.predict(example.reshape(1, -1)))
-            if absdiff > tol * abs(y.X):
+            abserror = np.abs(pred_constr.get_error())
+            if abserror > tol:
                 print(f"Error: {y.X} != {predictor.predict(example.reshape(1, -1))}")
 
-            self.assertTrue(abs(y.X - predictor.predict(example.reshape(1, -1))) < tol * abs(y.X))
+            self.assertLessEqual(np.abs(pred_constr.get_error()), tol)
 
     def test_diabetes(self):
         data = datasets.load_diabetes()
