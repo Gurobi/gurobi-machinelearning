@@ -48,6 +48,7 @@ class TestFixedModel(unittest.TestCase):
             else:
                 tol = 1e-5
             abserror = np.abs(pred_constr.get_error())
+            self.assertAlmostEqual(np.abs(y.X - predictor.predict(example.reshape(1, -1))), abserror, 1e-9)
             if abserror > tol:
                 print(f"Error: {y.X} != {predictor.predict(example.reshape(1, -1))}")
 
