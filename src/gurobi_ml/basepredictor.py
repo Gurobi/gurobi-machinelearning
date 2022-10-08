@@ -43,7 +43,7 @@ class AbstractPredictorConstr(SubModel):
             self._output = validate_gpvars(output_vars, False)
         else:
             self._output = None
-        super().__init__(grbmodel, **kwargs)
+        SubModel.__init__(self, grbmodel, **kwargs)
 
     def _set_output(self, output_vars):
         self._output = validate_gpvars(output_vars, False)
@@ -103,6 +103,7 @@ class AbstractPredictorConstr(SubModel):
     def has_solution(self):
         try:
             v = self._input.X
+            v = self._output.X
             return True
         except AttributeError:
             print("No solution available")
@@ -129,7 +130,7 @@ class AbstractNNLayer(AbstractPredictorConstr):
         **kwargs,
     ):
         self.activation = activation_function
-        super().__init__(grbmodel, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
     def reset_bounds(self):
         """Reset bounds on layer"""
