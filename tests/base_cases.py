@@ -68,7 +68,6 @@ class DiabetesCases:
         self.all_test += [
             make_pipeline(init_predictor(trans), init_predictor(reg)) for trans in transformers for reg in regressors
         ]
-        print(self.all_test)
         with open(os.path.join(self.basedir, "sklearn_version")) as filein:
             version = filein.read().strip()
         if version != sklearn_version:
