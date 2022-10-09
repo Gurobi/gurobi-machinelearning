@@ -20,8 +20,8 @@ def sklearn_convertors():
 
 def pytorch_convertors():
     """Collect known PyTorch objects that can be embeded and the conversion class"""
-    if "pytorch" in sys.modules:
-        from pytorch import nn as pytorchnn
+    if "torch" in sys.modules:
+        from torch import nn as pytorchnn
 
         from .pytorch import Sequential as TorchSequential
 
