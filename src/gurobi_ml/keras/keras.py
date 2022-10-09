@@ -6,10 +6,10 @@ in a Gurobi model """
 
 from tensorflow import keras
 
-from .neuralnet import BaseNNConstr
+from ..neuralnet import BaseNNConstr
 
 
-class Predictor(BaseNNConstr):
+class KerasNetworkConstr(BaseNNConstr):
     def __init__(self, grbmodel, predictor, input_vars, output_vars, clean_regressor=False):
         assert predictor.built
         for step in predictor.layers:

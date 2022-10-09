@@ -23,7 +23,7 @@ def pytorch_convertors():
     if "torch" in sys.modules:
         from torch import nn as pytorchnn
 
-        from .pytorch import Sequential as TorchSequential
+        from .torch import SequentialConstr as TorchSequential
 
         return {pytorchnn.Sequential: TorchSequential}
     return {}
@@ -36,7 +36,7 @@ def keras_convertors():
         from keras.engine.training import Model
         from tensorflow import keras
 
-        from .keras import Predictor as KerasPredictor
+        from .keras import KerasNetworkConstr as KerasPredictor
 
         return {keras.Sequential: KerasPredictor, Functional: KerasPredictor, Model: KerasPredictor}
     return {}

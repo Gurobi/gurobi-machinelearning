@@ -7,10 +7,10 @@ in a Gurobi model """
 import torch
 from torch import nn
 
-from .neuralnet import BaseNNConstr
+from ..neuralnet import BaseNNConstr
 
 
-class Sequential(BaseNNConstr):
+class SequentialConstr(BaseNNConstr):
     """Transform a pytorch Sequential Neural Network to Gurboi constraint with
     input and output as matrices of variables."""
 
