@@ -6,8 +6,8 @@
 import numpy as np
 from gurobipy import GRB
 
-from ..basepredictor import AbstractPredictorConstr
-from .baseobject import SKgetter
+from ..base import AbstractPredictorConstr
+from .skgetter import SKgetter
 
 
 class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):

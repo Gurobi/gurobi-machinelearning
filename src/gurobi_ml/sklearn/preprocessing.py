@@ -3,7 +3,7 @@ Guobi model"""
 
 import gurobipy as gp
 
-from ..basepredictor import AbstractPredictorConstr, _default_name
+from ..base import AbstractPredictorConstr, _default_name
 
 
 class StandardScalerConstr(AbstractPredictorConstr):

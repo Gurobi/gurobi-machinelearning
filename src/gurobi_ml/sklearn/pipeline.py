@@ -1,9 +1,9 @@
 """ Implementation for the scikit learn pipeline """
 
 
-from ..basepredictor import AbstractPredictorConstr
-from .baseobject import SKgetter
+from ..base import AbstractPredictorConstr
 from .list import sklearn_predictors, sklearn_transformers
+from .skgetter import SKgetter
 
 
 class PipelineConstr(SKgetter, AbstractPredictorConstr):

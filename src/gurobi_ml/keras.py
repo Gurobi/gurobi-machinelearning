@@ -6,7 +6,7 @@ in a Gurobi model """
 
 from tensorflow import keras
 
-from .basepredictor import BaseNNConstr
+from .neuralnet import BaseNNConstr
 
 
 class Predictor(BaseNNConstr):

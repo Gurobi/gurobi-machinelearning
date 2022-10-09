@@ -13,8 +13,8 @@ What we have so far:
 
 import numpy as np
 
-from ..basepredictor import BaseNNConstr
-from .baseobject import SKgetter
+from ..neuralnet import BaseNNConstr
+from .skgetter import SKgetter
 
 
 class LinearRegressionConstr(SKgetter, BaseNNConstr):
