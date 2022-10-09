@@ -4,7 +4,6 @@
 import gurobipy as gp
 
 from ..base.basepredictor import AbstractPredictorConstr, _default_name
-from ..base.submodel import SubModel
 
 
 class AbstractNNLayer(AbstractPredictorConstr):
@@ -27,38 +26,6 @@ class AbstractNNLayer(AbstractPredictorConstr):
         self._model.update()
         activation_function.reset_bounds(self)
         self._model.update()
-
-    def _update(self, model, before):
-        """Update added modeling objects compared to status before."""
-        model.update()
-        # range of variables
-        if model.numvars > before.numvars:
-            self._firstvar = model.getVars()[before.numVars]
-            self._lastvar = model.getVars()[model.numVars - 1]
-        # range of constraints
-        if model.numconstrs > before.numconstrs:
-            self._firstconstr = model.getConstrs()[before.numconstrs]
-            self._lastconstr = model.getConstrs()[model.numconstrs - 1]
-        # range of Q constraints
-        if model.numqconstrs > before.numqconstrs:
-            self._qconstrs = model.getQConstrs()[before.numQConstrs : model.numQConstrs]
-        # range of GenConstrs
-        if model.numgenconstrs > before.numgenconstrs:
-            self._genconstrs = model.getGenConstrs()[before.numgenconstrs : model.numgenconstrs]
-        # range of SOS
-        if model.numsos > before.numsos:
-            self._sos = model.getSOSs()[before.numsos : model.numsos]
-
-    def redolayer(self, activation=None):
-        """Rebuild the layer (possibly using a different model for activation)"""
-        self.model.remove(self.constrs)
-        self.model.remove(self.qconstrs)
-        self.model.remove(self.genconstrs)
-        self.model.remove(self.sos)
-        self.model.update()
-        before = SubModel._modelstats(self.model)
-        self.mip_model(activation)
-        self._update(self.model, before)
 
     def print_stats(self, file=None):
         """Print statistics about submodel created"""
