@@ -1,6 +1,7 @@
 import os
 import random
 import unittest
+import warnings
 
 import gurobipy as gp
 import numpy as np
@@ -39,6 +40,7 @@ class TestFixedModel(unittest.TestCase):
                 gpm.optimize()
             except GurobiError as E:
                 if E.errno == 10010:
+                    warnings.warn(UserWarning("Limited license"))
                     self.skipTest("Model too large for limited license")
                 else:
                     raise
@@ -47,6 +49,11 @@ class TestFixedModel(unittest.TestCase):
                 tol = 5e-3
             else:
                 tol = 1e-5
+            vio = gpm.MaxVio
+            if vio > 1e-5:
+                warnings.warn(UserWarning(f"Big solution violation {vio}"))
+                warnings.warn(UserWarning(f"predictor {predictor}"))
+            tol = max(tol, gpm.MaxVio)
             abserror = np.abs(pred_constr.get_error())
             self.assertAlmostEqual(np.abs(y.X - predictor.predict(example.reshape(1, -1))), abserror, 1e-9)
             if abserror > tol:
