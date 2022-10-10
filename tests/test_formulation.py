@@ -32,7 +32,7 @@ class TestFixedModel(unittest.TestCase):
                 pass
 
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
-            x = gpm.addMVar(example.shape, lb=example, ub=example)
+            x = gpm.addMVar(example.shape, lb=example - 1e-4, ub=example + 1e-4)
             y = gpm.addMVar(1, lb=-gp.GRB.INFINITY)
 
             pred_constr = add_predictor_constr(gpm, predictor, x, y)
@@ -54,9 +54,9 @@ class TestFixedModel(unittest.TestCase):
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
             tol = max(tol, vio)
-            abserror = np.abs(pred_constr.get_error())
-            self.assertAlmostEqual(np.abs(y.X - predictor.predict(example.reshape(1, -1))), abserror, 1e-9)
+            abserror = np.abs(pred_constr.get_error()).astype(float)
             if abserror > tol:
+                gpm.write("Failed.lp")
                 print(f"Error: {y.X} != {predictor.predict(example.reshape(1, -1))}")
 
             self.assertLessEqual(np.abs(pred_constr.get_error()), tol)
@@ -75,7 +75,7 @@ class TestFixedModel(unittest.TestCase):
                 with super().subTest(regressor=regressor, exampleno=exampleno):
                     if VERBOSE:
                         print(f"Doing {regressor} with example {exampleno}")
-                    self.fixed_model(regressor, X[exampleno, :], onecase["nonconvex"])
+                    self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"])
 
 
 class TestReLU(unittest.TestCase):
