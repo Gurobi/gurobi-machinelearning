@@ -5,6 +5,7 @@
 # - It skips the examples target in tox,
 # - In pytest, some tests are annotated as needing a WLS license. These are automatically skipped.
 
+
 name: Build and test PR, no license
 
 on:
@@ -35,6 +36,9 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - shell: bash
+      run: |
+        echo "I changed PR_nolicense"
     - name: Test with tox, excluding the examples target
       run: |
         tox
