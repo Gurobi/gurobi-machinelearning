@@ -13,7 +13,7 @@ What we have so far:
 import gurobipy as gp
 import numpy as np
 
-from ..base import AbstractPredictorConstr
+from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 
 

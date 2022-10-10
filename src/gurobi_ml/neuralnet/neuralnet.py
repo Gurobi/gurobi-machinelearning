@@ -3,7 +3,7 @@
 
 import numpy as np
 
-from ..base.basepredictor import AbstractPredictorConstr, _default_name
+from ..modeling.basepredictor import AbstractPredictorConstr, _default_name
 from .activations import Identity, LogisticGC, ReLUGC
 from .layers import ActivationLayer, DenseLayer
 

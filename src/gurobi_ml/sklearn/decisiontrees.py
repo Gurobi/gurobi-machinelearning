@@ -6,7 +6,7 @@
 import numpy as np
 from gurobipy import GRB
 
-from ..base import AbstractPredictorConstr
+from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 
 

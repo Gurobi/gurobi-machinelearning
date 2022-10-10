@@ -1,7 +1,7 @@
 """ Implementation for the scikit learn pipeline """
 
 
-from ..base import AbstractPredictorConstr
+from ..modeling import AbstractPredictorConstr
 from .list import sklearn_predictors, sklearn_transformers
 from .skgetter import SKgetter
 
