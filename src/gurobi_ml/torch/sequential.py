@@ -7,7 +7,7 @@ in a Gurobi model """
 import torch
 from torch import nn
 
-from ..neuralnet import BaseNNConstr
+from ..modeling.neuralnet import BaseNNConstr
 
 
 class SequentialConstr(BaseNNConstr):

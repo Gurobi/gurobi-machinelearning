@@ -6,7 +6,7 @@ in a Gurobi model """
 
 from tensorflow import keras
 
-from ..neuralnet import BaseNNConstr
+from ..modeling.neuralnet import BaseNNConstr
 
 
 class KerasNetworkConstr(BaseNNConstr):

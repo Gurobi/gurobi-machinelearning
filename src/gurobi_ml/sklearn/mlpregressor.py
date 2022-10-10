@@ -11,7 +11,7 @@ What we have so far:
 """
 
 
-from ..neuralnet import BaseNNConstr
+from ..modeling.neuralnet import BaseNNConstr
 from .skgetter import SKgetter
 
 

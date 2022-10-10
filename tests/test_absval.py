@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.datasets import make_regression
 from sklearn.neural_network import MLPRegressor
 
-from gurobi_ml.neuralnet.activations import ReLUGC
+from gurobi_ml.modeling.neuralnet.activations import ReLUGC
 from gurobi_ml.sklearn import MLPRegressorConstr
 
 
