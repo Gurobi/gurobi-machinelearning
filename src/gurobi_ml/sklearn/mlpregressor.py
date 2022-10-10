@@ -58,3 +58,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
             self._model.update()
         if self._output is None:
             self._output = layer.output
+
+
+def add_mlp_regressor_constr(grbmodel, mlpregressor, input_vars, output_vars=None, **kwargs):
+    return MLPRegressorConstr(grbmodel, mlpregressor, input_vars, output_vars, **kwargs)

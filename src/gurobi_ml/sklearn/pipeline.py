@@ -64,3 +64,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
     def __len__(self):
         """Get number of pipeline steps"""
         return self._steps.__len__()
+
+
+def add_pipeline_constr(grbmodel, pipeline, input_vars, output_vars=None, **kwargs):
+    return PipelineConstr(grbmodel, pipeline, input_vars, output_vars, **kwargs)

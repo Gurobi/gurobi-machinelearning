@@ -115,3 +115,11 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         for gc in self.model.getGenConstrs()[numgc:]:
             for attr, val in self.attributes.items():
                 gc.setAttr(attr, val)
+
+
+def add_linear_regression_constr(grbmodel, linear_regression, input_vars, output_vars=None, **kwargs):
+    return LinearRegressionConstr(grbmodel, linear_regression, input_vars, output_vars, **kwargs)
+
+
+def add_logistic_regression_constr(grbmodel, logistic_regression, input_vars, output_vars=None, **kwargs):
+    return LogisticRegressionConstr(grbmodel, logistic_regression, input_vars, output_vars, **kwargs)

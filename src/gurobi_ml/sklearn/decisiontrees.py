@@ -129,3 +129,15 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
             tree2gurobi.append(DecisionTreeRegressorConstr(model, tree, _input, treevars[:, i], default_name="rf_tree"))
 
         model.addConstr(predictor.n_estimators * output[:, 0] == treevars.sum(axis=1))
+
+
+def add_decision_tree_regressor_constr(grbmodel, decision_tree_regressor, input_vars, output_vars=None, **kwargs):
+    return DecisionTreeRegressorConstr(grbmodel, decision_tree_regressor, input_vars, output_vars, **kwargs)
+
+
+def add_gradient_boosting_regressor_constr(grbmodel, gradient_boosting_regressor, input_vars, output_vars=None, **kwargs):
+    return DecisionTreeRegressorConstr(grbmodel, gradient_boosting_regressor, input_vars, output_vars, **kwargs)
+
+
+def add_random_forest_regressor_constr(grbmodel, random_forest_regressor, input_vars, output_vars=None, **kwargs):
+    return DecisionTreeRegressorConstr(grbmodel, random_forest_regressor, input_vars, output_vars, **kwargs)

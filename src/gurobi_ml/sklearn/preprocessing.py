@@ -74,3 +74,11 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
                     elif power[j] == 1:
                         qexpr *= feat.item()
                 self.model.addConstr(output[k, i] == qexpr, name=f"polyfeat[{k},{i}]")
+
+
+def add_polynomial_features_constr(grbmodel, polynomial_features, input_vars, output_vars=None, **kwargs):
+    return PolynomialFeaturesConstr(grbmodel, polynomial_features, input_vars, output_vars, **kwargs)
+
+
+def add_standard_scaler_constr(grbmodel, scaler, input_vars, output_vars=None, **kwargs):
+    return StandardScalerConstr(grbmodel, scaler, input_vars, output_vars, **kwargs)

@@ -65,3 +65,7 @@ class KerasNetworkConstr(BaseNNConstr):
         if self.has_solution():
             return self.predictor.predict(self.input.X) - self.output.X
         raise BaseException("No solution available")
+
+
+def add_keras_constr(grbmodel, keras_model, input_vars, output_vars=None, **kwargs):
+    return KerasNetworkConstr(grbmodel, keras_model, input_vars, output_vars, **kwargs)

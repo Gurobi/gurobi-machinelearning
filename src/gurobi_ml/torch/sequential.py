@@ -72,3 +72,7 @@ class SequentialConstr(BaseNNConstr):
             t_out = self.predictor.forward(t_in)
             return t_out.detach().numpy() - self.output.X
         BaseException("No solution available")
+
+
+def add_sequential_constr(grbmodel, sequential_model, input_vars, output_vars=None, **kwargs):
+    return SequentialConstr(grbmodel, sequential_model, input_vars, output_vars, **kwargs)
