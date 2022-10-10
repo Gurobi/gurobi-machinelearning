@@ -1,0 +1,49 @@
+# This workflow uses `pull_request_target` which has access to a WLS license. For security reasons, this workflow
+# will only be run for PRs from a fork after it has been assessed by a repository owner and has the "safe to test"
+# label added. Any changes to the PR in need of a retriggering of the workflow require the removal and re-adding of the
+# "safe to test" label.
+#
+# Since a subset of tests was already run in the nolicense workflow, this workflow runs skips the following tests:
+# - Lint with flake8.
+
+name: Build and test PR, license required
+
+on:
+  pull_request_target:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  build_pr_license:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'safe to test')
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest tox tox-gh-actions
+    - shell: bash
+      id: write-license
+      env:
+        LICENSE: ${{ secrets.LICENSE   }}
+      run: |
+        echo "$LICENSE" > $PWD/gurobi.lic
+        echo "::set-output name=grb_license_file::$PWD/gurobi.lic"
+    - name: Test with tox
+      env:
+        GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
+      run: |
+        tox
+        tox -e examples
