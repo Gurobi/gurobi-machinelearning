@@ -149,7 +149,69 @@ class TestReLU(unittest.TestCase):
         # pipe2gurobi.steps[-1].actdict['softmax'] = Identity()
         return pipe2gurobi
 
-    def test_adversarial_activations(self):
+    def test_adversarial_sklearn(self):
+        # Load the trained network and the examples
+        dirname = os.path.dirname(__file__)
+        pipe = load(os.path.join(dirname, "predictors/MNIST_50_50.joblib"))
+        X = load(os.path.join(dirname, "predictors/MNIST_first100.joblib"))
+
+        # Change the out_activation of neural network to identity
+        pipe.steps[-1][1].out_activation_ = "identity"
+
+        # Choose an example
+        exampleno = random.randint(0, 99)
+        example = X.iloc[exampleno : exampleno + 1, :]
+        epsilon = 0.01
+        activations = (None,)
+        value = None
+        for activation in activations:
+            with gp.Model() as m:
+                m.Params.OutputFlag = 0
+                with self.subTest(
+                    example=exampleno,
+                    epsilon=epsilon,
+                    activation=activation,
+                    obbt=False,
+                ):
+                    self.adversarial_model(m, pipe, example, epsilon, activation=activation)
+                    m.optimize()
+                    if value is None:
+                        value = m.ObjVal
+                    else:
+                        self.assertAlmostEqual(value, m.ObjVal, places=5)
+
+    def test_adversarial_keras(self):
+        # Load the trained network and the examples
+        dirname = os.path.dirname(__file__)
+        pipe = load(os.path.join(dirname, "predictors/MNIST_50_50.joblib"))
+        X = load(os.path.join(dirname, "predictors/MNIST_first100.joblib"))
+
+        # Change the out_activation of neural network to identity
+        pipe.steps[-1][1].out_activation_ = "identity"
+
+        # Choose an example
+        exampleno = random.randint(0, 99)
+        example = X.iloc[exampleno : exampleno + 1, :]
+        epsilon = 0.01
+        activations = (None,)
+        value = None
+        for activation in activations:
+            with gp.Model() as m:
+                m.Params.OutputFlag = 0
+                with self.subTest(
+                    example=exampleno,
+                    epsilon=epsilon,
+                    activation=activation,
+                    obbt=False,
+                ):
+                    self.adversarial_model(m, pipe, example, epsilon, activation=activation)
+                    m.optimize()
+                    if value is None:
+                        value = m.ObjVal
+                    else:
+                        self.assertAlmostEqual(value, m.ObjVal, places=5)
+
+    def test_adversarial_pytorch(self):
         # Load the trained network and the examples
         dirname = os.path.dirname(__file__)
         pipe = load(os.path.join(dirname, "predictors/MNIST_50_50.joblib"))
