@@ -61,6 +61,19 @@ class TestFixedModel(unittest.TestCase):
 
             self.assertLessEqual(np.abs(pred_constr.get_error()), tol)
 
+    def all_of_them(self):
+        data = datasets.load_diabetes()
+
+        X = data["data"]
+        cases = DiabetesCases()
+
+        onecase = cases.get_case(cases.all_test[17])
+        regressor = onecase["predictor"]
+        for exampleno in range(X.shape[0]):
+            with super().subTest(regressor=regressor, exampleno=exampleno):
+                print("Test {}".format(exampleno))
+                self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"])
+
     def test_diabetes(self):
         data = datasets.load_diabetes()
 

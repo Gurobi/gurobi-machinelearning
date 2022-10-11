@@ -13,7 +13,7 @@ from .skgetter import SKgetter
 class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model a trained decision tree in a Gurobi model"""
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars, eps=1e-5, scale=1.0, float_type=np.float32, **kwargs):
+    def __init__(self, grbmodel, predictor, input_vars, output_vars, eps=1e-6, scale=1.0, float_type=np.float32, **kwargs):
         self.eps = eps
         self.scale = scale
         self.float_type = float_type
