@@ -68,7 +68,7 @@ class BaseNNConstr(AbstractPredictorConstr):
             name = self.default_name
         super().print_stats(file)
         print(file=file)
-        print(f"{name} has {len(self._layers)} layers:")
+        print(f"{name} has {len(self._layers)} layers:", file=file)
         for layer in self:
             layer.print_stats(file)
             print(file=file)

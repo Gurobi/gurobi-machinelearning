@@ -30,7 +30,7 @@ class AbstractNNLayer(AbstractPredictorConstr):
     def print_stats(self, file=None):
         """Print statistics about submodel created"""
         super().print_stats(file)
-        print(f"Activation is {_default_name(self.activation)}")
+        print(f"Activation is {_default_name(self.activation)}", file=file)
 
 
 class ActivationLayer(AbstractNNLayer):

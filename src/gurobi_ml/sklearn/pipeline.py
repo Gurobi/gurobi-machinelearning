@@ -43,15 +43,15 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
 
     def print_stats(self, file=None):
         super().print_stats(file=file)
-        print()
+        print(file=file)
         print(f"Pipeline has {len(self._steps)} steps:", file=file)
         for step in self:
             print(step, end=" ", file=file)
-        print()
-        print()
+        print(file=file)
+        print(file=file)
         for step in self:
             step.print_stats(file)
-            print()
+            print(file=file)
 
     def __getitem__(self, key):
         """Get an item from the pipeline steps"""

@@ -36,6 +36,8 @@ class TestFixedModel(unittest.TestCase):
             y = gpm.addMVar(1, lb=-gp.GRB.INFINITY)
 
             pred_constr = add_predictor_constr(gpm, predictor, x, y)
+            with open(os.devnull, "w") as outnull:
+                pred_constr.print_stats(file=outnull)
             try:
                 gpm.optimize()
             except GurobiError as E:
