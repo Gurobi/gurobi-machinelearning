@@ -5,6 +5,7 @@ import warnings
 
 import gurobipy as gp
 import numpy as np
+import tensorflow as tf
 from base_cases import DiabetesCases, IrisCases
 from gurobipy import GurobiError
 from joblib import load
@@ -56,6 +57,7 @@ class TestFixedModel(unittest.TestCase):
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
             tol = max(tol, vio)
+            tol *= np.abs(pred_constr.output.X)
             if isproba:
                 abserror = np.abs(pred_constr.get_error_proba()).astype(float)
             else:
@@ -96,6 +98,20 @@ class TestFixedModel(unittest.TestCase):
                     if VERBOSE:
                         print(f"Doing {regressor} with example {exampleno}")
                     self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"])
+
+    def test_diabetes_keras(self):
+        data = datasets.load_diabetes()
+
+        X = data["data"]
+        cases = DiabetesCases()
+
+        regressor = tf.keras.models.load_model("predictors/diabetes_keras")
+        for _ in range(5):
+            exampleno = random.randint(0, X.shape[0] - 1)
+            with super().subTest(regressor=regressor, exampleno=exampleno):
+                if VERBOSE:
+                    print(f"Doing {regressor} with example {exampleno}")
+                self.fixed_model(regressor, X[exampleno, :].astype(np.float32), 0)
 
     def test_iris(self):
         data = datasets.load_iris()
@@ -150,68 +166,6 @@ class TestReLU(unittest.TestCase):
         return pipe2gurobi
 
     def test_adversarial_sklearn(self):
-        # Load the trained network and the examples
-        dirname = os.path.dirname(__file__)
-        pipe = load(os.path.join(dirname, "predictors/MNIST_50_50.joblib"))
-        X = load(os.path.join(dirname, "predictors/MNIST_first100.joblib"))
-
-        # Change the out_activation of neural network to identity
-        pipe.steps[-1][1].out_activation_ = "identity"
-
-        # Choose an example
-        exampleno = random.randint(0, 99)
-        example = X.iloc[exampleno : exampleno + 1, :]
-        epsilon = 0.01
-        activations = (None,)
-        value = None
-        for activation in activations:
-            with gp.Model() as m:
-                m.Params.OutputFlag = 0
-                with self.subTest(
-                    example=exampleno,
-                    epsilon=epsilon,
-                    activation=activation,
-                    obbt=False,
-                ):
-                    self.adversarial_model(m, pipe, example, epsilon, activation=activation)
-                    m.optimize()
-                    if value is None:
-                        value = m.ObjVal
-                    else:
-                        self.assertAlmostEqual(value, m.ObjVal, places=5)
-
-    def test_adversarial_keras(self):
-        # Load the trained network and the examples
-        dirname = os.path.dirname(__file__)
-        pipe = load(os.path.join(dirname, "predictors/MNIST_50_50.joblib"))
-        X = load(os.path.join(dirname, "predictors/MNIST_first100.joblib"))
-
-        # Change the out_activation of neural network to identity
-        pipe.steps[-1][1].out_activation_ = "identity"
-
-        # Choose an example
-        exampleno = random.randint(0, 99)
-        example = X.iloc[exampleno : exampleno + 1, :]
-        epsilon = 0.01
-        activations = (None,)
-        value = None
-        for activation in activations:
-            with gp.Model() as m:
-                m.Params.OutputFlag = 0
-                with self.subTest(
-                    example=exampleno,
-                    epsilon=epsilon,
-                    activation=activation,
-                    obbt=False,
-                ):
-                    self.adversarial_model(m, pipe, example, epsilon, activation=activation)
-                    m.optimize()
-                    if value is None:
-                        value = m.ObjVal
-                    else:
-                        self.assertAlmostEqual(value, m.ObjVal, places=5)
-
-    def test_adversarial_pytorch(self):
         # Load the trained network and the examples
         dirname = os.path.dirname(__file__)
         pipe = load(os.path.join(dirname, "predictors/MNIST_50_50.joblib"))
