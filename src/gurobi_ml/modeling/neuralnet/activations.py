@@ -51,7 +51,7 @@ class Identity:
         layer.output.UB = GRB.Infinity
 
 
-class ReLUGC:
+class ReLU:
     """Class to apply the ReLU activation on a neural network layer
 
     Parameters

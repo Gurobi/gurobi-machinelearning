@@ -4,7 +4,7 @@
 import numpy as np
 
 from ..basepredictor import AbstractPredictorConstr, _default_name
-from .activations import Identity, ReLUGC
+from .activations import Identity, ReLU
 from .layers import ActivationLayer, DenseLayer
 
 
@@ -15,7 +15,7 @@ class BaseNNConstr(AbstractPredictorConstr):
         self.predictor = predictor
         self.clean = clean_regressor
         self.actdict = {
-            "relu": ReLUGC(),
+            "relu": ReLU(),
             "identity": Identity(),
         }
         try:

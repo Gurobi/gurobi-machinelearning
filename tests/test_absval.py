@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.datasets import make_regression
 from sklearn.neural_network import MLPRegressor
 
-from gurobi_ml.modeling.neuralnet.activations import ReLUGC
+from gurobi_ml.modeling.neuralnet.activations import ReLU
 from gurobi_ml.sklearn import MLPRegressorConstr
 
 
@@ -86,8 +86,8 @@ class TestNNFormulation(unittest.TestCase):
 
     def test_prop_without_bounds(self):
         """Test with propagation and without bounds"""
-        self.dothetest(gp.GRB.INFINITY, ReLUGC())
+        self.dothetest(gp.GRB.INFINITY, ReLU())
 
     def test_prop_with_bounds(self):
         """Test with propagation and with bounds"""
-        self.dothetest(100, ReLUGC())
+        self.dothetest(100, ReLU())
