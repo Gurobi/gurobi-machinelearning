@@ -32,7 +32,7 @@ class TestFixedModel(unittest.TestCase):
                 pass
 
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
-            x = gpm.addMVar(example.shape, lb=example - 1e-4, ub=example + 1e-4)
+            x = gpm.addMVar(example.shape, lb=example - 1e-3, ub=example + 1e-3)
             y = gpm.addMVar(1, lb=-gp.GRB.INFINITY)
 
             pred_constr = add_predictor_constr(gpm, predictor, x, y)
@@ -45,6 +45,8 @@ class TestFixedModel(unittest.TestCase):
                 else:
                     raise
 
+            self.assertNotEqual(gpm.Status, gp.GRB.INFEASIBLE)
+
             if nonconvex:
                 tol = 5e-3
             else:
@@ -56,7 +58,6 @@ class TestFixedModel(unittest.TestCase):
             tol = max(tol, vio)
             abserror = np.abs(pred_constr.get_error()).astype(float)
             if abserror > tol:
-                gpm.write("Failed.lp")
                 print(f"Error: {y.X} != {predictor.predict(example.reshape(1, -1))}")
 
             self.assertLessEqual(np.abs(pred_constr.get_error()), tol)
