@@ -7,7 +7,7 @@ in a Gurobi model """
 import torch
 from torch import nn
 
-from ..exceptions import NoModel
+from ..exceptions import NoModel, NoSolution
 from ..modeling.neuralnet import BaseNNConstr
 
 
@@ -72,7 +72,7 @@ class SequentialConstr(BaseNNConstr):
             t_in = torch.from_numpy(self.input.X).float()
             t_out = self.predictor.forward(t_in)
             return t_out.detach().numpy() - self.output.X
-        BaseException("No solution available")
+        raise NoSolution()
 
 
 def add_sequential_constr(grbmodel, sequential_model, input_vars, output_vars=None, **kwargs):

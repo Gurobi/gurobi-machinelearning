@@ -6,7 +6,7 @@ import gurobipy as gp
 from base_cases import DiabetesCases, IrisCases
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import ModelingError
+from gurobi_ml.exceptions import ModelingError, NoSolution
 
 
 class TestAddRemove(unittest.TestCase):
@@ -46,6 +46,9 @@ class TestAddRemove(unittest.TestCase):
             pred2grb = add_predictor_constr(model, predictor, x, y)
 
             self.check_counts(model, pred2grb, numvars)
+
+            with self.assertRaises(NoSolution):
+                pred2grb.get_error()
 
             pred2grb.remove()
             model.update()
@@ -98,6 +101,9 @@ class TestAddRemove(unittest.TestCase):
             model.Params.OutputFlag = 0
             pred2grb = add_predictor_constr(model, predictor, x)
 
+            with self.assertRaises(NoSolution):
+                pred2grb.get_error()
+
             self.assertEqual(pred2grb.output.shape[0], output_shape[0])
 
             self.check_counts(model, pred2grb, numvars)
@@ -134,6 +140,9 @@ class TestAddRemove(unittest.TestCase):
                 pred2grb.append(add_predictor_constr(model, predictor, x, y))
 
             for p2g in pred2grb:
+                with self.assertRaises(NoSolution):
+                    p2g.get_error()
+
                 p2g.remove()
             model.update()
             self.assertEqual(model.NumConstrs, 0)

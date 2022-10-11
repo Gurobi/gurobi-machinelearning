@@ -100,8 +100,8 @@ class AbstractPredictorConstr(SubModel):
             v = self._input.X
             v = self._output.X
             return True
-        except AttributeError:
-            print("No solution available")
+        except gp.GurobiError:
+            pass
         return False
 
     @property
