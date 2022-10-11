@@ -48,19 +48,6 @@ class BaseNNConstr(AbstractPredictorConstr):
         self._layers.append(layer)
         return layer
 
-    def rebuild_formulation(self, activation=None):
-        """Rebuild the MIP formulation for regression model"""
-        for layer in self:
-            if not isinstance(layer.activation, Identity):
-                layer.redolayer(activation)
-        self._model.update()
-
-    def reset_bounds(self):
-        """Reset bounds of variables in mip model"""
-        for layer in self:
-            layer.reset_bounds()
-        self._model.update()
-
     def print_stats(self, file=None):
         """Print statistics about submodel created"""
         name = self._name

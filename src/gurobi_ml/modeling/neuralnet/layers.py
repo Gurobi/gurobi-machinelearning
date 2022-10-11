@@ -20,13 +20,6 @@ class AbstractNNLayer(AbstractPredictorConstr):
         self.activation = activation_function
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
-    def reset_bounds(self):
-        """Reset bounds on layer"""
-        activation_function = self.activation
-        self._model.update()
-        activation_function.reset_bounds(self)
-        self._model.update()
-
     def print_stats(self, file=None):
         """Print statistics about submodel created"""
         super().print_stats(file)

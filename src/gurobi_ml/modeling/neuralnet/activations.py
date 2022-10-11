@@ -38,18 +38,6 @@ class Identity:
         output = layer.output
         layer.model.addConstr(output == layer.input @ layer.coefs + layer.intercept)
 
-    @staticmethod
-    def reset_bounds(layer):
-        """Reset the bounds in layer
-
-        Parameters
-        ----------
-        layer: AbstractNNLayer
-            Layer to which activation is applied.
-        """
-        layer.output.LB = -GRB.Infinity
-        layer.output.UB = GRB.Infinity
-
 
 class ReLU:
     """Class to apply the ReLU activation on a neural network layer
@@ -99,29 +87,3 @@ class ReLU:
                 constant=0.0,
                 name=_name(index, "relu"),
             )
-
-    @staticmethod
-    def forward(input_values):
-        """Return ReLU of input_values"""
-        return np.maximum(0.0, input_values)
-
-    @staticmethod
-    def forward_fixing(layer, input_values, threshold=-20):
-        """Fix binaries according to input_values"""
-        mixing = layer.mixing
-        if threshold < 0:
-            threshold = -int(threshold)
-            threshold = np.sort(np.abs(input_values))[0, threshold]
-        mixing[input_values < 0.0].UB = 0
-        mixing[input_values >= 0.0].LB = 0
-
-        closetozero = mixing[np.abs(input_values) <= threshold].tolist()
-        return closetozero
-
-    @staticmethod
-    def reset_bounds(layer):
-        """Reset the bounds in layer corresponding to modeling ReLU"""
-        layer.mixing.UB = GRB.Infinity
-        layer.mixing.LB = -GRB.Infinity
-        layer.output.UB = GRB.Infinity
-        layer.output.LB = -GRB.Infinity
