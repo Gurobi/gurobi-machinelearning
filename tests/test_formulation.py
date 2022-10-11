@@ -105,7 +105,23 @@ class TestFixedModel(unittest.TestCase):
         X = data["data"]
         cases = DiabetesCases()
 
-        regressor = tf.keras.models.load_model("predictors/diabetes_keras")
+        filename = os.path.join(os.path.dirname(__file__), "predictors", "diabetes_keras")
+        regressor = tf.keras.models.load_model(filename)
+        for _ in range(5):
+            exampleno = random.randint(0, X.shape[0] - 1)
+            with super().subTest(regressor=regressor, exampleno=exampleno):
+                if VERBOSE:
+                    print(f"Doing {regressor} with example {exampleno}")
+                self.fixed_model(regressor, X[exampleno, :].astype(np.float32), 0)
+
+    def test_diabetes_keras_alt(self):
+        data = datasets.load_diabetes()
+
+        X = data["data"]
+        cases = DiabetesCases()
+
+        filename = os.path.join(os.path.dirname(__file__), "predictors", "diabetes_keras_v2")
+        regressor = tf.keras.models.load_model(filename)
         for _ in range(5):
             exampleno = random.randint(0, X.shape[0] - 1)
             with super().subTest(regressor=regressor, exampleno=exampleno):
