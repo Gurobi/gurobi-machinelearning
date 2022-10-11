@@ -19,7 +19,9 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         self.float_type = float_type
         self.n_outputs_ = predictor.n_outputs_
         if predictor.n_outputs_ != 1:
-            raise Exception("Can only deal with 1-dimensional regression. Output dimension {}".format(outdim))
+            raise Exception(
+                "Can only deal with 1-dimensional regression trees. Output dimension {}".format(predictor.n_outputs_)
+            )
         SKgetter.__init__(self, predictor)
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
