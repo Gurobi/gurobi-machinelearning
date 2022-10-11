@@ -25,6 +25,12 @@ repos:
       hooks:
         - id: nbstripout
 
+    - repo: https://github.com/pycqa/flake8
+      rev: '5.0.4'
+      hooks:
+      - id: flake8
+        args: ["--count", "--select=E9,F63,F7,F82", "--show-source", "--statistics"]
+
     - repo: https://github.com/psf/black
       rev: 22.6.0
       hooks:
