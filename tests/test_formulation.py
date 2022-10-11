@@ -5,7 +5,7 @@ import warnings
 
 import gurobipy as gp
 import numpy as np
-from base_cases import DiabetesCases
+from base_cases import DiabetesCases, IrisCases
 from gurobipy import GurobiError
 from joblib import load
 from sklearn import datasets
@@ -20,7 +20,7 @@ class TestFixedModel(unittest.TestCase):
     """Test that if we fix the input of the predictor the feasible solution from
     Gurobi is identical to what the predict function would return."""
 
-    def fixed_model(self, predictor, example, nonconvex):
+    def fixed_model(self, predictor, example, nonconvex, isproba=False):
         params = {
             "OutputFlag": 0,
             "NonConvex": 2,
@@ -56,12 +56,17 @@ class TestFixedModel(unittest.TestCase):
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
             tol = max(tol, vio)
-            abserror = np.abs(pred_constr.get_error()).astype(float)
-            if abserror > tol:
-                gpm.write("Failed.lp")
-                print(f"Error: {y.X} != {predictor.predict(example.reshape(1, -1))}")
+            if isproba:
+                abserror = np.abs(pred_constr.get_error_proba()).astype(float)
+            else:
+                abserror = np.abs(pred_constr.get_error()).astype(float)
+            if (abserror > tol).any():
+                if isproba:
+                    print(f"Error: {y.X} != {predictor.predict_proba(example.reshape(1, -1))}")
+                else:
+                    print(f"Error: {y.X} != {predictor.predict(example.reshape(1, -1))}")
 
-            self.assertLessEqual(np.abs(pred_constr.get_error()), tol)
+            self.assertLessEqual(np.max(abserror), tol)
 
     def all_of_them(self):
         data = datasets.load_diabetes()
@@ -91,6 +96,27 @@ class TestFixedModel(unittest.TestCase):
                     if VERBOSE:
                         print(f"Doing {regressor} with example {exampleno}")
                     self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"])
+
+    def test_iris(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        y = data.target
+
+        # Make it a simple classification
+        X = X[y != 2]
+        y = y[y != 2]
+        cases = IrisCases()
+
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            regressor = onecase["predictor"]
+            for _ in range(5):
+                exampleno = random.randint(0, X.shape[0] - 1)
+                with super().subTest(regressor=regressor, exampleno=exampleno):
+                    if VERBOSE:
+                        print(f"Doing {regressor} with example {exampleno}")
+                    self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"], 1)
 
 
 class TestReLU(unittest.TestCase):

@@ -6,6 +6,7 @@ in a Gurobi model """
 
 from tensorflow import keras
 
+from ..exceptions import NoModel, NoSolution
 from ..modeling.neuralnet import BaseNNConstr
 
 
@@ -16,13 +17,13 @@ class KerasNetworkConstr(BaseNNConstr):
             if isinstance(step, keras.layers.Dense):
                 config = step.get_config()
                 if config["activation"] not in ("relu", "linear"):
-                    raise Exception("Unsupported network structure")
+                    raise NoModel(predictor, "Unsupported network structure")
             elif isinstance(step, keras.layers.ReLU):
                 pass
             elif isinstance(step, keras.layers.InputLayer):
                 pass
             else:
-                raise Exception("Unsupported network structure")
+                raise NoModel(predictor, "Unsupported network structure")
 
         super().__init__(grbmodel, predictor, input_vars, output_vars, clean_regressor=clean_regressor)
 
@@ -64,7 +65,7 @@ class KerasNetworkConstr(BaseNNConstr):
     def get_error(self):
         if self.has_solution():
             return self.predictor.predict(self.input.X) - self.output.X
-        raise BaseException("No solution available")
+        raise NoSolution
 
 
 def add_keras_constr(grbmodel, keras_model, input_vars, output_vars=None, **kwargs):

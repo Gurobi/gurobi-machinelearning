@@ -1,8 +1,10 @@
+# Copyright © 2022 Gurobi Optimization, LLC
 """ Implementation for using sklearn preprocessing object in a
 Guobi model"""
 
 import gurobipy as gp
 
+from ..exceptions import NoModel
 from ..modeling import AbstractPredictorConstr, _default_name
 
 
@@ -43,7 +45,7 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
 
     def __init__(self, grbmodel, polytrans, input_vars, **kwargs):
         if polytrans.degree > 2:
-            raise BaseException("Can only handle polynomials of degree < 2")
+            raise NoModel(polytrans, "Can only handle polynomials of degree < 2")
         self.polytrans = polytrans
         super().__init__(grbmodel, input_vars, default_name=_default_name(polytrans), **kwargs)
 

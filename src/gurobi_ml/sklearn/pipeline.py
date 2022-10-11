@@ -1,6 +1,7 @@
 """ Implementation for the scikit learn pipeline """
 
 
+from ..exceptions import NoModel
 from ..modeling import AbstractPredictorConstr
 from .list import sklearn_predictors, sklearn_transformers
 from .skgetter import SKgetter
@@ -28,7 +29,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
             try:
                 steps.append(transformers[name](model, obj, input_vars, **self._kwargs))
             except KeyError:
-                raise BaseException(f"I don't know how to deal with that object: {name}")
+                raise NoModel(pipeline, f"I don't know how to deal with that object: {name}")
             input_vars = steps[-1].output
         name, obj = pipeline.steps[-1]
         predictors = {}
@@ -37,7 +38,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         try:
             steps.append(predictors[name](model, obj, input_vars, output_vars, **self._kwargs))
         except KeyError:
-            raise BaseException(f"I don't know how to deal with that object: {name}")
+            raise NoModel(pipeline, f"I don't know how to deal with that object: {name}")
         if self._output is None:
             self._output = steps[-1].output
 

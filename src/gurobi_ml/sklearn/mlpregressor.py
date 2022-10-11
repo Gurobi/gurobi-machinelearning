@@ -10,7 +10,7 @@ What we have so far:
   - MLSRegressionConstr: a neural network.
 """
 
-
+from ..exceptions import NoModel
 from ..modeling.neuralnet import BaseNNConstr
 from .skgetter import SKgetter
 
@@ -38,7 +38,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         neuralnet = self.predictor
         if neuralnet.activation not in self.actdict:
             print(self.actdict)
-            raise BaseException(f"No implementation for activation function {neuralnet.activation}")
+            raise NoModel(neuralnet, f"No implementation for activation function {neuralnet.activation}")
         activation = self.actdict[neuralnet.activation]
 
         input_vars = self._input

@@ -1,7 +1,9 @@
+# Copyright © 2022 Gurobi Optimization, LLC
 """ Define generic function that can add any known trained predictor
 """
 import sys
 
+from .exceptions import NotRegistered
 from .sklearn import PipelineConstr, sklearn_predictors, sklearn_transformers
 
 USER_PREDICTORS = {}
@@ -117,5 +119,5 @@ def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwarg
         try:
             convertor = convertors[type(predictor).__name__]
         except:
-            raise BaseException(f"No converter for predictor {predictor}")
+            raise NotRegistered(type(predictor).__name__)
     return convertor(model, predictor, input_vars, output_vars, **kwargs)

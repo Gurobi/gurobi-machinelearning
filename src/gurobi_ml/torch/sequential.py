@@ -7,6 +7,7 @@ in a Gurobi model """
 import torch
 from torch import nn
 
+from ..exceptions import NoModel
 from ..modeling.neuralnet import BaseNNConstr
 
 
@@ -25,7 +26,7 @@ class SequentialConstr(BaseNNConstr):
                 linear = step
             else:
                 print(step)
-                raise BaseException("Unsupported network structure")
+                raise NoModel(predictor, "Unsupported network structure")
         super().__init__(
             grbmodel, predictor, input_vars, output_vars, clean_regressor=clean_regressor, default_name="torchsequential"
         )
@@ -57,7 +58,7 @@ class SequentialConstr(BaseNNConstr):
                 assert linear is None
                 linear = step
             else:
-                raise BaseException("Unsupported network structure")
+                raise NoModel(network, "Unsupported network structure")
         if linear is not None:
             for name, param in linear.named_parameters():
                 if name == "weight":

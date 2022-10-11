@@ -5,6 +5,7 @@ from sklearn import __version__ as sklearn_version
 from sklearn import datasets
 from sklearn.ensemble import GradientBoostingRegressor  # noqa
 from sklearn.ensemble import RandomForestRegressor  # noqa
+from sklearn.linear_model import LogisticRegression  # noqa
 from sklearn.linear_model import Lasso, LinearRegression, Ridge  # noqa
 from sklearn.neural_network import MLPRegressor  # noqa
 from sklearn.pipeline import Pipeline  # noqa
@@ -51,14 +52,12 @@ def predictor_as_string(predictor):
     return "_" + type(predictor).__name__.lower()
 
 
-class DiabetesCases:
-    """Base class to have cases for testing regression models on diabetes set"""
+class Cases:
+    """Base class to have cases for testing"""
 
-    def __init__(self):
+    def __init__(self, excluded):
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
         version = None
-
-        excluded = ["LogisticRegression", "MLPClassifier"]
 
         regressors = [r for r in sklearn_predictors().keys() if r not in excluded]
         transformers = list(sklearn_transformers().keys())
@@ -79,6 +78,22 @@ class DiabetesCases:
     def __iter__(self):
         return self.all_test.__iter__()
 
+    def get_case(self, predictor):
+        filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
+        predictor = load(os.path.join(self.basedir, filename))
+        return predictor
+
+
+class DiabetesCases(Cases):
+    """Base class to have cases for testing regression models on diabetes set"""
+
+    def __init__(self):
+        excluded = ["LogisticRegression", "MLPClassifier"]
+        self.dataset = "diabetes"
+        super().__init__(excluded=excluded)
+        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
+        version = None
+
     def build_predictors(self):
         data = datasets.load_diabetes()
 
@@ -86,7 +101,7 @@ class DiabetesCases:
         y = data["target"]
         for predictor in self:
             predictor.fit(X, y)
-            filename = f"diabetes_{predictor_as_string(predictor)}.joblib"
+            filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
             nonconvex = False
             if isinstance(predictor, Pipeline):
                 for element in predictor:
@@ -98,7 +113,46 @@ class DiabetesCases:
 
             dump(rval, os.path.join(self.basedir, filename))
 
-    def get_case(self, predictor):
-        filename = f"diabetes_{predictor_as_string(predictor)}.joblib"
-        predictor = load(os.path.join(self.basedir, filename))
-        return predictor
+
+class IrisCases(Cases):
+    """Base class to have cases for testing regression models on diabetes set"""
+
+    def __init__(self):
+        excluded = [
+            "LinearRegression",
+            "Ridge",
+            "Lasso",
+            "DecisionTreeRegressor",
+            "GradientBoostingRegressor",
+            "RandomForestRegressor",
+            "MLPRegressor",
+            "MLPClassifier",
+        ]
+        self.dataset = "iris"
+        super().__init__(excluded=excluded)
+        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
+        version = None
+
+    def build_predictors(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        y = data.target
+
+        # Make it a simple classification
+        X = X[y != 2]
+        y = y[y != 2]
+
+        for predictor in self:
+            predictor.fit(X, y)
+            filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
+            nonconvex = False
+            if isinstance(predictor, Pipeline):
+                for element in predictor:
+                    if isinstance(element, PolynomialFeatures):
+                        nonconvex = True
+                        break
+
+            rval = {"predictor": predictor, "input_shape": X.shape, "output_shape": y.shape, "nonconvex": nonconvex}
+
+            dump(rval, os.path.join(self.basedir, filename))
