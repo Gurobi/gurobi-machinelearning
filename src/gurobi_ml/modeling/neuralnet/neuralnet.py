@@ -4,7 +4,7 @@
 import numpy as np
 
 from ..basepredictor import AbstractPredictorConstr, _default_name
-from .activations import Identity, LogisticGC, ReLUGC
+from .activations import Identity, ReLUGC
 from .layers import ActivationLayer, DenseLayer
 
 
@@ -14,7 +14,10 @@ class BaseNNConstr(AbstractPredictorConstr):
     def __init__(self, grbmodel, predictor, input_vars, output_vars, clean_regressor=False, **kwargs):
         self.predictor = predictor
         self.clean = clean_regressor
-        self.actdict = {"relu": ReLUGC(), "identity": Identity(), "logistic": LogisticGC()}
+        self.actdict = {
+            "relu": ReLUGC(),
+            "identity": Identity(),
+        }
         try:
             for activation, activation_model in kwargs["activation_models"].items():
                 self.actdict[activation] = activation_model
