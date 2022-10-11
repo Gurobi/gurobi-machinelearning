@@ -125,38 +125,3 @@ class ReLUGC:
         layer.mixing.LB = -GRB.Infinity
         layer.output.UB = GRB.Infinity
         layer.output.LB = -GRB.Infinity
-
-
-class LogisticGC:
-    """Model Logit in a MIP using some PWL formulation"""
-
-    def __init__(self, gc_attributes=None):
-        if gc_attributes is None:
-            self.attributes = {"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 0.1, "FuncPieceRatio": -1.0}
-        else:
-            self.attributes = gc_attributes
-
-    def mip_model(self, layer):
-        """Add formulation for logit for neuron of layer"""
-        output = layer.output
-        if hasattr(layer, "coefs"):
-            if not hasattr(layer, "mixing"):
-                mixing = layer.model.addMVar(output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix")
-                layer.mixing = mixing
-            layer.model.update()
-
-            mixing = layer.mixing
-            layer.model.addConstr(mixing == layer.input @ layer.coefs + layer.intercept)
-        else:
-            mixing = layer._input
-        for index in np.ndindex(output.shape):
-            gc = layer.model.addGenConstrLogistic(
-                mixing[index],
-                output[index],
-                name=_name(index, "logistic"),
-            )
-        numgc = layer.model.NumGenConstrs
-        layer.model.update()
-        for gc in layer.model.getGenConstrs()[numgc:]:
-            for attr, val in self.attributes.items():
-                gc.setAttr(attr, val)
