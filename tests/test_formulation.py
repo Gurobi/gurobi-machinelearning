@@ -6,12 +6,14 @@ import warnings
 import gurobipy as gp
 import numpy as np
 import tensorflow as tf
+import torch
 from base_cases import DiabetesCases, IrisCases
 from gurobipy import GurobiError
 from joblib import load
 from sklearn import datasets
 
 from gurobi_ml import add_predictor_constr
+from gurobi_ml.exceptions import NoSolution
 from gurobi_ml.sklearn import PipelineConstr
 
 VERBOSE = False
@@ -37,6 +39,8 @@ class TestFixedModel(unittest.TestCase):
             y = gpm.addMVar(1, lb=-gp.GRB.INFINITY)
 
             pred_constr = add_predictor_constr(gpm, predictor, x, y)
+            with self.assertRaises(NoSolution):
+                pred_constr.get_error()
             with open(os.devnull, "w") as outnull:
                 pred_constr.print_stats(file=outnull)
             try:
@@ -92,12 +96,26 @@ class TestFixedModel(unittest.TestCase):
         for regressor in cases:
             onecase = cases.get_case(regressor)
             regressor = onecase["predictor"]
-            for _ in range(5):
+            for _ in range(1):
                 exampleno = random.randint(0, X.shape[0] - 1)
                 with super().subTest(regressor=regressor, exampleno=exampleno):
                     if VERBOSE:
                         print(f"Doing {regressor} with example {exampleno}")
                     self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"])
+
+    def test_diabetes_pytorch(self):
+        data = datasets.load_diabetes()
+
+        X = data["data"]
+
+        filename = os.path.join(os.path.dirname(__file__), "predictors", "diabetes__pytorch.pt")
+        regressor = torch.load(filename)
+        for _ in range(1):
+            exampleno = random.randint(0, X.shape[0] - 1)
+            with super().subTest(regressor=regressor, exampleno=exampleno):
+                if VERBOSE:
+                    print(f"Doing {regressor} with example {exampleno}")
+                self.fixed_model(regressor, X[exampleno, :].astype(np.float32), 0)
 
     def test_diabetes_keras(self):
         data = datasets.load_diabetes()
@@ -107,7 +125,7 @@ class TestFixedModel(unittest.TestCase):
 
         filename = os.path.join(os.path.dirname(__file__), "predictors", "diabetes_keras")
         regressor = tf.keras.models.load_model(filename)
-        for _ in range(5):
+        for _ in range(1):
             exampleno = random.randint(0, X.shape[0] - 1)
             with super().subTest(regressor=regressor, exampleno=exampleno):
                 if VERBOSE:
@@ -122,7 +140,7 @@ class TestFixedModel(unittest.TestCase):
 
         filename = os.path.join(os.path.dirname(__file__), "predictors", "diabetes_keras_v2")
         regressor = tf.keras.models.load_model(filename)
-        for _ in range(5):
+        for _ in range(1):
             exampleno = random.randint(0, X.shape[0] - 1)
             with super().subTest(regressor=regressor, exampleno=exampleno):
                 if VERBOSE:
@@ -143,7 +161,7 @@ class TestFixedModel(unittest.TestCase):
         for regressor in cases:
             onecase = cases.get_case(regressor)
             regressor = onecase["predictor"]
-            for _ in range(5):
+            for _ in range(1):
                 exampleno = random.randint(0, X.shape[0] - 1)
                 with super().subTest(regressor=regressor, exampleno=exampleno):
                     if VERBOSE:
