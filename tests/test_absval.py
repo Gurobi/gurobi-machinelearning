@@ -1,8 +1,10 @@
 import unittest
+import warnings
 
 import gurobipy as gp
 import numpy as np
 from sklearn.datasets import make_regression
+from sklearn.exceptions import ConvergenceWarning
 from sklearn.neural_network import MLPRegressor
 
 from gurobi_ml.modeling.neuralnet.activations import ReLU
@@ -18,6 +20,7 @@ def build_abs_network():
     X = np.concatenate([x.ravel().reshape(-1, 1)], axis=1)
     y = z.ravel()
 
+    warnings.filterwarnings("ignore", category=ConvergenceWarning)
     regression = MLPRegressor(hidden_layer_sizes=[2], max_iter=5, activation="relu", verbose=0)
     regression.fit(X=X, y=y)
 
