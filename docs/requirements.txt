@@ -1,4 +1,6 @@
 Sphinx==5.1.1
 sphinx-rtd-theme==1.0.0
 numpy==1.23.2
-gurobipy==9.5.2
+gurobipy==10.0.0b1
+scikit-learn==1.1.2
+myst_nb
