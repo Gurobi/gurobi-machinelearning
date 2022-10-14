@@ -1,6 +1,6 @@
 API
 ===
 
-.. autofunction:: gurobi_ml.add_predictor_constr
-
-.. autoclass:: gurobi_ml.modeling.AbstractPredictorConstr
+.. toctree::
+   api/add_predictor_constr.rst
+   api/add_constrs.rst

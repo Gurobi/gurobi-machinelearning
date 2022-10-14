@@ -37,6 +37,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
+    "myst_nb",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -49,6 +50,7 @@ exclude_patterns = []
 
 intersphinx_mapping = {
     "sklearn": ("https://scikit-learn.org/stable/", None),
+    "torch": ("https://pytorch.org/docs/master/", None),
 }
 
 # -- Options for HTML output -------------------------------------------------
