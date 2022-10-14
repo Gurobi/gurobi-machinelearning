@@ -1,6 +1,6 @@
 API
 ===
 
-.. autofunction:: gurobi.machinelearning.add_predictor_constr
+.. autofunction:: gurobi_ml.add_predictor_constr
 
-.. autoclass:: gurobi.machinelearning.basepredictor.AbstractPredictorConstr
+.. autoclass:: gurobi_ml.modeling.AbstractPredictorConstr

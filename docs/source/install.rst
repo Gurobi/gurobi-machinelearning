@@ -6,7 +6,7 @@ Install the package (or add it to your `requirements.txt` file):
 
 .. code-block:: console
 
-  (.venv) pip install ml2gurobi
+  (.venv) pip install gurobi-machinelearning
 
 
 .. note::

@@ -74,7 +74,7 @@ class TestFixedModel(unittest.TestCase):
 
             self.assertLessEqual(np.max(abserror), tol)
 
-    def all_of_them(self):
+    def all_of_them(self):  # pragma: no cover
         data = datasets.load_diabetes()
 
         X = data["data"]
