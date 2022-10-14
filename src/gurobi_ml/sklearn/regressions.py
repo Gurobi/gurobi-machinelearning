@@ -118,8 +118,54 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
 
 
 def add_linear_regression_constr(grbmodel, linear_regression, input_vars, output_vars=None, **kwargs):
+    """Use `linear_regression` to predict the value of `output_vars` using `input_vars` in `model`
+
+    Parameters
+    ----------
+    model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+            The gurobipy model where the predictor should be inserted.
+    linear_regression: :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
+        The linear regression to insert.
+    input_vars: mvar_array_like
+        Decision variables used as input for predictor in model.
+    output_vars: mvar_array_like, optional
+        Decision variables used as output for predictor in model.
+
+    Returns
+    -------
+    LinearRegressionConstr
+        Object containing information about what was added to model to insert the
+        predictor in it
+
+    Note
+    ----
+    See ... for acceptable values for input_vars and output_vars
+    """
     return LinearRegressionConstr(grbmodel, linear_regression, input_vars, output_vars, **kwargs)
 
 
 def add_logistic_regression_constr(grbmodel, logistic_regression, input_vars, output_vars=None, **kwargs):
+    """Use `lositic_regression` to predict the value of `output_vars` using `input_vars` in `model`
+
+    Parameters
+    ----------
+    model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+            The gurobipy model where the predictor should be inserted.
+    logistic_regression: :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
+        The linear regression to insert.
+    input_vars: mvar_array_like
+        Decision variables used as input for predictor in model.
+    output_vars: mvar_array_like, optional
+        Decision variables used as output for predictor in model.
+
+    Returns
+    -------
+    LinearRegressionConstr
+        Object containing information about what was added to model to insert the
+        predictor in it
+
+    Note
+    ----
+    See ... for acceptable values for input_vars and output_vars
+    """
     return LogisticRegressionConstr(grbmodel, logistic_regression, input_vars, output_vars, **kwargs)
