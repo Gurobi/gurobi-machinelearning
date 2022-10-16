@@ -22,9 +22,12 @@ The aim of the package is to:
 Contents
 --------
 .. toctree::
+   :maxdepth: 2
+
    install
-   example
+   quickstart
    supported
+   examples
    api
 
 
