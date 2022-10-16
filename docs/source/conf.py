@@ -62,18 +62,7 @@ html_theme = "sphinx_rtd_theme"
 
 
 myst_enable_extensions = [
-    "amsmath",
-    "colon_fence",
-    "deflist",
     "dollarmath",
-    "fieldlist",
-    "html_admonition",
-    "html_image",
-    "replacements",
-    "smartquotes",
-    "strikethrough",
-    "substitution",
-    "tasklist",
 ]
 
 # Add any paths that contain custom static files (such as style sheets) here,
