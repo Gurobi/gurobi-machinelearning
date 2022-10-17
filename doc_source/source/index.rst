@@ -8,7 +8,9 @@ Welcome to Gurobi Machine Learning!
 
 Gurobi Machine Learning is a Python package to help using *trained* regression models in a mathematical optimization
 model. The package supports a variety of regression models (linear, logistic, neural networks, decision trees,...) trained by
-different machine learning frameworks (scikit-learn, Keras and PyTorch).
+different machine learning frameworks (scikit-learn, Keras and PyTorch). They are inserted in a
+`gurobipy model <https://www.gurobi.com/documentation/current/refman/py_model.html>`
+model to be solved with the `Gurobi <https://www.gurobi.com>` solver.
 
 When the regression model is embedded in an optimization model, its input and output are decision variables.
 They are linked by the regression in that the output variables values are the values predicted by the regression from the input variables.
@@ -22,7 +24,7 @@ The aim of the package is to:
 
 The package currently support various `scikit-learn <https://scikit-learn.org/stable/>`_ objects and has limited support
 for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_ neural networks with ReLU activation.
-It is actively developped and users are encouraged to contact us if they have applications where a specific object that is currently
+It is actively developped and users are encouraged to contact us if they have applications where they use a regression model that is not currently
 not available.
 
 We give below basic instalation and usage instructions.
@@ -52,7 +54,8 @@ Usage
 -----
 
 The package essentially provides one function: :py:func:`gurobi_ml.add_predictor_constr`.
-The function takes as arguments: a gurobipy model, a supported regression model,
+The function takes as arguments: a `gurobipy model <https://www.gurobi.com/documentation/current/refman/py_model.html>`,
+a supported regression model,
 input (Gurobi) variables for the regression model and output (Gurobi) variables
 for the regression models.
 

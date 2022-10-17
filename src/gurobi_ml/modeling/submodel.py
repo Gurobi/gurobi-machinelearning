@@ -333,12 +333,16 @@ class SubModel:
 
     @property
     def results(self):
-        """Access the results from the _build_submodel() method."""
+        """Access the results from the _build_submodel() method.
+
+        :meta private:"""
         return self._objects
 
     @property
     def default_name(self):
-        """Access the default name base used for automatic name generation."""
+        """Access the default name base used for automatic name generation.
+
+        :meta private:"""
         return self._default_name
 
     def remove(self):

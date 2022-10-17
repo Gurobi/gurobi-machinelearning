@@ -1,7 +1,7 @@
 # Copyright © 2022 Gurobi Optimization, LLC
 import gurobipy as gp
 
-from ..exceptions import ModelingError
+from ..exceptions import InternalError, ModelingError
 from .submodel import SubModel
 
 
@@ -134,6 +134,24 @@ class AbstractPredictorConstr(SubModel):
         except gp.GurobiError:
             pass
         return False
+
+    def get_error(self):
+        """Returns error in Gurobi's solution with respect to prediction from input
+
+        Returns
+        -------
+        float
+            Assuming that we have a solution for the input and output variables
+            `x, y`. Returns the difference between `predict(x)` and
+            `y`, where predict is the corresponding function for the Scikit-Learn
+            object we are modeling.
+
+        Raises
+        ------
+        NoSolution
+            If the Gurobi model has no solution (either was not optimized or is infeasible).
+        """
+        raise InternalError("Not implemented")
 
     @property
     def output(self):
