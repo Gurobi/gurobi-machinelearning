@@ -1,8 +1,11 @@
 Supported Regression models
 ===========================
 
-The package currently support various `scikit-learn <https://scikit-learn.org/stable/>`_ objects and has limited support
-for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_ neural networks with ReLU activation.
+The package currently support various `scikit-learn <https://scikit-learn.org/stable/>`_ objects.
+It also  has limited support
+for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_.
+Only neural networks sequential network with ReLU activation function are currently supported.
+
 
 Scikit-learn
 ------------
@@ -19,22 +22,22 @@ and the function that can be used to insert it in a gurobi model
      - Function to insert
    * - Ordinary Least Square
      - :external:py:class:`LinearRegression <sklearn.linear_model.LinearRegression>`
-     - :doc:`api/add_linear_regression_constr`
+     - :py:func:`add_linear_regression_constr <gurobi_ml.sklearn.add_linear_regression_constr>`
    * - Logistic regression
      - :external:py:class:`LogisticRegression <sklearn.linear_model.LogisticRegression>`
-     - :doc:`api/add_logistic_regression_constr`
-   * - Neural-network
+     - :py:func:`add_logistic_regression_constr <gurobi_ml.sklearn.add_logistic_regression_constr>`
+   * - Neural-network [#]_
      - :external:py:class:`MLPRegressor <sklearn.neural_network.MLPRegressor>`
-     - :doc:`api/add_mlp_regressor_constr`
+     - :py:func:`add_mlp_regressor_constr <gurobi_ml.sklearn.add_mlp_regressor_constr>`
    * - Decision tree
      - :external:py:class:`DecisionTreeRegressor <sklearn.tree.DecisionTreeRegressor>`
-     - :doc:`api/add_decision_tree_regressor_constr`
+     - :py:func:`add_decision_tree_regressor_constr <gurobi_ml.sklearn.add_decision_tree_regressor_constr>`
    * - Gradient boosting
      - :external:py:class:`GradientBoostingRegressor <sklearn.ensemble.GradientBoostingRegressor>`
-     - :doc:`api/add_gradient_boosting_regressor_constr`
+     - :py:func:`add_gradient_boosting_regressor_constr <gurobi_ml.sklearn.add_gradient_boosting_regressor_constr>`
    * - Random Forest
      - :external:py:class:`RandomForestRegressor <sklearn.ensemble.RandomForestRegressor>`
-     - :doc:`api/add_random_forest_regressor_constr`
+     - :py:func:`add_random_forest_regressor_constr <gurobi_ml.sklearn.add_random_forest_regressor_constr>`
 
 
 .. list-table:: Transformers in scikit-learn
@@ -44,9 +47,11 @@ and the function that can be used to insert it in a gurobi model
    * - Scikit-learn object
      - Function to insert
    * - :external:py:class:`StandardScaler <sklearn.preprocessing.StandardScaler>`
-     - :doc:`api/add_standard_scaler_constr`
-   * - :external:py:class:`PolynomialFeatures <sklearn.preprocessing.PolynomialFeatures>`
-     - :doc:`api/add_polynomial_features_constr`
+     - :py:func:`gurobi_ml.sklearn.add_standard_scaler_constr`
+   * - :external:py:class:`Pipeline <sklearn.pipeline.Pipeline>`
+     - :py:func:`gurobi_ml.sklearn.add_pipeline_constr`
+   * - :external:py:class:`PolynomialFeatures <sklearn.preprocessing.PolynomialFeatures>` [#]_
+     - :py:func:`gurobi_ml.sklearn.add_polynomial_features_constr`
 
 Keras
 -----
@@ -74,3 +79,8 @@ Currently, only two types of layers are supported:
 
    * :external+torch:py:class:`Linear layers <torch.nn.Linear>`, and
    * :external+torch:py:class:`ReLU layers <torch.nn.ReLU>`.
+
+.. rubric:: Footnotes
+
+.. [#] Only networks with `'relu'` activation for hidden layers and `'identity'` for the output layer.
+.. [#] Only polynomial features of degree 2.

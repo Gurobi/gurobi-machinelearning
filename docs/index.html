@@ -74,13 +74,14 @@
 
   <section id="welcome-to-gurobi-machine-learning">
 <h1>Welcome to Gurobi Machine Learning!<a class="headerlink" href="#welcome-to-gurobi-machine-learning" title="Permalink to this heading"></a></h1>
-<p>Gurobi Machine Learning is a Python package to help using <em>trained</em> regression models in a mathematical optimization
-model. The package supports a variety of regression models (linear, logistic, neural networks, decision trees,…) trained by
+<p>Gurobi Machine Learning is a Python package to help using <em>trained</em> regression models in
+mathematical optimization models. The package supports a variety of regression models
+(linear, logistic, neural networks, decision trees,…) trained by
 different machine learning frameworks (scikit-learn, Keras and PyTorch). They are inserted in a
-<cite>gurobipy model &lt;https://www.gurobi.com/documentation/current/refman/py_model.html&gt;</cite>
-model to be solved with the <cite>Gurobi &lt;https://www.gurobi.com&gt;</cite> solver.</p>
+<a class="reference external" href="https://www.gurobi.com/documentation/current/refman/py_model.html">gurobipy model</a>
+to be solved with the <a class="reference external" href="https://www.gurobi.com">Gurobi</a> solver.</p>
 <p>When the regression model is embedded in an optimization model, its input and output are decision variables.
-They are linked by the regression in that the output variables values are the values predicted by the regression from the input variables.</p>
+They are linked by the regression in that the output variables values are the values predicted by the regression from the input variables in a feasible solution.</p>
 <p>The aim of the package is to:</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -92,9 +93,9 @@ They are linked by the regression in that the output variables values are the va
 </div></blockquote>
 <p>The package currently support various <a class="reference external" href="https://scikit-learn.org/stable/">scikit-learn</a> objects and has limited support
 for <a class="reference external" href="https://keras.io/">Keras</a> and <a class="reference external" href="https://pytorch.org/">PyTorch</a> neural networks with ReLU activation.
-It is actively developped and users are encouraged to contact us if they have applications where they use a regression model that is not currently
+It is actively developed and users are encouraged to contact us if they have applications where they use a regression model that is not currently
 not available.</p>
-<p>We give below basic instalation and usage instructions.</p>
+<p>We give below basic installation and usage instructions.</p>
 <section id="install">
 <h2>Install<a class="headerlink" href="#install" title="Permalink to this heading"></a></h2>
 <p>The package should be installed with pip (or add it to your <cite>requirements.txt</cite> file):</p>
@@ -112,7 +113,7 @@ numpy packages.</p>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
 <p>The package essentially provides one function: <a class="reference internal" href="api/add_predictor_constr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.add_predictor_constr()</span></code></a>.
-The function takes as arguments: a <cite>gurobipy model &lt;https://www.gurobi.com/documentation/current/refman/py_model.html&gt;</cite>,
+The function takes as arguments: a <a class="reference external" href="https://www.gurobi.com/documentation/current/refman/py_model.html">gurobipy model</a>,
 a supported regression model,
 input (Gurobi) variables for the regression model and output (Gurobi) variables
 for the regression models.</p>
@@ -139,11 +140,11 @@ model predicts from the input values and the actual values of the output in Guro
 </ul>
 </div></blockquote>
 <p>For the list of frameworks and regression models supported please refer to the <a class="reference internal" href="supported.html"><span class="doc">Supported Regression models</span></a>, section.
-Note that even though the <a class="reference internal" href="api/add_predictor_constr.html"><span class="doc">add_predictor_constr</span></a>, should add the correct model for any supported predictor, individual
-functions for each predictor are also available.</p>
-<p>For some regression models additional optional parameters can be set to tune the way the predictor is inserted in the Gurobi model. Those are documented
+Note that, even though <a class="reference internal" href="api/add_predictor_constr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_predictor_constr</span></code></a>
+the <a class="reference internal" href="api/add_predictor_constr.html"><span class="doc">add_predictor_constr</span></a> should add the correct model for any supported predictor, individual functions for each predictor are also available.</p>
+<p>For some regression models, additional optional parameters can be set to tune the way the predictor is inserted in the Gurobi model. Those are documented
 in the corresponding function linked from <a class="reference internal" href="supported.html"><span class="doc">Supported Regression models</span></a>.</p>
-<p>For a simple abstract example on how to use the package please refer to the <a class="reference internal" href="quickstart.html"><span class="doc">Quickstart Example</span></a> section. More advanced examples are avaiable in the
+<p>For a simple abstract example on how to use the package please refer to the <a class="reference internal" href="quickstart.html"><span class="doc">Quickstart Example</span></a> section. More advanced examples are available in the
 <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> section.</p>
 </section>
 <section id="contents">
@@ -153,8 +154,8 @@ in the corresponding function linked from <a class="reference internal" href="su
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported.html">Supported Regression models</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="supported.html#id1">Scikit-learn</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported.html#id2">Keras</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported.html#id4">PyTorch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported.html#id4">Keras</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported.html#id6">PyTorch</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
