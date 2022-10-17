@@ -1,0 +1,10 @@
+Sphinx
+sphinx-rtd-theme
+numpy
+gurobipy==10.0.0b1
+scikit-learn==1.1.2
+pandas
+matplotlib
+seaborn
+myst_nb
+.
