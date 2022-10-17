@@ -45,7 +45,7 @@ class ActivationLayer(AbstractNNLayer):
         self._model.update()
         self._output = rval
 
-    def mip_model(self, activation=None):
+    def _mip_model(self, activation=None):
         """Add the layer to model"""
         model = self._model
         model.update()
@@ -80,7 +80,7 @@ class DenseLayer(AbstractNNLayer):
         self._model.update()
         self._output = rval
 
-    def mip_model(self, activation=None):
+    def _mip_model(self, activation=None):
         """Add the layer to model"""
         model = self._model
         model.update()

@@ -21,7 +21,7 @@ class StandardScalerConstr(AbstractPredictorConstr):
         self._model.update()
         self._output = rval
 
-    def mip_model(self):
+    def _mip_model(self):
         """Do the transormation on x"""
         _input = self._input
         output = self._output
@@ -55,7 +55,7 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
         self._model.update()
         self._output = rval
 
-    def mip_model(self):
+    def _mip_model(self):
         """Do the transormation on x"""
         _input = self._input
         output = self._output

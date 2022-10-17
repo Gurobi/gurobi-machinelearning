@@ -31,7 +31,7 @@ class SequentialConstr(BaseNNConstr):
             grbmodel, predictor, input_vars, output_vars, clean_regressor=clean_regressor, default_name="torchsequential"
         )
 
-    def mip_model(self):
+    def _mip_model(self):
         network = self.predictor
         _input = self._input
         output = self._output
@@ -68,7 +68,7 @@ class SequentialConstr(BaseNNConstr):
             self.add_dense_layer(_input, layer_weight, layer_bias, self.actdict["identity"], output)
 
     def get_error(self):
-        if self.has_solution():
+        if self._has_solution():
             t_in = torch.from_numpy(self.input.X).float()
             t_out = self.predictor.forward(t_in)
             return t_out.detach().numpy() - self.output.X

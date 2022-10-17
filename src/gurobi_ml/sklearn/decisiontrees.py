@@ -27,7 +27,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         SKgetter.__init__(self, predictor)
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
-    def mip_model(self):
+    def _mip_model(self):
         tree = self.predictor.tree_
         model = self._model
 
@@ -83,7 +83,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         SKgetter.__init__(self, predictor)
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
-    def mip_model(self):
+    def _mip_model(self):
         """Predict output variables y from input variables X using the
         decision tree.
 
@@ -125,7 +125,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         SKgetter.__init__(self, predictor)
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
-    def mip_model(self):
+    def _mip_model(self):
         """Predict output variables y from input variables X using the
         decision tree.
 

@@ -1,5 +1,5 @@
-API
-===
+API Reference manual
+====================
 
 .. toctree::
    api/add_predictor_constr.rst

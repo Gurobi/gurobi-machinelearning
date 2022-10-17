@@ -70,7 +70,7 @@ class LinearRegressionConstr(BaseSKlearnRegressionConstr):
             **kwargs,
         )
 
-    def mip_model(self):
+    def _mip_model(self):
         """Add the prediction constraints to Gurobi"""
         self.add_regression_constr()
 
@@ -95,7 +95,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             **kwargs,
         )
 
-    def mip_model(self):
+    def _mip_model(self):
         """Add the prediction constraints to Gurobi"""
         if self._output is None:
             self._create_output_vars(self._input, name="logreg")

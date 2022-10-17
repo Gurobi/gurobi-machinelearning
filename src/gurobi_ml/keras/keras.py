@@ -27,7 +27,7 @@ class KerasNetworkConstr(BaseNNConstr):
 
         super().__init__(grbmodel, predictor, input_vars, output_vars, clean_regressor=clean_regressor)
 
-    def mip_model(self):
+    def _mip_model(self):
         network = self.predictor
         _input = self._input
         output = None
@@ -63,7 +63,7 @@ class KerasNetworkConstr(BaseNNConstr):
                 _input = layer.output
 
     def get_error(self):
-        if self.has_solution():
+        if self._has_solution():
             return self.predictor.predict(self.input.X) - self.output.X
         raise NoSolution()
 

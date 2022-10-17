@@ -30,7 +30,22 @@ def validate_gpvars(gpvars, isinput):
 
 
 class AbstractPredictorConstr(SubModel):
-    """Class to define a submodel"""
+    """Base class to store sub-model added by add_predictor_constr
+
+    This class is the base class to store everything that is added to
+    a Gurobi model when adding a trained predictor to it. Depending on
+    the type of the predictor, a class derived from it will be returned
+    by add_predictor_constr.
+
+    Atributes
+    ---------
+    model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+            The gurobipy model where the predictor should be inserted.
+    input_vars: mvar_array_like
+        Decision variables used as input.
+    output_vars: mvar_array_like, optional
+        Decision variables used as output.
+    """
 
     def __init__(self, grbmodel, input_vars, output_vars=None, **kwargs):
         self._input = validate_gpvars(input_vars, True)
@@ -44,8 +59,8 @@ class AbstractPredictorConstr(SubModel):
         self._output = validate_gpvars(output_vars, False)
 
     @staticmethod
-    def validate(input_vars, output_vars):
-        """Validate input and output variables (check shapes, reshape if needed."""
+    def _validate(input_vars, output_vars):
+        """Validate input and output variables (check shapes, reshape if needed)."""
         if input_vars is None:
             raise ModelingError("No input variables")
         if output_vars is None:
@@ -70,19 +85,34 @@ class AbstractPredictorConstr(SubModel):
         if self._output is None:
             self._create_output_vars(self._input)
         if self._output is not None:
-            self._input, self._output = self.validate(self._input, self._output)
+            self._input, self._output = self._validate(self._input, self._output)
         else:
             self._input = validate_gpvars(self._input, True)
-        self.mip_model()
+        self._mip_model()
         assert self._output is not None
         return self
 
     def print_stats(self, file=None):
+        """Print statistics on model additions stored by this class
+
+        This functions prints detailed statistics on the variables
+        and constraints that where added to the model.
+
+        Usually derived class reimplement this function to provide more
+        details about the structure of the additions (type of ML model,
+        layers if it's a neural network,...)
+
+        Arguments
+        ---------
+
+        file: None, optional
+        Text stream to which output should be redirected. By default sys.stdout.
+        """
         super().print_stats(file)
         print(f"Input has shape {self.input.shape}", file=file)
         print(f"Output has shape {self.output.shape}", file=file)
 
-    def mip_model(self):
+    def _mip_model(self):
         """Defined in derived class the mip_model for the predictor"""
 
     def _create_output_vars(self, input_vars):
@@ -95,7 +125,8 @@ class AbstractPredictorConstr(SubModel):
         self._model.update()
         self._output = rval
 
-    def has_solution(self):
+    def _has_solution(self):
+        """Returns true if we have a solution"""
         try:
             v = self._input.X
             v = self._output.X
@@ -106,10 +137,12 @@ class AbstractPredictorConstr(SubModel):
 
     @property
     def output(self):
+        """Returns the output variables of embeded predictor"""
         return self._output
 
     @property
     def input(self):
+        """Returns the input variables of embeded predictor"""
         return self._input
 
     def __str__(self):

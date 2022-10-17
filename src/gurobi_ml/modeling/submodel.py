@@ -294,7 +294,21 @@ class SubModel:
             # prefix_names(self._model, self.sos, "SOSName", name)
 
     def print_stats(self, file=None):
-        """Print statistics about submodel created"""
+        """Print statistics about submodel
+
+        This functions prints detailed statistics on the variables
+        and constraints that where added to the model using this object.
+
+        Usually derived class reimplement this function to provide more
+        details about the structure of the additions (type of ML model,
+        layers if it's a neural network,...)
+
+        Arguments
+        ---------
+
+        file: None, optional
+        Text stream to which output should be redirected. By default sys.stdout.
+        """
         name = self._name
         if name == "":
             name = self.default_name
@@ -355,7 +369,9 @@ class SubModel:
     # Methods to give direct access to result dict
 
     def keys(self):
-        """Returns all keys of the results dictionary"""
+        """Returns all keys of the results dictionary
+
+        :meta private:"""
         return self._objects.keys()
 
     def __getitem__(self, key):

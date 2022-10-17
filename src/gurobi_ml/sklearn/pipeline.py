@@ -16,7 +16,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         SKgetter.__init__(self, pipeline)
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
-    def mip_model(self):
+    def _mip_model(self):
         pipeline = self.predictor
         model = self._model
         input_vars = self._input
