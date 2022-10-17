@@ -18,6 +18,10 @@ class SKgetter:
     def __init__(self, predictor):
         check_is_fitted(predictor)
         self.predictor = predictor
+        try:
+            self.n_outputs_ = predictor.n_outputs_
+        except AttributeError:
+            self.n_outputs_ = 1
 
     def get_error(self):
         """Returns error in Gurobi's solution with respect to prediction from input
@@ -35,7 +39,7 @@ class SKgetter:
         NoSolution
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
-        if self.has_solution():
+        if self._has_solution():
             return self.predictor.predict(self.input.X) - self.output.X.T
         raise NoSolution()
 
@@ -55,6 +59,6 @@ class SKgetter:
         NoSolution
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
-        if self.has_solution():
+        if self._has_solution():
             return self.predictor.predict_proba(self.input.X)[:, 1] - self.output.X.T
         raise NoSolution()

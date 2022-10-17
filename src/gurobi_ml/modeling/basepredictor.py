@@ -115,13 +115,13 @@ class AbstractPredictorConstr(SubModel):
     def _mip_model(self):
         """Defined in derived class the mip_model for the predictor"""
 
-    def _create_output_vars(self, input_vars):
+    def _create_output_vars(self, input_vars, name="output"):
         """May be defined in derived class to create the output variables of predictor"""
         try:
             n_outputs = self.n_outputs_
         except AttributeError:
             return
-        rval = self._model.addMVar((input_vars.shape[0], n_outputs), lb=-gp.GRB.INFINITY, name="output")
+        rval = self._model.addMVar((input_vars.shape[0], n_outputs), lb=-gp.GRB.INFINITY, name=name)
         self._model.update()
         self._output = rval
 

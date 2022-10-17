@@ -10,7 +10,6 @@ What we have so far:
   - MLSRegressionConstr: a neural network.
 """
 
-import gurobipy as gp
 import numpy as np
 
 from ..modeling import AbstractPredictorConstr
@@ -37,17 +36,10 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
             **kwargs,
         )
 
-    def _create_output_vars(self, input_vars, name="linreg_out"):
-        rval = self._model.addMVar((input_vars.shape[0], 1), lb=-gp.GRB.INFINITY, name=name)
-        self._model.update()
-        self._output = rval
-
     def add_regression_constr(self):
         """Add the prediction constraints to Gurobi"""
         coefs = self.predictor.coef_.T
         intercept = self.predictor.intercept_
-        if self._output is None:
-            self._create_output_vars(self._input)
         self.model.addConstr(self._output == self._input @ coefs + intercept, name="linreg")
 
     def print_stats(self, file=None):
@@ -97,8 +89,6 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
 
     def _mip_model(self):
         """Add the prediction constraints to Gurobi"""
-        if self._output is None:
-            self._create_output_vars(self._input, name="logreg")
         outputvars = self._output
         self._create_output_vars(self._input, name="affine_trans")
         affinevars = self._output
