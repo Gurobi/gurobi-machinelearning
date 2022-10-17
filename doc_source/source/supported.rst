@@ -51,9 +51,13 @@ and the function that can be used to insert it in a gurobi model
 Keras
 -----
 
- * Keras
-    * Linear layers
-    * ReLU layers
+`Keras <https://keras.io/>`_ neural networks generated either using the `functional API <https://keras.io/guides/functional_api/>`,
+`subclassing model <https://keras.io/guides/making_new_layers_and_models_via_subclassing/>` or using the
+`Sequential <https://keras.io/api/models/sequential/>` class.
+
+Currently, only two types of layers are supported:
+    * `Dense layers <https://keras.io/api/layers/core_layers/dense/>` (possibly with `relu` activation).
+    * `ReLU layers <https://keras.io/api/layers/activation_layers/relu/>` with default settings.
 
 PyTorch
 -------

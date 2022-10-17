@@ -20,6 +20,11 @@ The aim of the package is to:
    #. Allow to easily compare the effect of using different regression models in the same mathematical optimization application.
    #. Improve the algorithmic performance of Gurobi on those models.
 
+The package currently support various `scikit-learn <https://scikit-learn.org/stable/>`_ objects and has limited support
+for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_ neural networks with ReLU activation.
+It is actively developped and users are encouraged to contact us if they have applications where a specific object that is currently
+not available.
+
 We give below basic instalation and usage instructions.
 
 Install
@@ -73,7 +78,7 @@ The modeling object can perform a few tasks:
      model predicts from the input values and the actual values of the output in Gurobi's solution with the
      :py:meth:`get_error <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` function.
 
-For the list of models supported please refer to the :doc:`supported`, section.
+For the list of frameworks and regression models supported please refer to the :doc:`supported`, section.
 Note that even though the :doc:`api/add_predictor_constr`, should add the correct model for any supported predictor, individual
 functions for each predictor are also available.
 
@@ -81,7 +86,8 @@ For some regression models additional optional parameters can be set to tune the
 in the corresponding function linked from :doc:`supported`.
 
 For a simple abstract example on how to use the package please refer to the :doc:`quickstart` section. More advanced examples are avaiable in the
-:doc:examples section.
+:doc:`examples` section.
+
 
 Contents
 --------
