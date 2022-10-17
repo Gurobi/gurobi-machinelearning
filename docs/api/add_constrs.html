@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Individual function to insert ML models &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
+  <title>Detailed API &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
@@ -21,8 +21,6 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="add_pipeline_constr" href="add_pipeline_constr.html" />
-    <link rel="prev" title="add_predictor_constr" href="add_predictor_constr.html" />
 </head>
 
 <body class="wy-body-for-nav">
@@ -40,25 +38,11 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="add_predictor_constr.html">add_predictor_constr</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Individual function to insert ML models</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="add_pipeline_constr.html">add_pipeline_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_linear_regression_constr.html">add_linear_regression_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_logistic_regression_constr.html">add_logistic_regression_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_mlp_regressor_constr.html">add_mlp_regressor_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_decision_tree_regressor_constr.html">add_decision_tree_regressor_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_gradient_boosting_regressor_constr.html">add_gradient_boosting_regressor_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_random_forest_regressor_constr.html">add_random_forest_regressor_constr</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference manual</a></li>
 </ul>
 
         </div>
@@ -75,8 +59,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">API</a> &raquo;</li>
-      <li>Individual function to insert ML models</li>
+      <li>Detailed API</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/add_constrs.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -86,49 +69,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
 
-  <section id="individual-function-to-insert-ml-models">
-<h1>Individual function to insert ML models<a class="headerlink" href="#individual-function-to-insert-ml-models" title="Permalink to this heading"></a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="add_pipeline_constr.html">add_pipeline_constr</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="add_pipeline_constr.html#gurobi_ml.sklearn.add_pipeline_constr"><code class="docutils literal notranslate"><span class="pre">add_pipeline_constr()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="add_linear_regression_constr.html">add_linear_regression_constr</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="add_linear_regression_constr.html#gurobi_ml.sklearn.add_linear_regression_constr"><code class="docutils literal notranslate"><span class="pre">add_linear_regression_constr()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="add_logistic_regression_constr.html">add_logistic_regression_constr</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="add_logistic_regression_constr.html#gurobi_ml.sklearn.add_logistic_regression_constr"><code class="docutils literal notranslate"><span class="pre">add_logistic_regression_constr()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="add_mlp_regressor_constr.html">add_mlp_regressor_constr</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="add_mlp_regressor_constr.html#gurobi_ml.sklearn.add_mlp_regressor_constr"><code class="docutils literal notranslate"><span class="pre">add_mlp_regressor_constr()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="add_decision_tree_regressor_constr.html">add_decision_tree_regressor_constr</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="add_decision_tree_regressor_constr.html#gurobi_ml.sklearn.add_decision_tree_regressor_constr"><code class="docutils literal notranslate"><span class="pre">add_decision_tree_regressor_constr()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="add_gradient_boosting_regressor_constr.html">add_gradient_boosting_regressor_constr</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="add_gradient_boosting_regressor_constr.html#gurobi_ml.sklearn.add_gradient_boosting_regressor_constr"><code class="docutils literal notranslate"><span class="pre">add_gradient_boosting_regressor_constr()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="add_random_forest_regressor_constr.html">add_random_forest_regressor_constr</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="add_random_forest_regressor_constr.html#gurobi_ml.sklearn.add_random_forest_regressor_constr"><code class="docutils literal notranslate"><span class="pre">add_random_forest_regressor_constr()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</div>
+  <section id="detailed-api">
+<h1>Detailed API<a class="headerlink" href="#detailed-api" title="Permalink to this heading"></a></h1>
 </section>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="add_predictor_constr.html" class="btn btn-neutral float-left" title="add_predictor_constr" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="add_pipeline_constr.html" class="btn btn-neutral float-right" title="add_pipeline_constr" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

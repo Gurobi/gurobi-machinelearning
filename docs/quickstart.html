@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Supported Regression models" href="supported.html" />
-    <link rel="prev" title="Installation" href="install.html" />
+    <link rel="prev" title="Welcome to Gurobi Machine Learning!" href="index.html" />
 </head>
 
 <body class="wy-body-for-nav">
@@ -43,11 +43,10 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference manual</a></li>
 </ul>
 
         </div>
@@ -220,11 +219,6 @@ Activation is identity
 </div>
 <p>To finish the model we set the objective and then we can optimize it.</p>
 <div class="cell tag_remove-input docutils container">
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>rm: gurobi.log: No such file or directory
-</pre></div>
-</div>
-</div>
 </div>
 <div class="cell tag_remove-stdout docutils container">
 <div class="cell_input docutils container">
@@ -237,7 +231,7 @@ Activation is identity
 </div>
 <div class="cell tag_remove-input docutils container">
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi 10.0.0 (mac64[x86]) logging started Mon Oct 17 09:59:59 2022
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi 10.0.0 (mac64[x86]) logging started Mon Oct 17 17:08:34 2022
 
 Set parameter LogFile to value &quot;gurobi.log&quot;
 Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
@@ -246,44 +240,50 @@ CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
 Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
 
 Optimize a model with 82 rows, 182 columns and 1322 nonzeros
-Model fingerprint: 0x24a3a6b1
+Model fingerprint: 0xd9e7de87
 Model has 2 quadratic objective terms
 Model has 80 general constraints
 Variable types: 182 continuous, 0 integer (0 binary)
 Coefficient statistics:
-  Matrix range     [5e-04, 2e+00]
+  Matrix range     [5e-03, 3e+00]
   Objective range  [0e+00, 0e+00]
   QObjective range [2e+00, 2e+00]
-  Bounds range     [8e-03, 3e+00]
-  RHS range        [5e-02, 1e+00]
-Presolve removed 2 rows and 92 columns
+  Bounds range     [1e-02, 2e+00]
+  RHS range        [2e-02, 2e+00]
+Presolve removed 0 rows and 90 columns
 Presolve time: 0.02s
-Presolved: 80 rows, 90 columns, 544 nonzeros
+Presolved: 82 rows, 92 columns, 601 nonzeros
 Presolved model has 1 quadratic objective terms
-Variable types: 65 continuous, 25 integer (25 binary)
+Variable types: 67 continuous, 25 integer (25 binary)
 
-Root relaxation: objective 6.001185e+03, 127 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: objective 6.387535e+02, 137 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0 6001.18521    0   13          - 6001.18521      -     -    0s
-H    0     0                    6001.1852138 6001.18521  0.00%     -    0s
+     0     0  638.75351    0   11          -  638.75351      -     -    0s
+H    0     0                    8721.4081038  638.75351  92.7%     -    0s
+     0     0  638.75351    0   12 8721.40810  638.75351  92.7%     -    0s
+H    0     0                    2917.1212876  638.75351  78.1%     -    0s
+     0     0  638.75351    0   12 2917.12128  638.75351  78.1%     -    0s
+     0     0  638.75351    0   10 2917.12128  638.75351  78.1%     -    0s
+H    0     0                     638.7535153  638.75351  0.00%     -    0s
+     0     0  638.75351    0   11  638.75351  638.75351  0.00%     -    0s
 
 Cutting planes:
   Cover: 4
-  Implied bound: 4
-  MIR: 5
-  Flow cover: 24
+  Clique: 1
+  MIR: 3
+  Flow cover: 4
   Relax-and-lift: 2
 
-Explored 1 nodes (127 simplex iterations) in 0.03 seconds (0.01 work units)
+Explored 1 nodes (245 simplex iterations) in 0.04 seconds (0.02 work units)
 Thread count was 8 (of 8 available processors)
 
-Solution count 1: 6001.19
+Solution count 3: 638.754 2917.12 8721.41
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 6.001185213818e+03, best bound 6.001185213818e+03, gap 0.0000%
+Best objective 6.387535153856e+02, best bound 6.387535153856e+02, gap 0.0000%
 </pre></div>
 </div>
 </div>
@@ -298,7 +298,7 @@ Best objective 6.001185213818e+03, best bound 6.001185213818e+03, gap 0.0000%
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[-5.77315973e-15, -4.26325641e-14]])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[-4.99600361e-15,  1.42108547e-14]])
 </pre></div>
 </div>
 </div>
@@ -311,7 +311,7 @@ Best objective 6.001185213818e+03, best bound 6.001185213818e+03, gap 0.0000%
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([  0.        , -77.46731707])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([  0.        , -25.27357346])
 </pre></div>
 </div>
 </div>
@@ -323,7 +323,7 @@ Best objective 6.001185213818e+03, best bound 6.001185213818e+03, gap 0.0000%
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([  56.34362072, -174.43586176])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([ -78.69065107, -141.63955201])
 </pre></div>
 </div>
 </div>
@@ -335,7 +335,7 @@ Best objective 6.001185213818e+03, best bound 6.001185213818e+03, gap 0.0000%
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="install.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Gurobi Machine Learning!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="supported.html" class="btn btn-neutral float-right" title="Supported Regression models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

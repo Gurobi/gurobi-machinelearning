@@ -18,10 +18,12 @@
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation" href="install.html" />
+    <link rel="next" title="Quickstart Example" href="quickstart.html" />
 </head>
 
 <body class="wy-body-for-nav">
@@ -40,11 +42,10 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference manual</a></li>
 </ul>
 
         </div>
@@ -73,10 +74,12 @@
 
   <section id="welcome-to-gurobi-machine-learning">
 <h1>Welcome to Gurobi Machine Learning!<a class="headerlink" href="#welcome-to-gurobi-machine-learning" title="Permalink to this heading"></a></h1>
-<p>Gurobi Machine Learning is a Python package to embed <em>trained</em> regression models in a mathematical optimization
+<p>Gurobi Machine Learning is a Python package to help using <em>trained</em> regression models in a mathematical optimization
 model. The package supports a variety of regression models (linear, logistic, neural networks, decision trees,…) trained by
-different machine learning framework (scikit-learn, Keras and PyTorch).
-When the regression model is embedded in an optimization model, its input and output are decision variables.
+different machine learning frameworks (scikit-learn, Keras and PyTorch). They are inserted in a
+<cite>gurobipy model &lt;https://www.gurobi.com/documentation/current/refman/py_model.html&gt;</cite>
+model to be solved with the <cite>Gurobi &lt;https://www.gurobi.com&gt;</cite> solver.</p>
+<p>When the regression model is embedded in an optimization model, its input and output are decision variables.
 They are linked by the regression in that the output variables values are the values predicted by the regression from the input variables.</p>
 <p>The aim of the package is to:</p>
 <blockquote>
@@ -87,16 +90,71 @@ They are linked by the regression in that the output variables values are the va
 <li><p>Improve the algorithmic performance of Gurobi on those models.</p></li>
 </ol>
 </div></blockquote>
+<p>The package currently support various <a class="reference external" href="https://scikit-learn.org/stable/">scikit-learn</a> objects and has limited support
+for <a class="reference external" href="https://keras.io/">Keras</a> and <a class="reference external" href="https://pytorch.org/">PyTorch</a> neural networks with ReLU activation.
+It is actively developped and users are encouraged to contact us if they have applications where they use a regression model that is not currently
+not available.</p>
+<p>We give below basic instalation and usage instructions.</p>
+<section id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this heading"></a></h2>
+<p>The package should be installed with pip (or add it to your <cite>requirements.txt</cite> file):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="go">pip install gurobi-machinelearning</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If not already installed this should install the gurobipy and
+numpy packages.</p>
+<p>The package needs Gurobi version 10 to work properly.</p>
+<p>The package has been tested with and is supported for python 3.9 and python 3.10</p>
+</div>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
+<p>The package essentially provides one function: <a class="reference internal" href="api/add_predictor_constr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.add_predictor_constr()</span></code></a>.
+The function takes as arguments: a <cite>gurobipy model &lt;https://www.gurobi.com/documentation/current/refman/py_model.html&gt;</cite>,
+a supported regression model,
+input (Gurobi) variables for the regression model and output (Gurobi) variables
+for the regression models.</p>
+<p>By calling the function, the gurobipy model is augmented with variables and
+constraints so that, in a solution, the values of the output variables
+are predicted by the regression model from the input variables.
+More formally, if we denote by <span class="math notranslate nohighlight">\(g\)</span> the prediction function of the regression model, by
+<span class="math notranslate nohighlight">\(x\)</span> the input variables
+and by <span class="math notranslate nohighlight">\(y\)</span> the output variables, in any solution we should have <span class="math notranslate nohighlight">\(y = g(x)\)</span>.</p>
+<p>The function <a class="reference internal" href="api/add_predictor_constr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_predictor_constr</span></code></a> returns a so-called modeling object derived from the class
+<a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr" title="gurobi_ml.modeling.AbstractPredictorConstr"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPredictorConstr</span></code></a>.
+That object keeps track of all the variables and constraints that have been added
+to the gurobipy model to establish the relationship between input and output variables
+of the regression.</p>
+<p>The modeling object can perform a few tasks:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Everything it created (i.e. variables and constraints to establish the relationship between input and output)
+can be removed with the <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr.remove" title="gurobi_ml.modeling.AbstractPredictorConstr.remove"><code class="xref py py-meth docutils literal notranslate"><span class="pre">remove</span></code></a> function.</p></li>
+<li><p>It can print a summary of what it added with the <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr.print_stats" title="gurobi_ml.modeling.AbstractPredictorConstr.print_stats"><code class="xref py py-meth docutils literal notranslate"><span class="pre">print_stats</span></code></a> function.</p></li>
+<li><p>Once Gurobi computed a solution to the optimization problem, it can compute the difference between what the regression
+model predicts from the input values and the actual values of the output in Gurobi’s solution with the
+<a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr.print_stats" title="gurobi_ml.modeling.AbstractPredictorConstr.print_stats"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_error</span></code></a> function.</p></li>
+</ul>
+</div></blockquote>
+<p>For the list of frameworks and regression models supported please refer to the <a class="reference internal" href="supported.html"><span class="doc">Supported Regression models</span></a>, section.
+Note that even though the <a class="reference internal" href="api/add_predictor_constr.html"><span class="doc">add_predictor_constr</span></a>, should add the correct model for any supported predictor, individual
+functions for each predictor are also available.</p>
+<p>For some regression models additional optional parameters can be set to tune the way the predictor is inserted in the Gurobi model. Those are documented
+in the corresponding function linked from <a class="reference internal" href="supported.html"><span class="doc">Supported Regression models</span></a>.</p>
+<p>For a simple abstract example on how to use the package please refer to the <a class="reference internal" href="quickstart.html"><span class="doc">Quickstart Example</span></a> section. More advanced examples are avaiable in the
+<a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> section.</p>
+</section>
 <section id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported.html">Supported Regression models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="supported.html#scikit-learn">Scikit-learn</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported.html#keras">Keras</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported.html#pytorch">PyTorch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported.html#id1">Scikit-learn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported.html#id2">Keras</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supported.html#id4">PyTorch</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
@@ -104,9 +162,31 @@ They are linked by the regression in that the output variables values are the va
 <li class="toctree-l2"><a class="reference internal" href="examples/price_optimization.html">How Much Is Too Much? Avocado Pricing and Supply Using Mathematical Optimization</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference manual</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/add_predictor_constr.html">add_predictor_constr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/add_constrs.html">Individual function to insert ML models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/AbstractPredictorConstr.html">AbstractPredictorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/DecisionTreeRegressorConstr.html">DecisionTreeRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/GradientBoostingRegressorConstr.html">GradientBoostingRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/KerasConstr.html">KerasConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/LinearRegressionConstr.html">LinearRegressionConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/LogisticRegressionConstr.html">LogisticRegressionConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/MlpRegressorConstr.html">MLPRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/PipelineConstr.html">PipelineConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/PolynomialFeaturesConstr.html">PolynomialFeaturesConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/RandomForestRegressorConstr.html">RandomForestRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/SequentialConstr.html">SequentialConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/StandardScalerConstr.html">StandardScalerConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/add_decision_tree_regressor_constr.html">add_decision_tree_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/add_gradient_boosting_regressor_constr.html">add_gradient_boosting_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/add_keras_constr.html">add_keras_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/add_linear_regression_constr.html">add_linear_regression_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/add_logistic_regression_constr.html">add_logistic_regression_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/add_mlp_regressor_constr.html">add_mlp_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/add_pipeline_constr.html">add_pipeline_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/add_polynomial_features_constr.html">add_polynomial_features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/add_random_forest_regressor_constr.html">add_random_forest_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/add_sequential_constr.html">add_sequential_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/add_standard_scaler_constr.html">add_standard_scaler_constr</a></li>
 </ul>
 </li>
 </ul>
@@ -126,7 +206,7 @@ They are linked by the regression in that the output variables values are the va
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quickstart Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

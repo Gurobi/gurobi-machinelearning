@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>add_linear_regression_constr &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
+  <title>add_sequential_constr &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="add_logistic_regression_constr" href="add_logistic_regression_constr.html" />
-    <link rel="prev" title="add_pipeline_constr" href="add_pipeline_constr.html" />
+    <link rel="next" title="add_keras_constr" href="add_keras_constr.html" />
+    <link rel="prev" title="add_polynomial_features" href="add_polynomial_features_constr.html" />
 </head>
 
 <body class="wy-body-for-nav">
@@ -41,7 +41,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../start.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
@@ -61,10 +61,7 @@
 <li class="toctree-l3"><a class="reference internal" href="SequentialConstr.html">SequentialConstr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="StandardScalerConstr.html">StandardScalerConstr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="add_pipeline_constr.html">add_pipeline_constr</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">add_linear_regression_constr</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.add_linear_regression_constr"><code class="docutils literal notranslate"><span class="pre">add_linear_regression_constr()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="add_linear_regression_constr.html">add_linear_regression_constr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="add_logistic_regression_constr.html">add_logistic_regression_constr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="add_mlp_regressor_constr.html">add_mlp_regressor_constr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="add_decision_tree_regressor_constr.html">add_decision_tree_regressor_constr</a></li>
@@ -72,7 +69,10 @@
 <li class="toctree-l3"><a class="reference internal" href="add_random_forest_regressor_constr.html">add_random_forest_regressor_constr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="add_standard_scaler_constr.html">add_standard_scaler_constr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="add_polynomial_features_constr.html">add_polynomial_features</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_sequential_constr.html">add_sequential_constr</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">add_sequential_constr</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.add_sequential_constr"><code class="docutils literal notranslate"><span class="pre">add_sequential_constr()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="add_keras_constr.html">add_keras_constr</a></li>
 </ul>
 </li>
@@ -96,9 +96,9 @@
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">API Reference manual</a> &raquo;</li>
           <li><a href="add_constrs.html">Detailed API</a> &raquo;</li>
-      <li>add_linear_regression_constr</li>
+      <li>add_sequential_constr</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/api/add_linear_regression_constr.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/add_sequential_constr.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -106,34 +106,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
 
-  <section id="add-linear-regression-constr">
-<h1>add_linear_regression_constr<a class="headerlink" href="#add-linear-regression-constr" title="Permalink to this heading"></a></h1>
+  <section id="add-sequential-constr">
+<h1>add_sequential_constr<a class="headerlink" href="#add-sequential-constr" title="Permalink to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.add_linear_regression_constr">
-<span class="sig-prename descclassname"><span class="pre">gurobi_ml.sklearn.</span></span><span class="sig-name descname"><span class="pre">add_linear_regression_constr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grbmodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear_regression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.add_linear_regression_constr" title="Permalink to this definition"></a></dt>
-<dd><p>Use <cite>linear_regression</cite> to predict the value of <cite>output_vars</cite> using <cite>input_vars</cite> in <cite>model</cite></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>model</strong> (<a class="reference external" href="https://www.gurobi.com/documentation/9.5/refman/py_model.html">gp.Model</a>) – The gurobipy model where the predictor should be inserted.</p></li>
-<li><p><strong>linear_regression</strong> (<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.linear_model.LinearRegression</span></code></a>) – The linear regression to insert.</p></li>
-<li><p><strong>input_vars</strong> (<em>mvar_array_like</em>) – Decision variables used as input for predictor in model.</p></li>
-<li><p><strong>output_vars</strong> (<em>mvar_array_like</em><em>, </em><em>optional</em>) – Decision variables used as output for predictor in model.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Object containing information about what was added to model to insert the
-predictor in it</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="LinearRegressionConstr.html#gurobi_ml.sklearn.LinearRegressionConstr" title="gurobi_ml.sklearn.LinearRegressionConstr">LinearRegressionConstr</a></p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>See … for acceptable values for input_vars and output_vars</p>
-</div>
-</dd></dl>
+<dt class="sig sig-object py" id="gurobi_ml.torch.add_sequential_constr">
+<span class="sig-prename descclassname"><span class="pre">gurobi_ml.torch.</span></span><span class="sig-name descname"><span class="pre">add_sequential_constr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grbmodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.torch.add_sequential_constr" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 
@@ -141,8 +119,8 @@ predictor in it</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="add_pipeline_constr.html" class="btn btn-neutral float-left" title="add_pipeline_constr" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="add_logistic_regression_constr.html" class="btn btn-neutral float-right" title="add_logistic_regression_constr" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="add_polynomial_features_constr.html" class="btn btn-neutral float-left" title="add_polynomial_features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="add_keras_constr.html" class="btn btn-neutral float-right" title="add_keras_constr" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

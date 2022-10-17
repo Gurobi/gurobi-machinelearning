@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GradientBoostingRegressorConstr &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="KerasConstr" href="KerasConstr.html" />
+    <link rel="prev" title="DecisionTreeRegressorConstr" href="DecisionTreeRegressorConstr.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Gurobi Machine Learning
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported.html">Supported Regression models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="add_predictor_constr.html">add_predictor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="AbstractPredictorConstr.html">AbstractPredictorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DecisionTreeRegressorConstr.html">DecisionTreeRegressorConstr</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GradientBoostingRegressorConstr</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.get_error"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.get_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.get_error_proba"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.get_error_proba()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.print_stats"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.print_stats()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.remove"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.constrs"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.constrs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.genconstrs"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.genconstrs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.input"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.input</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.model"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.output"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.output</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.qconstrs"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.qconstrs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.sos"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.sos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.vars"><code class="docutils literal notranslate"><span class="pre">GradientBoostingRegressorConstr.vars</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="KerasConstr.html">KerasConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LinearRegressionConstr.html">LinearRegressionConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogisticRegressionConstr.html">LogisticRegressionConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MlpRegressorConstr.html">MLPRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PipelineConstr.html">PipelineConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PolynomialFeaturesConstr.html">PolynomialFeaturesConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RandomForestRegressorConstr.html">RandomForestRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SequentialConstr.html">SequentialConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="StandardScalerConstr.html">StandardScalerConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_decision_tree_regressor_constr.html">add_decision_tree_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_gradient_boosting_regressor_constr.html">add_gradient_boosting_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_keras_constr.html">add_keras_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_linear_regression_constr.html">add_linear_regression_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_logistic_regression_constr.html">add_logistic_regression_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_mlp_regressor_constr.html">add_mlp_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_pipeline_constr.html">add_pipeline_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_polynomial_features_constr.html">add_polynomial_features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_random_forest_regressor_constr.html">add_random_forest_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_sequential_constr.html">add_sequential_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_standard_scaler_constr.html">add_standard_scaler_constr</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Gurobi Machine Learning</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">API Reference manual</a> &raquo;</li>
+      <li>GradientBoostingRegressorConstr</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/GradientBoostingRegressorConstr.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="gradientboostingregressorconstr">
+<h1>GradientBoostingRegressorConstr<a class="headerlink" href="#gradientboostingregressorconstr" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gurobi_ml.sklearn.</span></span><span class="sig-name descname"><span class="pre">GradientBoostingRegressorConstr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grbmodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr" title="Permalink to this definition"></a></dt>
+<dd><p>Class to model a trained gradient boosting tree in a Gurobi model</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.get_error">
+<span class="sig-name descname"><span class="pre">get_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.get_error" title="Permalink to this definition"></a></dt>
+<dd><p>Returns error in Gurobi’s solution with respect to prediction from input</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Assuming that we have a solution for the input and output variables
+<cite>x, y</cite>. Returns the difference between <cite>predict(x)</cite> and
+<cite>y</cite>, where predict is the corresponding function for the Scikit-Learn
+object we are modeling.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>NoSolution</strong> – If the Gurobi model has no solution (either was not optimized or is infeasible).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.get_error_proba">
+<span class="sig-name descname"><span class="pre">get_error_proba</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.get_error_proba" title="Permalink to this definition"></a></dt>
+<dd><p>Same as get_error but using predict_proba</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Assuming that we have a solution for the input and output variables
+<cite>x, y</cite>. Returns the difference between <cite>predict_proba(x)</cite> and
+<cite>y</cite>, where predict is the corresponding function for the Scikit-Learn
+object we are modeling.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>NoSolution</strong> – If the Gurobi model has no solution (either was not optimized or is infeasible).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.print_stats">
+<span class="sig-name descname"><span class="pre">print_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.print_stats" title="Permalink to this definition"></a></dt>
+<dd><p>Print statistics on model additions stored by this class</p>
+<p>This functions prints detailed statistics on the variables
+and constraints that where added to the model.</p>
+<p>Usually derived class reimplement this function to provide more
+details about the structure of the additions (type of ML model,
+layers if it’s a neural network,…)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<em>None</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>sys.stdout.</strong> (<em>Text stream to which output should be redirected. By default</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.remove" title="Permalink to this definition"></a></dt>
+<dd><p>Remove the submodel from the model</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.constrs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constrs</span></span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.constrs" title="Permalink to this definition"></a></dt>
+<dd><p>Return the list of linear constraints in the submodel.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.genconstrs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">genconstrs</span></span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.genconstrs" title="Permalink to this definition"></a></dt>
+<dd><p>Return the list of general constraints in the submodel.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.input">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input</span></span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.input" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the input variables of embeded predictor</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.model">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.model" title="Permalink to this definition"></a></dt>
+<dd><p>Access model the submodel is a part of</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.output">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output</span></span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.output" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the output variables of embeded predictor</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.qconstrs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qconstrs</span></span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.qconstrs" title="Permalink to this definition"></a></dt>
+<dd><p>Return the list of quadratic constraints in the submodel.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.sos">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sos</span></span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.sos" title="Permalink to this definition"></a></dt>
+<dd><p>Return the list of SOS constraints in the submodel.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.GradientBoostingRegressorConstr.vars">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vars</span></span><a class="headerlink" href="#gurobi_ml.sklearn.GradientBoostingRegressorConstr.vars" title="Permalink to this definition"></a></dt>
+<dd><p>Return the list of variables in the submodel.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="DecisionTreeRegressorConstr.html" class="btn btn-neutral float-left" title="DecisionTreeRegressorConstr" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="KerasConstr.html" class="btn btn-neutral float-right" title="KerasConstr" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Gurobi Optimization, LLC. All Rights Reserved..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

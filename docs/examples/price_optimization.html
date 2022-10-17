@@ -23,7 +23,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="API" href="../api.html" />
+    <link rel="next" title="API Reference manual" href="../api.html" />
     <link rel="prev" title="adversarial_mnist" href="adversarial_mnist.html" />
 </head>
 
@@ -43,7 +43,6 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported.html">Supported Regression models</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
@@ -76,7 +75,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference manual</a></li>
 </ul>
 
         </div>
@@ -657,7 +656,7 @@ Note that the notation <span class="math notranslate nohighlight">\(\mathbb{1}(r
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The R^2 value in the test set is 0.9333990718202463
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The R^2 value in the test set is 0.9420160217305209
 </pre></div>
 </div>
 </div>
@@ -673,7 +672,7 @@ Note that the notation <span class="math notranslate nohighlight">\(\mathbb{1}(r
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The R^2 value in the full dataset is 0.9510278350153236
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The R^2 value in the full dataset is 0.9492220552925662
 </pre></div>
 </div>
 </div>
@@ -889,6 +888,11 @@ w_r &amp;= x_r - s_r
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Warning for adding constraints: zero or small (&lt; 1e-13) coefficients, ignored
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -995,10 +999,10 @@ See <a class="reference external" href="https://www.gurobi.com/documentation/9.5
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Optimize a model with 103 rows, 192 columns and 777 nonzeros
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Optimize a model with 103 rows, 192 columns and 774 nonzeros
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model fingerprint: 0x35759fe9
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model fingerprint: 0xb25463c2
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model has 3 quadratic objective terms
@@ -1013,7 +1017,7 @@ See <a class="reference external" href="https://www.gurobi.com/documentation/9.5
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Coefficient statistics:
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Matrix range     [5e-03, 2e+00]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Matrix range     [7e-04, 2e+00]
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Objective range  [2e-01, 5e-01]
@@ -1025,28 +1029,28 @@ See <a class="reference external" href="https://www.gurobi.com/documentation/9.5
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Bounds range     [4e-01, 1e+01]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  RHS range        [2e-02, 2e+01]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  RHS range        [3e-02, 2e+01]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolve removed 42 rows and 129 columns
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolve removed 21 rows and 108 columns
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolve time: 0.00s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolve time: 0.01s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolved: 68 rows, 67 columns, 207 nonzeros
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolved: 89 rows, 88 columns, 316 nonzeros
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolved model has 3 bilinear constraint(s)
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Variable types: 50 continuous, 17 integer (17 binary)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Variable types: 66 continuous, 22 integer (22 binary)
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Root relaxation: objective 2.599409e+01, 42 iterations, 0.00 seconds (0.00 work units)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Root relaxation: objective 2.593775e+01, 48 iterations, 0.00 seconds (0.00 work units)
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -1061,145 +1065,130 @@ See <a class="reference external" href="https://www.gurobi.com/documentation/9.5
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   25.99408    0   12          -   25.99408      -     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   25.93774    0   14          -   25.93774      -     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   25.89038    0   11          -   25.89038      -     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   25.92246    0   13          -   25.92246      -     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      17.2671005   25.89038  49.9%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      16.6126567   25.92246  56.0%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   24.82764    0   14   17.26710   24.82764  43.8%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   25.36570    0   19   16.61265   25.36570  52.7%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      18.3183540   24.82764  35.5%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   25.31940    0   18   16.61265   25.31940  52.4%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   22.54046    0   14   18.31835   22.54046  23.0%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   25.30569    0   18   16.61265   25.30569  52.3%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   22.48473    0   13   18.31835   22.48473  22.7%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      16.7988496   25.30569  50.6%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      18.3361153   22.48473  22.6%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   23.19173    0   19   16.79884   23.19173  38.1%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   22.46320    0   13   18.33611   22.46320  22.5%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   23.09103    0   18   16.79884   23.09103  37.5%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.56596    0   12   18.33611   21.56596  17.6%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   22.48728    0   15   16.79884   22.48728  33.9%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.51696    0   10   18.33611   21.51696  17.3%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   22.47425    0   16   16.79884   22.47425  33.8%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.51192    0   11   18.33611   21.51192  17.3%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   22.11912    0   18   16.79884   22.11912  31.7%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.19267    0   17   18.33611   21.19267  15.6%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   22.10780    0   18   16.79884   22.10780  31.6%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.19039    0   16   18.33611   21.19039  15.6%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.98626    0   19   16.79884   21.98626  30.9%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.14735    0   16   18.33611   21.14735  15.3%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      17.8121953   21.96915  23.3%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.61306    0   13   18.33611   20.61306  12.4%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.96915    0   18   17.81219   21.96915  23.3%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.57702    0   11   18.33611   20.57702  12.2%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.74562    0   18   17.81219   21.74562  22.1%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.47676    0   13   18.33611   20.47676  11.7%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.73982    0   18   17.81219   21.73982  22.1%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.47676    0   13   18.33611   20.47676  11.7%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.73276    0   18   17.81219   21.73276  22.0%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.38538    0   10   18.33611   20.38538  11.2%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.73197    0   18   17.81219   21.73197  22.0%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.32738    0   11   18.33611   20.32738  10.9%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.67444    0   17   17.81219   21.67444  21.7%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.31609    0   13   18.33611   20.31609  10.8%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.67420    0   17   17.81219   21.67420  21.7%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.31453    0   13   18.33611   20.31453  10.8%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.61652    0   17   17.81219   21.61652  21.4%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.28701    0   13   18.33611   20.28701  10.6%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      17.9060287   21.43230  19.7%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.27741    0   10   18.33611   20.27741  10.6%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      17.9377403   21.43230  19.5%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.25062    0   15   18.33611   20.25062  10.4%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      17.9390351   21.43230  19.5%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.23396    0   15   18.33611   20.23396  10.4%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      17.9678694   21.43230  19.3%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.19943    0   12   18.33611   20.19943  10.2%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      17.9680234   21.43230  19.3%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.19050    0   14   18.33611   20.19050  10.1%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      17.9714893   21.43230  19.3%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.18080    0   11   18.33611   20.18080  10.1%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      17.9720172   21.43230  19.3%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.17935    0   11   18.33611   20.17935  10.1%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.43230    0   17   17.97201   21.43230  19.3%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.16860    0   11   18.33611   20.16860  10.0%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   21.23924    0   17   17.97201   21.23924  18.2%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.16838    0   11   18.33611   20.16838  10.0%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     2   21.23924    0   17   17.97201   21.23924  18.2%     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                      18.4764648   20.16838  9.16%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H  175    34                      17.9725441   18.25324  1.56%   4.2    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0   20.16838    0   11   18.47646   20.16838  9.16%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>*  254    25              37      17.9725444   18.05953  0.48%   3.4    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     2   20.16838    0   11   18.47646   20.16838  9.16%     -    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H  259    25                      17.9725750   18.05953  0.48%   3.3    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H   81    34                      18.4978065   18.84973  1.90%   2.4    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>*  261    25              28      17.9725752   18.05953  0.48%   3.3    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H  127    42                      18.5323708   18.84402  1.68%   2.0    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H  321    41                      17.9726200   17.97797  0.03%   2.9    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H  184    47                      18.5323724   18.77109  1.29%   1.9    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>*  347    41              33      17.9726201   17.97797  0.03%   2.8    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>*  618   185              46      18.5323751   18.59477  0.34%   1.1    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>*  416     7              28      17.9726203   17.97336  0.00%   2.4    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>*  657   185              35      18.5347437   18.59477  0.32%   1.1    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>*  441     7              29      17.9726205   17.97323  0.00%   2.3    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H  669   185                      18.5356254   18.59477  0.32%   1.1    0s
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>*  713   201              40      18.5360627   18.59031  0.29%   1.1    0s
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H 1668   244                      18.5361306   18.55008  0.08%   1.0    0s
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H 1868   147                      18.5361421   18.54596  0.05%   0.9    0s
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>* 1885   147              45      18.5361426   18.54596  0.05%   0.9    0s
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>* 1886   147              44      18.5361427   18.54596  0.05%   0.9    0s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>*  453     7              30      17.9726206   17.97262  0.00%   2.2    0s
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -1208,28 +1197,34 @@ See <a class="reference external" href="https://www.gurobi.com/documentation/9.5
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cutting planes:
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Cover: 1
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Gomory: 3
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Cover: 4
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Implied bound: 2
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Clique: 2
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  MIR: 4
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  MIR: 8
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Flow cover: 5
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Flow cover: 4
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  RLT: 8
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  RLT: 10
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Relax-and-lift: 6
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Relax-and-lift: 5
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Explored 2129 nodes (2287 simplex iterations) in 0.23 seconds (0.05 work units)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Explored 461 nodes (1277 simplex iterations) in 0.20 seconds (0.05 work units)
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Thread count was 8 (of 8 available processors)
@@ -1238,7 +1233,7 @@ See <a class="reference external" href="https://www.gurobi.com/documentation/9.5
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Solution count 10: 18.5361 18.5361 18.5361 ... 18.5324
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Solution count 10: 17.9726 17.9726 17.9726 ... 17.939
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -1247,7 +1242,7 @@ See <a class="reference external" href="https://www.gurobi.com/documentation/9.5
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Optimal solution found (tolerance 1.00e-04)
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Best objective 1.853614256873e+01, best bound 1.853651568131e+01, gap 0.0020%
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Best objective 1.797262011607e+01, best bound 1.797262820929e+01, gap 0.0000%
 </pre></div>
 </div>
 </div>
@@ -1259,10 +1254,7 @@ See <a class="reference external" href="https://www.gurobi.com/documentation/9.5
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Maximal error in predicted values in solution 4.440892098500626e-15
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Maximal error in predicted values in solution 8.881784197001252e-16
 </pre></div>
 </div>
 </div>
@@ -1286,7 +1278,7 @@ Let us now analyze the optimal solution by storing it in a Pandas dataframe.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> The optimal net revenue: $18.536143 million
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> The optimal net revenue: $17.972620 million
 </pre></div>
 </div>
 <div class="output text_html"><div>
@@ -1319,29 +1311,29 @@ Let us now analyze the optimal solution by storing it in a Pandas dataframe.</p>
     <tr>
       <th>0</th>
       <td>Great_Lakes</td>
-      <td>1.532535</td>
-      <td>3.5858</td>
-      <td>3.5858</td>
+      <td>0.978354</td>
+      <td>4.9298</td>
+      <td>4.9298</td>
       <td>0.0</td>
-      <td>3.5858</td>
+      <td>4.9298</td>
     </tr>
     <tr>
       <th>1</th>
       <td>West</td>
-      <td>1.640845</td>
-      <td>5.7950</td>
-      <td>5.7950</td>
+      <td>2.000000</td>
+      <td>4.8119</td>
+      <td>4.8119</td>
       <td>0.0</td>
-      <td>5.7950</td>
+      <td>4.8119</td>
     </tr>
     <tr>
       <th>2</th>
       <td>Northeast</td>
-      <td>1.426271</td>
-      <td>5.6192</td>
-      <td>5.6192</td>
+      <td>1.534786</td>
+      <td>5.2583</td>
+      <td>5.2583</td>
       <td>0.0</td>
-      <td>5.6192</td>
+      <td>5.2583</td>
     </tr>
   </tbody>
 </table>
@@ -1366,7 +1358,7 @@ Let us now analyze the optimal solution by storing it in a Pandas dataframe.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/aa55b9daeecca6e4493faa99850933e624dc1462891ea3ad90afd78f865b7004.png" src="../_images/aa55b9daeecca6e4493faa99850933e624dc1462891ea3ad90afd78f865b7004.png" />
+<img alt="../_images/df9c108e24a6483d42417f6d2d704d19a0e49e9db9581df1fb1d069532fcf060.png" src="../_images/df9c108e24a6483d42417f6d2d704d19a0e49e9db9581df1fb1d069532fcf060.png" />
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The circles represent sales quantity and the cross markers represent the wasted quantity.
 </pre></div>
 </div>
@@ -1382,7 +1374,7 @@ Let us now analyze the optimal solution by storing it in a Pandas dataframe.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="adversarial_mnist.html" class="btn btn-neutral float-left" title="adversarial_mnist" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../api.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../api.html" class="btn btn-neutral float-right" title="API Reference manual" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
