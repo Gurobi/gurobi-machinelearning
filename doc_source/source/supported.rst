@@ -51,21 +51,26 @@ and the function that can be used to insert it in a gurobi model
 Keras
 -----
 
-`Keras <https://keras.io/>`_ neural networks generated either using the `functional API <https://keras.io/guides/functional_api/>`,
-`subclassing model <https://keras.io/guides/making_new_layers_and_models_via_subclassing/>` or using the
-`Sequential <https://keras.io/api/models/sequential/>` class.
+`Keras <https://keras.io/>`_ neural networks generated either using the `functional API <https://keras.io/guides/functional_api/>`_,
+`subclassing model <https://keras.io/guides/making_new_layers_and_models_via_subclassing/>`_ or using the
+`Sequential <https://keras.io/api/models/sequential/>`_ class.
+
+They can be embedded in a Gurobi model with the function :py:func:`gurobi_ml.keras.add_keras_constr`.
 
 Currently, only two types of layers are supported:
-    * `Dense layers <https://keras.io/api/layers/core_layers/dense/>` (possibly with `relu` activation).
-    * `ReLU layers <https://keras.io/api/layers/activation_layers/relu/>` with default settings.
+
+    * `Dense layers <https://keras.io/api/layers/core_layers/dense/>`_ (possibly with `relu` activation).
+    * `ReLU layers <https://keras.io/api/layers/activation_layers/relu/>`_ with default settings.
 
 PyTorch
 -------
 
+
 In PyTorch, only :external+torch:py:class:`torch.nn.Sequential` objects are supported.
-Also, the only supported layers are:
+
+They can be embedded in a Gurobi model with the function :py:func:`gurobi_ml.torch.add_sequential_constr`.
+
+Currently, only two types of layers are supported:
 
    * :external+torch:py:class:`Linear layers <torch.nn.Linear>`, and
    * :external+torch:py:class:`ReLU layers <torch.nn.ReLU>`.
-
-They can be embedded in a Gurobi model with the function :doc:`api/add_sequential_constr`.
