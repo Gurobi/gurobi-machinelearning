@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SequentialConstr &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
@@ -17,7 +17,6 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,7 +40,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Simple Usage Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference manual</a><ul class="current">
@@ -56,25 +55,7 @@
 <li class="toctree-l2"><a class="reference internal" href="PipelineConstr.html">PipelineConstr</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PolynomialFeaturesConstr.html">PolynomialFeaturesConstr</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RandomForestRegressorConstr.html">RandomForestRegressorConstr</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">SequentialConstr</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr"><code class="docutils literal notranslate"><span class="pre">SequentialConstr</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.add_activation_layer"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.add_activation_layer()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.add_dense_layer"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.add_dense_layer()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.get_error"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.get_error()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.print_stats"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.print_stats()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.remove"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.remove()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.constrs"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.constrs</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.genconstrs"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.genconstrs</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.input"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.input</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.model"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.model</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.output"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.output</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.qconstrs"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.qconstrs</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.sos"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.sos</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.vars"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.vars</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">SequentialConstr</a></li>
 <li class="toctree-l2"><a class="reference internal" href="StandardScalerConstr.html">StandardScalerConstr</a></li>
 <li class="toctree-l2"><a class="reference internal" href="add_decision_tree_regressor_constr.html">add_decision_tree_regressor_constr</a></li>
 <li class="toctree-l2"><a class="reference internal" href="add_gradient_boosting_regressor_constr.html">add_gradient_boosting_regressor_constr</a></li>
@@ -140,16 +121,16 @@ input and output as matrices of variables.</p>
 <span class="sig-name descname"><span class="pre">get_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.torch.SequentialConstr.get_error" title="Permalink to this definition"></a></dt>
 <dd><p>Returns error in Gurobi’s solution with respect to prediction from input</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Assuming that we have a solution for the input and output variables
 <cite>x, y</cite>. Returns the difference between <cite>predict(x)</cite> and
 <cite>y</cite>, where predict is the corresponding function for the Scikit-Learn
 object we are modeling.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>float</p>
 </dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><strong>NoSolution</strong> – If the Gurobi model has no solution (either was not optimized or is infeasible).</p>
 </dd>
 </dl>

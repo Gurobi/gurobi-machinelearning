@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>add_mlp_regressor_constr &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
@@ -17,11 +17,10 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="add_decision_tree_regressor_constr" href="add_decision_tree_regressor_constr.html" />
+    <link rel="next" title="add_pipeline_constr" href="add_pipeline_constr.html" />
     <link rel="prev" title="add_logistic_regression_constr" href="add_logistic_regression_constr.html" />
 </head>
 
@@ -41,41 +40,34 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Simple Usage Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference manual</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="add_predictor_constr.html">add_predictor_constr</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="add_constrs.html">Detailed API</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="AbstractPredictorConstr.html">AbstractPredictorConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="DecisionTreeRegressorConstr.html">DecisionTreeRegressorConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="GradientBoostingRegressorConstr.html">GradientBoostingRegressorConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="KerasConstr.html">KerasConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="LinearRegressionConstr.html">LinearRegressionConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="LogisticRegressionConstr.html">LogisticRegressionConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="MlpRegressorConstr.html">MLPRegressorConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="PipelineConstr.html">PipelineConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="PolynomialFeaturesConstr.html">PolynomialFeaturesConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="RandomForestRegressorConstr.html">RandomForestRegressorConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="SequentialConstr.html">SequentialConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="StandardScalerConstr.html">StandardScalerConstr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_pipeline_constr.html">add_pipeline_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_linear_regression_constr.html">add_linear_regression_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_logistic_regression_constr.html">add_logistic_regression_constr</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">add_mlp_regressor_constr</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.sklearn.add_mlp_regressor_constr"><code class="docutils literal notranslate"><span class="pre">add_mlp_regressor_constr()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="add_decision_tree_regressor_constr.html">add_decision_tree_regressor_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_gradient_boosting_regressor_constr.html">add_gradient_boosting_regressor_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_random_forest_regressor_constr.html">add_random_forest_regressor_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_standard_scaler_constr.html">add_standard_scaler_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_polynomial_features_constr.html">add_polynomial_features</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_sequential_constr.html">add_sequential_constr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add_keras_constr.html">add_keras_constr</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="AbstractPredictorConstr.html">AbstractPredictorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DecisionTreeRegressorConstr.html">DecisionTreeRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GradientBoostingRegressorConstr.html">GradientBoostingRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="KerasConstr.html">KerasConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LinearRegressionConstr.html">LinearRegressionConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogisticRegressionConstr.html">LogisticRegressionConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MlpRegressorConstr.html">MLPRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PipelineConstr.html">PipelineConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PolynomialFeaturesConstr.html">PolynomialFeaturesConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RandomForestRegressorConstr.html">RandomForestRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SequentialConstr.html">SequentialConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="StandardScalerConstr.html">StandardScalerConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_decision_tree_regressor_constr.html">add_decision_tree_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_gradient_boosting_regressor_constr.html">add_gradient_boosting_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_keras_constr.html">add_keras_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_linear_regression_constr.html">add_linear_regression_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_logistic_regression_constr.html">add_logistic_regression_constr</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">add_mlp_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_pipeline_constr.html">add_pipeline_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_polynomial_features_constr.html">add_polynomial_features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_random_forest_regressor_constr.html">add_random_forest_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_sequential_constr.html">add_sequential_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_standard_scaler_constr.html">add_standard_scaler_constr</a></li>
 </ul>
 </li>
 </ul>
@@ -95,7 +87,6 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">API Reference manual</a> &raquo;</li>
-          <li><a href="add_constrs.html">Detailed API</a> &raquo;</li>
       <li>add_mlp_regressor_constr</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/add_mlp_regressor_constr.rst.txt" rel="nofollow"> View page source</a>
@@ -120,7 +111,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="add_logistic_regression_constr.html" class="btn btn-neutral float-left" title="add_logistic_regression_constr" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="add_decision_tree_regressor_constr.html" class="btn btn-neutral float-right" title="add_decision_tree_regressor_constr" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="add_pipeline_constr.html" class="btn btn-neutral float-right" title="add_pipeline_constr" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

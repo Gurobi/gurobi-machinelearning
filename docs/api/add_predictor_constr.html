@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>add_predictor_constr &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
@@ -17,11 +17,10 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Detailed API" href="add_constrs.html" />
+    <link rel="next" title="AbstractPredictorConstr" href="AbstractPredictorConstr.html" />
     <link rel="prev" title="API Reference manual" href="../api.html" />
 </head>
 
@@ -41,16 +40,34 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Simple Usage Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference manual</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">add_predictor_constr</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#gurobi_ml.add_predictor_constr"><code class="docutils literal notranslate"><span class="pre">add_predictor_constr()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="add_constrs.html">Detailed API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">add_predictor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="AbstractPredictorConstr.html">AbstractPredictorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DecisionTreeRegressorConstr.html">DecisionTreeRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GradientBoostingRegressorConstr.html">GradientBoostingRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="KerasConstr.html">KerasConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LinearRegressionConstr.html">LinearRegressionConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogisticRegressionConstr.html">LogisticRegressionConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MlpRegressorConstr.html">MLPRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PipelineConstr.html">PipelineConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PolynomialFeaturesConstr.html">PolynomialFeaturesConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RandomForestRegressorConstr.html">RandomForestRegressorConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SequentialConstr.html">SequentialConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="StandardScalerConstr.html">StandardScalerConstr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_decision_tree_regressor_constr.html">add_decision_tree_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_gradient_boosting_regressor_constr.html">add_gradient_boosting_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_keras_constr.html">add_keras_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_linear_regression_constr.html">add_linear_regression_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_logistic_regression_constr.html">add_logistic_regression_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_mlp_regressor_constr.html">add_mlp_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_pipeline_constr.html">add_pipeline_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_polynomial_features_constr.html">add_polynomial_features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_random_forest_regressor_constr.html">add_random_forest_regressor_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_sequential_constr.html">add_sequential_constr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_standard_scaler_constr.html">add_standard_scaler_constr</a></li>
 </ul>
 </li>
 </ul>
@@ -87,7 +104,7 @@
 <span class="sig-prename descclassname"><span class="pre">gurobi_ml.</span></span><span class="sig-name descname"><span class="pre">add_predictor_constr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.add_predictor_constr" title="Permalink to this definition"></a></dt>
 <dd><p>Use <cite>predictor</cite> to predict the value of <cite>output_vars</cite> using <cite>input_vars</cite> in <cite>model</cite></p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<a class="reference external" href="https://www.gurobi.com/documentation/9.5/refman/py_model.html">gp.Model</a>) – The gurobipy model where the predictor should be inserted.</p></li>
 <li><p><strong>predictor</strong> – The predictor to insert.</p></li>
@@ -95,11 +112,11 @@
 <li><p><strong>output_vars</strong> (<em>mvar_array_like</em><em>, </em><em>optional</em>) – Decision variables used as output for predictor in model.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Object containing information about what was added to model to insert the
 predictor in it</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr" title="gurobi_ml.modeling.AbstractPredictorConstr">AbstractPredictorConstr</a></p>
 </dd>
 </dl>
@@ -133,7 +150,7 @@ variables (for e.g. a prediction is made for every time period in a planning hor
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../api.html" class="btn btn-neutral float-left" title="API Reference manual" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="add_constrs.html" class="btn btn-neutral float-right" title="Detailed API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="AbstractPredictorConstr.html" class="btn btn-neutral float-right" title="AbstractPredictorConstr" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

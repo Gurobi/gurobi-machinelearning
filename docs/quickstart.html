@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quickstart Example &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
+  <title>Simple Usage Example &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
@@ -17,7 +17,6 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
         <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
@@ -43,7 +42,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart Example</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Simple Usage Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference manual</a></li>
@@ -63,7 +62,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Quickstart Example</li>
+      <li>Simple Usage Example</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/quickstart.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -73,8 +72,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
 
-  <section class="tex2jax_ignore mathjax_ignore" id="quickstart-example">
-<h1>Quickstart Example<a class="headerlink" href="#quickstart-example" title="Permalink to this heading"></a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="simple-usage-example">
+<h1>Simple Usage Example<a class="headerlink" href="#simple-usage-example" title="Permalink to this heading"></a></h1>
 <p>In this page, we provide a simple example of using the Gurobi Machine Learning package.</p>
 <p>The example is entirely abstract. Its aim is only to illustrate the basic functionalities of the
 package in the most simple way. For some more realistic applications please refer to the notebooks.</p>
@@ -231,7 +230,7 @@ Activation is identity
 </div>
 <div class="cell tag_remove-input docutils container">
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi 10.0.0 (mac64[x86]) logging started Mon Oct 17 17:08:34 2022
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi 10.0.0 (mac64[x86]) logging started Mon Oct 17 18:11:43 2022
 
 Set parameter LogFile to value &quot;gurobi.log&quot;
 Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
@@ -240,50 +239,38 @@ CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
 Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
 
 Optimize a model with 82 rows, 182 columns and 1322 nonzeros
-Model fingerprint: 0xd9e7de87
+Model fingerprint: 0x9fbece53
 Model has 2 quadratic objective terms
 Model has 80 general constraints
 Variable types: 182 continuous, 0 integer (0 binary)
 Coefficient statistics:
-  Matrix range     [5e-03, 3e+00]
+  Matrix range     [5e-04, 3e+00]
   Objective range  [0e+00, 0e+00]
   QObjective range [2e+00, 2e+00]
-  Bounds range     [1e-02, 2e+00]
-  RHS range        [2e-02, 2e+00]
-Presolve removed 0 rows and 90 columns
-Presolve time: 0.02s
-Presolved: 82 rows, 92 columns, 601 nonzeros
+  Bounds range     [5e-03, 2e+00]
+  RHS range        [3e-02, 1e+00]
+Presolve added 6 rows and 0 columns
+Presolve removed 0 rows and 84 columns
+Presolve time: 0.01s
+Presolved: 88 rows, 98 columns, 662 nonzeros
 Presolved model has 1 quadratic objective terms
-Variable types: 67 continuous, 25 integer (25 binary)
+Variable types: 71 continuous, 27 integer (27 binary)
 
-Root relaxation: objective 6.387535e+02, 137 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: objective 1.370712e+04, 159 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0  638.75351    0   11          -  638.75351      -     -    0s
-H    0     0                    8721.4081038  638.75351  92.7%     -    0s
-     0     0  638.75351    0   12 8721.40810  638.75351  92.7%     -    0s
-H    0     0                    2917.1212876  638.75351  78.1%     -    0s
-     0     0  638.75351    0   12 2917.12128  638.75351  78.1%     -    0s
-     0     0  638.75351    0   10 2917.12128  638.75351  78.1%     -    0s
-H    0     0                     638.7535153  638.75351  0.00%     -    0s
-     0     0  638.75351    0   11  638.75351  638.75351  0.00%     -    0s
+     0     0 13707.1150    0   14          - 13707.1150      -     -    0s
+H    0     0                    13707.981166 13707.1150  0.01%     -    0s
 
-Cutting planes:
-  Cover: 4
-  Clique: 1
-  MIR: 3
-  Flow cover: 4
-  Relax-and-lift: 2
-
-Explored 1 nodes (245 simplex iterations) in 0.04 seconds (0.02 work units)
+Explored 1 nodes (159 simplex iterations) in 0.02 seconds (0.01 work units)
 Thread count was 8 (of 8 available processors)
 
-Solution count 3: 638.754 2917.12 8721.41
+Solution count 1: 13708
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 6.387535153856e+02, best bound 6.387535153856e+02, gap 0.0000%
+Best objective 1.370798116658e+04, best bound 1.370711504110e+04, gap 0.0063%
 </pre></div>
 </div>
 </div>
@@ -298,7 +285,7 @@ Best objective 6.387535153856e+02, best bound 6.387535153856e+02, gap 0.0000%
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[-4.99600361e-15,  1.42108547e-14]])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[-5.68434189e-14, -1.22124533e-14]])
 </pre></div>
 </div>
 </div>
@@ -311,7 +298,7 @@ Best objective 6.387535153856e+02, best bound 6.387535153856e+02, gap 0.0000%
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([  0.        , -25.27357346])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([-117.07738911,   -0.93065863])
 </pre></div>
 </div>
 </div>
@@ -323,7 +310,7 @@ Best objective 6.387535153856e+02, best bound 6.387535153856e+02, gap 0.0000%
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([ -78.69065107, -141.63955201])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([-211.59893321,  102.00399225])
 </pre></div>
 </div>
 </div>

@@ -5,7 +5,7 @@
    "id": "ab946551",
    "metadata": {},
    "source": [
-    "Quickstart Example\n",
+    "Simple Usage Example\n",
     "==================\n",
     "\n",
     "In this page, we provide a simple example of using the Gurobi Machine Learning package.\n",
