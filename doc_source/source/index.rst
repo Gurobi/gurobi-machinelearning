@@ -33,7 +33,7 @@ We give below basic installation and usage instructions.
 Install
 -------
 
-The package should be installed with pip (or add it to your `requirements.txt` file):
+We encourage to install the package via pip (or add it to your `requirements.txt` file):
 
 
 .. code-block:: console
@@ -58,7 +58,7 @@ The package essentially provides one function: :py:func:`gurobi_ml.add_predictor
 The function takes as arguments: a `gurobipy model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_,
 a supported regression model,
 input (Gurobi) variables for the regression model and output (Gurobi) variables
-for the regression models.
+for the regression model.
 
 By calling the function, the gurobipy model is augmented with variables and
 constraints so that, in a solution, the values of the output variables
@@ -82,9 +82,9 @@ The modeling object can perform a few tasks:
      model predicts from the input values and the actual values of the output in Gurobi's solution with the
      :py:meth:`get_error <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` function.
 
-For the list of frameworks and regression models supported please refer to the :doc:`supported`, section.
-Note that, even though :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`
-the :doc:`api/add_predictor_constr` should add the correct model for any supported predictor, individual functions for each predictor are also available.
+For the list of frameworks and regression models supported please refer to the :doc:`supported` section.
+Note that :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` :doc:`api/add_predictor_constr`
+should add the correct model for any supported predictor. Individual functions for each predictor are also available.
 
 For some regression models, additional optional parameters can be set to tune the way the predictor is inserted in the Gurobi model. Those are documented
 in the corresponding function linked from :doc:`supported`.

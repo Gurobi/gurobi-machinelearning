@@ -45,7 +45,7 @@ def keras_convertors():
 
 
 def register_predictor_constr(predictor, predictor_constr):
-    """Register a new perdictor that can be added using use_predictor_constr
+    """Register a new predictor that can be added using use_predictor_constr
 
     Parameters
     ----------
@@ -90,15 +90,15 @@ def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwarg
     the prefered and most convenient format to use.
 
     They should have dimensions that conforms with the input/output of the predictor.
-    We denote by `n_features` the dimension of the input of the predictor and `n_output` the dimension of the output.
+    We denote by `n_features` the dimension of the input of the predictor and by `n_output` the dimension of the output.
 
     If they are lists or a dictionaries `input_vars` should have length `n_features` and `output_vars`
     should have length `n_output`.
 
     If they are matrix variables, `input_vars` and `output_vars` can be either of shape `(n_features)` and
     `(n_outputs,)` respecitvely or `(k, n_features)` and `(k, n_outputs)` respectively (with `k >= 1`).
-    The latter form is espcecially useful if the predictor is used to associate different groups of
-    variables (for e.g. a prediction is made for every time period in a planning horizon).
+    The latter form is especially useful if the predictor is used to associate different groups of
+    variables (e.g. a prediction is made for every time period in a planning horizon).
     """
     convertors = {}
     convertors |= sklearn_convertors()
