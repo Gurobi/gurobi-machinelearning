@@ -40,7 +40,7 @@ and the function that can be used to insert it in a Gurobi model
      - :py:func:`add_random_forest_regressor_constr <gurobi_ml.sklearn.add_random_forest_regressor_constr>`
 
 
-.. list-table:: Transformers in :external+sklearn:std:doc:`scikit-learn <user_guide>
+.. list-table:: Transformers in :external+sklearn:std:doc:`scikit-learn <user_guide>`
    :widths: 25 25
    :header-rows: 1
 
