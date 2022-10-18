@@ -7,6 +7,7 @@
   <title>Supported Regression models &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -17,6 +18,8 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -81,12 +84,12 @@
 <p>The package currently support various <a class="reference external" href="https://scikit-learn.org/stable/">scikit-learn</a> objects.
 It also  has limited support
 for <a class="reference external" href="https://keras.io/">Keras</a> and <a class="reference external" href="https://pytorch.org/">PyTorch</a>.
-Only neural networks sequential network with ReLU activation function are currently supported.</p>
+Only sequential neural networks with ReLU activation function are currently supported.</p>
 <section id="id1">
 <h2>Scikit-learn<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
 <p>The following tables list the name of the models supported,
 the name of the corresponding object in the python framework,
-and the function that can be used to insert it in a Gurobi model</p>
+and the function that can be used to insert it in a Gurobi model.</p>
 <table class="colwidths-given docutils align-default" id="id9">
 <caption><span class="caption-text">Supported regression models of <a class="reference external" href="https://scikit-learn.org/stable/user_guide.html" title="(in scikit-learn v1.1)"><span class="xref std std-doc">scikit-learn</span></a></span><a class="headerlink" href="#id9" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -179,7 +182,7 @@ and the function that can be used to insert it in a Gurobi model</p>
 <p class="rubric">Footnotes</p>
 <dl class="footnote brackets">
 <dt class="label" id="id7"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
-<dd><p>Only networks with <cite>‘relu’</cite> activation for hidden layers and <cite>‘identity’</cite> for the output layer.</p>
+<dd><p>Only networks with <cite>“relu”</cite> activation for hidden layers and <cite>‘identity’</cite> for the output layer.</p>
 </dd>
 <dt class="label" id="id8"><span class="brackets"><a class="fn-backref" href="#id3">2</a></span></dt>
 <dd><p>Only polynomial features of degree 2.</p>

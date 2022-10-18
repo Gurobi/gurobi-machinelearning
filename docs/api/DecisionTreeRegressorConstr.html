@@ -7,6 +7,7 @@
   <title>DecisionTreeRegressorConstr &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -17,6 +18,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -148,17 +151,14 @@ object we are modeling.</p>
 <dt class="sig sig-object py" id="gurobi_ml.sklearn.DecisionTreeRegressorConstr.print_stats">
 <span class="sig-name descname"><span class="pre">print_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.DecisionTreeRegressorConstr.print_stats" title="Permalink to this definition"></a></dt>
 <dd><p>Print statistics on model additions stored by this class</p>
-<p>This functions prints detailed statistics on the variables
+<p>This function prints detailed statistics on the variables
 and constraints that where added to the model.</p>
-<p>Usually derived class reimplement this function to provide more
+<p>Usually derived classes reimplement this function to provide more
 details about the structure of the additions (type of ML model,
 layers if it’s a neural network,…)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> (<em>None</em><em>, </em><em>optional</em>) – </p></li>
-<li><p><strong>sys.stdout.</strong> (<em>Text stream to which output should be redirected. By default</em>) – </p></li>
-</ul>
+<dd class="field-odd"><p><strong>file</strong> (<em>None</em><em>, </em><em>optional</em>) – Text stream to which output should be redirected. By default sys.stdout.</p>
 </dd>
 </dl>
 </dd></dl>

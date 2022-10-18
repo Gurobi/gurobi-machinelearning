@@ -7,6 +7,7 @@
   <title>Adversarial Machine Learning &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -17,6 +18,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
         <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -326,7 +329,7 @@ Solving the adversarial problem, as we formulated it above, doesn’t actually r
 </div>
 <div class="cell tag_remove-input docutils container">
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi 10.0.0 (mac64[x86]) logging started Tue Oct 18 15:08:40 2022
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi 10.0.0 (mac64[x86]) logging started Tue Oct 18 15:14:45 2022
 
 Set parameter LogFile to value &quot;gurobi.log&quot;
 Set parameter BestBdStop to value 0
@@ -346,7 +349,7 @@ Coefficient statistics:
   Bounds range     [1e+00, 1e+00]
   RHS range        [5e-03, 5e+00]
 Presolve removed 1244 rows and 728 columns
-Presolve time: 0.13s
+Presolve time: 0.12s
 Presolved: 435 rows, 1050 columns, 37955 nonzeros
 Variable types: 969 continuous, 81 integer (76 binary)
 
@@ -376,8 +379,8 @@ Root relaxation: objective 2.043941e+03, 307 iterations, 0.01 seconds (0.01 work
      0     0  813.64600    0   69          -  813.64600      -     -    0s
      0     0  812.98647    0   69          -  812.98647      -     -    0s
      0     0  685.35456    0   71          -  685.35456      -     -    0s
-     0     0  677.98993    0   70          -  677.98993      -     -    1s
-     0     0  677.26643    0   70          -  677.26643      -     -    1s
+     0     0  677.98993    0   70          -  677.98993      -     -    0s
+     0     0  677.26643    0   70          -  677.26643      -     -    0s
      0     0  613.10331    0   67          -  613.10331      -     -    1s
      0     0  601.69584    0   69          -  601.69584      -     -    1s
      0     0  600.79638    0   69          -  600.79638      -     -    1s
@@ -403,7 +406,7 @@ Cutting planes:
   Flow cover: 78
   Relax-and-lift: 1
 
-Explored 275 nodes (18426 simplex iterations) in 2.65 seconds (5.28 work units)
+Explored 275 nodes (18426 simplex iterations) in 2.49 seconds (5.28 work units)
 Thread count was 8 (of 8 available processors)
 
 Solution count 2: 0.470929 -19.5746

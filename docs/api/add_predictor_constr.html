@@ -7,6 +7,7 @@
   <title>add_predictor_constr &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -17,6 +18,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -134,13 +137,13 @@ predictor in it</p>
 <p>For internal use in the package they are cast into matrix variables and it is
 the prefered and most convenient format to use.</p>
 <p>They should have dimensions that conforms with the input/output of the predictor.
-We denote by <cite>n_features</cite> the dimension of the input of the predictor and <cite>n_output</cite> the dimension of the output.</p>
+We denote by <cite>n_features</cite> the dimension of the input of the predictor and by <cite>n_output</cite> the dimension of the output.</p>
 <p>If they are lists or a dictionaries <cite>input_vars</cite> should have length <cite>n_features</cite> and <cite>output_vars</cite>
 should have length <cite>n_output</cite>.</p>
 <p>If they are matrix variables, <cite>input_vars</cite> and <cite>output_vars</cite> can be either of shape <cite>(n_features)</cite> and
 <cite>(n_outputs,)</cite> respecitvely or <cite>(k, n_features)</cite> and <cite>(k, n_outputs)</cite> respectively (with <cite>k &gt;= 1</cite>).
-The latter form is espcecially useful if the predictor is used to associate different groups of
-variables (for e.g. a prediction is made for every time period in a planning horizon).</p>
+The latter form is especially useful if the predictor is used to associate different groups of
+variables (e.g. a prediction is made for every time period in a planning horizon).</p>
 </div>
 </dd></dl>
 
