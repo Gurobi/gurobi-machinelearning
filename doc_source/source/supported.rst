@@ -4,14 +4,14 @@ Supported Regression models
 The package currently support various `scikit-learn <https://scikit-learn.org/stable/>`_ objects.
 It also  has limited support
 for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_.
-Only neural networks sequential network with ReLU activation function are currently supported.
+Only sequential neural networks with ReLU activation function are currently supported.
 
 
 Scikit-learn
 ------------
 The following tables list the name of the models supported,
 the name of the corresponding object in the python framework,
-and the function that can be used to insert it in a Gurobi model
+and the function that can be used to insert it in a Gurobi model.
 
 .. list-table:: Supported regression models of :external+sklearn:std:doc:`scikit-learn <user_guide>`
    :widths: 25 25 50
@@ -82,5 +82,5 @@ Currently, only two types of layers are supported:
 
 .. rubric:: Footnotes
 
-.. [#] Only networks with `'relu'` activation for hidden layers and `'identity'` for the output layer.
+.. [#] Only networks with `"relu"` activation for hidden layers and `'identity'` for the output layer.
 .. [#] Only polynomial features of degree 2.

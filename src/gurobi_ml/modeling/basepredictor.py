@@ -95,10 +95,10 @@ class AbstractPredictorConstr(SubModel):
     def print_stats(self, file=None):
         """Print statistics on model additions stored by this class
 
-        This functions prints detailed statistics on the variables
+        This function prints detailed statistics on the variables
         and constraints that where added to the model.
 
-        Usually derived class reimplement this function to provide more
+        Usually derived classes reimplement this function to provide more
         details about the structure of the additions (type of ML model,
         layers if it's a neural network,...)
 
@@ -106,7 +106,7 @@ class AbstractPredictorConstr(SubModel):
         ---------
 
         file: None, optional
-        Text stream to which output should be redirected. By default sys.stdout.
+          Text stream to which output should be redirected. By default sys.stdout.
         """
         super().print_stats(file)
         print(f"Input has shape {self.input.shape}", file=file)
