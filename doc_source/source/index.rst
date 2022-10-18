@@ -28,7 +28,7 @@ for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_ neural ne
 It is actively developed and users are encouraged to contact us if they have applications where they use a regression model that is not currently
 not available.
 
-We give below basic installation and usage instructions.
+Below, we give basic installation and usage instructions.
 
 Install
 -------
@@ -43,12 +43,12 @@ The package should be installed with pip (or add it to your `requirements.txt` f
 
 .. note::
 
-  If not already installed this should install the gurobipy and
-  numpy packages.
+  If not already installed, this should install the ``gurobipy`` and
+  ``numpy`` packages.
 
-  The package needs Gurobi version 10 to work properly.
+  The package requires ``gurobipy`` version 10.0 or greater.
 
-  The package has been tested with and is supported for python 3.9 and python 3.10
+  The package has been tested with and is supported for Python 3.9 and Python 3.10.
 
 
 Usage
@@ -84,7 +84,7 @@ The modeling object can perform a few tasks:
 
 For the list of frameworks and regression models supported please refer to the :doc:`supported`, section.
 Note that, even though :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`
-the :doc:`api/add_predictor_constr` should add the correct model for any supported predictor, individual functions for each predictor are also available.
+should add the correct model for any supported predictor, individual functions for each predictor are also available.
 
 For some regression models, additional optional parameters can be set to tune the way the predictor is inserted in the Gurobi model. Those are documented
 in the corresponding function linked from :doc:`supported`.
