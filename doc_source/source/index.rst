@@ -25,7 +25,7 @@ The aim of the package is to:
 
 The package currently support various `scikit-learn <https://scikit-learn.org/stable/>`_ objects and has limited support
 for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_ neural networks with ReLU activation.
-It is actively developed and users are encouraged to contact us if they have applications where they use a regression model that is not currently
+It is actively developed and users are encouraged to contact `Gurobi Optimization <https://www.gurobi.com>`_ if they have applications where they use a regression model that is currently
 not available.
 
 We give below basic installation and usage instructions.
