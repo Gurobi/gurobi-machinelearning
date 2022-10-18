@@ -6,7 +6,7 @@
 # Since a subset of tests was already run in the nolicense workflow, this workflow runs skips the following tests:
 # - Lint with flake8.
 
-name: Build and test PR, license required
+name: build and test PR, license required
 
 on:
   pull_request_target:
