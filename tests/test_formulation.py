@@ -14,7 +14,7 @@ from sklearn import datasets
 
 from gurobi_ml import add_predictor_constr
 from gurobi_ml.exceptions import NoSolution
-from gurobi_ml.sklearn import PipelineConstr
+from gurobi_ml.sklearn import add_mlp_regressor_constr
 
 VERBOSE = False
 
@@ -172,8 +172,8 @@ class TestFixedModel(unittest.TestCase):
 class TestReLU(unittest.TestCase):
     """Test that various versions of ReLU work and give the same results."""
 
-    def adversarial_model(self, m, pipe, example, epsilon, activation=None):
-        ex_prob = pipe.predict_proba(example)
+    def adversarial_model(self, m, nn, example, epsilon, activation=None):
+        ex_prob = nn.predict_proba(example)
         output_shape = ex_prob.shape
         sortedidx = np.argsort(ex_prob)[0]
 
@@ -188,25 +188,25 @@ class TestReLU(unittest.TestCase):
         m.addConstr(absdiff[0, :] >= -x[0, :] + example.to_numpy()[0, :])
         m.addConstr(absdiff[0, :].sum() <= epsilon)
 
-        self.assertEqual(pipe.steps[-1][1].out_activation_, "identity")
+        self.assertEqual(nn.out_activation_, "identity")
         # Code to add the neural network to the constraints
         if activation is not None:
             activation_models = {"relu": activation}
         else:
             activation_models = {}
 
-        pipe2gurobi = PipelineConstr(m, pipe, x, output, activation_models=activation_models)
+        nn_constr = add_mlp_regressor_constr(m, nn, x, output, activation_models=activation_models)
         # pipe2gurobi.steps[-1].actdict['softmax'] = Identity()
-        return pipe2gurobi
+        return nn_constr
 
     def test_adversarial_sklearn(self):
         # Load the trained network and the examples
         dirname = os.path.dirname(__file__)
-        pipe = load(os.path.join(dirname, "predictors/MNIST_50_50.joblib"))
+        nn = load(os.path.join(dirname, "predictors/MNIST_50_50.joblib"))
         X = load(os.path.join(dirname, "predictors/MNIST_first100.joblib"))
 
         # Change the out_activation of neural network to identity
-        pipe.steps[-1][1].out_activation_ = "identity"
+        nn.out_activation_ = "identity"
 
         # Choose an example
         exampleno = random.randint(0, 99)
@@ -223,7 +223,7 @@ class TestReLU(unittest.TestCase):
                     activation=activation,
                     obbt=False,
                 ):
-                    self.adversarial_model(m, pipe, example, epsilon, activation=activation)
+                    self.adversarial_model(m, nn, example, epsilon, activation=activation)
                     m.optimize()
                     if value is None:
                         value = m.ObjVal
