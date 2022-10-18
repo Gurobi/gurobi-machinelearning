@@ -95,7 +95,7 @@ They are linked by the regression in that the output variables values are the va
 for <a class="reference external" href="https://keras.io/">Keras</a> and <a class="reference external" href="https://pytorch.org/">PyTorch</a> neural networks with ReLU activation.
 It is actively developed and users are encouraged to contact us if they have applications where they use a regression model that is not currently
 not available.</p>
-<p>We give below basic installation and usage instructions.</p>
+<p>Below, we give basic installation and usage instructions.</p>
 <section id="install">
 <h2>Install<a class="headerlink" href="#install" title="Permalink to this heading"></a></h2>
 <p>The package should be installed with pip (or add it to your <cite>requirements.txt</cite> file):</p>
@@ -104,10 +104,10 @@ not available.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If not already installed this should install the gurobipy and
-numpy packages.</p>
-<p>The package needs Gurobi version 10 to work properly.</p>
-<p>The package has been tested with and is supported for python 3.9 and python 3.10</p>
+<p>If not already installed, this should install the <code class="docutils literal notranslate"><span class="pre">gurobipy</span></code> and
+<code class="docutils literal notranslate"><span class="pre">numpy</span></code> packages.</p>
+<p>The package requires <code class="docutils literal notranslate"><span class="pre">gurobipy</span></code> version 10.0 or greater.</p>
+<p>The package has been tested with and is supported for Python 3.9 and Python 3.10.</p>
 </div>
 </section>
 <section id="usage">
@@ -141,7 +141,7 @@ model predicts from the input values and the actual values of the output in Guro
 </div></blockquote>
 <p>For the list of frameworks and regression models supported please refer to the <a class="reference internal" href="supported.html"><span class="doc">Supported Regression models</span></a>, section.
 Note that, even though <a class="reference internal" href="api/add_predictor_constr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_predictor_constr</span></code></a>
-the <a class="reference internal" href="api/add_predictor_constr.html"><span class="doc">add_predictor_constr</span></a> should add the correct model for any supported predictor, individual functions for each predictor are also available.</p>
+should add the correct model for any supported predictor, individual functions for each predictor are also available.</p>
 <p>For some regression models, additional optional parameters can be set to tune the way the predictor is inserted in the Gurobi model. Those are documented
 in the corresponding function linked from <a class="reference internal" href="supported.html"><span class="doc">Supported Regression models</span></a>.</p>
 <p>For a simple abstract example on how to use the package please refer to the <a class="reference internal" href="quickstart.html"><span class="doc">Simple Usage Example</span></a> section. More advanced examples are available in the
@@ -159,7 +159,7 @@ in the corresponding function linked from <a class="reference internal" href="su
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples/adversarial_mnist.html">Adversarial Machine Learning with Gurobi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/adversarial_mnist.html">Adversarial Machine Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/price_optimization.html">How Much Is Too Much? Avocado Pricing and Supply Using Mathematical Optimization</a></li>
 </ul>
 </li>
