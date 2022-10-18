@@ -83,7 +83,7 @@ The modeling object can perform a few tasks:
      :py:meth:`get_error <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` function.
 
 For the list of frameworks and regression models supported please refer to the :doc:`supported` section.
-Note that :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` :doc:`api/add_predictor_constr`
+Note that the function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`
 should add the correct model for any supported predictor. Individual functions for each predictor are also available.
 
 For some regression models, additional optional parameters can be set to tune the way the predictor is inserted in the Gurobi model. Those are documented
