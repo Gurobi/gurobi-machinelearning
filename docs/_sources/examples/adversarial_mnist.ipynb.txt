@@ -4,7 +4,9 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# adversarial_mnist\n",
+    "# Adversarial Machine Learning with Gurobi\n",
+    "\n",
+    "Here, we show how to use Gurobi Machine Learning to con\n",
     "Extra required packages:\n",
     "- matplotlib\n",
     "- pandas"

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>adversarial_mnist &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
+  <title>Adversarial Machine Learning with Gurobi &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
@@ -30,7 +30,7 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
             <a href="../index.html" class="icon icon-home"> Gurobi Machine Learning
-            <img src="../_static/gurobi.png" class="logo" alt="Logo"/>
+            <img src="../_static/image8.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Simple Usage Example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported.html">Supported Regression models</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">adversarial_mnist</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Adversarial Machine Learning with Gurobi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="price_optimization.html">How Much Is Too Much? Avocado Pricing and Supply Using Mathematical Optimization</a></li>
 </ul>
 </li>
@@ -66,7 +66,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../examples.html">Examples</a> &raquo;</li>
-      <li>adversarial_mnist</li>
+      <li>Adversarial Machine Learning with Gurobi</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/examples/adversarial_mnist.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -76,9 +76,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
 
-  <section class="tex2jax_ignore mathjax_ignore" id="adversarial-mnist">
-<h1>adversarial_mnist<a class="headerlink" href="#adversarial-mnist" title="Permalink to this heading"></a></h1>
-<p>Extra required packages:</p>
+  <section class="tex2jax_ignore mathjax_ignore" id="adversarial-machine-learning-with-gurobi">
+<h1>Adversarial Machine Learning with Gurobi<a class="headerlink" href="#adversarial-machine-learning-with-gurobi" title="Permalink to this heading"></a></h1>
+<p>Here, we show how to use Gurobi Machine Learning to con
+Extra required packages:</p>
 <ul class="simple">
 <li><p>matplotlib</p></li>
 <li><p>pandas</p></li>
@@ -399,13 +400,13 @@ Activation is identity
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  812.98647    0   69          -  812.98647      -     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  685.35456    0   71          -  685.35456      -     -    1s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  685.35456    0   71          -  685.35456      -     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  677.98993    0   70          -  677.98993      -     -    1s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  677.98993    0   70          -  677.98993      -     -    0s
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  677.26643    0   70          -  677.26643      -     -    1s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  677.26643    0   70          -  677.26643      -     -    0s
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  613.10331    0   67          -  613.10331      -     -    1s
@@ -483,7 +484,7 @@ Activation is identity
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Explored 275 nodes (18426 simplex iterations) in 2.68 seconds (5.28 work units)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Explored 275 nodes (18426 simplex iterations) in 2.62 seconds (5.28 work units)
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Thread count was 8 (of 8 available processors)
