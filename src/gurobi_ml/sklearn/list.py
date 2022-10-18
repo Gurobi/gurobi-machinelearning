@@ -25,5 +25,4 @@ def sklearn_predictors():
         "GradientBoostingRegressor": GradientBoostingRegressorConstr,
         "RandomForestRegressor": RandomForestRegressorConstr,
         "MLPRegressor": MLPRegressorConstr,
-        "MLPClassifier": MLPRegressorConstr,
     }

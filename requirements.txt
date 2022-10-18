@@ -1,9 +1,9 @@
-gurobipy==10.0.0b1
+gurobipy>=10.0.0b1
 ipywidgets
 matplotlib
 myst_nb
 notebook
-numpy
+numpy>=1.22.0
 pandas
 seaborn
 Sphinx

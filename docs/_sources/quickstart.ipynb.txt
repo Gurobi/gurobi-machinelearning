@@ -11,10 +11,10 @@
     "In this page, we provide a simple example of using the Gurobi Machine Learning package.\n",
     "\n",
     "The example is entirely abstract. Its aim is only to illustrate the basic functionalities of the\n",
-    "package in the most simple way. For some more realistic applications please refer to the notebooks.\n",
+    "package in the most simple way. For some more realistic applications, please refer to the notebooks.\n",
     "\n",
     "Before proceeding to the example itself, we need to import a number of packages.\n",
-    "Here, we will use scikit-learn to train regression models. We generate random data for the\n",
+    "Here, we will use `scikit-learn` to train regression models. We generate random data for the\n",
     "regression using the :external+sklearn:py:func:`sklearn.datasets.make_regression`. For the regression model, we use a neural network :external:py:class:`sklearn.neural_network.MLPRegressor`, import the corresponding\n",
     "objects."
    ]
@@ -36,8 +36,8 @@
    "id": "d9e715f9",
    "metadata": {},
    "source": [
-    "Certainly, we also need gurobipy to build an optimization model and from the `gurobi_ml` package we need the `add_predictor_constr`\n",
-    "function. We will also need numpy."
+    "Certainly, we also need `gurobipy` to build an optimization model and from the `gurobi_ml` package we need the `add_predictor_constr`\n",
+    "function. We will also need `numpy`."
    ]
   },
   {
@@ -76,7 +76,7 @@
    "id": "5caa3577",
    "metadata": {},
    "source": [
-    "Now, create the MLPRegressor object and fit it."
+    "Now, create the _MLPRegressor_ object and fit it."
    ]
   },
   {
@@ -96,10 +96,10 @@
    "id": "9bdde8c5",
    "metadata": {},
    "source": [
-    "We now turn to the optimization model. In the spirit of adverserial machine learning examples, we want to use some training examples.\n",
-    "we pick $n=5$ training example randomly. For each of the example, we want the optimization to pick an input that is in a small neighborhood of it that leads to the output that is closer to 0 with the regression.\n",
+    "We now turn to the optimization model. In the spirit of adversarial machine learning examples, we want to use some training examples.\n",
+    "we pick $n=5$ training example randomly. For each of the examples, we want the optimization to pick an input that is in a small neighborhood of it that leads to the output that is closer to 0 with the regression.\n",
     "\n",
-    "Denoting by $X^E$ our set of examples and by $g$ the prediction function of our regression model. our optimization problem reads:\n",
+    "Denoting by $X^E$ our set of examples and by $g$ the prediction function of our regression model, our optimization problem reads:\n",
     "\n",
     "$$\n",
     "\\begin{aligned}\n",
@@ -112,7 +112,7 @@
     "\n",
     "where X is a matrix of variables of dimension $5 \\times 10$ (the number of examples we consider and number of features in the regression respectively), y is a vector of free (unbounded) variables and $\\delta$ a small constant.\n",
     "\n",
-    "First, let's pick randomly 3 training examples using numpy, and create our gurobipy model."
+    "First, let's pick randomly 3 training examples using `numpy`, and create our `gurobipy` model."
    ]
   },
   {
@@ -135,11 +135,11 @@
    "id": "32a77546",
    "metadata": {},
    "source": [
-    "Our only decision variables in this case, are the five inputs and outputs for the regression. We use gurobipy.MVar matrix variables that are most convenient in this case.\n",
+    "Our only decision variables in this case, are the five inputs and outputs for the regression. We use `gurobipy.MVar` matrix variables that are most convenient in this case.\n",
     "\n",
     "The input variables have the same shame as `X_examples`. Their lower bound is `X_examples - delta` and their upper bound `X_examples + delta`.\n",
     "\n",
-    "The output variable have the shape of `y_examples`. They are unbounded, by default in Gurobi variables are non-negative, we therefore need to set an infinite lower bound."
+    "The output variable have the shape of `y_examples`. They are unbounded. By default, in Gurobi variables are non-negative, we therefore need to set an infinite lower bound."
    ]
   },
   {
@@ -198,7 +198,7 @@
    "id": "c4809041",
    "metadata": {},
    "source": [
-    "To finish the model we set the objective and then we can optimize it."
+    "To finish the model, we set the objective and then we can optimize it."
    ]
   },
   {
@@ -255,9 +255,9 @@
    "source": [
     "The function `get_error` is useful to check that the solution that Gurobi computed is correct with respect to the regression model we use.\n",
     "\n",
-    "Let $(\\bar X, \\bar y)$ be the values of the input and output variables in the solution computed. The function return $g(\\bar X) - y$ using the original regression (in this case the scikit-learn) object.\n",
+    "Let $(\\bar X, \\bar y)$ be the values of the input and output variables in the solution computed. The function returns $g(\\bar X) - y$ using the original regression (in this case the `scikit-learn`) object.\n",
     "\n",
-    "Normally all values should be small and below Gurobi's tolerances."
+    "Normally, all values should be small and below Gurobi's tolerances."
    ]
   },
   {
@@ -275,7 +275,7 @@
    "id": "caccbcfa",
    "metadata": {},
    "source": [
-    "Finally, we can look at the computed values for the output variables and compare them with the original targets values"
+    "Finally, we can look at the computed values for the output variables and compare them with the original targets values."
    ]
   },
   {

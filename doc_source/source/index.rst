@@ -28,7 +28,7 @@ for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_ neural ne
 It is actively developed and users are encouraged to contact `Gurobi Optimization <https://www.gurobi.com>`_ if they have applications where they use a regression model that is currently
 not available.
 
-We give below basic installation and usage instructions.
+Below, we give basic installation and usage instructions.
 
 Install
 -------
@@ -43,12 +43,12 @@ We encourage to install the package via pip (or add it to your `requirements.txt
 
 .. note::
 
-  If not already installed this should install the gurobipy and
-  numpy packages.
+  If not already installed, this should install the ``gurobipy`` and
+  ``numpy`` packages.
 
-  The package needs Gurobi version 10 to work properly.
+  The package requires ``gurobipy`` version 10.0 or greater.
 
-  The package has been tested with and is supported for python 3.9 and python 3.10
+  The package has been tested with and is supported for Python 3.9 and Python 3.10.
 
 
 Usage
@@ -81,6 +81,7 @@ The modeling object can perform a few tasks:
    * Once Gurobi computed a solution to the optimization problem, it can compute the difference between what the regression
      model predicts from the input values and the actual values of the output in Gurobi's solution with the
      :py:meth:`get_error <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` function.
+
 
 For the list of frameworks and regression models supported please refer to the :doc:`supported` section.
 Note that the function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`

@@ -7,4 +7,5 @@ pandas
 matplotlib
 seaborn
 myst_nb
+sphinx-copybutton
 .
