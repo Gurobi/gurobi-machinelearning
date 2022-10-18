@@ -6,7 +6,7 @@
 ![Gurobi](doc_source/source/_static/image8.png)
 # Gurobi Machine Learning
 
-Gurobi Machine Learning is a python package to insert trained predictors into a [gurobipy](https://pypi.org/project/gurobipy/) model.
+Gurobi Machine Learning is a python package to insert trained predictors into a [`gurobipy`](https://pypi.org/project/gurobipy/) model.
 
 The goal of the package is to:
   1. Simplify the process of importing a trained machine learning model built with a popular ML package into an optimization model.
@@ -14,20 +14,20 @@ The goal of the package is to:
   1. Make it easier for optimization models to mix explicit and implicit constraints.
 
 The package currently support the following regression models:
- - Scikit-learn:
-    - Regression models:
+ - [Scikit-learn](https://scikit-learn.org/)
+    - Regression models
       - Linear regression
       - Logistic regression
       - Neural-network regression (MLPRegressor)
       - Decision tree
       - Gradient boosting tree
       - Random Forest
-    - Transformers:
+    - Transformers
       - Standard Scaler
       - Polynomial Features (degree 2)
- - Keras
+ - [Keras](https://keras.io/)
    - Dense layers
    - ReLU layers
- - PyTorch (only torch.nn.Sequential objects)
+ - [PyTorch](https://pytorch.org/) (only torch.nn.Sequential objects)
    - Dense layers
    - ReLU layers
