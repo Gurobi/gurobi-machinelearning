@@ -23,7 +23,7 @@ author = "Pierre Bonami"
 
 # The full version, including alpha/beta/rc tags
 release = "1.0.0"
-
+html_logo = "_static/gurobi.png"
 
 # -- General configuration ---------------------------------------------------
 
