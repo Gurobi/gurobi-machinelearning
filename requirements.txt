@@ -5,9 +5,7 @@ myst_nb
 notebook
 numpy
 pandas
-scikit-learn==1.1.2
 seaborn
 Sphinx
 sphinx-rtd-theme
-tensorflow
 .
