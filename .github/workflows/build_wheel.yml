@@ -36,6 +36,10 @@ jobs:
     needs: build_wheel
     # if: github.event_name == 'push'
     steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: dist
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
       with:
