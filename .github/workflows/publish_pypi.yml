@@ -1,0 +1,43 @@
+name: Publish to Pypi
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version upload to pypi'
+        required: true
+      pypi_repo:
+        description: 'Repo to upload to (testpypi or pypi)'
+        default: 'testpypi'
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: Install dependencies
+      run: |
+        pip install -U wheelhouse_uploader pyyaml
+    - name: Downloading wheels and sdist from staging
+      env:
+        WHEEL_VERSION: ${{ github.event.inputs.version }}
+      run: |
+        echo "Download $WHEEL_VERSION wheel and sdist"
+        python -m wheelhouse_uploader fetch \
+          --version $WHEEL_VERSION \
+          --local-folder dist/ \
+          gurobi-machinelearning \
+          https://pypi.anaconda.org/gurobi-machinelearning-wheels-staging/simple/gurobi-machinelearning/
+    - name: Publish package to TestPyPI
+      uses: pypa/gh-action-pypi-publish@v1.4.1
+      with:
+        password: ${{ secrets.TEST_PYPI_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
+      if: ${{ github.event.inputs.pypi_repo == 'testpypi' }}
+    - name: Publish package to PyPI
+      uses: pypa/gh-action-pypi-publish@v1.4.1
+      with:
+        password: ${{ secrets.PYPI_TOKEN }}
+      if: ${{ github.event.inputs.pypi_repo == 'pypi' }}

@@ -1,4 +1,5 @@
 [![build and test](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/push.yml/badge.svg)](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/push.yml)
+[![build wheel](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/build_wheel.yml/badge.svg)](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/build_wheel.yml)
 ![Python versions](https://img.shields.io/badge/python-3.9%20|%203.10-blue)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI](https://img.shields.io/pypi/v/gurobipy)](https://pypi.org/project/gurobipy)
