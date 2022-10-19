@@ -20,7 +20,7 @@ and the function that can be used to insert it in a Gurobi model.
    * - Regression Model
      - Scikit-learn object
      - Function to insert
-   * - Ordinary Least Square
+   * - :external+sklearn:std:label:`Ordinary Least Square <ordinary_least_squares>`
      - :external:py:class:`LinearRegression <sklearn.linear_model.LinearRegression>`
      - :py:func:`add_linear_regression_constr <gurobi_ml.sklearn.add_linear_regression_constr>`
    * - Logistic regression
