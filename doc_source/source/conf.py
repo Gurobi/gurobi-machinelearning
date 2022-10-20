@@ -38,6 +38,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
+    "sphinxcontrib.bibtex",
     "sphinx.ext.autosectionlabel",
     "myst_nb",
 ]
@@ -73,3 +74,5 @@ myst_enable_extensions = [
 html_static_path = ["_static"]
 autodoc_member_order = "groupwise"
 autodoc_mock_imports = ["torch", "tensorflow"]
+
+bibtex_bibfiles = ["refs.bib"]

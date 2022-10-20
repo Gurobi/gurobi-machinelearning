@@ -103,6 +103,7 @@ Contents
    supported
    examples
    api
+   bibliography
 
 
 Indices and tables

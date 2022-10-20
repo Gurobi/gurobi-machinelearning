@@ -12,27 +12,78 @@ kernelspec:
   name: python3
 ---
 
-# Integrate a logistic regression in a Gurobi model
-*Note: The resulting model in this example will be too large for a size-limited license; in order to solve it, please visit https://www.gurobi.com/free-trial for a full license*
+# Student Enrollment
 
-We take the model from JANOS example:
+In this example, we show how to reproduce the model of student enrollment from
+{cite:p}`JANOS` with Gurobi Machine Learning.
 
-$
+This model was developed in the context of the development of
+[Janos](https://github.com/INFORMSJoC/2020.1023), a toolkit similar to
+Gurobi Machine Learning to integrate ML models and Mathematical optimization.
+
+In this example, we illustrate in particular how to use the logistic regression and chaing parameters for tuning the piecewise linear approximation. We also show how to deal with fixed features in the optimization model using pandas data frames.
+
+## Introduction
+
+In this model, data of students admissions in a college is used to predict the probability
+that a student enrolls to the college.
+
+The data has 3 features:
+the SAT score of each student,
+the GAP score of each student and the scholarship that was offered to each student.
+Finally, it is known if each student decided to join or not the college.
+
+Based on this data a logistic regression is trained to predict the probability that
+a student joins the college.
+
+Using this regression model, {cite:p}`JANOS` proposes the following student enrollment
+problem. The Admission Office has data for SAT and GPA scores of the admitted students for
+the incoming class, and they would want to offer scholarships to students with the goal of
+maximizing the expected number of students that enroll in the college. There is a total
+of $n$ student that are admitted. The maximal
+budget for the sum of all scholarships offered is $0.2 n \text{K\$}$ and each student can be offered a
+scholarship of at most $2.5K\$$.
+
+This problem can be expressed as a mathematical optimization problem as follows.
+Two vectors of decision variables $x$ and $y$ of dimension $n$ are used to model
+respectively the scholarship offered to each student in $K\$$ and the probability
+that they join.
+Denoting by $g$ the prediction function for the probability of the logistic regression we then have for each student $i$:
+
+$$
+y_i = g(x_i, SAT_i, GPA_i),
+$$
+
+with $SAT_i$ and $GPA_i$ the (known) SAT and GPA score of each student.
+
+The objective is to maximize the sum of the $y$ variables and the budget constraint imposes
+that the sum of the variables $x$ is less or equal to $0.2 n$. Also each variable $x_i$ is between 0 and 2.5.
+
+The full model then reads:
+$$
 \begin{align}
-&\max \sum y_i \\
+&\max \sum_{i=1}^n y_i \\
 &\text{subject to:}\\
-&\sum x_i \le 100,\\
-&y_i = g(x_i, \psi),\\
+&\sum_{i=1}^n x_i \le 0.2*n,\\
+&y_i = g(x_i, SAT_i, GPA_i) & & i = 1, \ldots, n,\\
 & 0 \le x \le 2.5.
 \end{align}
-$
+$$
 
-Where, $\psi$ is a matrix of known features. And $g$ is a logistic function computed using the  logistic regression of scikit-learn.
+Note that in this example differently to what is describe in {cite:p}`JANOS` we scale the features corresponding to $x$ for the regression. Also to fit in Gurobi's limited size licence we only consider the problem where $n=250$.
 
-Note that differently to JANOS, we scale the feature corresponding to $x$ for the regression.
+We note also that the model may differ from the objectives of Admission Offices and
+don't encourage its use in real life. The example is for illustration purposes only.
 
-```{code-cell}
-import gurobipy as gp
+```{bibliography} ../refs.bib
+```
+
+## Importing packages and retrieving the data.
+
+We import the necessary packages. Besides the usual (`numpy`, `gurobipy`, `pandas`), for this we will use
+scikit-learn's Pipeline, StandardScaler and LogisticRegression.
+
+```{code-cell} ipython3
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -40,108 +91,160 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
+import gurobipy as gp
 from gurobi_ml import add_predictor_constr
-
-# Base URL for retrieving data
-janos_data_url = 'https://raw.githubusercontent.com/INFORMSJoC/2020.1023/master/data/'
 ```
 
-```{code-cell}
+We now retrieve the historical data used to build the regression from Janos repository.
+
+The features we use for the regression are `"merit"` (scholarhip), `"SAT"` and `"GPA"` and the target is `"enroll"`. We store those values.
+
+```{code-cell} ipython3
+# Base URL for retrieving data
+janos_data_url = 'https://raw.githubusercontent.com/INFORMSJoC/2020.1023/master/data/'
 historical_data = pd.read_csv(janos_data_url + 'college_student_enroll-s1-1.csv', index_col=0)
 
 # classify our features between the ones that are fixed and the ones that will be
 # part of the optimization problem
-known_features = ["SAT", "GPA"]
-dec_features = ["merit"]
+features = ["merit", "SAT", "GPA"]
 target = "enroll"
-features = known_features + dec_features
 
-historical_data = historical_data[features + [target]]
-```
-
-### Do our logistic regression
-
-```{code-cell}
-# Run our regression
 X = historical_data.loc[:, features]
 Y = historical_data.loc[:, target]
-scaler = StandardScaler()
-regression = LogisticRegression(random_state=1, penalty='l1', C=10, solver='saga')
-pipe = make_pipeline(scaler, regression)
-pipe.fit(X=X, y=Y)
 ```
 
-### Now start with the optimization model
+## Fit the logistic regression
 
-- Read in our data
-- add the x and y variables and the regular matrix constraints
++++
 
-```{code-cell}
+For the regression, we use a pipeline with a standard scaler and a logistic regression.
+We build it using the `make_pipeline` from `scikit-learn`.
+
+```{code-cell} ipython3
+# Run our regression
+regression = LogisticRegression(random_state=1)
+pipe = make_pipeline(StandardScaler(), LogisticRegression(random_state=1))
+pipe.fit(X=historical_data.loc[:, features], y=historical_data.loc[:, target])
+```
+
+### Optimization Model
+
+We now turn to building the mathematical optimization model for Gurobi.
+
+First, retrieve the data for the new students. We won't use all the data there, we randomly pick 250 students from it.
+
+```{code-cell} ipython3
 # Retrieve new data used to build the optimization problem
 studentsdata = pd.read_csv(janos_data_url + 'college_applications6000.csv', index_col=0)
 
 studentsdata = studentsdata[known_features]
-nstudents = 500
+nstudents = 250
 
 # Select randomly nstudents in the data
 studentsdata = studentsdata.sample(nstudents)
 ```
 
-```{code-cell}
+A non-trivial part of the model is the decision variables that we need for using Gurobi Machine Learning.
+
+In the mathematical formulation above, we only had two vectors of variables `x` and `y`. Then each student had associated its score $SAT_i$ and $GAP_i$ that was a fixed parameter of $g$. For the Gurobi model, we need to create a matrix of variables that also includes the values of $SAT$ adn $GAP$ of each student. We will fix those variables by giving them the same lower bound and upper bound.
+
+Therefore, we need to build 2 matrices of variables, one for each set of bounds and we need to make sure that they are in the same order as our regression model would expect.
+
+To do so, we use `pandas` data frames to construct those bounds.
+
+To construct the lower bounds, we first make a copy of `studentsdata` and then add the `merit` column with a value of 0. We then do the same for the upper bound, except that the value for `merit`is $2.5.
+
+Finally we need to make sure that the columns of the two data frames are in the same order as the ones used for the regression.
+
+```{code-cell} ipython3
+# Construct lower bounds data frame
+feat_lb = studentsdata.copy()
+feat_lb.loc[:, "merit"] = 0
+
+# Construct upper bounds data frame
+feat_ub = studentsdata.copy()
+feat_ub.loc[:, "merit"] = 2.5
+
+# Make sure the columns are ordered in the same way as for the regression model.
+feat_lb = feat_lb[features]
+feat_ub = feat_ub[features]
+```
+
+We can now create the variables for our model: `feature_vars` is initialized using the data frames we just created
+(be careful that they have to be converted to `numpy` arrays).
+
+For the rest of the model, we want to recover from the `feature_vars` matrix, the column corresponding to merit.
+With `pandas`, we can use the `get_indexer` function to recover the index of this column.
+
+```{code-cell} ipython3
 # Start with classical part of the model
 m = gp.Model()
 
-knownidx = historical_data.columns.get_indexer(known_features)
-scholarshipidx = historical_data.columns.get_indexer(dec_features)
+feature_vars = m.addMVar(feat_lb.shape, lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name="feats")
+y = m.addMVar(nstudents, name="y")
 
-lb = np.zeros((nstudents, len(features)))
-ub = np.ones((nstudents, len(features))) * gp.GRB.INFINITY
-lb[:, knownidx] = studentsdata.loc[:, known_features]
-ub[:, knownidx] = studentsdata.loc[:, known_features]
 
-x = m.addMVar(lb.shape, lb=lb, ub=ub, name="x")
-scholarship = x[:, scholarshipidx][:, 0]
-y = m.addMVar(nstudents, ub=1, name="y")
-
-scholarship.LB = 0.0
-scholarship.UB = 2.5
-
-m.setObjective(y.sum(), gp.GRB.MAXIMIZE)
-m.addConstr(scholarship.sum() <= 0.2 * nstudents)
-
-pred_constr = add_predictor_constr(m, pipe, x, y)
+x = feature_vars[:, feat_lb.columns.get_indexer(['merit'])][:, 0]
 ```
 
-```{code-cell}
+The objective and the budget constraint:
+
+```{code-cell} ipython3
+m.setObjective(y.sum(), gp.GRB.MAXIMIZE)
+
+m.addConstr(x.sum() <= 0.2 * nstudents)
+m.update()
+```
+
+Finally, we insert the constraints from the regression. Note that due to the shape of the `feature_vars` matrix and `y`, this will insert one regression constraint for each students.
+
+With the `print_stats` function we display what was added to the model.
+
+```{code-cell} ipython3
+pred_constr = add_predictor_constr(m, pipe, feature_vars, y)
+
 pred_constr.print_stats()
 ```
 
-### Finally optimize it
+We can now optimize the problem.
 
-```{code-cell}
+```{code-cell} ipython3
 m.optimize()
 ```
 
-### Look at solution
+Remember that for the logistic regression, Gurobi does a piecewise linear approximation of the logistic function. We can therefore get some significant errors when comparing the results of the Gurobi model with what is predicted by the regression.
 
-```{code-cell}
-# This is what we predicted
-plt.scatter(scholarship.X, y.X)
+We print the error. Here we need to use `get_error_proba`.
+
+```{code-cell} ipython3
+print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error_proba()))))
 ```
 
-```{code-cell}
-# This is the historical data
-plt.scatter(X.loc[:, "merit"], pipe.predict_proba(X)[:, 1])
+The error we get might be considered too large but we can use Gurobi parameters to
+tune the piecewise linear approximation made by Gurobi (at the expense of a harder models).
+
+The specific parameters are explain in the documentation of
+[Functions Constraints](https://www.gurobi.com/documentation/9.1/refman/constraints.html#subsubsection:GenConstrFunction)
+in Gurobi's manual.
+
+We can pass those parameters, to the `add_predictor_constr` function in the form of a dictionary with the keyword
+parameter `gc_attributes`.
+
+Now we want a more precise solution so we remove the current constraint, add a new one that does a tighter approximation and resolve the model.
+
+```{code-cell} ipython3
+pred_constr.remove()
+
+gc_attributes={"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 1e-4, "FuncPieceRatio": -1.0}
+pred_constr = add_predictor_constr(m, pipe, feature_vars, y, gc_attributes=gc_attributes)
+
+m.optimize()
 ```
 
-```{code-cell}
-# Proportion of students offered a scholarship
-print(
-    "In historical data {:.4}% students offered a scholarship".format(
-        100 * (sum(historical_data.loc[:, "merit"] > 0) / len(historical_data.loc[:, "merit"]))
-    )
-)
-print("In our solution {:.4}% students offered a scholarship".format(100 * sum(scholarship.X > 0) / nstudents))
+We can see that the error has been reduced.
+
+```{code-cell} ipython3
+print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error_proba()))))
 ```
 
 Copyright © 2022 Gurobi Optimization, LLC
