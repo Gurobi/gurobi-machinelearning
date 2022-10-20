@@ -4,8 +4,10 @@ jupytext:
   text_representation:
     extension: .md
     format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.14.1
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -23,7 +25,6 @@ Here, we will use `scikit-learn` to train regression models. We generate random 
 regression using the :external+sklearn:py:func:`sklearn.datasets.make_regression`. For the regression model, we use a neural network :external:py:class:`sklearn.neural_network.MLPRegressor`, import the corresponding
 objects.
 
-
 ```{code-cell} ipython3
 from sklearn.datasets import make_regression
 from sklearn.metrics import mean_squared_error
@@ -32,7 +33,6 @@ from sklearn.neural_network import MLPRegressor
 
 Certainly, we also need `gurobipy` to build an optimization model and from the `gurobi_ml` package we need the `add_predictor_constr`
 function. We will also need `numpy`.
-
 
 ```{code-cell} ipython3
 import numpy as np
@@ -43,15 +43,13 @@ from gurobi_ml import add_predictor_constr
 We start by building artificial data for training our regressions. We use _make_regression_ to obtain
 data with 10 features.
 
-
 ```{code-cell} ipython3
 X, y = make_regression(n_features=10, noise=1.0)
 ```
 
 Now, create the _MLPRegressor_ object and fit it.
 
-
-```{code-cell}
+```{code-cell} ipython3
 nn = MLPRegressor([20]*2, max_iter=10000, random_state=1)
 
 nn.fit(X, y)
@@ -75,7 +73,6 @@ where $X$ is a matrix of variables of dimension $n \times 10$ (the number of exa
 
 First, let's pick randomly 2 training examples using `numpy`, and create our `gurobipy` model.
 
-
 ```{code-cell} ipython3
 n = 2
 index = np.random.choice(X.shape[0], n, replace=False)
@@ -91,7 +88,6 @@ The input variables have the same shape as `X_examples`. Their lower bound is `X
 
 The output variables have the shape of `y_examples` and are unbounded. By default, in Gurobi variables are non-negative, we therefore need to set an infinite lower bound.
 
-
 ```{code-cell} ipython3
 input_vars = m.addMVar(X_examples.shape, lb=X_examples-0.2, ub=X_examples+0.2)
 output_vars = m.addMVar(y_examples.shape, lb=-gp.GRB.INFINITY)
@@ -103,13 +99,11 @@ Note that because of the shape of the variables this will add the 5 different co
 
 The function returns a modeling object that we can use later on.
 
-
 ```{code-cell} ipython3
 pred_constr = add_predictor_constr(m, nn, input_vars, output_vars)
 ```
 
 The member function `print_stats` of the modeling object outputs the details of the regression model that was added to the Gurobi.
-
 
 ```{code-cell} ipython3
 pred_constr.print_stats()
@@ -117,15 +111,14 @@ pred_constr.print_stats()
 
 To finish the model, we set the objective and then we can optimize it.
 
-
 ```{code-cell} ipython3
-:tags: ["hide-input"]
+:tags: [hide-input]
+
 # This is some trickery for output Gurobi's log doesn't display well with myst
 m.params.LogToConsole = 0
 !rm -f gurobi.log
 m.params.LogFile = 'gurobi.log'
 ```
-
 
 ```{code-cell} ipython3
 m.setObjective(output_vars@output_vars, gp.GRB.MINIMIZE)
@@ -133,9 +126,9 @@ m.setObjective(output_vars@output_vars, gp.GRB.MINIMIZE)
 m.optimize()
 ```
 
-
 ```{code-cell} ipython3
-:tags: ["hide-input"]
+:tags: [hide-input]
+
 !cat gurobi.log
 ```
 
@@ -145,18 +138,15 @@ Let $(\bar X, \bar y)$ be the values of the input and output variables in the co
 
 Normally, all values should be small and below Gurobi's tolerances.
 
-
 ```{code-cell} ipython3
 pred_constr.get_error()
 ```
 
 Finally, we can look at the computed values for the output variables and compare them with the original targets values.
 
-
 ```{code-cell} ipython3
 output_vars.X
 ```
-
 
 ```{code-cell} ipython3
 y_examples
