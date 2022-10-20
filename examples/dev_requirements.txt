@@ -6,8 +6,9 @@ numpy>=1.22.0
 pandas
 seaborn
 Sphinx
+sphinx-copybutton
 sphinx-rtd-theme
 tensorflow
 torch
 skorch
-.
+../.
