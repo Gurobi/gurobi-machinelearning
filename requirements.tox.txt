@@ -1,0 +1,5 @@
+pandas~=1.5.0
+torch~=1.12.1
+gurobipy~=10.0.0b1
+scikit-learn~=1.1.2
+tensorflow~=2.10.0
