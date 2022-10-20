@@ -118,6 +118,6 @@ def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwarg
     if convertor is None:
         try:
             convertor = convertors[type(predictor).__name__]
-        except:
+        except KeyError:
             raise NotRegistered(type(predictor).__name__)
     return convertor(model, predictor, input_vars, output_vars, **kwargs)
