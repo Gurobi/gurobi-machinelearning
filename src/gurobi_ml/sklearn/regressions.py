@@ -1,13 +1,12 @@
 # Copyright © 2022 Gurobi Optimization, LLC
-""" A set of classes for transforming Scikit-Learn regression objects
-to constraints in Gurobi
+""" Module for insterting simple Scikit-Learn regression models into a gurobipy model
 
-What we have so far:
-  - LinearRegressionConstr: insert a constraint of the form y = g(x, psi)
-    where g is the regressor predicted by a linear regression.
-  - LogisticRegressionConstr: insert a constraint of the form y = g(x, psi)
-    where g is the regressor predicted by a logistic regression.
-  - MLSRegressionConstr: a neural network.
+All linear models should work:
+  * :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
+  * :external+sklearn:py:class:`sklearn.linear_model.RidgeRegression`
+  * :external+sklearn:py:class:`sklearn.linear_model.LassoRegression`
+
+Also does :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
 """
 
 import numpy as np
@@ -74,7 +73,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
 
     def __init__(self, grbmodel, predictor, input_vars, output_vars=None, gc_attributes=None, **kwargs):
         if gc_attributes is None:
-            self.attributes = {"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 0.1, "FuncPieceRatio": -1.0}
+            self.attributes = self.default_gc_attributes()
         else:
             self.attributes = gc_attributes
 
@@ -86,6 +85,11 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             output_vars,
             **kwargs,
         )
+
+    @staticmethod
+    def default_gc_attributes(self):
+        """Default attributes for approximating the logistic function in Gurobi"""
+        return {"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 0.01, "FuncPieceRatio": -1.0}
 
     def _mip_model(self):
         """Add the prediction constraints to Gurobi"""
@@ -134,7 +138,7 @@ def add_linear_regression_constr(grbmodel, linear_regression, input_vars, output
     return LinearRegressionConstr(grbmodel, linear_regression, input_vars, output_vars, **kwargs)
 
 
-def add_logistic_regression_constr(grbmodel, logistic_regression, input_vars, output_vars=None, **kwargs):
+def add_logistic_regression_constr(grbmodel, logistic_regression, input_vars, output_vars=None, gc_attributes=None, **kwargs):
     """Use `lositic_regression` to predict the value of `output_vars` using `input_vars` in `model`
 
     Parameters
@@ -147,6 +151,9 @@ def add_logistic_regression_constr(grbmodel, logistic_regression, input_vars, ou
         Decision variables used as input for predictor in model.
     output_vars: mvar_array_like, optional
         Decision variables used as output for predictor in model.
+    gc_attributes: dict, optional
+        Dictionary for non-default attributes for Gurobi to build the piecewise linear
+        approximation of the logistic function.
 
     Returns
     -------
@@ -158,4 +165,6 @@ def add_logistic_regression_constr(grbmodel, logistic_regression, input_vars, ou
     ----
     See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
     """
-    return LogisticRegressionConstr(grbmodel, logistic_regression, input_vars, output_vars, **kwargs)
+    return LogisticRegressionConstr(
+        grbmodel, logistic_regression, input_vars, output_vars, gc_attributes=gc_attributes, **kwargs
+    )
