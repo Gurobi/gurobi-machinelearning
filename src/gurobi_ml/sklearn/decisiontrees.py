@@ -1,7 +1,6 @@
 # Copyright © 2022 Gurobi Optimization, LLC
-""" Model decision trees based regressor from scikit learn
-
-   Implements the decision tree and gradient boosting trees"""
+""" Module for insterting decision tree based regressor into a gurobipy model.
+"""
 
 import numpy as np
 from gurobipy import GRB

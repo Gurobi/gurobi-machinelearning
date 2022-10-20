@@ -1,7 +1,7 @@
 # Copyright © 2022 Gurobi Optimization, LLC
 
-""" To transform a sequential neural network of PyTorch
-in a Gurobi model """
+""" Module for insterting a Keras model into a gurobipy model
+"""
 
 
 from tensorflow import keras
@@ -107,6 +107,12 @@ def add_keras_constr(grbmodel, keras_model, input_vars, output_vars=None, **kwar
     KerasNetworkConstr
         Object containing information about what was added to model to insert the
         predictor in it
+
+    Raises
+    ------
+    NoModel
+        If the translation for some of the Keras model structure
+        (layer or activation) is not implemented.
 
     Note
     ----

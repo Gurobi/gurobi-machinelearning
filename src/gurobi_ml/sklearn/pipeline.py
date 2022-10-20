@@ -1,4 +1,6 @@
-""" Implementation for the scikit learn pipeline """
+# Copyright © 2022 Gurobi Optimization, LLC
+""" Module for insterting an :external+sklearn:py:class:`sklearn.pipeline.Pipeline` into a gurobipy model
+"""
 
 
 from ..exceptions import NoModel
@@ -101,6 +103,12 @@ def add_pipeline_constr(grbmodel, pipeline, input_vars, output_vars=None, **kwar
     PipelineConstr
         Object containing information about what was added to model to insert the
         predictor in it
+
+    Raises
+    ------
+    NoModel
+        If the translation to Gurobi of one of the elements in the pipeline
+        is not implemented or recognized.
 
     Note
     ----

@@ -1,8 +1,8 @@
 # Copyright © 2022 Gurobi Optimization, LLC
 # pylint: disable=C0103
 
-""" To transform a sequential neural network of PyTorch
-in a Gurobi model """
+""" Module for insterting a :external+torch:py:class:`torch.nn.Sequential` model into a gurobipy model
+"""
 
 import torch
 from torch import nn
@@ -109,6 +109,12 @@ def add_sequential_constr(grbmodel, sequential_model, input_vars, output_vars=No
     SequentialConstr
         Object containing information about what was added to model to insert the
         predictor in it
+
+    Raises
+    ------
+    NoModel
+        If the translation for some of the Pytorch model structure
+        (layer or activation) is not implemented.
 
     Note
     ----
