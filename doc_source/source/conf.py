@@ -11,6 +11,7 @@
 #
 import os
 import sys
+from pathlib import Path
 
 from sphinx_pyproject import SphinxConfig
 
@@ -37,6 +38,16 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "myst_nb",
 ]
+
+dep_versions = {
+    x.split("==")[0]: x.split("==")[1] for x in (Path().resolve().parent.parent / "requirements.tox.txt").read_text().split()
+}
+rst_epilog = f"""
+.. |PandasVersion| replace:: {dep_versions["pandas"]}
+.. |TorchVersion| replace:: {dep_versions["torch"]}
+.. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}
+.. |TensorflowVersion| replace:: {dep_versions["tensorflow"]}
+"""
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
