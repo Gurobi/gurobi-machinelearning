@@ -12,17 +12,13 @@
 import os
 import sys
 
+from sphinx_pyproject import SphinxConfig
+
 sys.path.insert(0, os.path.abspath("../../src/"))
-
-
 # -- Project information -----------------------------------------------------
+config = SphinxConfig("../../pyproject.toml", globalns=globals())
 
-project = "Gurobi Machine Learning"
 copyright = "2022, Gurobi Optimization, LLC. All Rights Reserved."
-author = "Pierre Bonami"
-
-# The full version, including alpha/beta/rc tags
-release = "1.0.0"
 html_logo = "_static/image8.png"
 
 # -- General configuration ---------------------------------------------------

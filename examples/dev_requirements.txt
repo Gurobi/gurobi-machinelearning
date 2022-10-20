@@ -7,6 +7,7 @@ pandas
 seaborn
 Sphinx
 sphinx-copybutton
+sphinx-pyproject
 sphinx-rtd-theme
 tensorflow
 torch
