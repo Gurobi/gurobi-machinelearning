@@ -7,7 +7,7 @@ from .submodel import SubModel
 
 def _default_name(predictor):
     """Make a default name for predictor constraint.
-    
+
     Parameters
     ----------
     predictor:
@@ -18,7 +18,7 @@ def _default_name(predictor):
 
 def validate_gpvars(gpvars, isinput):
     """Put variables into appropriate form (matrix of variable).
-    
+
     Parameters
     ----------
     gpvars:
@@ -57,7 +57,7 @@ class AbstractPredictorConstr(SubModel):
     the type of the predictor, a class derived from it will be returned
     by add_predictor_constr.
 
-    Attributes
+    Parameters
     ----------
     model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
         The gurobipy model where the predictor should be inserted.
