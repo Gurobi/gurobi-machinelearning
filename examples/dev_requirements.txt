@@ -7,4 +7,7 @@ pandas
 seaborn
 Sphinx
 sphinx-rtd-theme
+tensorflow
+torch
+skorch
 .
