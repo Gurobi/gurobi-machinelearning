@@ -97,7 +97,7 @@ def add_sequential_constr(grbmodel, sequential_model, input_vars, output_vars=No
     ----------
     grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
         The gurobipy model where the predictor should be inserted.
-    sequential_model: :external+sklearn:py:class:`torch.nn.Sequential`
+    sequential_model: :external+torch:py:class:`torch.nn.Sequential`
         The sequential model to insert as predictor.
     input_vars: mvar_array_like
         Decision variables used as input for predictor in model.
@@ -106,7 +106,7 @@ def add_sequential_constr(grbmodel, sequential_model, input_vars, output_vars=No
 
     Returns
     -------
-    RandomForestRegressorConstr
+    SequentialConstr
         Object containing information about what was added to model to insert the
         predictor in it
 
