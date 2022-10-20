@@ -43,6 +43,21 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
             self._output = steps[-1].output
 
     def print_stats(self, file=None):
+        """Print statistics on model additions stored by this class
+
+        This function prints detailed statistics on the variables
+        and constraints that where added to the model.
+
+        Usually derived classes reimplement this function to provide more
+        details about the structure of the additions (type of ML model,
+        layers if it's a neural network,...)
+
+        Arguments
+        ---------
+
+        file: None, optional
+            Text stream to which output should be redirected. By default sys.stdout.
+        """
         super().print_stats(file=file)
         print(file=file)
         print(f"Pipeline has {len(self._steps)} steps:", file=file)
@@ -68,4 +83,27 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
 
 
 def add_pipeline_constr(grbmodel, pipeline, input_vars, output_vars=None, **kwargs):
+    """Use a `pipeline` to predict the value of `output_vars` using `input_vars` in `grbmodel`
+
+    Parameters
+    ----------
+    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+        The gurobipy model where the predictor should be inserted.
+    pipeline: :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
+        The pipeline to insert as predictor.
+    input_vars: mvar_array_like
+        Decision variables used as input for predictor in model.
+    output_vars: mvar_array_like, optional
+        Decision variables used as output for predictor in model.
+
+    Returns
+    -------
+    PipelineConstr
+        Object containing information about what was added to model to insert the
+        predictor in it
+
+    Note
+    ----
+    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    """
     return PipelineConstr(grbmodel, pipeline, input_vars, output_vars, **kwargs)

@@ -21,7 +21,14 @@ class AbstractNNLayer(AbstractPredictorConstr):
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
     def print_stats(self, file=None):
-        """Print statistics about submodel created"""
+        """Print statistics about submodel created
+        
+        Parameters
+        ---------
+
+        file: None, optional
+          Text stream to which output should be redirected. By default sys.stdout.
+        """
         super().print_stats(file)
         print(f"Activation is {_default_name(self.activation)}", file=file)
 

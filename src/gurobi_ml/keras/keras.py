@@ -68,10 +68,48 @@ class KerasNetworkConstr(BaseNNConstr):
                 _input = layer.output
 
     def get_error(self):
+        """Returns error in Gurobi's solution with respect to prediction from input
+
+        Returns
+        -------
+        float
+            Assuming that we have a solution for the input and output variables
+            `x, y`. Returns the difference between `predict(x)` and
+            `y`, where predict is the corresponding function for the Scikit-Learn
+            object we are modeling.
+
+        Raises
+        ------
+        NoSolution
+            If the Gurobi model has no solution (either was not optimized or is infeasible).
+        """
         if self._has_solution():
             return self.predictor.predict(self.input.X) - self.output.X
         raise NoSolution()
 
 
 def add_keras_constr(grbmodel, keras_model, input_vars, output_vars=None, **kwargs):
+    """Use `keras_model` to predict the value of `output_vars` using `input_vars` in `grbmodel`
+
+    Parameters
+    ----------
+    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+              The gurobipy model where the predictor should be inserted.
+    keras_model: :external+keras:py:class:`keras.Model`
+        The keras model to insert as predictor.
+    input_vars: mvar_array_like
+        Decision variables used as input for predictor in model.
+    output_vars: mvar_array_like, optional
+        Decision variables used as output for predictor in model.
+
+    Returns
+    -------
+    KerasNetworkConstr
+        Object containing information about what was added to model to insert the
+        predictor in it
+
+    Note
+    ----
+    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    """
     return KerasNetworkConstr(grbmodel, keras_model, input_vars, output_vars, **kwargs)

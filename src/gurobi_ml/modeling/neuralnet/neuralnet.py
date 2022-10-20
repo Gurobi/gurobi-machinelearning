@@ -34,7 +34,22 @@ class BaseNNConstr(AbstractPredictorConstr):
         return self._layers.__iter__()
 
     def add_dense_layer(self, input_vars, layer_coefs, layer_intercept, activation, activation_vars=None, **kwargs):
-        """Add a layer to model"""
+        """Add a layer to model
+        
+        Parameters
+        ---------
+
+        input_vars:  mvar_array_like
+            Decision variables used as input for predictor in model.
+        layer_coefs:
+            Coefficient for each node in a layer
+        layer_intercept:
+            Intercept bias
+        activation:
+            Activation function
+        activation_vars: None, optional
+            Output variables
+        """
         if self.clean:
             mask = np.abs(layer_coefs) < 1e-8
             layer_coefs[mask] = 0.0
@@ -43,13 +58,31 @@ class BaseNNConstr(AbstractPredictorConstr):
         return layer
 
     def add_activation_layer(self, input_vars, activation, activation_vars=None, **kwargs):
-        """Add a layer to model"""
+        """Add a layer to model
+        
+        Parameters
+        ---------
+
+        input_vars:  mvar_array_like
+            Decision variables used as input for predictor in model.
+        activation:
+            Activation function
+        activation_vars: mvar_array_like, optional
+            Output variables
+        """
         layer = ActivationLayer(self._model, activation_vars, input_vars, activation, **kwargs)
         self._layers.append(layer)
         return layer
 
     def print_stats(self, file=None):
-        """Print statistics about submodel created"""
+        """Print statistics about submodel created
+
+        Parameters
+        ---------
+
+        file: None, optional
+            Text stream to which output should be redirected. By default sys.stdout.
+        """
         name = self._name
         if name == "":
             name = self.default_name
