@@ -119,7 +119,10 @@ def add_linear_regression_constr(grbmodel, linear_regression, input_vars, output
     model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
         The gurobipy model where the predictor should be inserted.
     linear_regression: :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
-        The linear regression to insert.
+        The linear regression to insert. It can be of any of the following types:
+           * :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
+           * :external+sklearn:py:class:`sklearn.linear_model.RidgeRegression`
+           * :external+sklearn:py:class:`sklearn.linear_model.LassoRegression`
     input_vars: mvar_array_like
         Decision variables used as input for predictor in model.
     output_vars: mvar_array_like, optional
@@ -139,7 +142,7 @@ def add_linear_regression_constr(grbmodel, linear_regression, input_vars, output
 
 
 def add_logistic_regression_constr(grbmodel, logistic_regression, input_vars, output_vars=None, gc_attributes=None, **kwargs):
-    """Use `lositic_regression` to predict the value of `output_vars` using `input_vars` in `model`
+    """Use `logistic_regression` to predict the value of `output_vars` using `input_vars` in `model`
 
     Parameters
     ----------
