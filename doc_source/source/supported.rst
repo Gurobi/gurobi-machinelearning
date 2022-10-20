@@ -7,6 +7,23 @@ for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_.
 Only sequential neural networks with ReLU activation function are currently supported.
 
 
+.. list-table:: The following packages are supported in the current version (|version|)
+   :widths: 50 50
+   :header-rows: 1
+
+   * - Package
+     - Version
+   * - ``pandas``
+     - |PandasVersion|
+   * - ``torch``
+     - |TorchVersion|
+   * - ``scikit-learn``
+     - |SklearnVersion|
+   * - ``tensorflow``
+     - |TensorflowVersion|
+
+
+
 Scikit-learn
 ------------
 The following tables list the name of the models supported,
@@ -20,7 +37,7 @@ and the function that can be used to insert it in a Gurobi model.
    * - Regression Model
      - Scikit-learn object
      - Function to insert
-   * - :external+sklearn:std:label:`Ordinary Least Square <ordinary_least_squares>`
+   * - Ordinary Least Square
      - :external:py:class:`LinearRegression <sklearn.linear_model.LinearRegression>`
      - :py:func:`add_linear_regression_constr <gurobi_ml.sklearn.add_linear_regression_constr>`
    * - Logistic regression
@@ -41,16 +58,20 @@ and the function that can be used to insert it in a Gurobi model.
 
 
 .. list-table:: Transformers in :external+sklearn:std:doc:`scikit-learn <user_guide>`
-   :widths: 25 25
+   :widths: 25 25 50
    :header-rows: 1
 
-   * - Scikit-learn object
+   * - Transformer
+     - Scikit-learn object
      - Function to insert
-   * - :external:py:class:`StandardScaler <sklearn.preprocessing.StandardScaler>`
+   * - StandardScaler
+     - :external:py:class:`StandardScaler <sklearn.preprocessing.StandardScaler>`
      - :py:func:`gurobi_ml.sklearn.add_standard_scaler_constr`
-   * - :external:py:class:`Pipeline <sklearn.pipeline.Pipeline>`
+   * - Pipeline
+     - :external:py:class:`Pipeline <sklearn.pipeline.Pipeline>`
      - :py:func:`gurobi_ml.sklearn.add_pipeline_constr`
-   * - :external:py:class:`PolynomialFeatures <sklearn.preprocessing.PolynomialFeatures>` [#]_
+   * - PolynomialFeatures
+     - :external:py:class:`PolynomialFeatures <sklearn.preprocessing.PolynomialFeatures>` [#]_
      - :py:func:`gurobi_ml.sklearn.add_polynomial_features_constr`
 
 Keras

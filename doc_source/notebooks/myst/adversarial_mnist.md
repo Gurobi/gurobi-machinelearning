@@ -238,4 +238,4 @@ print(f"Solution is classified as {nn.predict(example_mod)}")
 
 +++ {"tags": ["hide-input"]}
 
-copyright © 2022 Gurobi Optimization, LLC
+Copyright © 2022 Gurobi Optimization, LLC

@@ -151,5 +151,3 @@ output_vars.X
 ```{code-cell}
 y_examples
 ```
-
-Copyright @ Gurobi Optimization 2022
