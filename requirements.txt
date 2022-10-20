@@ -1,4 +1,3 @@
-gurobipy>=10.0.0b1
 ipywidgets
 matplotlib
 myst_nb
