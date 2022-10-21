@@ -35,7 +35,7 @@ class BaseNNConstr(AbstractPredictorConstr):
 
     def add_dense_layer(self, input_vars, layer_coefs, layer_intercept, activation, activation_vars=None, **kwargs):
         """Add a layer to model
-        
+
         Parameters
         ---------
 
@@ -59,7 +59,7 @@ class BaseNNConstr(AbstractPredictorConstr):
 
     def add_activation_layer(self, input_vars, activation, activation_vars=None, **kwargs):
         """Add a layer to model
-        
+
         Parameters
         ---------
 

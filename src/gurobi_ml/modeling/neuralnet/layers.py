@@ -22,7 +22,7 @@ class AbstractNNLayer(AbstractPredictorConstr):
 
     def print_stats(self, file=None):
         """Print statistics about submodel created
-        
+
         Parameters
         ---------
 
