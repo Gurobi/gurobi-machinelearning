@@ -3,8 +3,8 @@
 
 All linear models should work:
   * :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
-  * :external+sklearn:py:class:`sklearn.linear_model.RidgeRegression`
-  * :external+sklearn:py:class:`sklearn.linear_model.LassoRegression`
+  * :external+sklearn:py:class:`sklearn.linear_model.Ridge`
+  * :external+sklearn:py:class:`sklearn.linear_model.Lasso`
 
 Also does :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
 """
@@ -121,8 +121,8 @@ def add_linear_regression_constr(grbmodel, linear_regression, input_vars, output
     linear_regression: :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
         The linear regression to insert. It can be of any of the following types:
            * :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
-           * :external+sklearn:py:class:`sklearn.linear_model.RidgeRegression`
-           * :external+sklearn:py:class:`sklearn.linear_model.LassoRegression`
+           * :external+sklearn:py:class:`sklearn.linear_model.Ridge`
+           * :external+sklearn:py:class:`sklearn.linear_model.Lasso`
     input_vars: mvar_array_like
         Decision variables used as input for predictor in model.
     output_vars: mvar_array_like, optional
