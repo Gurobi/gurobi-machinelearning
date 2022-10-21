@@ -87,7 +87,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         )
 
     @staticmethod
-    def default_gc_attributes(self):
+    def default_gc_attributes():
         """Default attributes for approximating the logistic function in Gurobi"""
         return {"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 0.01, "FuncPieceRatio": -1.0}
 
