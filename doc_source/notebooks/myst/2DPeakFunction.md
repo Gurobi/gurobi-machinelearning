@@ -12,7 +12,7 @@ kernelspec:
   name: python3
 ---
 
-# Approximating nonlinear functions via neural networks
+# Surrogate functions
 
 Extra required packages:
 - matplotlib
