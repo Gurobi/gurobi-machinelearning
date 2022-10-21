@@ -11,18 +11,15 @@
 #
 import os
 import sys
+from pathlib import Path
+
+from sphinx_pyproject import SphinxConfig
 
 sys.path.insert(0, os.path.abspath("../../src/"))
-
-
 # -- Project information -----------------------------------------------------
+config = SphinxConfig("../../pyproject.toml", globalns=globals())
 
-project = "Gurobi Machine Learning"
 copyright = "2022, Gurobi Optimization, LLC. All Rights Reserved."
-author = "Pierre Bonami"
-
-# The full version, including alpha/beta/rc tags
-release = "1.0.0"
 html_logo = "_static/image8.png"
 
 # -- General configuration ---------------------------------------------------
@@ -42,6 +39,16 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "myst_nb",
 ]
+
+dep_versions = {
+    x.split("==")[0]: x.split("==")[1] for x in (Path().resolve().parent.parent / "requirements.tox.txt").read_text().split()
+}
+rst_epilog = f"""
+.. |PandasVersion| replace:: {dep_versions["pandas"]}
+.. |TorchVersion| replace:: {dep_versions["torch"]}
+.. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}
+.. |TensorflowVersion| replace:: {dep_versions["tensorflow"]}
+"""
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
