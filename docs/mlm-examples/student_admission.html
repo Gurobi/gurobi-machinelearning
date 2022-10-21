@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Enrollment &mdash; Gurobi Machine Learning  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/design-tabs.js"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Pricing and Supply problem" href="price_optimization.html" />
+    <link rel="prev" title="Adversarial Machine Learning" href="adversarial_mnist.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Gurobi Machine Learning
+            <img src="../_static/gurobi-logo-title.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0.dev1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Simple Usage Example</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../mlm-supported.html">Supported Regression models</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../mlm-examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="adversarial_mnist.html">Adversarial Machine Learning</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Student Enrollment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#importing-packages-and-retrieving-the-data">Importing packages and retrieving the data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fit-the-logistic-regression">Fit the logistic regression</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#optimization-model">Optimization Model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="price_optimization.html">Pricing and Supply problem</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Meta</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../meta-api.html">API Reference manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Gurobi Machine Learning</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../mlm-examples.html">Examples</a> &raquo;</li>
+      <li>Student Enrollment</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/mlm-examples/student_admission.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section class="tex2jax_ignore mathjax_ignore" id="student-enrollment">
+<h1>Student Enrollment<a class="headerlink" href="#student-enrollment" title="Permalink to this heading"></a></h1>
+<p>In this example, we show how to reproduce the model of student enrollment from
+<span id="id1">[<a class="reference internal" href="../meta-bibliography.html#id2" title="David Bergman, Teng Huang, Philip Brooks, Andrea Lodi, and Arvind U. Raghunathan. Janos: an integrated predictive and prescriptive modeling framework. INFORMS Journal on Computing, 34(2):807-816, 2022. URL: https://doi.org/10.1287/ijoc.2020.1023, arXiv:https://doi.org/10.1287/ijoc.2020.1023, doi:10.1287/ijoc.2020.1023.">BHB+22</a>]</span> with Gurobi Machine Learning.</p>
+<p>This model was developed in the context of the development of
+<a class="reference external" href="https://github.com/INFORMSJoC/2020.1023">Janos</a>, a toolkit similar to
+Gurobi Machine Learning to integrate ML models and Mathematical optimization.</p>
+<p>In this example, we illustrate in particular how to use the logistic regression and changing parameters
+to tune the piece wise linear approximation of the logistic function.
+We also show how to deal with fixed features in the optimization model using pandas data frames.</p>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h2>
+<p>In this model, data of students admissions in a college is used to predict the probability
+that a student enrolls to the college.</p>
+<p>The data has 3 features:
+the SAT and GPA scores of each student,
+and the scholarship (or merit) that was offered to each student.
+Finally, it is known if each student decided to join or not the college.</p>
+<p>Based on this data a logistic regression is trained to predict the probability that
+a student joins the college.</p>
+<p>Using this regression model, <span id="id2">[<a class="reference internal" href="../meta-bibliography.html#id2" title="David Bergman, Teng Huang, Philip Brooks, Andrea Lodi, and Arvind U. Raghunathan. Janos: an integrated predictive and prescriptive modeling framework. INFORMS Journal on Computing, 34(2):807-816, 2022. URL: https://doi.org/10.1287/ijoc.2020.1023, arXiv:https://doi.org/10.1287/ijoc.2020.1023, doi:10.1287/ijoc.2020.1023.">BHB+22</a>]</span> proposes the following student enrollment
+problem. The Admission Office has data for SAT and GPA scores of the admitted students for
+the incoming class, and they would want to offer scholarships to students with the goal of
+maximizing the expected number of students that enroll in the college. There is a total
+of <span class="math notranslate nohighlight">\(n\)</span> student that are admitted. The maximal
+budget for the sum of all scholarships offered is <span class="math notranslate nohighlight">\(0.2 n \, \text{K\$}\)</span> and each student can be offered a
+scholarship of at most <span class="math notranslate nohighlight">\(2.5 \, K\$\)</span>.</p>
+<p>This problem can be expressed as a mathematical optimization problem as follows.
+Two vectors of decision variables <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> of dimension <span class="math notranslate nohighlight">\(n\)</span> are used to model
+respectively the scholarship offered to each student in <span class="math notranslate nohighlight">\(K\$\)</span> and the probability
+that they join.
+Denoting by <span class="math notranslate nohighlight">\(g\)</span> the prediction function for the probability of the logistic regression we then have for each student <span class="math notranslate nohighlight">\(i\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[
+y_i = g(x_i, SAT_i, GPA_i),
+\]</div>
+<p>with <span class="math notranslate nohighlight">\(SAT_i\)</span> and <span class="math notranslate nohighlight">\(GPA_i\)</span> the (known) SAT and GPA score of each student.</p>
+<p>The objective is to maximize the sum of the <span class="math notranslate nohighlight">\(y\)</span> variables and the budget constraint imposes
+that the sum of the variables <span class="math notranslate nohighlight">\(x\)</span> is less or equal to <span class="math notranslate nohighlight">\(0.2n\)</span>. Also, each variable <span class="math notranslate nohighlight">\(x_i\)</span> is between 0 and 2.5.</p>
+<p>The full model then reads:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+&amp;\max \sum_{i=1}^n y_i \\
+&amp;\text{subject to:}\\
+&amp;\sum_{i=1}^n x_i \le 0.2*n,\\
+&amp;y_i = g(x_i, SAT_i, GPA_i) &amp; &amp; i = 1, \ldots, n,\\
+&amp; 0 \le x \le 2.5.
+\end{align}
+\end{split}\]</div>
+<p>Note that in this example differently to <span id="id3">[<a class="reference internal" href="../meta-bibliography.html#id2" title="David Bergman, Teng Huang, Philip Brooks, Andrea Lodi, and Arvind U. Raghunathan. Janos: an integrated predictive and prescriptive modeling framework. INFORMS Journal on Computing, 34(2):807-816, 2022. URL: https://doi.org/10.1287/ijoc.2020.1023, arXiv:https://doi.org/10.1287/ijoc.2020.1023, doi:10.1287/ijoc.2020.1023.">BHB+22</a>]</span> we scale the features for the regression.
+Also, to fit in Gurobi’s limited size license we only consider the problem where <span class="math notranslate nohighlight">\(n=250\)</span>.</p>
+<p>We note also that the model may differ from the objectives of Admission Offices and
+don’t encourage its use in real life. The example is for illustration purposes only.</p>
+</section>
+<section id="importing-packages-and-retrieving-the-data">
+<h2>Importing packages and retrieving the data<a class="headerlink" href="#importing-packages-and-retrieving-the-data" title="Permalink to this heading"></a></h2>
+<p>We import the necessary packages. Besides the usual (<code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">gurobipy</span></code>, <code class="docutils literal notranslate"><span class="pre">pandas</span></code>), for this we will use
+Scikit-learn’s Pipeline, StandardScaler and LogisticRegression.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">make_pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="kn">import</span> <span class="nn">gurobipy</span> <span class="k">as</span> <span class="nn">gp</span>
+<span class="kn">from</span> <span class="nn">gurobi_ml</span> <span class="kn">import</span> <span class="n">add_predictor_constr</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We now retrieve the historical data used to build the regression from Janos repository.</p>
+<p>The features we use for the regression are <code class="docutils literal notranslate"><span class="pre">&quot;merit&quot;</span></code> (scholarship), <code class="docutils literal notranslate"><span class="pre">&quot;SAT&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;GPA&quot;</span></code> and the target is <code class="docutils literal notranslate"><span class="pre">&quot;enroll&quot;</span></code>.
+We store those values.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Base URL for retrieving data</span>
+<span class="n">janos_data_url</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/INFORMSJoC/2020.1023/master/data/&#39;</span>
+<span class="n">historical_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">janos_data_url</span> <span class="o">+</span> <span class="s1">&#39;college_student_enroll-s1-1.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># classify our features between the ones that are fixed and the ones that will be</span>
+<span class="c1"># part of the optimization problem</span>
+<span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;merit&quot;</span><span class="p">,</span> <span class="s2">&quot;SAT&quot;</span><span class="p">,</span> <span class="s2">&quot;GPA&quot;</span><span class="p">]</span>
+<span class="n">target</span> <span class="o">=</span> <span class="s2">&quot;enroll&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="fit-the-logistic-regression">
+<h2>Fit the logistic regression<a class="headerlink" href="#fit-the-logistic-regression" title="Permalink to this heading"></a></h2>
+<p>For the regression, we use a pipeline with a standard scaler and a logistic regression.
+We build it using the <code class="docutils literal notranslate"><span class="pre">make_pipeline</span></code> from <code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run our regression</span>
+<span class="n">regression</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">historical_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">features</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">historical_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">target</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><style>#sk-container-id-1 {color: black;background-color: white;}#sk-container-id-1 pre{padding: 0;}#sk-container-id-1 div.sk-toggleable {background-color: white;}#sk-container-id-1 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-1 label.sk-toggleable__label-arrow:before {content: "▸";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-1 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-1 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-1 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: "▾";}#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-1 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-1 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-1 div.sk-parallel-item::after {content: "";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-serial::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-1 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-1 div.sk-item {position: relative;z-index: 1;}#sk-container-id-1 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-1 div.sk-item::before, #sk-container-id-1 div.sk-parallel-item::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-1 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-1 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-1 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-1 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-1 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-1 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-1 div.sk-label-container {text-align: center;}#sk-container-id-1 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-1 div.sk-text-repr-fallback {display: none;}</style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>Pipeline(steps=[(&#x27;standardscaler&#x27;, StandardScaler()),
+                (&#x27;logisticregression&#x27;, LogisticRegression(random_state=1))])</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" ><label for="sk-estimator-id-1" class="sk-toggleable__label sk-toggleable__label-arrow">Pipeline</label><div class="sk-toggleable__content"><pre>Pipeline(steps=[(&#x27;standardscaler&#x27;, StandardScaler()),
+                (&#x27;logisticregression&#x27;, LogisticRegression(random_state=1))])</pre></div></div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-2" type="checkbox" ><label for="sk-estimator-id-2" class="sk-toggleable__label sk-toggleable__label-arrow">StandardScaler</label><div class="sk-toggleable__content"><pre>StandardScaler()</pre></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-3" type="checkbox" ><label for="sk-estimator-id-3" class="sk-toggleable__label sk-toggleable__label-arrow">LogisticRegression</label><div class="sk-toggleable__content"><pre>LogisticRegression(random_state=1)</pre></div></div></div></div></div></div></div></div></div>
+</div>
+<section id="optimization-model">
+<h3>Optimization Model<a class="headerlink" href="#optimization-model" title="Permalink to this heading"></a></h3>
+<p>We now turn to building the mathematical optimization model for Gurobi.</p>
+<p>First, retrieve the data for the new students. We won’t use all the data there, we randomly pick 250 students from it.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Retrieve new data used to build the optimization problem</span>
+<span class="n">studentsdata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">janos_data_url</span> <span class="o">+</span> <span class="s1">&#39;college_applications6000.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">nstudents</span> <span class="o">=</span> <span class="mi">250</span>
+
+<span class="c1"># Select randomly nstudents in the data</span>
+<span class="n">studentsdata</span> <span class="o">=</span> <span class="n">studentsdata</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">nstudents</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>A non-trivial part of the model is the decision variables that we need for using Gurobi Machine Learning.</p>
+<p>In the mathematical formulation above, we only had two vectors of variables <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>.
+Then each student had associated its score <span class="math notranslate nohighlight">\(SAT_i\)</span> and <span class="math notranslate nohighlight">\(GPA_i\)</span> that were fixed parameters
+in the optimization.
+For the Gurobi model, we need to create a matrix of variables that also includes the values
+of <span class="math notranslate nohighlight">\(SAT\)</span> and <span class="math notranslate nohighlight">\(GPA\)</span> of each student. We will fix those variables by giving them the same
+lower bound and upper bound.</p>
+<p>Therefore, we need to build 2 matrices of variables, one for each set of bounds, and we
+need to make sure that they are in the same order as the regression model would expect.</p>
+<p>To do so, we use <code class="docutils literal notranslate"><span class="pre">pandas</span></code> data frames to construct those lower and upper bounds.</p>
+<p>To construct the lower bounds, we first make a copy of <code class="docutils literal notranslate"><span class="pre">studentsdata</span></code> and then add the
+<code class="docutils literal notranslate"><span class="pre">&quot;merit&quot;</span></code> column with a value of <span class="math notranslate nohighlight">\(0\)</span>. We then do the same for the upper bound, except that
+the value for <code class="docutils literal notranslate"><span class="pre">&quot;merit&quot;</span></code>is <span class="math notranslate nohighlight">\(2.5\)</span>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Construct lower bounds data frame</span>
+<span class="n">feat_lb</span> <span class="o">=</span> <span class="n">studentsdata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">feat_lb</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;merit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># Construct upper bounds data frame</span>
+<span class="n">feat_ub</span> <span class="o">=</span> <span class="n">studentsdata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">feat_ub</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;merit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.5</span>
+
+<span class="c1"># Make sure the columns are ordered in the same way as for the regression model.</span>
+<span class="n">feat_lb</span> <span class="o">=</span> <span class="n">feat_lb</span><span class="p">[</span><span class="n">features</span><span class="p">]</span>
+<span class="n">feat_ub</span> <span class="o">=</span> <span class="n">feat_ub</span><span class="p">[</span><span class="n">features</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can now create the variables for our model: <code class="docutils literal notranslate"><span class="pre">feature_vars</span></code> is initialized using the data frames we just created
+(be careful that they have to be converted to <code class="docutils literal notranslate"><span class="pre">numpy</span></code> arrays).</p>
+<p>For the rest of the model, we want to recover from the <code class="docutils literal notranslate"><span class="pre">feature_vars</span></code> matrix, the column corresponding to merit.
+With <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, we can use the <code class="docutils literal notranslate"><span class="pre">get_indexer</span></code> function to recover the index of this column in
+our <code class="docutils literal notranslate"><span class="pre">MVar</span></code> matrix.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start with classical part of the model</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="n">feature_vars</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addMVar</span><span class="p">(</span><span class="n">feat_lb</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">lb</span><span class="o">=</span><span class="n">feat_lb</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">ub</span><span class="o">=</span><span class="n">feat_ub</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;feats&quot;</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addMVar</span><span class="p">(</span><span class="n">nstudents</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">feature_vars</span><span class="p">[:,</span> <span class="n">feat_lb</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_indexer</span><span class="p">([</span><span class="s1">&#39;merit&#39;</span><span class="p">])][:,</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi 10.0.0 (beta1) - expires 2022-11-21
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Restricted license - for non-production use only - expires 2022-11-22
+</pre></div>
+</div>
+</div>
+</div>
+<p>We add the objective and the budget constraint:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">setObjective</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">gp</span><span class="o">.</span><span class="n">GRB</span><span class="o">.</span><span class="n">MAXIMIZE</span><span class="p">)</span>
+
+<span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">nstudents</span><span class="p">)</span>
+<span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Finally, we insert the constraints from the regression. Note that due to the shape of the <code class="docutils literal notranslate"><span class="pre">feature_vars</span></code> matrix and <code class="docutils literal notranslate"><span class="pre">y</span></code>, this will insert one regression constraint for each student.</p>
+<p>With the <code class="docutils literal notranslate"><span class="pre">print_stats</span></code> function we display what was added to the model.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pred_constr</span> <span class="o">=</span> <span class="n">add_predictor_constr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">pipe</span><span class="p">,</span> <span class="n">feature_vars</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="n">pred_constr</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model for PipelineConstr1:
+1000 variables
+1000 constraints
+250 general constraints
+Input has shape (250, 3)
+Output has shape (250, 1)
+
+Pipeline has 2 steps:
+standardscaler1 LogisticRegressionConstr1
+
+Model for standardscaler1:
+750 variables
+750 constraints
+Input has shape (250, 3)
+Output has shape (250, 3)
+
+Model for LogisticRegressionConstr1:
+250 variables
+250 constraints
+250 general constraints
+Input has shape (250, 3)
+Output has shape (250, 1)
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can now optimize the problem.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Optimize a model with 1001 rows, 2000 columns and 2750 nonzeros
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model fingerprint: 0x3421dd6a
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model has 250 general constraints
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Variable types: 2000 continuous, 0 integer (0 binary)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Coefficient statistics:
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Matrix range     [4e-01, 2e+02]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Objective range  [1e+00, 1e+00]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Bounds range     [4e-03, 2e+03]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  RHS range        [7e-01, 1e+03]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolve removed 806 rows and 1382 columns
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolve time: 0.01s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolved: 195 rows, 618 columns, 1140 nonzeros
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolved model has 83 SOS constraint(s)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Variable types: 611 continuous, 7 integer (7 binary)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Root relaxation: objective 1.482759e+02, 183 iterations, 0.00 seconds (0.00 work units)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>    Nodes    |    Current Node    |     Objective Bounds      |     Work
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  148.27594    0    1          -  148.27594      -     -    0s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                     148.0038404  148.27594  0.18%     -    0s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  148.23734    0    1  148.00384  148.23734  0.16%     -    0s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  148.23734    0    1  148.00384  148.23734  0.16%     -    0s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  148.23734    0    1  148.00384  148.23734  0.16%     -    0s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     2  148.23734    0    1  148.00384  148.23734  0.16%     -    0s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Explored 6817 nodes (33570 simplex iterations) in 0.49 seconds (0.31 work units)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Thread count was 8 (of 8 available processors)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Solution count 1: 148.004
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Optimal solution found (tolerance 1.00e-04)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Warning: max constraint violation (9.7002e-02) exceeds tolerance
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Warning: max general constraint violation (9.7002e-02) exceeds tolerance
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Piecewise linearization of function constraints often causes big violation.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Try to adjust the settings of the related parameters, such as FuncPieces.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Best objective 1.480038404441e+02, best bound 1.480038404441e+02, gap 0.0000%
+</pre></div>
+</div>
+</div>
+</div>
+<p>Remember that for the logistic regression, Gurobi does a piece wise linear approximation of the logistic function. We can therefore get some significant errors when comparing the results of the Gurobi model with what is predicted by the regression.</p>
+<p>We print the error. Here we need to use <code class="docutils literal notranslate"><span class="pre">get_error_proba</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error in approximating the regression </span><span class="si">{:.6}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pred_constr</span><span class="o">.</span><span class="n">get_error_proba</span><span class="p">()))))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Error in approximating the regression 0.0970018
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/sklearn/base.py:450: UserWarning: X does not have valid feature names, but StandardScaler was fitted with feature names
+  warnings.warn(
+</pre></div>
+</div>
+</div>
+</div>
+<p>The error we get might be considered too large, but we can use Gurobi parameters to
+tune the piece wise linear approximation made by Gurobi (at the expense of a harder models).</p>
+<p>The specific parameters are explained in the documentation of
+<a class="reference external" href="https://www.gurobi.com/documentation/9.1/refman/constraints.html#subsubsection:GenConstrFunction">Functions Constraints</a>
+in Gurobi’s manual.</p>
+<p>We can pass those parameters, to the <code class="docutils literal notranslate"><span class="pre">add_predictor_constr</span></code> function in the form of a dictionary with the keyword
+parameter <code class="docutils literal notranslate"><span class="pre">gc_attributes</span></code>.</p>
+<p>Now we want a more precise solution, so we remove the current constraint, add a new one that does a tighter approximation and resolve the model.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pred_constr</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+<span class="n">gc_attributes</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;FuncPieces&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;FuncPieceLength&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s2">&quot;FuncPieceError&quot;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="s2">&quot;FuncPieceRatio&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">}</span>
+<span class="n">pred_constr</span> <span class="o">=</span> <span class="n">add_predictor_constr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">pipe</span><span class="p">,</span> <span class="n">feature_vars</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">gc_attributes</span><span class="o">=</span><span class="n">gc_attributes</span><span class="p">)</span>
+
+<span class="n">m</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Optimize a model with 1001 rows, 2000 columns and 2750 nonzeros
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model fingerprint: 0xd8cec920
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model has 250 general constraints
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Variable types: 2000 continuous, 0 integer (0 binary)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Coefficient statistics:
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Matrix range     [4e-01, 2e+02]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Objective range  [1e+00, 1e+00]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  Bounds range     [4e-03, 2e+03]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  RHS range        [7e-01, 1e+03]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolve added 0 rows and 5525 columns
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolve removed 572 rows and 0 columns
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolve time: 0.04s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolved: 429 rows, 7525 columns, 21758 nonzeros
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Presolved model has 133 SOS constraint(s)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Variable types: 7511 continuous, 14 integer (14 binary)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Root relaxation: objective 1.485094e+02, 1552 iterations, 0.01 seconds (0.01 work units)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>    Nodes    |    Current Node    |     Objective Bounds      |     Work
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  148.50940    0    1          -  148.50940      -     -    0s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                     147.7599972  148.50940  0.51%     -    0s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  148.50940    0    1  147.75999  148.50940  0.51%     -    0s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H    0     0                     148.4931073  148.50940  0.01%     -    0s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     0     0  148.50940    0    1  148.49310  148.50940  0.01%     -    0s
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Explored 1 nodes (2093 simplex iterations) in 0.21 seconds (0.11 work units)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Thread count was 8 (of 8 available processors)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Solution count 2: 148.493 147.76
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Optimal solution found (tolerance 1.00e-04)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Warning: max constraint violation (6.4176e-05) exceeds tolerance
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Warning: max general constraint violation (6.4176e-05) exceeds tolerance
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Best objective 1.484931073566e+02, best bound 1.485055905401e+02, gap 0.0084%
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can see that the error has been reduced.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error in approximating the regression </span><span class="si">{:.6}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pred_constr</span><span class="o">.</span><span class="n">get_error_proba</span><span class="p">()))))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Error in approximating the regression 6.4176e-05
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/sklearn/base.py:450: UserWarning: X does not have valid feature names, but StandardScaler was fitted with feature names
+  warnings.warn(
+</pre></div>
+</div>
+</div>
+</div>
+<p>Copyright © 2022 Gurobi Optimization, LLC</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="adversarial_mnist.html" class="btn btn-neutral float-left" title="Adversarial Machine Learning" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="price_optimization.html" class="btn btn-neutral float-right" title="Pricing and Supply problem" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Gurobi Optimization, LLC. All Rights Reserved..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

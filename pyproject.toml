@@ -1,3 +1,32 @@
+[project]
+name = "gurobi-machinelearning"
+version = "1.0.0.dev1"
+description = "package to insert ML models in Gurobi"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "APACHE"}
+keywords = ["optimization", "mip", "lp", "gurobi", "scikit-learn", "pytorch", "tensorflow", "ml"]
+authors = [
+  {email = "bonami@gurobi.com"},
+  {name = "Pierre Bonami"}
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent"
+]
+
+dependencies = [
+  "numpy >= 1.22.0",
+  "gurobipy >= 10.0.0b1"
+]
+
+[project.urls]
+homepage = "https://github.com/Gurobi/gurobi-machinelearning"
+repository = "https://github.com/Gurobi/gurobi-machinelearning"
+"bug tracker" = "https://github.com/Gurobi/gurobi.machinelearning/issues"
+
+
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"

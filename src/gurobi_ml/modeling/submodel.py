@@ -52,17 +52,17 @@ class SubModel:
 
     my_sub_model = SubModel(model, ....., model_function=my_modeling_function, ....)
 
-    Indipendently of how you created your SubModel instance, you can remove
+    Independently of how you created your SubModel instance, you can remove
     the sub-model from the gurobipy.Model by calling the remove method:
 
     my_sub_model.remove()
 
-    You can always pass the named parameter name='my_name' to the consturctors
+    You can always pass the named parameter name='my_name' to the constructors
     of a submodel.  This name will be used to prefix the names of all the
-    modeling object that are being created during submodel construction. If
+    modeling objects that are being created during submodel construction. If
     no name is provided an automatic name is generated from a default name.
     The default name can be specified with the default_name parameter (mostly
-    useful with sub-classing); if not it is derived from the class name of
+    useful with sub-classing); if not, it is derived from the class name of
     your derived class, or the name of your model construction function.
     The only exception is the empty string name='' which is not used as a
     prefix.  This is usefull if the full model is built as a SubModel.
@@ -303,11 +303,11 @@ class SubModel:
         details about the structure of the additions (type of ML model,
         layers if it's a neural network,...)
 
-        Arguments
+        Parameters
         ---------
 
         file: None, optional
-        Text stream to which output should be redirected. By default sys.stdout.
+            Text stream to which output should be redirected. By default sys.stdout.
         """
         name = self._name
         if name == "":

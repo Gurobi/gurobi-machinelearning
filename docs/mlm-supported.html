@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supported Regression models &mdash; Gurobi Machine Learning  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+        <script src="_static/design-tabs.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="mlm-examples.html" />
+    <link rel="prev" title="Simple Usage Example" href="firststeps-simple-example.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Gurobi Machine Learning
+            <img src="_static/gurobi-logo-title.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0.dev1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="firststeps-introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firststeps-simple-example.html">Simple Usage Example</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Supported Regression models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Scikit-learn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">Keras</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">PyTorch</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mlm-examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Meta</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="meta-api.html">API Reference manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meta-bibliography.html">Bibliography</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Gurobi Machine Learning</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Supported Regression models</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/mlm-supported.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="supported-regression-models">
+<h1>Supported Regression models<a class="headerlink" href="#supported-regression-models" title="Permalink to this heading"></a></h1>
+<p>The package currently support various <a class="reference external" href="https://scikit-learn.org/stable/">scikit-learn</a> objects.
+It also has limited support
+for <a class="reference external" href="https://keras.io/">Keras</a> and <a class="reference external" href="https://pytorch.org/">PyTorch</a>.
+Only sequential neural networks with ReLU activation function are currently supported.</p>
+<table class="colwidths-given docutils align-default" id="id9">
+<caption><span class="caption-text">The following packages are supported in the current version (1.0.0.dev1)</span><a class="headerlink" href="#id9" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Package</p></th>
+<th class="head"><p>Version</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pandas</span></code></p></td>
+<td><p>1.5.1</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">torch</span></code></p></td>
+<td><p>1.12.1</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code></p></td>
+<td><p>1.1.2</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tensorflow</span></code></p></td>
+<td><p>2.10.0</p></td>
+</tr>
+</tbody>
+</table>
+<section id="id1">
+<h2>Scikit-learn<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<p>The following tables list the name of the models supported,
+the name of the corresponding object in the python framework,
+and the function that can be used to insert it in a Gurobi model.</p>
+<table class="colwidths-given docutils align-default" id="id10">
+<caption><span class="caption-text">Supported regression models of <a class="reference external" href="https://scikit-learn.org/stable/user_guide.html" title="(in scikit-learn v1.1)"><span class="xref std std-doc">scikit-learn</span></a></span><a class="headerlink" href="#id10" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Regression Model</p></th>
+<th class="head"><p>Scikit-learn object</p></th>
+<th class="head"><p>Function to insert</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Ordinary Least Square</p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearRegression</span></code></a></p></td>
+<td><p><a class="reference internal" href="api/LinearRegressionConstr.html#gurobi_ml.sklearn.add_linear_regression_constr" title="gurobi_ml.sklearn.add_linear_regression_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_linear_regression_constr</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Logistic regression</p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogisticRegression</span></code></a></p></td>
+<td><p><a class="reference internal" href="api/LogisticRegressionConstr.html#gurobi_ml.sklearn.add_logistic_regression_constr" title="gurobi_ml.sklearn.add_logistic_regression_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_logistic_regression_constr</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p>Neural-network <a class="footnote-reference brackets" href="#id7" id="id2">1</a></p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html#sklearn.neural_network.MLPRegressor" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLPRegressor</span></code></a></p></td>
+<td><p><a class="reference internal" href="api/MlpRegressorConstr.html#gurobi_ml.sklearn.add_mlp_regressor_constr" title="gurobi_ml.sklearn.add_mlp_regressor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_mlp_regressor_constr</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Decision tree</p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html#sklearn.tree.DecisionTreeRegressor" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DecisionTreeRegressor</span></code></a></p></td>
+<td><p><a class="reference internal" href="api/DecisionTreeRegressorConstr.html#gurobi_ml.sklearn.add_decision_tree_regressor_constr" title="gurobi_ml.sklearn.add_decision_tree_regressor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_decision_tree_regressor_constr</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p>Gradient boosting</p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html#sklearn.ensemble.GradientBoostingRegressor" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GradientBoostingRegressor</span></code></a></p></td>
+<td><p><a class="reference internal" href="api/GradientBoostingRegressorConstr.html#gurobi_ml.sklearn.add_gradient_boosting_regressor_constr" title="gurobi_ml.sklearn.add_gradient_boosting_regressor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_gradient_boosting_regressor_constr</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Random Forest</p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html#sklearn.ensemble.RandomForestRegressor" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RandomForestRegressor</span></code></a></p></td>
+<td><p><a class="reference internal" href="api/RandomForestRegressorConstr.html#gurobi_ml.sklearn.add_random_forest_regressor_constr" title="gurobi_ml.sklearn.add_random_forest_regressor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_random_forest_regressor_constr</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<table class="colwidths-given docutils align-default" id="id11">
+<caption><span class="caption-text">Transformers in <a class="reference external" href="https://scikit-learn.org/stable/user_guide.html" title="(in scikit-learn v1.1)"><span class="xref std std-doc">scikit-learn</span></a></span><a class="headerlink" href="#id11" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Transformer</p></th>
+<th class="head"><p>Scikit-learn object</p></th>
+<th class="head"><p>Function to insert</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>StandardScaler</p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html#sklearn.preprocessing.StandardScaler" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StandardScaler</span></code></a></p></td>
+<td><p><a class="reference internal" href="api/StandardScalerConstr.html#gurobi_ml.sklearn.add_standard_scaler_constr" title="gurobi_ml.sklearn.add_standard_scaler_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.sklearn.add_standard_scaler_constr()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Pipeline</p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html#sklearn.pipeline.Pipeline" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a></p></td>
+<td><p><a class="reference internal" href="api/PipelineConstr.html#gurobi_ml.sklearn.add_pipeline_constr" title="gurobi_ml.sklearn.add_pipeline_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.sklearn.add_pipeline_constr()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p>PolynomialFeatures</p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PolynomialFeatures.html#sklearn.preprocessing.PolynomialFeatures" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolynomialFeatures</span></code></a> <a class="footnote-reference brackets" href="#id8" id="id3">2</a></p></td>
+<td><p><a class="reference internal" href="api/PolynomialFeaturesConstr.html#gurobi_ml.sklearn.add_polynomial_features_constr" title="gurobi_ml.sklearn.add_polynomial_features_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.sklearn.add_polynomial_features_constr()</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id4">
+<h2>Keras<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="https://keras.io/">Keras</a> neural networks generated either using the <a class="reference external" href="https://keras.io/guides/functional_api/">functional API</a>,
+<a class="reference external" href="https://keras.io/guides/making_new_layers_and_models_via_subclassing/">subclassing model</a> or the
+<a class="reference external" href="https://keras.io/api/models/sequential/">Sequential</a> class.</p>
+<p>They can be embedded in a Gurobi model with the function <a class="reference internal" href="api/KerasConstr.html#gurobi_ml.keras.add_keras_constr" title="gurobi_ml.keras.add_keras_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.keras.add_keras_constr()</span></code></a>.</p>
+<p>Currently, only two types of layers are supported:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://keras.io/api/layers/core_layers/dense/">Dense layers</a> (possibly with <cite>relu</cite> activation),</p></li>
+<li><p><a class="reference external" href="https://keras.io/api/layers/activation_layers/relu/">ReLU layers</a> with default settings.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id6">
+<h2>PyTorch<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h2>
+<p>In PyTorch, only <a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Sequential.html#torch.nn.Sequential" title="(in PyTorch vmaster (1.14.0a0+git894c421 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code></a> objects are supported.</p>
+<p>They can be embedded in a Gurobi model with the function <a class="reference internal" href="api/SequentialConstr.html#gurobi_ml.torch.add_sequential_constr" title="gurobi_ml.torch.add_sequential_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.torch.add_sequential_constr()</span></code></a>.</p>
+<p>Currently, only two types of layers are supported:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Linear.html#torch.nn.Linear" title="(in PyTorch vmaster (1.14.0a0+git894c421 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">Linear</span> <span class="pre">layers</span></code></a>,</p></li>
+<li><p><a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.ReLU.html#torch.nn.ReLU" title="(in PyTorch vmaster (1.14.0a0+git894c421 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReLU</span> <span class="pre">layers</span></code></a>.</p></li>
+</ul>
+</div></blockquote>
+<p class="rubric">Footnotes</p>
+<dl class="footnote brackets">
+<dt class="label" id="id7"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
+<dd><p>Only networks with <cite>“relu”</cite> activation for hidden layers and <cite>‘identity’</cite> for the output layer.</p>
+</dd>
+<dt class="label" id="id8"><span class="brackets"><a class="fn-backref" href="#id3">2</a></span></dt>
+<dd><p>Only polynomial features of degree 2.</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="firststeps-simple-example.html" class="btn btn-neutral float-left" title="Simple Usage Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mlm-examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Gurobi Optimization, LLC. All Rights Reserved..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

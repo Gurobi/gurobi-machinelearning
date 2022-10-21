@@ -4,11 +4,12 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PipelineConstr &mdash; Gurobi Machine Learning 1.0.0 documentation</title>
+  <title>Pipeline &mdash; Gurobi Machine Learning  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -20,11 +21,12 @@
         <script src="../_static/doctools.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
+        <script src="../_static/design-tabs.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="PolynomialFeaturesConstr" href="PolynomialFeaturesConstr.html" />
-    <link rel="prev" title="MLPRegressorConstr" href="MlpRegressorConstr.html" />
+    <link rel="next" title="Polynomial Features" href="PolynomialFeaturesConstr.html" />
+    <link rel="prev" title="MLP Regressor" href="MlpRegressorConstr.html" />
 </head>
 
 <body class="wy-body-for-nav">
@@ -33,8 +35,11 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
             <a href="../index.html" class="icon icon-home"> Gurobi Machine Learning
-            <img src="../_static/image8.png" class="logo" alt="Logo"/>
+            <img src="../_static/gurobi-logo-title.png" class="logo" alt="Logo"/>
           </a>
+              <div class="version">
+                1.0.0.dev1
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -43,37 +48,37 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Simple Usage Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supported.html">Supported Regression models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference manual</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="add_predictor_constr.html">add_predictor_constr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="AbstractPredictorConstr.html">AbstractPredictorConstr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="DecisionTreeRegressorConstr.html">DecisionTreeRegressorConstr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="GradientBoostingRegressorConstr.html">GradientBoostingRegressorConstr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="KerasConstr.html">KerasConstr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="LinearRegressionConstr.html">LinearRegressionConstr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="LogisticRegressionConstr.html">LogisticRegressionConstr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="MlpRegressorConstr.html">MLPRegressorConstr</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">PipelineConstr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="PolynomialFeaturesConstr.html">PolynomialFeaturesConstr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RandomForestRegressorConstr.html">RandomForestRegressorConstr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="SequentialConstr.html">SequentialConstr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="StandardScalerConstr.html">StandardScalerConstr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_decision_tree_regressor_constr.html">add_decision_tree_regressor_constr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_gradient_boosting_regressor_constr.html">add_gradient_boosting_regressor_constr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_keras_constr.html">add_keras_constr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_linear_regression_constr.html">add_linear_regression_constr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_logistic_regression_constr.html">add_logistic_regression_constr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_mlp_regressor_constr.html">add_mlp_regressor_constr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_pipeline_constr.html">add_pipeline_constr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_polynomial_features_constr.html">add_polynomial_features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_random_forest_regressor_constr.html">add_random_forest_regressor_constr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_sequential_constr.html">add_sequential_constr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_standard_scaler_constr.html">add_standard_scaler_constr</a></li>
+              <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Simple Usage Example</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mlm-supported.html">Supported Regression models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mlm-examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Meta</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../meta-api.html">API Reference manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="AbstractPredictorConstr.html">Generic Predictor Function</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../sklearn.html">Scikit-learn regression models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="DecisionTreeRegressorConstr.html">Decision Tree Regressor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GradientBoostingRegressorConstr.html">Gradient Boosting Regressor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LinearRegressionConstr.html">Linear Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LogisticRegressionConstr.html">Logistic Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MlpRegressorConstr.html">MLP Regressor</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PolynomialFeaturesConstr.html">Polynomial Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RandomForestRegressorConstr.html">RandomForestRegressorConstr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="StandardScalerConstr.html">Standard Scaler</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="KerasConstr.html">Keras Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SequentialConstr.html">Pytorch Sequential</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
 </ul>
 
         </div>
@@ -90,8 +95,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">API Reference manual</a> &raquo;</li>
-      <li>PipelineConstr</li>
+          <li><a href="../meta-api.html">API Reference manual</a> &raquo;</li>
+          <li><a href="../sklearn.html">Scikit-learn regression models</a> &raquo;</li>
+      <li>Pipeline</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/PipelineConstr.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -101,52 +107,43 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
 
-  <section id="pipelineconstr">
-<h1>PipelineConstr<a class="headerlink" href="#pipelineconstr" title="Permalink to this heading"></a></h1>
+  <section id="pipeline">
+<h1>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="gurobi_ml.sklearn.add_pipeline_constr">
+<span class="sig-prename descclassname"><span class="pre">gurobi_ml.sklearn.</span></span><span class="sig-name descname"><span class="pre">add_pipeline_constr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grbmodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.add_pipeline_constr" title="Permalink to this definition"></a></dt>
+<dd><p>Use a <cite>pipeline</cite> to predict the value of <cite>output_vars</cite> using <cite>input_vars</cite> in <cite>grbmodel</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grbmodel</strong> (<a class="reference external" href="https://www.gurobi.com/documentation/9.5/refman/py_model.html">gp.Model</a>) – The gurobipy model where the predictor should be inserted.</p></li>
+<li><p><strong>pipeline</strong> (<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html#sklearn.pipeline.Pipeline" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.pipeline.Pipeline</span></code></a>) – The pipeline to insert as predictor.</p></li>
+<li><p><strong>input_vars</strong> (<em>mvar_array_like</em>) – Decision variables used as input for predictor in model.</p></li>
+<li><p><strong>output_vars</strong> (<em>mvar_array_like</em><em>, </em><em>optional</em>) – Decision variables used as output for predictor in model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object containing information about what was added to model to insert the
+predictor in it</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#gurobi_ml.sklearn.PipelineConstr" title="gurobi_ml.sklearn.PipelineConstr">PipelineConstr</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>NoModel</strong> – If the translation to Gurobi of one of the elements in the pipeline
+    is not implemented or recognized.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>See <a class="reference internal" href="AbstractPredictorConstr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_predictor_constr</span></code></a> for acceptable values for input_vars and output_vars</p>
+</div>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gurobi_ml.sklearn.</span></span><span class="sig-name descname"><span class="pre">PipelineConstr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grbmodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr" title="Permalink to this definition"></a></dt>
 <dd><p>Use a scikit-learn pipeline to build constraints in Gurobi model.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.get_error">
-<span class="sig-name descname"><span class="pre">get_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.get_error" title="Permalink to this definition"></a></dt>
-<dd><p>Returns error in Gurobi’s solution with respect to prediction from input</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Assuming that we have a solution for the input and output variables
-<cite>x, y</cite>. Returns the difference between <cite>predict(x)</cite> and
-<cite>y</cite>, where predict is the corresponding function for the Scikit-Learn
-object we are modeling.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float</p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><strong>NoSolution</strong> – If the Gurobi model has no solution (either was not optimized or is infeasible).</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.get_error_proba">
-<span class="sig-name descname"><span class="pre">get_error_proba</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.get_error_proba" title="Permalink to this definition"></a></dt>
-<dd><p>Same as get_error but using predict_proba</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Assuming that we have a solution for the input and output variables
-<cite>x, y</cite>. Returns the difference between <cite>predict_proba(x)</cite> and
-<cite>y</cite>, where predict is the corresponding function for the Scikit-Learn
-object we are modeling.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float</p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><strong>NoSolution</strong> – If the Gurobi model has no solution (either was not optimized or is infeasible).</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.print_stats">
 <span class="sig-name descname"><span class="pre">print_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.print_stats" title="Permalink to this definition"></a></dt>
@@ -163,60 +160,6 @@ layers if it’s a neural network,…)</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.remove">
-<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.remove" title="Permalink to this definition"></a></dt>
-<dd><p>Remove the submodel from the model</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.constrs">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constrs</span></span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.constrs" title="Permalink to this definition"></a></dt>
-<dd><p>Return the list of linear constraints in the submodel.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.genconstrs">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">genconstrs</span></span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.genconstrs" title="Permalink to this definition"></a></dt>
-<dd><p>Return the list of general constraints in the submodel.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.input">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input</span></span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.input" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the input variables of embeded predictor</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.model">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.model" title="Permalink to this definition"></a></dt>
-<dd><p>Access model the submodel is a part of</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.output">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output</span></span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.output" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the output variables of embeded predictor</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.qconstrs">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qconstrs</span></span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.qconstrs" title="Permalink to this definition"></a></dt>
-<dd><p>Return the list of quadratic constraints in the submodel.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.sos">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sos</span></span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.sos" title="Permalink to this definition"></a></dt>
-<dd><p>Return the list of SOS constraints in the submodel.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="gurobi_ml.sklearn.PipelineConstr.vars">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vars</span></span><a class="headerlink" href="#gurobi_ml.sklearn.PipelineConstr.vars" title="Permalink to this definition"></a></dt>
-<dd><p>Return the list of variables in the submodel.</p>
-</dd></dl>
-
 </dd></dl>
 
 </section>
@@ -225,8 +168,8 @@ layers if it’s a neural network,…)</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="MlpRegressorConstr.html" class="btn btn-neutral float-left" title="MLPRegressorConstr" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="PolynomialFeaturesConstr.html" class="btn btn-neutral float-right" title="PolynomialFeaturesConstr" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="MlpRegressorConstr.html" class="btn btn-neutral float-left" title="MLP Regressor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="PolynomialFeaturesConstr.html" class="btn btn-neutral float-right" title="Polynomial Features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
