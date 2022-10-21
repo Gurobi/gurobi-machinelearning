@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.abspath("../../src/"))
 # -- Project information -----------------------------------------------------
 config = SphinxConfig("../../pyproject.toml", globalns=globals())
 
+project = "Gurobi Machine Learning"
 copyright = "2022, Gurobi Optimization, LLC. All Rights Reserved."
 html_logo = "_static/image8.png"
 
