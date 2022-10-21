@@ -2,7 +2,7 @@ Supported Regression models
 ===========================
 
 The package currently support various `scikit-learn <https://scikit-learn.org/stable/>`_ objects.
-It also  has limited support
+It also has limited support
 for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_.
 Only sequential neural networks with ReLU activation function are currently supported.
 

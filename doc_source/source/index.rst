@@ -6,7 +6,7 @@
 Welcome to Gurobi Machine Learning!
 ===================================
 
-Gurobi Machine Learning is a Python package to help using *trained* regression models in
+Gurobi Machine Learning is a Python package to help use *trained* regression models in
 mathematical optimization models. The package supports a variety of regression models
 (linear, logistic, neural networks, decision trees,...) trained by
 different machine learning frameworks (scikit-learn, Keras and PyTorch). They are inserted in a
@@ -75,11 +75,14 @@ of the regression.
 
 The modeling object can perform a few tasks:
 
-   * Everything it created (i.e. variables and constraints to establish the relationship between input and output)
-     can be removed with the :py:meth:`remove <gurobi_ml.modeling.AbstractPredictorConstr.remove>` function.
-   * It can print a summary of what it added with the :py:meth:`print_stats <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` function.
-   * Once Gurobi computed a solution to the optimization problem, it can compute the difference between what the regression
-     model predicts from the input values and the actual values of the output in Gurobi's solution with the
+   * Everything it created (i.e. variables and constraints to establish the relationship
+     between input and output) can be removed with the
+     :py:meth:`remove <gurobi_ml.modeling.AbstractPredictorConstr.remove>` function.
+   * It can print a summary of what it added with the
+     :py:meth:`print_stats <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` function.
+   * Once Gurobi computed a solution to the optimization problem, it can compute the difference
+     between what the regression model predicts from the input values and the actual values
+     of the output in Gurobi's solution with the
      :py:meth:`get_error <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` function.
 
 
