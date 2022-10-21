@@ -29,7 +29,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
     @staticmethod
-    def default_gc_attributes(self):
+    def default_gc_attributes():
         """Default attributes for approximating the decision tree regressor in Gurobi"""
         return {"eps": 1e-6, "scale": 1.0, "float_type": np.float32}
 
