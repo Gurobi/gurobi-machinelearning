@@ -1,5 +1,5 @@
 # Copyright © 2022 Gurobi Optimization, LLC
-""" Module for insterting simple Scikit-Learn regression models into a gurobipy model
+""" Module for inserting simple Scikit-Learn regression models into a gurobipy model
 
 All linear models should work:
   * :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`

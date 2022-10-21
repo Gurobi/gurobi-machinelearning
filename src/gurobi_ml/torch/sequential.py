@@ -1,7 +1,7 @@
 # Copyright © 2022 Gurobi Optimization, LLC
 # pylint: disable=C0103
 
-""" Module for insterting a :external+torch:py:class:`torch.nn.Sequential` model into a gurobipy model
+""" Module for inserting a :external+torch:py:class:`torch.nn.Sequential` model into a gurobipy model
 """
 
 import torch
@@ -12,7 +12,7 @@ from ..modeling.neuralnet import BaseNNConstr
 
 
 class SequentialConstr(BaseNNConstr):
-    """Transform a pytorch Sequential Neural Network to Gurboi constraint with
+    """Transform a pytorch Sequential Neural Network to Gurobi constraint with
     input and output as matrices of variables."""
 
     def __init__(self, grbmodel, predictor, input_vars, output_vars, clean_regressor=False):

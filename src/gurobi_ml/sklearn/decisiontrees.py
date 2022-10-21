@@ -1,5 +1,5 @@
 # Copyright © 2022 Gurobi Optimization, LLC
-""" Module for insterting decision tree based regressor into a gurobipy model.
+""" Module for inserting decision tree based regressor into a gurobipy model.
 """
 
 import numpy as np
@@ -13,10 +13,12 @@ from .skgetter import SKgetter
 class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model a trained decision tree in a Gurobi model"""
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars, eps=1e-6, scale=1.0, float_type=np.float32, **kwargs):
-        self.eps = eps
-        self.scale = scale
-        self.float_type = float_type
+    def __init__(self, grbmodel, predictor, input_vars, output_vars, gc_attributes=None, **kwargs):
+        if gc_attributes is None:
+            self.attributes = self.default_gc_attributes()
+        else:
+            self.attributes = gc_attributes
+
         self.n_outputs_ = predictor.n_outputs_
         if predictor.n_outputs_ != 1:
             raise NoModel(
@@ -25,6 +27,11 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
             )
         SKgetter.__init__(self, predictor)
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
+
+    @staticmethod
+    def default_gc_attributes(self):
+        """Default attributes for approximating the decision tree regressor in Gurobi"""
+        return {"eps": 1e-6, "scale": 1.0, "float_type": np.float32}
 
     def _mip_model(self):
         tree = self.predictor.tree_
@@ -51,8 +58,8 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         for node in range(tree.capacity):
             left = tree.children_left[node]
             right = tree.children_right[node]
-            threshold = self.float_type(tree.threshold[node])
-            scale = max(abs(1 / threshold), self.scale)
+            threshold = self.attributes["float_type"](tree.threshold[node])
+            scale = max(abs(1 / threshold), self.attributes["scale"])
             scale = 1
             if left >= 0:
                 model.addConstrs(
@@ -60,7 +67,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                     for k in range(nex)
                 )
                 model.addConstrs(
-                    (nodes[k, right].item() == 1) >> (scale * _input[k, tree.feature[node]] >= scale * threshold + self.eps)
+                    (nodes[k, right].item() == 1) >> (scale * _input[k, tree.feature[node]] >= scale * threshold + self.attributes["eps"])
                     for k in range(nex)
                 )
             else:
@@ -148,7 +155,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         model.addConstr(predictor.n_estimators * output[:, 0] == treevars.sum(axis=1))
 
 
-def add_decision_tree_regressor_constr(grbmodel, decision_tree_regressor, input_vars, output_vars=None, **kwargs):
+def add_decision_tree_regressor_constr(grbmodel, decision_tree_regressor, input_vars, output_vars=None, gc_attributes=None, **kwargs):
     """Use a `decision_tree_regressor` to predict the value of `output_vars` using `input_vars` in `grbmodel`
 
     Parameters
@@ -161,6 +168,9 @@ def add_decision_tree_regressor_constr(grbmodel, decision_tree_regressor, input_
         Decision variables used as input for predictor in model.
     output_vars: mvar_array_like, optional
         Decision variables used as output for predictor in model.
+    gc_attributes: dict, optional
+        Dictionary for non-default attributes to build the decision tree regressor
+        constraint in Gurobi.
 
     Returns
     -------
@@ -172,7 +182,7 @@ def add_decision_tree_regressor_constr(grbmodel, decision_tree_regressor, input_
     ----
     See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
     """
-    return DecisionTreeRegressorConstr(grbmodel, decision_tree_regressor, input_vars, output_vars, **kwargs)
+    return DecisionTreeRegressorConstr(grbmodel, decision_tree_regressor, input_vars, output_vars, gc_attributes=gc_attributes, **kwargs)
 
 
 def add_gradient_boosting_regressor_constr(grbmodel, gradient_boosting_regressor, input_vars, output_vars=None, **kwargs):

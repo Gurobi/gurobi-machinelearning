@@ -1,5 +1,5 @@
 # Copyright © 2022 Gurobi Optimization, LLC
-""" Module for insterting an :external+sklearn:py:class:`sklearn.pipeline.Pipeline` into a gurobipy model
+""" Module for inserting an :external+sklearn:py:class:`sklearn.pipeline.Pipeline` into a gurobipy model
 """
 
 

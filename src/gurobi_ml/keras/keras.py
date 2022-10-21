@@ -1,6 +1,6 @@
 # Copyright © 2022 Gurobi Optimization, LLC
 
-""" Module for insterting a Keras model into a gurobipy model
+""" Module for inserting a Keras model into a gurobipy model
 """
 
 
@@ -94,7 +94,7 @@ def add_keras_constr(grbmodel, keras_model, input_vars, output_vars=None, **kwar
     Parameters
     ----------
     grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-              The gurobipy model where the predictor should be inserted.
+        The gurobipy model where the predictor should be inserted.
     keras_model: `keras.Model <https://keras.io/api/models/model/>`
         The keras model to insert as predictor.
     input_vars: mvar_array_like

@@ -1,5 +1,5 @@
 # Copyright © 2022 Gurobi Optimization, LLC
-""" Module for insterting an :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` into a gurobipy model
+""" Module for inserting an :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` into a gurobipy model
 """
 from ..exceptions import NoModel
 from ..modeling.neuralnet import BaseNNConstr
