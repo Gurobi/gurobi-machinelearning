@@ -55,6 +55,20 @@ The easiest way to install `gurobi-machinelearning` is using `pip` in a virtual 
 (.venv) pip install gurobi-machinelearning
 ```
 
+# Getting a Gurobi License
+`gurobi-machinelearning` comes bundled with a trial Gurobi license that allows you to solve problems of limited size.
+As a student or staff member of an academic institution you qualify for a free, full product license.
+For more information, see:
+
+* https://www.gurobi.com/academia/academic-program-and-licenses/
+
+For a commercial evaluation, you can
+[request an evaluation license](https://www.gurobi.com/free-trial/?utm_source=internal&utm_medium=documentation&utm_campaign=fy21_pipinstall_eval_pypipointer&utm_content=c_na&utm_term=pypi).
+
+Other useful resources to get started:
+* https://www.gurobi.com/documentation/
+* https://support.gurobi.com/hc/en-us/community/topics/
+
 # Development
 We value any level of experience in using Gurobi Machine Learning and would like to encourage you to
 contribute directly to this project. Please see the [Contributing Guide](CONTRIBUTING.md) for more information.
