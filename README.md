@@ -42,11 +42,15 @@ Our documentation contains more detailed information on the
 `gurobi-machinelearning` requires the following:
 - Python >= 3.9
 - [`numpy`](https://pypi.org/project/numpy/) >= 1.22.0
+- [`gurobipy`](https://pypi.org/project/gurobipy/) >= 10.0
 
 The current version supports the following ML package versions:
 - [`torch`](https://pypi.org/project/torch/1.12.1/) == 1.12.1
 - [`scikit-learn`](https://pypi.org/project/scikit-learn/1.1.2/) == 1.1.2
 - [`tensorflow`](https://pypi.org/project/tensorflow/2.10.0/) == 2.10.0
+
+Note that installing those package is only required if the predictor you want to insert uses them
+(i.e. to insert a Keras based predictor you need to have `tensorflow` installed).
 
 ## Pip installation
 
