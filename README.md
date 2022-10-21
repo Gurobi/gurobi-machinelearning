@@ -37,7 +37,6 @@ Our documentation contains more detailed information on the
 
 # Installation
 
----
 ## Dependencies
 
 `gurobi-machinelearning` requires the following:
@@ -57,8 +56,6 @@ The easiest way to install `gurobi-machinelearning` is using `pip` in a virtual 
 ```
 
 # Development
-
----
 We value any level of experience in using Gurobi Machine Learning and would like to encourage you to
 contribute directly to this project. Please see the [Contributing Guide](CONTRIBUTING.md) for more information.
 
