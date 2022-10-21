@@ -10,6 +10,8 @@ different machine learning frameworks (scikit-learn, Keras and PyTorch). They ar
 to be solved with the `Gurobi <https://www.gurobi.com>`_ solver.
 
 
+
+
 .. button-link:: firststeps-introduction
        :color: primary
        :class: sd-rounded-pill
@@ -18,10 +20,9 @@ to be solved with the `Gurobi <https://www.gurobi.com>`_ solver.
        Get Started
 
 
-Contents
---------
 .. toctree::
    :maxdepth: 2
+   :hidden:
    :caption: Basics
 
    firststeps-introduction
@@ -29,6 +30,7 @@ Contents
 
 .. toctree::
    :maxdepth: 2
+   :hidden:
    :caption: Machine Learning Models
 
    mlm-supported
@@ -36,15 +38,8 @@ Contents
 
 .. toctree::
    :maxdepth: 2
+   :hidden:
    :caption: Meta
 
    meta-api
    meta-bibliography
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
