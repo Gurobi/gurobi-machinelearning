@@ -40,7 +40,7 @@ import gurobipy as gp
 from gurobi_ml import add_predictor_constr
 ```
 
-We start by building artificial data for training our regressions. We use _make_regression_ to obtain
+We start by building artificial data for training our regressions. To do so, we use _make_regression_ to obtain
 data with 10 features.
 
 ```{code-cell}
@@ -55,7 +55,7 @@ nn = MLPRegressor([20]*2, max_iter=10000, random_state=1)
 nn.fit(X, y)
 ```
 
-We now turn to the optimization model. In the spirit of adverserial machine learning examples, we use some training examples.
+We now turn to the optimization model. In the spirit of adversarial machine learning examples, we use some training examples.
 We pick $n$ training examples randomly. For each of the examples, we want to find an input that is in a small neighborhood of it that leads to the output that is closer to $0$ with the regression.
 
 Denoting by $X^E$ our set of examples and by $g$ the prediction function of our regression model, our optimization problem reads:
@@ -109,7 +109,7 @@ The member function `print_stats` of the modeling object outputs the details of 
 pred_constr.print_stats()
 ```
 
-To finish the model, we set the objective and then we can optimize it.
+To finish the model, we set the objective, and then we can optimize it.
 
 ```{code-cell}
 :tags: [hide-input]

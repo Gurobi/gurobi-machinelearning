@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.abspath("../../src/"))
 # -- Project information -----------------------------------------------------
 config = SphinxConfig("../../pyproject.toml", globalns=globals())
 
+project = "Gurobi Machine Learning"
 copyright = "2022, Gurobi Optimization, LLC. All Rights Reserved."
 html_logo = "_static/image8.png"
 
@@ -35,6 +36,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
+    "sphinxcontrib.bibtex",
     "sphinx.ext.autosectionlabel",
     "myst_nb",
 ]
@@ -80,3 +82,5 @@ myst_enable_extensions = [
 html_static_path = ["_static"]
 autodoc_member_order = "groupwise"
 autodoc_mock_imports = ["torch", "tensorflow"]
+
+bibtex_bibfiles = ["refs.bib"]

@@ -2,7 +2,6 @@ ipywidgets
 matplotlib
 myst_nb
 notebook
-numpy>=1.22.0
 pandas
 seaborn
 Sphinx
