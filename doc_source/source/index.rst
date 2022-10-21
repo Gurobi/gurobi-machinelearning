@@ -12,7 +12,7 @@ to be solved with the `Gurobi <https://www.gurobi.com>`_ solver.
 
 
 
-.. button-link:: firststeps-introduction
+.. button-link:: firststeps-introduction.html
        :color: primary
        :class: sd-rounded-pill
        :shadow:
