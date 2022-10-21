@@ -6,12 +6,32 @@ from .submodel import SubModel
 
 
 def _default_name(predictor):
-    """Make a default name for predictor constraint."""
+    """Make a default name for predictor constraint.
+
+    Parameters
+    ----------
+    predictor:
+        Class of the predictor
+    """
     return type(predictor).__name__.lower()
 
 
 def validate_gpvars(gpvars, isinput):
-    """Put variables into appropriate form (matrix of variable)"""
+    """Put variables into appropriate form (matrix of variable).
+
+    Parameters
+    ----------
+    gpvars:
+        Decision variables used.
+    isinput:
+        True if variables are used as input. False if variables are used
+        as output.
+
+    Returns
+    -------
+    mvar_array_like
+        Decision variables with correctly adjusted shape.
+    """
     if isinstance(gpvars, gp.MVar):
         if gpvars.ndim == 1 and isinput:
             return gpvars.reshape(1, -1)
@@ -37,14 +57,20 @@ class AbstractPredictorConstr(SubModel):
     the type of the predictor, a class derived from it will be returned
     by add_predictor_constr.
 
-    Atributes
-    ---------
+    Parameters
+    ----------
     model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-            The gurobipy model where the predictor should be inserted.
+        The gurobipy model where the predictor should be inserted.
     input_vars: mvar_array_like
         Decision variables used as input.
     output_vars: mvar_array_like, optional
         Decision variables used as output.
+    """
+
+    doc_in_out_fmt = """
+    Note
+    ----
+    See: py: func: `add_predictor_constr < gurobi_ml.add_predictor_constr >` for acceptable values for input_vars and output_vars
     """
 
     def __init__(self, grbmodel, input_vars, output_vars=None, **kwargs):
@@ -106,7 +132,7 @@ class AbstractPredictorConstr(SubModel):
         ---------
 
         file: None, optional
-          Text stream to which output should be redirected. By default sys.stdout.
+            Text stream to which output should be redirected. By default sys.stdout.
         """
         super().print_stats(file)
         print(f"Input has shape {self.input.shape}", file=file)
