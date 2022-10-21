@@ -21,7 +21,7 @@ config = SphinxConfig("../../pyproject.toml", globalns=globals())
 
 project = "Gurobi Machine Learning"
 copyright = "2022, Gurobi Optimization, LLC. All Rights Reserved."
-html_logo = "_static/image8.png"
+html_logo = "_static/gurobi-logo-title.png"
 
 # -- General configuration ---------------------------------------------------
 
