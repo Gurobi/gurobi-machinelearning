@@ -24,13 +24,13 @@ We use the MNIST handwritten digit database (http://yann.lecun.com/exdb/mnist/) 
 For this problem, we are given a trained neural network and one well classified example $\bar x$.
 Our goal is to construct another example $x$ _close to_ $\bar x$ that is classified with another label.
 
-For the hand digit recognition problem, the input is a grayscale image of $28 \times 28$ ($=784$) pixels and the output is a vector of length 10 (each entry corresponding to a digit). We denote the output vecor by $y$. The image is classified according to the largest entry of $y$.
+For the hand digit recognition problem, the input is a grayscale image of $28 \times 28$ ($=784$) pixels and the output is a vector of length 10 (each entry corresponding to a digit). We denote the output vector by $y$. The image is classified according to the largest entry of $y$.
 
 For the training example, assume that coordinate $l$ of the output vector was the one with the largest value giving the correct label. We pick a coordinate corresponding to another label, denoted $w$, and we want the difference between $y_w - y_l$ to be as large as possible.
 
 If we can find a solution where this difference is positive, then $x$ is a counter-example that will receive a different label. If instead we can show that the difference is non-positive, no such counter-example exists.
 
-In this example, we define the neighborhood using the $l1-$norm $|| x - \bar x ||_1$. The size of the neigborhood is defined by a fixed parameter $\delta$. We want
+In this example, we define the neighborhood using the $l1-$norm $|| x - \bar x ||_1$. The size of the neighborhood is defined by a fixed parameter $\delta$. We want
 
 $$
 || x - \bar x ||_1 \le \delta.
@@ -48,19 +48,13 @@ $$
 $$
 
 
-### References
-
-Our model is inspired by:
-
-Fischetti, M., Jo, J. Deep neural networks and mixed integer linear optimization. *Constraints 23, 296–309* (2018). https://doi.org/10.1007/s10601-018-9285-6
-
-+++
+Our model is inspired by {cite:p}`fischetti_jo_2018`.
 
 ## Imports and loading data
 
 First, we import the required packages for this example.
 
-In addition to the usual packages, we will neeed `matplotlib` to plot the digits, `joblib` to load a pre-trained network and `pandas` that is the format in which training examples are stored.
+In addition to the usual packages, we will need `matplotlib` to plot the digits, `joblib` to load a pre-trained network and `pandas` that is the format in which training examples are stored.
 
 Note that from the `gurobi_ml` package we need to use directly the `add_mlp_regressor_constr` function for reasons that will be clarified later.
 
@@ -76,7 +70,7 @@ from gurobi_ml.sklearn import add_mlp_regressor_constr
 
 Now we can load the data.
 
-We load a neural network that was pre-trained with scikit-learn MLPRegressor. The network is quite small (2 hidden layers of 50 neurons), finding counter example shouldn't be too difficult.
+We load a neural network that was pre-trained with Scikit-learn MLPRegressor. The network is quite small (2 hidden layers of 50 neurons), finding counter example shouldn't be too difficult.
 
 We also load the first 100 training examples of the MNIST dataset that we saved to avoid having to reload the full data set.
 
@@ -103,10 +97,10 @@ plt.show()
 print(f"Predicted label {nn.predict(example)}")
 ```
 
-To setup the objective function of the optimization model, we need to find a wrong lable.
+To set up the objective function of the optimization model, we need to find a wrong label.
 
 We use `predict_proba` to get the weight for each label given by the neural network.
-We then use `numpy`'s argsort function to get the labels sorted by their weight.
+We then use `numpy`'s `argsort` function to get the labels sorted by their weight.
 The right label is then the last element in the list, and we pick the next to last element as the wrong label.
 
 ```{code-cell}
@@ -122,7 +116,7 @@ Now that all the data is gathered we can proceed to building the optimization mo
 
 We need to create a matrix variable `x` corresponding to the new input of the neural network we want to compute and a `y` variables for the output of the neural network. Those variables should have respectively the shape of the example we picked and the shape of the return value of `predict_proba`.
 
-We also need additional variables to model the $l1$-norm constraint. Namely for each pixel in the image, we need to model the absolute difference between $x$ and $\bar x$. We will detail the model below. For now we create the necessary variables that are another matix of variable of same shape as `x`.
+We also need additional variables to model the $l1$-norm constraint. Namely, for each pixel in the image, we need to model the absolute difference between $x$ and $\bar x$. We will detail the model below. For now, we create the necessary variables that are another matrix of variable of same shape as `x`.
 
 We also set the objective which is to maximize the difference between the _wrong_ label and the _right_ label.
 
@@ -164,9 +158,9 @@ m.update()
 
 Finally, we insert the neural network in the `gurobipy` model to link `x` and `y`.
 
-Note that this case is not as straigthforward as others. The reason is that the neural network is trained for classification with a `"softmax"` activation in the last layer. But in this model we are using the network without activation in the last layer.
+Note that this case is not as straightforward as others. The reason is that the neural network is trained for classification with a `"softmax"` activation in the last layer. But in this model we are using the network without activation in the last layer.
 
-For this reason, we change manually the last layer activation before adding the network to the gurobi model.
+For this reason, we change manually the last layer activation before adding the network to the Gurobi model.
 
 Also, we use the function `add_mlp_regressor_constr` directly. The network being actually for classification (i.e. of type `MLPClassifier`, the `add_predictor_constr` function would not handle it automatically.
 
@@ -191,14 +185,14 @@ pred_constr.print_stats()
 ## Solving the model
 
 We now turn to solving the optimization model.
-Solving the adversarial problem, as we formulated it above, doesn't actually require computing a provably optimal solution. Instead we need to either:
+Solving the adversarial problem, as we formulated it above, doesn't actually require computing a provably optimal solution. Instead, we need to either:
 
- - find a feasible solution with a positive objective cost (i.e. a counter-example), or
- - or prove that there is no solution of positive cost (i.e. no counter-example in the neighborhood).
+   - find a feasible solution with a positive objective cost (i.e. a counter-example), or
+   - prove that there is no solution of positive cost (i.e. no counter-example in the neighborhood).
 
- We can use Gurobi parameters to limit the optimization to answer those questions: setting BestObjStop (https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop) to 0.0 will stop we optimization if a counter-example is found, setting BestBdStop (https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop) to 0.0 will stop the optimization if we have shown there is no counter-example.
+ We can use Gurobi parameters to limit the optimization to answer those questions: setting BestObjStop (https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop) to 0.0 will stop the optimizer if a counter-example is found, setting BestBdStop (https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop) to 0.0 will stop the optimization if the optimizer has shown there is no counter-example.
 
-We set the two paramters and optimize.
+We set the two parameters and optimize.
 
 ```{code-cell}
 :tags: [remove-input]
