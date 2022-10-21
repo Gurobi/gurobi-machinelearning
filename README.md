@@ -18,7 +18,7 @@ The package currently support the following regression models:
     - Regression models
       - Linear regression
       - Logistic regression
-      - Neural-network regression (MLPRegressor)
+      - Neural-network regression (`MLPRegressor`)
       - Decision tree
       - Gradient boosting tree
       - Random Forest
@@ -28,6 +28,73 @@ The package currently support the following regression models:
  - [Keras](https://keras.io/)
    - Dense layers
    - ReLU layers
- - [PyTorch](https://pytorch.org/) (only torch.nn.Sequential objects)
+ - [PyTorch](https://pytorch.org/) (only `torch.nn.Sequential` objects)
    - Dense layers
    - ReLU layers
+
+Our documentation contains more detailed information on the
+[supported models](https://gurobi-machinelearning.readthedocs.io/en/stable/).
+
+# Installation
+
+---
+## Dependencies
+
+`gurobi-machinelearning` requires the following:
+- Python >= 3.9
+- [`numpy`](https://pypi.org/project/numpy/) >= 1.22.0
+
+The current version supports the following ML package versions:
+- [`torch`](https://pypi.org/project/torch/1.12.1/) == 1.12.1
+- [`scikit-learn`](https://pypi.org/project/scikit-learn/1.1.2/) == 1.1.2
+- [`tensorflow`](https://pypi.org/project/tensorflow/2.10.0/) == 2.10.0
+
+## Pip installation
+
+The easiest way to install `gurobi-machinelearning` is using `pip` in a virtual environment:
+```shell
+(.venv) pip install gurobi-machinelearning
+```
+
+# Development
+
+---
+We value any level of experience in using Gurobi Machine Learning and would like to encourage you to
+contribute directly to this project. Please see the [Contributing Guide](CONTRIBUTING.md) for more information.
+
+## Source code
+You can clone the latest sources with the command:
+```shell
+git clone git@github.com:Gurobi/gurobi-machinelearning.git
+```
+
+## Testing
+After cloning the project, you can run the tests by invoking `tox`. For this, you will need to create a virtual
+environment and activate it:
+```shell
+python3.10 -m venv .venv
+. .venv/bin/activate
+```
+Then, you can install `tox` (>= 3.26.0) and run a few basic tests:
+```shell
+(.venv) pip install tox
+(.venv) tox -e py310,pre-commit,docs
+```
+`tox` will install, among others, the aforementioned ML packages into a separate `venv`. These packages can be quite
+large, so this might take a while.
+
+### Running the full test set
+In the above command, we only ran a subset of tests. Running the full set of tests requires having a Gurobi license
+installed, and is done by running just the `tox` command without the `-e` parameter:
+
+```shell
+(.venv) pip install tox
+(.venv) tox
+```
+
+If you don't have a Gurobi license, you can still run the subset of tests, open a PR, and Github Actions will run the
+tests with a full Gurobi license.
+
+## Submitting a Pull Request
+Before opening a Pull Request, have a look at the full [Contributing page](CONTRIBUTING.md) to make sure your code
+complies with our guidelines.

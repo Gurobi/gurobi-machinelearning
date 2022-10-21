@@ -2,7 +2,7 @@
 
 Welcome to Gurobi Machine Learning!
 
-We value your experience in using Gurobi Machine Learning and would like to encourage you to
+We value any level of experience in using Gurobi Machine Learning and would like to encourage you to
 contribute directly to this project.
 
 ## How to report bugs or submit feature requests
