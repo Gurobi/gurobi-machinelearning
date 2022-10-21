@@ -11,7 +11,7 @@ from ..modeling.neuralnet import BaseNNConstr
 
 
 class KerasNetworkConstr(BaseNNConstr):
-    def __init__(self, grbmodel, predictor, input_vars, output_vars, clean_regressor=False):
+    def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
         assert predictor.built
         for step in predictor.layers:
             if isinstance(step, keras.layers.Dense):
@@ -30,7 +30,7 @@ class KerasNetworkConstr(BaseNNConstr):
             else:
                 raise NoModel(predictor, "Unsupported network structure")
 
-        super().__init__(grbmodel, predictor, input_vars, output_vars, clean_regressor=clean_regressor)
+        super().__init__(grbmodel, predictor, input_vars, output_vars, **kwargs)
 
     def _mip_model(self):
         network = self.predictor

@@ -15,7 +15,7 @@ class SequentialConstr(BaseNNConstr):
     """Transform a pytorch Sequential Neural Network to Gurobi constraint with
     input and output as matrices of variables."""
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars, clean_regressor=False):
+    def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
         linear = None
         for step in predictor:
             if isinstance(step, nn.ReLU):
@@ -27,9 +27,7 @@ class SequentialConstr(BaseNNConstr):
             else:
                 print(step)
                 raise NoModel(predictor, "Unsupported network structure")
-        super().__init__(
-            grbmodel, predictor, input_vars, output_vars, clean_regressor=clean_regressor, default_name="torchsequential"
-        )
+        super().__init__(grbmodel, predictor, input_vars, output_vars, default_name="torchsequential")
 
     def _mip_model(self):
         network = self.predictor

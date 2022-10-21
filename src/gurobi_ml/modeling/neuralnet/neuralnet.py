@@ -1,7 +1,6 @@
 # Copyright © 2022 Gurobi Optimization, LLC
 """Bases classes for modeling neural network layers"""
 
-import numpy as np
 
 from ..basepredictor import AbstractPredictorConstr, _default_name
 from .activations import Identity, ReLU
@@ -11,9 +10,8 @@ from .layers import ActivationLayer, DenseLayer
 class BaseNNConstr(AbstractPredictorConstr):
     """Base class for inserting a regressor based on neural-network/tensor into Gurobi"""
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars, clean_regressor=False, **kwargs):
+    def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
         self.predictor = predictor
-        self.clean = clean_regressor
         self.actdict = {
             "relu": ReLU(),
             "identity": Identity(),
@@ -50,9 +48,6 @@ class BaseNNConstr(AbstractPredictorConstr):
         activation_vars: None, optional
             Output variables
         """
-        if self.clean:
-            mask = np.abs(layer_coefs) < 1e-8
-            layer_coefs[mask] = 0.0
         layer = DenseLayer(self._model, activation_vars, input_vars, layer_coefs, layer_intercept, activation, **kwargs)
         self._layers.append(layer)
         return layer

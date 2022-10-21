@@ -67,6 +67,12 @@ class AbstractPredictorConstr(SubModel):
         Decision variables used as output.
     """
 
+    doc_in_out_fmt = """
+    Note
+    ----
+    See: py: func: `add_predictor_constr < gurobi_ml.add_predictor_constr >` for acceptable values for input_vars and output_vars
+    """
+
     def __init__(self, grbmodel, input_vars, output_vars=None, **kwargs):
         self._input = validate_gpvars(input_vars, True)
         if output_vars is not None:
