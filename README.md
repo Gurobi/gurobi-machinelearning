@@ -13,7 +13,7 @@ The goal of the package is to:
   1. Improve algorithmic performance to enable the optimization model to explore a sizable space of solutions that satisfy the variable relationships captured in the ML model.
   1. Make it easier for optimization models to mix explicit and implicit constraints.
 
-The package currently support the following regression models:
+The package currently supports the following regression models:
  - [Scikit-learn](https://scikit-learn.org/)
     - Regression models
       - Linear regression
