@@ -38,6 +38,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinxcontrib.bibtex",
     "sphinx.ext.autosectionlabel",
+    "sphinx_design",
     "myst_nb",
 ]
 

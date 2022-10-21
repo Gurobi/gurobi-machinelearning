@@ -9,6 +9,15 @@ different machine learning frameworks (scikit-learn, Keras and PyTorch). They ar
 `gurobipy model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_
 to be solved with the `Gurobi <https://www.gurobi.com>`_ solver.
 
+
+.. button-link:: firststeps-introduction
+       :color: primary
+       :class: sd-rounded-pill
+       :shadow:
+
+       Get Started
+
+
 Contents
 --------
 .. toctree::
