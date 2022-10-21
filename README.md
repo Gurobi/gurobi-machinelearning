@@ -49,7 +49,7 @@ The current version supports the following ML package versions:
 - [`scikit-learn`](https://pypi.org/project/scikit-learn/1.1.2/) == 1.1.2
 - [`tensorflow`](https://pypi.org/project/tensorflow/2.10.0/) == 2.10.0
 
-Note that installing those package is only required if the predictor you want to insert uses them
+Installing these package is only required if the predictor you want to insert uses them
 (i.e. to insert a Keras based predictor you need to have `tensorflow` installed).
 
 ## Pip installation
@@ -58,9 +58,13 @@ The easiest way to install `gurobi-machinelearning` is using `pip` in a virtual 
 ```shell
 (.venv) pip install gurobi-machinelearning
 ```
+This will also install the `numpy` and `gurobipy` dependencies.
+
+Please note that `gurobipy` is commercial software and requires a license. When installed via pip or conda,
+`gurobipy` ships with a free license which is only for testing and can only solve models of limited size.
 
 # Getting a Gurobi License
-`gurobi-machinelearning` comes bundled with a trial Gurobi license that allows you to solve problems of limited size.
+Alternatively to the bundled limited license, there are licenses that can handle models of all sizes.
 As a student or staff member of an academic institution you qualify for a free, full product license.
 For more information, see:
 
