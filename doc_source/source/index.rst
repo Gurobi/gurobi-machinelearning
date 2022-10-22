@@ -43,3 +43,4 @@ to be solved with the `Gurobi <https://www.gurobi.com>`_ solver.
 
    meta-api
    meta-bibliography
+   meta-contactus
