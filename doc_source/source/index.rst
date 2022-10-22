@@ -2,6 +2,13 @@
 Welcome to Gurobi Machine Learning!
 ===================================
 
+.. image:: _static/image8.png
+     :width: 200
+     :target: https://www.gurobi.com
+     :alt: Gurobi
+     :align: right
+
+
 Gurobi Machine Learning is a Python package to help use *trained* regression models in
 mathematical optimization models. The package supports a variety of regression models
 (linear, logistic, neural networks, decision trees,...) trained by
@@ -16,12 +23,6 @@ to be solved with the `Gurobi <https://www.gurobi.com>`_ solver.
        :shadow:
 
        Get Started
-
-.. image:: _static/image8.png
-     :width: 200
-     :target: https://www.gurobi.com
-     :alt: Gurobi
-     :align: right
 
 
 .. toctree::
