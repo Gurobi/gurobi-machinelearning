@@ -1,9 +1,10 @@
-
 .. image:: _static/image8.png
      :width: 220
      :target: https://www.gurobi.com
      :alt: Gurobi
-     :align: right
+     :class: float-right
+
+..  rst-class::  clear-both
 
 
 Gurobi Machine Learning
