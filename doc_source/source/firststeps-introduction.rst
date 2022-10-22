@@ -1,11 +1,9 @@
 
 Introduction
-===================================
+============
 
-Gurobi Machine Learning is a Python package to help use *trained* regression models in
-mathematical optimization models. The package supports a variety of regression models
-(linear, logistic, neural networks, decision trees,...) trained by
-different machine learning frameworks (scikit-learn, Keras and PyTorch). They are inserted in a
+Gurobi Machine Learning is a Python package to embed *trained* regression models in
+in a
 `gurobipy model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_
 to be solved with the `Gurobi <https://www.gurobi.com>`_ solver.
 
@@ -19,7 +17,7 @@ The aim of the package is to:
    #. Allow to easily compare the effect of using different regression models in the same mathematical optimization application.
    #. Improve the algorithmic performance of Gurobi on those models.
 
-The package currently support various `scikit-learn <https://scikit-learn.org/stable/>`_ objects and has limited support
+The package currently supports various `scikit-learn <https://scikit-learn.org/stable/>`_ objects and has limited support
 for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_ neural networks with ReLU activation.
 It is actively developed and users are encouraged to contact `Gurobi Optimization <https://www.gurobi.com>`_ if they have applications where they use a regression model that is currently
 not available.
@@ -27,7 +25,7 @@ not available.
 Below, we give basic installation and usage instructions.
 
 Install
--------
+=======
 
 We encourage to install the package via pip (or add it to your `requirements.txt` file):
 
@@ -42,13 +40,40 @@ We encourage to install the package via pip (or add it to your `requirements.txt
   If not already installed, this should install the ``gurobipy`` and
   ``numpy`` packages.
 
-  The package requires ``gurobipy`` version 10.0 or greater.
+
+.. note::
 
   The package has been tested with and is supported for Python 3.9 and Python 3.10.
 
+  Table table-versions_ lists the version of the relevant packages that are tested and
+  supported in the current version (|version|).
+
+  .. _table-versions:
+
+  .. list-table:: Supported packages with version |version|
+     :widths: 50 50
+     :align: center
+     :header-rows: 1
+
+     * - Package
+       - Version
+     * - ``gurobipy``
+       - |GurobiVersion|
+     * - ``numpy``
+       - |NumpyVersion|
+     * - ``pandas``
+       - |PandasVersion|
+     * - ``torch``
+       - |TorchVersion|
+     * - ``scikit-learn``
+       - |SklearnVersion|
+     * - ``tensorflow``
+       - |TensorflowVersion|
+
+
 
 Usage
------
+=====
 
 The main function provided by the package is :py:func:`gurobi_ml.add_predictor_constr`.
 It takes as arguments: a `gurobipy model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_,

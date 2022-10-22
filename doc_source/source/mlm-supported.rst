@@ -6,22 +6,8 @@ It also has limited support
 for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_.
 Only sequential neural networks with ReLU activation function are currently supported.
 
-
-.. list-table:: The following packages are supported in the current version (|version|)
-   :widths: 50 50
-   :header-rows: 1
-
-   * - Package
-     - Version
-   * - ``pandas``
-     - |PandasVersion|
-   * - ``torch``
-     - |TorchVersion|
-   * - ``scikit-learn``
-     - |SklearnVersion|
-   * - ``tensorflow``
-     - |TensorflowVersion|
-
+The versions of those packages tested with the current version (|version|) are listed in
+Table table-versions_.
 
 
 Scikit-learn

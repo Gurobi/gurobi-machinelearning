@@ -46,6 +46,8 @@ dep_versions = {
     x.split("==")[0]: x.split("==")[1] for x in (Path().resolve().parent.parent / "requirements.tox.txt").read_text().split()
 }
 rst_epilog = f"""
+.. |GurobiVersion| replace:: {dep_versions["gurobipy"]}
+.. |NumpyVersion| replace:: {dep_versions["numpy"]}
 .. |PandasVersion| replace:: {dep_versions["pandas"]}
 .. |TorchVersion| replace:: {dep_versions["torch"]}
 .. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}
