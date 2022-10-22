@@ -50,20 +50,21 @@ We encourage to install the package via pip (or add it to your `requirements.txt
 Usage
 -----
 
-The package essentially provides one function: :py:func:`gurobi_ml.add_predictor_constr`.
-The function takes as arguments: a `gurobipy model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_,
-a supported regression model,
-input (Gurobi) variables for the regression model and output (Gurobi) variables
-for the regression model.
+The main function provided by the package is :py:func:`gurobi_ml.add_predictor_constr`.
+It takes as arguments: a `gurobipy model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_,
+a :doc:`supported regression model <mlm-supported>`,
+input `Gurobi variables <https://www.gurobi.com/documentation/current/refman/variables.html>`_ and
+output `Gurobi variables <https://www.gurobi.com/documentation/current/refman/variables.html>`_.
 
-By calling the function, the gurobipy model is augmented with variables and
+By invoking the function, the gurobipy model is augmented with variables and
 constraints so that, in a solution, the values of the output variables
-are predicted by the regression model from the input variables.
+are predicted by the regression model from the values of the input variables.
 More formally, if we denote by :math:`g` the prediction function of the regression model, by
 :math:`x` the input variables
-and by :math:`y` the output variables, in any solution we should have :math:`y = g(x)`.
+and by :math:`y` the output variables, :math:`y = g(x)` in any solution.
 
-The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` returns a so-called modeling object derived from the class
+The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` returns a
+modeling object derived from the class
 :py:class:`AbstractPredictorConstr <gurobi_ml.modeling.AbstractPredictorConstr>`.
 That object keeps track of all the variables and constraints that have been added
 to the gurobipy model to establish the relationship between input and output variables
@@ -73,21 +74,23 @@ The modeling object can perform a few tasks:
 
    * Everything it created (i.e. variables and constraints to establish the relationship
      between input and output) can be removed with the
-     :py:meth:`remove <gurobi_ml.modeling.AbstractPredictorConstr.remove>` function.
+     :py:meth:`remove <gurobi_ml.modeling.AbstractPredictorConstr.remove>` member function.
    * It can print a summary of what it added with the
-     :py:meth:`print_stats <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` function.
+     :py:meth:`print_stats <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` member function.
    * Once Gurobi computed a solution to the optimization problem, it can compute the difference
-     between what the regression model predicts from the input values and the actual values
-     of the output in Gurobi's solution with the
-     :py:meth:`get_error <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` function.
+     between what the regression model predicts from the input values and the values
+     of the output variables in Gurobi's solution with the
+     :py:meth:`get_error <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` member function.
 
 
-For the list of frameworks and regression models supported please refer to the :doc:`mlm-supported` section.
-Note that the function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`
-should add the correct model for any supported predictor. Individual functions for each predictor are also available.
+The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`
+is a shorthand that should add the correct model for any supported regression model,
+but individual functions for each regression model are also available.
+For the list of frameworks and regression models supported and the corresponding functions please
+refer to the :doc:`mlm-supported` section.
 
-For some regression models, additional optional parameters can be set to tune the way the predictor is inserted in the Gurobi model. Those are documented
-in the corresponding function linked from :doc:`mlm-supported`.
+For some regression models, additional optional parameters can be set to tune the way the predictor is inserted in the Gurobi model.
+Those are documented in the corresponding function linked from :doc:`mlm-supported`.
 
-For a simple abstract example on how to use the package please refer to the :doc:`firststeps-simple-example` section. More advanced examples are available in the
-:doc:`mlm-examples` section.
+For a simple example on how to use the package please refer to the :doc:`firststeps-simple-example` section.
+More advanced examples are available in the :doc:`mlm-examples` section.
