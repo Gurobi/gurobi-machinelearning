@@ -10,14 +10,18 @@ different machine learning frameworks (scikit-learn, Keras and PyTorch). They ar
 to be solved with the `Gurobi <https://www.gurobi.com>`_ solver.
 
 
-
-
 .. button-link:: firststeps-introduction.html
        :color: primary
        :class: sd-rounded-pill
        :shadow:
 
        Get Started
+
+.. image:: _static/image8.png
+     :width: 200
+     :target: https://www.gurobi.com
+     :alt: Gurobi
+     :align: right
 
 
 .. toctree::
