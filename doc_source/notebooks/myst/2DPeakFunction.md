@@ -49,20 +49,24 @@ $$
 
 In this example, we will search for the global minimum of %f% over a small interval.
 
-$$\begin{align*}
+$$
+\begin{aligned}
 &\min_{x,y} f(x,y)\\
 &\text{s.t.}\\
 &x,y \in [-1,1]
-\end{align*}$$
+\end{aligned}
+$$
 
 To find the global minimum of $f$, we will approximate $f(x,y)$ through a neural
 network function $g(x,y)$ to obtain a MIP and solve
 
-$$\begin{align*}
+$$
+\begin{aligned}
 &\min_{x,y} g(x,y) \approx f(x,y)\\
 &\text{s.t.}\\
 &x,y \in [-1,1]
-\end{align*}$$
+\end{aligned}
+$$
 
 with Gurobi.
 

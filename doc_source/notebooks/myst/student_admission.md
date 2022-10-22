@@ -64,13 +64,13 @@ that the sum of the variables $x$ is less or equal to $0.2n$. Also, each variabl
 The full model then reads:
 
 $$
-\begin{align}
+\begin{aligned}
 &\max \sum_{i=1}^n y_i \\
 &\text{subject to:}\\
 &\sum_{i=1}^n x_i \le 0.2*n,\\
 &y_i = g(x_i, SAT_i, GPA_i) & & i = 1, \ldots, n,\\
 & 0 \le x \le 2.5.
-\end{align}
+\end{aligned}
 $$
 
 Note that in this example differently to {cite:p}`JANOS` we scale the features for the regression.

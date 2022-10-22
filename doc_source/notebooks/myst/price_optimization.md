@@ -520,10 +520,10 @@ Hence, the predicted sales quantity is the minimum of the allocated quantity and
 This relationship can be modeled by the following two constraints for each region $r$.
 
 $$
-\begin{align*}
+\begin{aligned}
 s_r &\leq x_r  \\
 s_r &\leq d(p_r,r)
-\end{align*}
+\end{aligned}
 $$
 
 These constraints will ensure that the sales quantity $s_r$ in region $r$ is  greater than neither the allocated quantity nor the predicted demand. Note that the maximization objective function tries to maximize the revenue from sales, and therefore the optimizer will maximize the predicted sales quantity. This is assuming that the surplus and transportation costs are less than the sales price per avocado. Hence, these constraints along with the objective will ensure that the sales are equal to the minimum of supply and predicted demand.
