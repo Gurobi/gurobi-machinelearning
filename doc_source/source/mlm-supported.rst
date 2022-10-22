@@ -7,7 +7,7 @@ for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_.
 Only sequential neural networks with ReLU activation function are currently supported.
 
 The versions of those packages tested with the current version (|version|) are listed in
-Table table-versions_.
+the table :ref:`table-versions`.
 
 
 Scikit-learn
