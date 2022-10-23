@@ -88,5 +88,5 @@ autodoc_mock_imports = ["torch", "tensorflow"]
 nbsphinx_custom_formats = {
     ".md": ["jupytext.reads", {"fmt": "Rmd"}],
 }
-nbsphinx_allow_errors = True
+nbsphinx_allow_errors = False
 bibtex_bibfiles = ["refs.bib"]

@@ -7,9 +7,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.14.0
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: gurobi-ml
   language: python
-  name: python3
+  name: Python3
 ---
 
 # Surrogate functions
