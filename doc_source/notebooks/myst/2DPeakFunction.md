@@ -160,7 +160,6 @@ plt.show()
 
 Optically, the approximation looks very close to the original function.
 
-+++
 
 ##### Construct the optimization model
 
@@ -207,7 +206,5 @@ print(abs(peak2d(x[0].X, x[1].X) - m.ObjVal)) # error of the approximation
 ```
 
 The difference between the function and the approximation at the computed solution point is noticable but acceptable given the big maximum error of the neural network approximation.
-
-+++
 
 Copyright © 2020 Gurobi Optimization, LLC

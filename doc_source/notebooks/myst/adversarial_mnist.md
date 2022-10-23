@@ -211,6 +211,4 @@ example_mod = pd.DataFrame(data=x.X, columns=example.columns, index=example.inde
 print(f"Solution is classified as {nn.predict(example_mod)}")
 ```
 
-+++ {"tags": ["hide-input"]}
-
 Copyright © 2022 Gurobi Optimization, LLC
