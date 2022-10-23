@@ -38,7 +38,7 @@ class TestFixedModel(unittest.TestCase):
             x = gpm.addMVar(example.shape, lb=example - 1e-4, ub=example + 1e-4)
             y = gpm.addMVar(1, lb=-gp.GRB.INFINITY)
 
-            pred_constr = add_predictor_constr(gpm, predictor, x, y)
+            pred_constr = add_predictor_constr(gpm, predictor, x, y, epsilon=1e-5, float_type=np.float32)
             with self.assertRaises(NoSolution):
                 pred_constr.get_error()
             with open(os.devnull, "w") as outnull:

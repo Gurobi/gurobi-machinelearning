@@ -19,8 +19,9 @@ sys.path.insert(0, os.path.abspath("../../src/"))
 # -- Project information -----------------------------------------------------
 config = SphinxConfig("../../pyproject.toml", globalns=globals())
 
+project = "Gurobi Machine Learning"
 copyright = "2022, Gurobi Optimization, LLC. All Rights Reserved."
-html_logo = "_static/image8.png"
+html_logo = "_static/gurobi-logo-title.png"
 
 # -- General configuration ---------------------------------------------------
 
@@ -35,14 +36,18 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
+    "sphinxcontrib.bibtex",
     "sphinx.ext.autosectionlabel",
     "nbsphinx",
+    "sphinx_design",
 ]
 
 dep_versions = {
     x.split("==")[0]: x.split("==")[1] for x in (Path().resolve().parent.parent / "requirements.tox.txt").read_text().split()
 }
 rst_epilog = f"""
+.. |GurobiVersion| replace:: {dep_versions["gurobipy"]}
+.. |NumpyVersion| replace:: {dep_versions["numpy"]}
 .. |PandasVersion| replace:: {dep_versions["pandas"]}
 .. |TorchVersion| replace:: {dep_versions["torch"]}
 .. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}
@@ -84,3 +89,4 @@ nbsphinx_custom_formats = {
     ".md": ["jupytext.reads", {"fmt": "Rmd"}],
 }
 nbsphinx_allow_errors = True
+bibtex_bibfiles = ["refs.bib"]

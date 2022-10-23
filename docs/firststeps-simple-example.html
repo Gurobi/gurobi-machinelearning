@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Usage Example &mdash; Gurobi Machine Learning  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+        <script src="_static/design-tabs.js"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Supported Regression models" href="mlm-supported.html" />
+    <link rel="prev" title="Introduction" href="firststeps-introduction.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Gurobi Machine Learning
+            <img src="_static/gurobi-logo-title.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0.dev1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="firststeps-introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Simple Usage Example</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mlm-supported.html">Supported Regression models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlm-examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Meta</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="meta-api.html">API Reference manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meta-bibliography.html">Bibliography</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Gurobi Machine Learning</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Simple Usage Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/firststeps-simple-example.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section class="tex2jax_ignore mathjax_ignore" id="simple-usage-example">
+<h1>Simple Usage Example<a class="headerlink" href="#simple-usage-example" title="Permalink to this heading"></a></h1>
+<p>In this page, we provide a simple example of using the Gurobi Machine Learning package.</p>
+<p>The example is entirely abstract. Its aim is only to illustrate the basic functionalities of the
+package in the most simple way. For some more realistic applications, please refer to the notebooks.</p>
+<p>Before proceeding to the example itself, we need to import a number of packages.
+Here, we will use <code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code> to train regression models. We generate random data for the
+regression using the :external+sklearn:py:func:<code class="docutils literal notranslate"><span class="pre">sklearn.datasets.make_regression</span></code>. For the regression model, we use a neural network :external:py:class:<code class="docutils literal notranslate"><span class="pre">sklearn.neural_network.MLPRegressor</span></code>, import the corresponding
+objects.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_regression</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
+<span class="kn">from</span> <span class="nn">sklearn.neural_network</span> <span class="kn">import</span> <span class="n">MLPRegressor</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Certainly, we also need <code class="docutils literal notranslate"><span class="pre">gurobipy</span></code> to build an optimization model and from the <code class="docutils literal notranslate"><span class="pre">gurobi_ml</span></code> package we need the <code class="docutils literal notranslate"><span class="pre">add_predictor_constr</span></code>
+function. We will also need <code class="docutils literal notranslate"><span class="pre">numpy</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">gurobipy</span> <span class="k">as</span> <span class="nn">gp</span>
+<span class="kn">from</span> <span class="nn">gurobi_ml</span> <span class="kn">import</span> <span class="n">add_predictor_constr</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We start by building artificial data for training our regressions. To do so, we use <em>make_regression</em> to obtain
+data with 10 features.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_regression</span><span class="p">(</span><span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now, create the <em>MLPRegressor</em> object and fit it.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nn</span> <span class="o">=</span> <span class="n">MLPRegressor</span><span class="p">([</span><span class="mi">20</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">nn</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><style>#sk-container-id-1 {color: black;background-color: white;}#sk-container-id-1 pre{padding: 0;}#sk-container-id-1 div.sk-toggleable {background-color: white;}#sk-container-id-1 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-1 label.sk-toggleable__label-arrow:before {content: "▸";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-1 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-1 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-1 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: "▾";}#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-1 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-1 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-1 div.sk-parallel-item::after {content: "";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-serial::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-1 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-1 div.sk-item {position: relative;z-index: 1;}#sk-container-id-1 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-1 div.sk-item::before, #sk-container-id-1 div.sk-parallel-item::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-1 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-1 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-1 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-1 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-1 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-1 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-1 div.sk-label-container {text-align: center;}#sk-container-id-1 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-1 div.sk-text-repr-fallback {display: none;}</style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>MLPRegressor(hidden_layer_sizes=[20, 20], max_iter=10000, random_state=1)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" checked><label for="sk-estimator-id-1" class="sk-toggleable__label sk-toggleable__label-arrow">MLPRegressor</label><div class="sk-toggleable__content"><pre>MLPRegressor(hidden_layer_sizes=[20, 20], max_iter=10000, random_state=1)</pre></div></div></div></div></div></div></div>
+</div>
+<p>We now turn to the optimization model. In the spirit of adversarial machine learning examples, we use some training examples.
+We pick <span class="math notranslate nohighlight">\(n\)</span> training examples randomly. For each of the examples, we want to find an input that is in a small neighborhood of it that leads to the output that is closer to <span class="math notranslate nohighlight">\(0\)</span> with the regression.</p>
+<p>Denoting by <span class="math notranslate nohighlight">\(X^E\)</span> our set of examples and by <span class="math notranslate nohighlight">\(g\)</span> the prediction function of our regression model, our optimization problem reads:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{aligned}
+&amp;\min \sum_{i=1}^5 y_i^2 \\
+&amp;\text{s.t.:}\\
+&amp;y_i = g(X_i) &amp; &amp; i = 1, \ldots, n,\\
+&amp;X^E - \delta \leq X \leq X^E + \delta,\\
+\end{aligned}
+\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(X\)</span> is a matrix of variables of dimension <span class="math notranslate nohighlight">\(n \times 10\)</span> (the number of examples we consider and number of features in the regression respectively), <span class="math notranslate nohighlight">\(y\)</span> is a vector of free (unbounded) variables and <span class="math notranslate nohighlight">\(\delta\)</span> a small positive constant.</p>
+<p>First, let’s pick randomly 2 training examples using <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, and create our <code class="docutils literal notranslate"><span class="pre">gurobipy</span></code> model.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">X_examples</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">y_examples</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi 10.0.0 (beta1) - expires 2022-11-21
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Restricted license - for non-production use only - expires 2022-11-22
+</pre></div>
+</div>
+</div>
+</div>
+<p>Our only decision variables in this case, are the five inputs and outputs for the regression. We use <code class="docutils literal notranslate"><span class="pre">gurobipy.MVar</span></code> matrix variables that are most convenient in this case.</p>
+<p>The input variables have the same shape as <code class="docutils literal notranslate"><span class="pre">X_examples</span></code>. Their lower bound is <code class="docutils literal notranslate"><span class="pre">X_examples</span> <span class="pre">-</span> <span class="pre">delta</span></code> and their upper bound <code class="docutils literal notranslate"><span class="pre">X_examples</span> <span class="pre">+</span> <span class="pre">delta</span></code>.</p>
+<p>The output variables have the shape of <code class="docutils literal notranslate"><span class="pre">y_examples</span></code> and are unbounded. By default, in Gurobi variables are non-negative, we therefore need to set an infinite lower bound.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">input_vars</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addMVar</span><span class="p">(</span><span class="n">X_examples</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">lb</span><span class="o">=</span><span class="n">X_examples</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="n">X_examples</span><span class="o">+</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">output_vars</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addMVar</span><span class="p">(</span><span class="n">y_examples</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">lb</span><span class="o">=-</span><span class="n">gp</span><span class="o">.</span><span class="n">GRB</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The constraints linking <code class="docutils literal notranslate"><span class="pre">input_vars</span></code> and <code class="docutils literal notranslate"><span class="pre">output_vars</span></code> can now be added with the function <code class="docutils literal notranslate"><span class="pre">add_predictor_constr</span></code>.</p>
+<p>Note that because of the shape of the variables this will add the 5 different constraints.</p>
+<p>The function returns a modeling object that we can use later on.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pred_constr</span> <span class="o">=</span> <span class="n">add_predictor_constr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">nn</span><span class="p">,</span> <span class="n">input_vars</span><span class="p">,</span> <span class="n">output_vars</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The member function <code class="docutils literal notranslate"><span class="pre">print_stats</span></code> of the modeling object outputs the details of the regression model that was added to the Gurobi.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pred_constr</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model for mlpregressor1:
+160 variables
+82 constraints
+80 general constraints
+Input has shape (2, 10)
+Output has shape (2, 1)
+
+mlpregressor1 has 3 layers:
+Model for layer0:
+80 variables
+40 constraints
+40 general constraints
+Input has shape (2, 10)
+Output has shape (2, 20)
+Activation is relu
+
+Model for layer1:
+80 variables
+40 constraints
+40 general constraints
+Input has shape (2, 20)
+Output has shape (2, 20)
+Activation is relu
+
+Model for layer2:
+0 variables
+2 constraints
+Input has shape (2, 20)
+Output has shape (2, 1)
+Activation is identity
+</pre></div>
+</div>
+</div>
+</div>
+<p>To finish the model, we set the objective, and then we can optimize it.</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># This is some trickery for output Gurobi&#39;s log doesn&#39;t display well with myst</span>
+<span class="n">m</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">LogToConsole</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="o">!</span>rm -f gurobi.log
+<span class="n">m</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">LogFile</span> <span class="o">=</span> <span class="s1">&#39;gurobi.log&#39;</span>
+</pre></div>
+</div>
+</div>
+</details>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">setObjective</span><span class="p">(</span><span class="n">output_vars</span><span class="nd">@output_vars</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">GRB</span><span class="o">.</span><span class="n">MINIMIZE</span><span class="p">)</span>
+
+<span class="n">m</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>cat gurobi.log
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi 10.0.0 (mac64[x86]) logging started Fri Oct 21 17:20:32 2022
+
+Set parameter LogFile to value &quot;gurobi.log&quot;
+Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
+
+CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 82 rows, 182 columns and 1322 nonzeros
+Model fingerprint: 0xba06b160
+Model has 2 quadratic objective terms
+Model has 80 general constraints
+Variable types: 182 continuous, 0 integer (0 binary)
+Coefficient statistics:
+  Matrix range     [2e-03, 2e+00]
+  Objective range  [0e+00, 0e+00]
+  QObjective range [2e+00, 2e+00]
+  Bounds range     [4e-02, 2e+00]
+  RHS range        [4e-02, 2e+00]
+Presolve removed 22 rows and 112 columns
+Presolve time: 0.01s
+Presolved: 60 rows, 70 columns, 441 nonzeros
+Presolved model has 1 quadratic objective terms
+Variable types: 53 continuous, 17 integer (17 binary)
+
+Root relaxation: objective 2.550698e+04, 109 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 25506.9837    0    9          - 25506.9837      -     -    0s
+H    0     0                    25506.983761 25506.9837  0.00%     -    0s
+
+Explored 1 nodes (109 simplex iterations) in 0.02 seconds (0.01 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 25507
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.550698376194e+04, best bound 2.550698376194e+04, gap 0.0000%
+</pre></div>
+</div>
+</div>
+</div>
+<p>The function <code class="docutils literal notranslate"><span class="pre">get_error</span></code> is useful to check that the solution computed by Gurobi is correct with respect to the regression model we use.</p>
+<p>Let <span class="math notranslate nohighlight">\((\bar X, \bar y)\)</span> be the values of the input and output variables in the computed solution. The function returns <span class="math notranslate nohighlight">\(g(\bar X) - y\)</span> using the original regression (in this case the <code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code>) object.</p>
+<p>Normally, all values should be small and below Gurobi’s tolerances.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pred_constr</span><span class="o">.</span><span class="n">get_error</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[-2.54241073e-14, -2.84217094e-14]])
+</pre></div>
+</div>
+</div>
+</div>
+<p>Finally, we can look at the computed values for the output variables and compare them with the original targets values.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">output_vars</span><span class="o">.</span><span class="n">X</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([   0.        , -159.70905974])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y_examples</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([  52.86478865, -238.82708577])
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="firststeps-introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mlm-supported.html" class="btn btn-neutral float-right" title="Supported Regression models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Gurobi Optimization, LLC. All Rights Reserved..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

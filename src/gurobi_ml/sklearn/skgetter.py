@@ -12,7 +12,7 @@ class SKgetter:
     Attributes
     ----------
     predictor
-        Scikit-Learn predictor embeded into Gurobi model.
+        Scikit-Learn predictor embedded into Gurobi model.
     """
 
     def __init__(self, predictor):
