@@ -3,7 +3,7 @@
 
 
 class SubModel:
-    """Base class for building and representing a sub-model embeded in a gurobipy.Model.
+    """Base class for building and representing a sub-model embedded in a gurobipy.Model.
 
     When instantiating this class, a (sub-)model is created in the provided
     gurobipy.Model.  The instance represents the sub-model that was created,
@@ -65,7 +65,7 @@ class SubModel:
     useful with sub-classing); if not, it is derived from the class name of
     your derived class, or the name of your model construction function.
     The only exception is the empty string name='' which is not used as a
-    prefix.  This is usefull if the full model is built as a SubModel.
+    prefix.  This is useful if the full model is built as a SubModel.
 
     Note, that you can instantiate as many SubModels as needed in one
     gurobipy.Model.  In particular, you can instantiate SubModels from

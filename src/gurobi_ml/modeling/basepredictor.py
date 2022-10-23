@@ -181,12 +181,12 @@ class AbstractPredictorConstr(SubModel):
 
     @property
     def output(self):
-        """Returns the output variables of embeded predictor"""
+        """Returns the output variables of embedded predictor"""
         return self._output
 
     @property
     def input(self):
-        """Returns the input variables of embeded predictor"""
+        """Returns the input variables of embedded predictor"""
         return self._input
 
     def __str__(self):
