@@ -9,7 +9,7 @@ jupytext:
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
-  name: ipython3
+  name: python3
 ---
 
 Simple Usage Example

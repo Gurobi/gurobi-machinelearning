@@ -86,7 +86,7 @@ html_static_path = ["_static"]
 autodoc_member_order = "groupwise"
 autodoc_mock_imports = ["torch", "tensorflow"]
 nbsphinx_custom_formats = {
-    ".md": ["jupytext.reads", {"fmt": "Rmd"}],
+    ".md": ["jupytext.reads", {"fmt": "myst"}],
 }
 nbsphinx_allow_errors = False
 bibtex_bibfiles = ["refs.bib"]
