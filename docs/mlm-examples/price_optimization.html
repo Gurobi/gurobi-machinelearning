@@ -8,7 +8,6 @@
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
       <link rel="stylesheet" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -19,10 +18,12 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script src="../_static/design-tabs.js"></script>
-        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -53,36 +54,39 @@
               <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#install">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#usage">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Simple Usage Example</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../mlm-supported.html">Supported Regression models</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../mlm-examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="2DPeakFunction.html">Surrogate functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="adversarial_mnist.html">Adversarial Machine Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="student_admission.html">Student Enrollment</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Pricing and Supply problem</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#load-the-packages-and-the-datasets">Load the Packages and the Datasets</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#extra-required-packages">Extra required packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Load-the-Packages-and-the-Datasets">Load the Packages and the Datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Extra-required-packages">Extra required packages</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#prepare-the-dataset">Prepare the Dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#part-i-observe-trends-in-the-data">Part I: Observe Trends in the Data</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#sales-over-the-years">Sales Over the Years</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#seasonality">Seasonality</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#correlations">Correlations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#regions">Regions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Prepare-the-Dataset">Prepare the Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Part-I:-Observe-Trends-in-the-Data">Part I: Observe Trends in the Data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Sales-Over-the-Years">Sales Over the Years</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Seasonality">Seasonality</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Correlations">Correlations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Regions">Regions</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#part-ii-predict-the-sales">Part II: Predict the Sales</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#part-iii-optimize-for-price-and-supply-of-avocados">Part III: Optimize for Price and Supply of Avocados</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#input-parameters">Input Parameters</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#decision-variables">Decision Variables</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#set-the-objective">Set the Objective</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#add-the-supply-constraint">Add the Supply Constraint</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#add-constraints-that-define-sales-quantity">Add Constraints That Define Sales Quantity</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#add-the-wastage-constraints">Add the Wastage Constraints</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#fire-up-the-solver">Fire Up the Solver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Part-II:-Predict-the-Sales">Part II: Predict the Sales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Part-III:-Optimize-for-Price-and-Supply-of-Avocados">Part III: Optimize for Price and Supply of Avocados</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Input-Parameters">Input Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Decision-Variables">Decision Variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Set-the-Objective">Set the Objective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Add-the-Supply-Constraint">Add the Supply Constraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Add-Constraints-That-Define-Sales-Quantity">Add Constraints That Define Sales Quantity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Add-the-Wastage-Constraints">Add the Wastage Constraints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Fire-Up-the-Solver">Fire Up the Solver</a></li>
 </ul>
 </li>
 </ul>
@@ -94,6 +98,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta-contactus.html">Contact Us</a></li>
 </ul>
 
         </div>
@@ -121,46 +126,333 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
 
-  <section class="tex2jax_ignore mathjax_ignore" id="pricing-and-supply-problem">
-<h1>Pricing and Supply problem<a class="headerlink" href="#pricing-and-supply-problem" title="Permalink to this heading"></a></h1>
-<p><em>Note: This example is a limited version of the example <a class="reference external" href="https://github.com/Gurobi/modeling-examples/tree/master/price_optimization">How Much Is Too Much? Avocado Pricing and Supply Using Mathematical Optimization</a>. It is only aimed at showing the capabilities of Gurobi Machine Learning.
-In particular the model is restricted to a limited number of regions so that it can fits within Gurobi size-limited license. Please visit the full notebook page, for a more detailed explanation about the problem and detailed analysis of the results.</em></p>
-<p>A <a class="reference external" href="https://www.foodnetwork.com/fn-dish/news/2018/3/avocado-unseats-banana-as-america-s-top-fruit-import-by-value">Food Network article</a> from March 2017 declared, “Avocado unseats banana as America’s top fruit import.” This declaration is incomplete and debatable for reasons other than whether  avocado is a fruit. Avocados are expensive.</p>
-<p>As a supplier, setting an appropriate avocado price requires a delicate trade-off.
-Set it too high and you lose customers. Set it too low and you won’t make a profit.
-Equipped with good data, the avocado pricing and supply problem is <em>ripe</em> with opportunities for demonstrating the power of optimization and data science.</p>
-<p>They say when life gives you avocados, make guacamole.
-Just like the perfect guacamole needs the right blend of onion, lemon and spices, finding an optimal avocado price needs the right blend of descriptive, predictive and prescriptive analytics.</p>
-<table class="colwidths-auto docutils align-default">
+
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+---
+jupytext:
+  formats: ipynb///ipynb,myst///md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.14.0
+kernelspec:
+  display_name: Python 3 (ipykernel)
+  language: python
+  name: python3
+---<section id="Pricing-and-Supply-problem">
+<h1>Pricing and Supply problem<a class="headerlink" href="#Pricing-and-Supply-problem" title="Permalink to this heading"></a></h1>
+<p><em>Note: This example is a limited version of the example</em><a class="reference external" href="https://github.com/Gurobi/modeling-examples/tree/master/price_optimization">How Much Is Too Much? Avocado Pricing and Supply Using Mathematical Optimization</a><em>. It is only aimed at showing the capabilities of Gurobi Machine Learning. In particular the model is restricted to a limited number of regions so that it can fits within Gurobi size-limited license. Please visit the full notebook page, for a more detailed explanation about the
+problem and detailed analysis of the results.</em></p>
+<p>A <a class="reference external" href="https://www.foodnetwork.com/fn-dish/news/2018/3/avocado-unseats-banana-as-america-s-top-fruit-import-by-value">Food Network article</a> from March 2017 declared, “Avocado unseats banana as America’s top fruit import.” This declaration is incomplete and debatable for reasons other than whether avocado is a fruit. Avocados are expensive.</p>
+<p>As a supplier, setting an appropriate avocado price requires a delicate trade-off. Set it too high and you lose customers. Set it too low and you won’t make a profit. Equipped with good data, the avocado pricing and supply problem is <em>ripe</em> with opportunities for demonstrating the power of optimization and data science.</p>
+<p>They say when life gives you avocados, make guacamole. Just like the perfect guacamole needs the right blend of onion, lemon and spices, finding an optimal avocado price needs the right blend of descriptive, predictive and prescriptive analytics.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
 <thead>
-<tr class="row-odd"><th class="text-center head"><p><img src="https://github.com/Gurobi/modeling-examples/blob/master/price_optimization/avocado_image_grocery.jpeg?raw=1" width="500" align="center"></p></th>
+<tr class="row-odd"><th class="head"><p><img alt="d508ede375254e078ca2bf0ec733a501" class="no-scaled-link" src="https://github.com/Gurobi/modeling-examples/blob/master/price_optimization/avocado_image_grocery.jpeg?raw=1" style="width: 500px;" /></p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td class="text-center"><p><b>Avocados: a quintessential corner of a grocery store. Image Credits: <a class="reference external" href="https://nypost.com/2022/02/15/us-will-halt-mexico-avocado-imports-as-long-as-necessary/">New York Post</a> </b></p></td>
+<tr class="row-even"><td><p>Avocados: a quintessential corner of a grocery store. Image Credits: <a class="reference external" href="https://nypost.com/2022/02/15/us-will-halt-mexico-avocado-imports-as-long-as-necessary/">New York Post</a></p></td>
 </tr>
 </tbody>
 </table>
 <p><strong>Goal</strong>: Develop a data science pipeline for pricing and distribution of avocados to maximize revenue.</p>
-<p>This notebook walks through a decision-making pipeline that culminates in a mathematical optimization model.
-There are three stages:</p>
-<ul class="simple">
-<li><p>First, understand the dataset and infer the relationships between categories such as the sales, price, region, and seasonal trends.</p></li>
-<li><p>Second, build a prediction model that predicts the demand for avocados as a function of price, region, year and the seasonality.</p></li>
-<li><p>Third, design an optimization problem that sets the optimal price and supply quantity to maximize the net revenue while incorporating costs for wastage and transportation.</p></li>
-</ul>
-<section id="load-the-packages-and-the-datasets">
-<h2>Load the Packages and the Datasets<a class="headerlink" href="#load-the-packages-and-the-datasets" title="Permalink to this heading"></a></h2>
+<p>This notebook walks through a decision-making pipeline that culminates in a mathematical optimization model. There are three stages: - First, understand the dataset and infer the relationships between categories such as the sales, price, region, and seasonal trends. - Second, build a prediction model that predicts the demand for avocados as a function of price, region, year and the seasonality. - Third, design an optimization problem that sets the optimal price and supply quantity to maximize
+the net revenue while incorporating costs for wastage and transportation.</p>
+<section id="Load-the-Packages-and-the-Datasets">
+<h2>Load the Packages and the Datasets<a class="headerlink" href="#Load-the-Packages-and-the-Datasets" title="Permalink to this heading"></a></h2>
 <p>We use real sales data provided by the <a class="reference external" href="https://hassavocadoboard.com/">Hass Avocado Board</a> (HAB), whose aim is to “make avocados America’s most popular fruit”. This dataset contains consolidated information on several years’ worth of market prices and sales of avocados.</p>
 <p>We will now load the following packages for analyzing and visualizing the data.</p>
-<section id="extra-required-packages">
-<h3>Extra required packages<a class="headerlink" href="#extra-required-packages" title="Permalink to this heading"></a></h3>
+<section id="Extra-required-packages">
+<h3>Extra required packages<a class="headerlink" href="#Extra-required-packages" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>seaborn</p></li>
 </ul>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -171,22 +463,26 @@ There are three stages:</p>
 </pre></div>
 </div>
 </div>
-</div>
 <p>The dataset from HAB contains sales data for the years 2019-2022. This data is augmented by a previous download from HAB available on <a class="reference external" href="https://www.kaggle.com/datasets/timmate/avocado-prices-2020">Kaggle</a> with sales for the years 2015-2018.</p>
-<p>Each row in the dataset is the weekly number of avocados sold and the weekly average price of an avocado categorized by region and type of avocado. There are two types of avocados: conventional and organic. In this notebook, we will only consider the conventional avocados.
-There are eight large regions relevant for this example, namely the Great Lakes, Midsouth, North East, Northern New England, South Central, South East, West and Plains.</p>
+<p>Each row in the dataset is the weekly number of avocados sold and the weekly average price of an avocado categorized by region and type of avocado. There are two types of avocados: conventional and organic. In this notebook, we will only consider the conventional avocados. There are eight large regions relevant for this example, namely the Great Lakes, Midsouth, North East, Northern New England, South Central, South East, West and Plains.</p>
 <p>Now, load the data and store it into a Pandas dataframe.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">avocado</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/Gurobi/modeling-examples/master/price_optimization/HABdata_2019_2022.csv&#39;</span><span class="p">)</span> <span class="c1"># dataset downloaded directly from HAB</span>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">avocado</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/Gurobi/modeling-examples/master/price_optimization/HABdata_2019_2022.csv&#39;</span><span class="p">)</span> <span class="c1"># dataset downloaded directly from HAB</span>
 <span class="n">avocado_old</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/Gurobi/modeling-examples/master/price_optimization/kaggledata_till2018.csv&#39;</span><span class="p">)</span> <span class="c1"># dataset downloaded from Kaggle</span>
 <span class="n">avocado</span> <span class="o">=</span> <span class="n">avocado</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avocado_old</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">avocado</span>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output text_html"><div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
         vertical-align: middle;
@@ -303,16 +599,18 @@ There are eight large regions relevant for this example, namely the Great Lakes,
   </tbody>
 </table>
 <p>6804 rows × 5 columns</p>
-</div></div></div>
+</div></div>
 </div>
 </section>
 </section>
-<section id="prepare-the-dataset">
-<h2>Prepare the Dataset<a class="headerlink" href="#prepare-the-dataset" title="Permalink to this heading"></a></h2>
+<section id="Prepare-the-Dataset">
+<h2>Prepare the Dataset<a class="headerlink" href="#Prepare-the-Dataset" title="Permalink to this heading"></a></h2>
 <p>We will now prepare the data for making sales predictions. Add new columns to the dataframe for the year and seasonality. Let each year from 2015 through 2022 be given an index from 0 through 7 in the increasing order of the year. We will define the peak season to be the months of February through July. These months are set based on visual inspection of the trends, but you can try setting other months.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add the index for each year from 2015 through 2022</span>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add the index for each year from 2015 through 2022</span>
 <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;display.max_colwidth&quot;</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">avocado</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">avocado</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span>
 <span class="n">avocado</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">avocado</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">year</span>
@@ -339,8 +637,12 @@ There are eight large regions relevant for this example, namely the Great Lakes,
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output text_html"><div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
         vertical-align: middle;
@@ -493,24 +795,27 @@ There are eight large regions relevant for this example, namely the Great Lakes,
   </tbody>
 </table>
 <p>3402 rows × 8 columns</p>
-</div></div></div>
+</div></div>
 </div>
 </section>
-<section id="part-i-observe-trends-in-the-data">
-<h2>Part I: Observe Trends in the Data<a class="headerlink" href="#part-i-observe-trends-in-the-data" title="Permalink to this heading"></a></h2>
+<section id="Part-I:-Observe-Trends-in-the-Data">
+<h2>Part I: Observe Trends in the Data<a class="headerlink" href="#Part-I:-Observe-Trends-in-the-Data" title="Permalink to this heading"></a></h2>
 <p>Now, we will infer sales trends in time and seasonality. For simplicity, let’s proceed with data from the United States as a whole.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_Total_US</span> <span class="o">=</span> <span class="n">avocado</span><span class="p">[</span><span class="n">avocado</span><span class="p">[</span><span class="s1">&#39;region&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Total_US&#39;</span><span class="p">]</span>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_Total_US</span> <span class="o">=</span> <span class="n">avocado</span><span class="p">[</span><span class="n">avocado</span><span class="p">[</span><span class="s1">&#39;region&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Total_US&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
+<section id="Sales-Over-the-Years">
+<h3>Sales Over the Years<a class="headerlink" href="#Sales-Over-the-Years" title="Permalink to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
 </div>
-<section id="sales-over-the-years">
-<h3>Sales Over the Years<a class="headerlink" href="#sales-over-the-years" title="Permalink to this heading"></a></h3>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 
 <span class="n">mean</span> <span class="o">=</span> <span class="n">df_Total_US</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;year&#39;</span><span class="p">)[</span><span class="s1">&#39;units_sold&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 <span class="n">std</span>  <span class="o">=</span> <span class="n">df_Total_US</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;year&#39;</span><span class="p">)[</span><span class="s1">&#39;units_sold&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
@@ -522,18 +827,23 @@ There are eight large regions relevant for this example, namely the Great Lakes,
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<img alt="../_images/4cf792a82c84eeefba784d59bd54a217540fe083fbf046d7c7e01702c644222c.png" src="../_images/4cf792a82c84eeefba784d59bd54a217540fe083fbf046d7c7e01702c644222c.png" />
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/mlm-examples_price_optimization_12_0.png" src="../_images/mlm-examples_price_optimization_12_0.png" />
 </div>
 </div>
 <p>We can see that the sales generally increased over the years, albeit marginally. The dip in 2019 is the effect of the well-documented <a class="reference external" href="https://abc7news.com/avocado-shortage-season-prices/5389855/">2019 avocado shortage</a> that led to avocados <a class="reference external" href="https://abc7news.com/avocado-shortage-season-prices/5389855/">nearly doubling in price.</a></p>
 </section>
-<section id="seasonality">
-<h3>Seasonality<a class="headerlink" href="#seasonality" title="Permalink to this heading"></a></h3>
+<section id="Seasonality">
+<h3>Seasonality<a class="headerlink" href="#Seasonality" title="Permalink to this heading"></a></h3>
 <p>We will now see the sales trends within a year.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 
 <span class="n">mean</span> <span class="o">=</span> <span class="n">df_Total_US</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;month&#39;</span><span class="p">)[</span><span class="s1">&#39;units_sold&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 <span class="n">std</span>  <span class="o">=</span> <span class="n">df_Total_US</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;month&#39;</span><span class="p">)[</span><span class="s1">&#39;units_sold&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
@@ -551,19 +861,23 @@ There are eight large regions relevant for this example, namely the Great Lakes,
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<img alt="../_images/26080c19ebdb38be716edcbe505c5689c20eda256b34b28a160314bf2b72cedc.png" src="../_images/26080c19ebdb38be716edcbe505c5689c20eda256b34b28a160314bf2b72cedc.png" />
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/mlm-examples_price_optimization_14_0.png" src="../_images/mlm-examples_price_optimization_14_0.png" />
 </div>
 </div>
 <p>We see a Super Bowl peak in February and a Cinco de Mayo peak in May.</p>
 </section>
-<section id="correlations">
-<h3>Correlations<a class="headerlink" href="#correlations" title="Permalink to this heading"></a></h3>
-<p>Now, we will see how the variables are correlated with each other.
-The end goal is to predict sales given the price of an avocado, year and seasonality (peak or not).</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<section id="Correlations">
+<h3>Correlations<a class="headerlink" href="#Correlations" title="Permalink to this heading"></a></h3>
+<p>Now, we will see how the variables are correlated with each other. The end goal is to predict sales given the price of an avocado, year and seasonality (peak or not).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">df_Total_US</span><span class="p">[[</span><span class="s1">&#39;units_sold&#39;</span><span class="p">,</span> <span class="s1">&#39;price&#39;</span><span class="p">,</span> <span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;peak&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">corr</span><span class="p">(),</span><span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
 
 <span class="n">axes</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Correlations for conventional avocados&#39;</span><span class="p">)</span>
@@ -571,18 +885,23 @@ The end goal is to predict sales given the price of an avocado, year and seasona
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<img alt="../_images/efbb45f0239e4f1155d01022684ef27947ef7e48384ec0502655e30fbd00fa5d.png" src="../_images/efbb45f0239e4f1155d01022684ef27947ef7e48384ec0502655e30fbd00fa5d.png" />
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/mlm-examples_price_optimization_16_0.png" src="../_images/mlm-examples_price_optimization_16_0.png" />
 </div>
 </div>
 <p>As expected, the sales quantity has a negative correlation with the price per avocado. The sales quantity has a positive correlation with the year and season being a peak season.</p>
 </section>
-<section id="regions">
-<h3>Regions<a class="headerlink" href="#regions" title="Permalink to this heading"></a></h3>
+<section id="Regions">
+<h3>Regions<a class="headerlink" href="#Regions" title="Permalink to this heading"></a></h3>
 <p>Finally, we will see how the sales differ among the different regions. This will determine the number of avocados that we want to supply to each region.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 
 <span class="n">regions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Great_Lakes&#39;</span><span class="p">,</span><span class="s1">&#39;Midsouth&#39;</span><span class="p">,</span><span class="s1">&#39;Northeast&#39;</span><span class="p">,</span><span class="s1">&#39;Northern_New_England&#39;</span><span class="p">,</span><span class="s1">&#39;SouthCentral&#39;</span><span class="p">,</span><span class="s1">&#39;Southeast&#39;</span><span class="p">,</span><span class="s1">&#39;West&#39;</span><span class="p">,</span><span class="s1">&#39;Plains&#39;</span><span class="p">]</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">avocado</span><span class="p">[</span><span class="n">avocado</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">regions</span><span class="p">)]</span>
@@ -601,28 +920,29 @@ The end goal is to predict sales given the price of an avocado, year and seasona
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<img alt="../_images/f2168945778dccb56ae974387d473c79533c62cced0d05204c51dedd30c44863.png" src="../_images/f2168945778dccb56ae974387d473c79533c62cced0d05204c51dedd30c44863.png" />
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/mlm-examples_price_optimization_19_0.png" src="../_images/mlm-examples_price_optimization_19_0.png" />
 </div>
 </div>
 <p>Clearly, west-coasters love avocados.</p>
 </section>
 </section>
-<section id="part-ii-predict-the-sales">
-<h2>Part II: Predict the Sales<a class="headerlink" href="#part-ii-predict-the-sales" title="Permalink to this heading"></a></h2>
-<p>The trends observed in Part I motivate us to construct a prediction model for sales using the independent variables - price, year, region and seasonality.
-Henceforth, the sales quantity will be referred to as the <em>predicted demand</em>.</p>
-<p>Let us now construct a linear regressor for the demand.
-Note that the region is a categorical variable.
-The linear regressor can be mathematically expressed as:</p>
+<section id="Part-II:-Predict-the-Sales">
+<h2>Part II: Predict the Sales<a class="headerlink" href="#Part-II:-Predict-the-Sales" title="Permalink to this heading"></a></h2>
+<p>The trends observed in Part I motivate us to construct a prediction model for sales using the independent variables - price, year, region and seasonality. Henceforth, the sales quantity will be referred to as the <em>predicted demand</em>.</p>
+<p>Let us now construct a linear regressor for the demand. Note that the region is a categorical variable. The linear regressor can be mathematically expressed as:</p>
 <div class="math notranslate nohighlight">
 \[demand = \beta_0 + \beta_1 \cdot price + \sum\limits_{region} \beta^{region}_3 \cdot \mathbb{1}(region)  +  \beta_4 w_{year} \cdot year +  \beta_5  \cdot \mathbb{1}(peak).\]</div>
-<p>Here, the <span class="math notranslate nohighlight">\(\beta\)</span> values are weights (or “co-efficients”) that have to be learned from the data.
-Note that the notation <span class="math notranslate nohighlight">\(\mathbb{1}(region)\)</span> is an indicator function that takes the value <span class="math notranslate nohighlight">\(1\)</span> for each region in the summation. The value of <span class="math notranslate nohighlight">\(\mathbb{1}(peak)\)</span> is <span class="math notranslate nohighlight">\(1\)</span> if we consider the peak season.</p>
+<p>Here, the <span class="math notranslate nohighlight">\(\beta\)</span> values are weights (or “co-efficients”) that have to be learned from the data. Note that the notation <span class="math notranslate nohighlight">\(\mathbb{1}(region)\)</span> is an indicator function that takes the value <span class="math notranslate nohighlight">\(1\)</span> for each region in the summation. The value of <span class="math notranslate nohighlight">\(\mathbb{1}(peak)\)</span> is <span class="math notranslate nohighlight">\(1\)</span> if we consider the peak season.</p>
 <p>To validate the regression model, we will randomly split the dataset into <span class="math notranslate nohighlight">\(80\%\)</span> training and <span class="math notranslate nohighlight">\(20\%\)</span> testing data and learn the weights using sklearn.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
 
 <span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">make_column_transformer</span>
@@ -636,15 +956,21 @@ Note that the notation <span class="math notranslate nohighlight">\(\mathbb{1}(r
 </pre></div>
 </div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">regions</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">regions</span>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;Great_Lakes&#39;,
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;Great_Lakes&#39;,
  &#39;Midsouth&#39;,
  &#39;Northeast&#39;,
  &#39;Northern_New_England&#39;,
@@ -652,13 +978,13 @@ Note that the notation <span class="math notranslate nohighlight">\(\mathbb{1}(r
  &#39;Southeast&#39;,
  &#39;West&#39;,
  &#39;Plains&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">regions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Great_Lakes&#39;</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">regions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Great_Lakes&#39;</span><span class="p">,</span>
            <span class="s1">&#39;Midsouth&#39;</span><span class="p">,</span>
            <span class="s1">&#39;Northeast&#39;</span><span class="p">,</span>
            <span class="s1">&#39;West&#39;</span><span class="p">,</span>
@@ -666,10 +992,11 @@ Note that the notation <span class="math notranslate nohighlight">\(\mathbb{1}(r
 </pre></div>
 </div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target</span> <span class="o">=</span> <span class="s1">&#39;units_sold&#39;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target</span> <span class="o">=</span> <span class="s1">&#39;units_sold&#39;</span>
 <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">,</span> <span class="s1">&#39;year_index&#39;</span><span class="p">,</span> <span class="s1">&#39;region&#39;</span><span class="p">,</span> <span class="s1">&#39;peak&#39;</span><span class="p">]</span>
 
 <span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">target</span><span class="p">]</span>
@@ -682,8 +1009,12 @@ Note that the notation <span class="math notranslate nohighlight">\(\mathbb{1}(r
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output text_html"><div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
         vertical-align: middle;
@@ -788,29 +1119,33 @@ Note that the notation <span class="math notranslate nohighlight">\(\mathbb{1}(r
   </tbody>
 </table>
 <p>1512 rows × 4 columns</p>
-</div></div></div>
+</div></div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">transform</span> <span class="o">=</span> <span class="n">make_column_transformer</span><span class="p">((</span><span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">),</span> <span class="p">[</span><span class="s1">&#39;region&#39;</span><span class="p">]),</span> <span class="n">remainder</span><span class="o">=</span><span class="s1">&#39;passthrough&#39;</span><span class="p">,</span>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">transform</span> <span class="o">=</span> <span class="n">make_column_transformer</span><span class="p">((</span><span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">),</span> <span class="p">[</span><span class="s1">&#39;region&#39;</span><span class="p">]),</span> <span class="n">remainder</span><span class="o">=</span><span class="s1">&#39;passthrough&#39;</span><span class="p">,</span>
                                     <span class="n">verbose_feature_names_out</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="n">X</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Split the data for training and testing</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Split the data for training and testing</span>
 <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Train the model</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Train the model</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">MLPRegressor</span><span class="p">([</span><span class="mi">10</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">))</span>
 <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 
@@ -820,41 +1155,44 @@ Note that the notation <span class="math notranslate nohighlight">\(\mathbb{1}(r
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The R^2 value in the test set is 0.859327537889134
-</pre></div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The R^2 value in the test set is 0.8603705388148124
+</pre></div></div>
 </div>
 <p>We can observe a good <span class="math notranslate nohighlight">\(R^2\)</span> value in the test set. We will now fit the weights to the full dataset.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
 <span class="n">y_pred_full</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The R^2 value in the full dataset is&quot;</span><span class="p">,</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y_pred_full</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The R^2 value in the full dataset is 0.8712886127944649
-</pre></div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The R^2 value in the full dataset is 0.8611189486347879
+</pre></div></div>
 </div>
 </section>
-<section id="part-iii-optimize-for-price-and-supply-of-avocados">
-<h2>Part III: Optimize for Price and Supply of Avocados<a class="headerlink" href="#part-iii-optimize-for-price-and-supply-of-avocados" title="Permalink to this heading"></a></h2>
-<p>Knowing how the price of an avocado affects the demand, how can we set the optimal avocado price?
-We don’t want to set the price too high, since that could drive demand and sales down. At the same time, setting the price too low could be sub-optimal when maximizing revenue. So what is the sweet spot?</p>
-<p>On the distribution logistics, we want to make sure that there are enough avocados across the regions. We can address these considerations in a mathematical optimization model.
-An optimization model finds the <strong>best solution</strong> according to an <strong>objective function</strong> such that the solution satisfies a set of <strong>constraints</strong>.
-Here, a solution is expressed as a vector of real values or integer values called <strong>decision variables</strong>.
-Constraints are a set of equations or inequalities written as a function of the decision variables.</p>
+<section id="Part-III:-Optimize-for-Price-and-Supply-of-Avocados">
+<h2>Part III: Optimize for Price and Supply of Avocados<a class="headerlink" href="#Part-III:-Optimize-for-Price-and-Supply-of-Avocados" title="Permalink to this heading"></a></h2>
+<p>Knowing how the price of an avocado affects the demand, how can we set the optimal avocado price? We don’t want to set the price too high, since that could drive demand and sales down. At the same time, setting the price too low could be sub-optimal when maximizing revenue. So what is the sweet spot?</p>
+<p>On the distribution logistics, we want to make sure that there are enough avocados across the regions. We can address these considerations in a mathematical optimization model. An optimization model finds the <strong>best solution</strong> according to an <strong>objective function</strong> such that the solution satisfies a set of <strong>constraints</strong>. Here, a solution is expressed as a vector of real values or integer values called <strong>decision variables</strong>. Constraints are a set of equations or inequalities written as a
+function of the decision variables.</p>
 <p>At the start of each week, assume that the total number of available products is finite. This quantity needs to be distributed to the various regions while maximizing net revenue. So there are two key decisions - the price of an avocado in each region, and the number of avocados allocated to each region.</p>
 <p>Let us now define some input parameters and notations used for creating the model. The subscript <span class="math notranslate nohighlight">\(r\)</span> will be used to denote each region.</p>
-<section id="input-parameters">
-<h3>Input Parameters<a class="headerlink" href="#input-parameters" title="Permalink to this heading"></a></h3>
+<section id="Input-Parameters">
+<h3>Input Parameters<a class="headerlink" href="#Input-Parameters" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(R\)</span>: set of regions,</p></li>
 <li><p><span class="math notranslate nohighlight">\(d(p,r)\)</span>: predicted demand in region <span class="math notranslate nohighlight">\(r\in R\)</span> when the avocado per product is <span class="math notranslate nohighlight">\(p\)</span>,</p></li>
@@ -864,24 +1202,23 @@ Constraints are a set of equations or inequalities written as a function of the 
 <li><p><span class="math notranslate nohighlight">\(a^r_{min},a^r_{max}\)</span>: minimum and maximum price (<span class="math notranslate nohighlight">\(\$\)</span>) per avocado for reigon <span class="math notranslate nohighlight">\(r \in R\)</span>,</p></li>
 <li><p><span class="math notranslate nohighlight">\(b^r_{min},b^r_{max}\)</span>: minimum and maximum number of avocados allocated to region <span class="math notranslate nohighlight">\(r \in R\)</span>,</p></li>
 </ul>
-<p>The following code loads the Gurobi python package and initiates the optimization model.
-The value of <span class="math notranslate nohighlight">\(B\)</span> is set to <span class="math notranslate nohighlight">\(30\)</span> million avocados, which is close to the average weekly supply value from the data.
-For illustration, let us consider the peak season of 2021.
-The cost of wasting an avocado is set to <span class="math notranslate nohighlight">\(\$0.10\)</span>.
-The cost of transporting an avocado ranges between <span class="math notranslate nohighlight">\(\$0.10\)</span> to <span class="math notranslate nohighlight">\(\$0.50\)</span> based on each region’s distance from the southern border, where the <a class="reference external" href="https://www.britannica.com/plant/avocado">majority of avocado supply comes from</a>.
-Further, we can set the price of an avocado to not exceed <span class="math notranslate nohighlight">\(\$ 2\)</span> apiece.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">regions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Great_Lakes&#39;</span><span class="p">,</span>
+<p>The following code loads the Gurobi python package and initiates the optimization model. The value of <span class="math notranslate nohighlight">\(B\)</span> is set to <span class="math notranslate nohighlight">\(30\)</span> million avocados, which is close to the average weekly supply value from the data. For illustration, let us consider the peak season of 2021. The cost of wasting an avocado is set to <span class="math notranslate nohighlight">\(\$0.10\)</span>. The cost of transporting an avocado ranges between <span class="math notranslate nohighlight">\(\$0.10\)</span> to <span class="math notranslate nohighlight">\(\$0.50\)</span> based on each region’s distance from the southern border, where the <a class="reference external" href="https://www.britannica.com/plant/avocado">majority of
+avocado supply comes from</a>. Further, we can set the price of an avocado to not exceed <span class="math notranslate nohighlight">\(\$ 2\)</span> apiece.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">regions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Great_Lakes&#39;</span><span class="p">,</span>
  <span class="s1">&#39;West&#39;</span><span class="p">,</span>
  <span class="s1">&#39;Northeast&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gurobipy</span> <span class="k">as</span> <span class="nn">gp</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gurobipy</span> <span class="k">as</span> <span class="nn">gp</span>
 <span class="kn">from</span> <span class="nn">gurobipy</span> <span class="kn">import</span> <span class="n">GRB</span>
 
 <span class="n">m</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="s2">&quot;Avocado_Price_Allocation&quot;</span><span class="p">)</span>
@@ -914,18 +1251,20 @@ Further, we can set the price of an avocado to not exceed <span class="math notr
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi 10.0.0 (beta1) - expires 2022-11-21
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Gurobi 10.0.0 (beta1) - expires 2022-11-21
+Restricted license - for non-production use only - expires 2022-11-22
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Restricted license - for non-production use only - expires 2022-11-22
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compute bounds for the features</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compute bounds for the features</span>
 
 <span class="c1"># First create a data frame indexed by the regions and with the features</span>
 <span class="c1"># as columns</span>
@@ -947,21 +1286,20 @@ Further, we can set the price of an avocado to not exceed <span class="math notr
 </pre></div>
 </div>
 </div>
-</div>
 </section>
-<section id="decision-variables">
-<h3>Decision Variables<a class="headerlink" href="#decision-variables" title="Permalink to this heading"></a></h3>
-<p>Let us now define the decision variables.
-In our model, we want to store the price and number of avocados allocated to each region. We also want variables that track how many avocados are predicted to be sold and how many are predicted to be wasted.
-The following notation is used to model these decision variables, indexed for each region <span class="math notranslate nohighlight">\(r\)</span>.</p>
+<section id="Decision-Variables">
+<h3>Decision Variables<a class="headerlink" href="#Decision-Variables" title="Permalink to this heading"></a></h3>
+<p>Let us now define the decision variables. In our model, we want to store the price and number of avocados allocated to each region. We also want variables that track how many avocados are predicted to be sold and how many are predicted to be wasted. The following notation is used to model these decision variables, indexed for each region <span class="math notranslate nohighlight">\(r\)</span>.</p>
 <p><span class="math notranslate nohighlight">\(p_r\)</span>: the price of an avocado (<span class="math notranslate nohighlight">\(\$\)</span>) in region <span class="math notranslate nohighlight">\(r\)</span>,</p>
 <p><span class="math notranslate nohighlight">\(x_r\)</span>: the number of avocados supplied to region <span class="math notranslate nohighlight">\(r\)</span>,</p>
 <p><span class="math notranslate nohighlight">\(s_r = \min \{x_r,d_r(p_r)\}\)</span>: the predicted number of avocados sold in region <span class="math notranslate nohighlight">\(r\)</span>,</p>
 <p><span class="math notranslate nohighlight">\(w_r = x_r - s_r\)</span>: the predicted number of avocados wasted in region <span class="math notranslate nohighlight">\(r\)</span></p>
 <p>We will now add the variables to the Gurobi model.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addMVar</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">lb</span><span class="o">=</span><span class="n">b_min</span><span class="p">,</span><span class="n">ub</span><span class="o">=</span><span class="n">b_max</span><span class="p">)</span>  <span class="c1"># quantity supplied to each region</span>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addMVar</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">lb</span><span class="o">=</span><span class="n">b_min</span><span class="p">,</span><span class="n">ub</span><span class="o">=</span><span class="n">b_max</span><span class="p">)</span>  <span class="c1"># quantity supplied to each region</span>
 <span class="n">s</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addMVar</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span><span class="n">lb</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>   <span class="c1"># predicted amount of sales in each region for the given price</span>
 <span class="n">w</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addMVar</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span><span class="n">lb</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>   <span class="c1"># excess wasteage in each region</span>
 
@@ -976,100 +1314,100 @@ The following notation is used to model these decision variables, indexed for ea
 </pre></div>
 </div>
 </div>
-</div>
 </section>
-<section id="set-the-objective">
-<h3>Set the Objective<a class="headerlink" href="#set-the-objective" title="Permalink to this heading"></a></h3>
+<section id="Set-the-Objective">
+<h3>Set the Objective<a class="headerlink" href="#Set-the-Objective" title="Permalink to this heading"></a></h3>
 <p>Next, we will define the objective function: we want to maximize the <strong>net revenue</strong>. The revenue from sales in each region is calculated by the price of an avocado in that region multiplied by the quantity sold there. There are two types of costs incurred: the wastage costs for excess unsold avocados and the cost of transporting the avocados to the different regions.</p>
 <p>The net revenue is the sales revenue subtracted by the total costs incurred. We assume that the purchase costs are fixed and are not incorporated in this model.</p>
 <p>Using the defined decision variables, the objective can be written as follows.</p>
 <div class="math notranslate nohighlight">
-\[\textrm{maximize} \, \sum_{r}  (p_r \cdot s_r - c_{waste} \cdot w_r - c^r_{transport} \cdot x_r) \]</div>
+\[\textrm{maximize} \, \sum_{r}  (p_r \cdot s_r - c_{waste} \cdot w_r - c^r_{transport} \cdot x_r)\]</div>
 <p>Let us now add the objective function to the model.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">setObjective</span><span class="p">(</span><span class="n">p</span><span class="nd">@s</span> <span class="o">-</span> <span class="n">c_waste</span> <span class="o">*</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">-</span> <span class="n">c_transport</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">setObjective</span><span class="p">(</span><span class="n">p</span><span class="nd">@s</span> <span class="o">-</span> <span class="n">c_waste</span> <span class="o">*</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">-</span> <span class="n">c_transport</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span>
 <span class="n">m</span><span class="o">.</span><span class="n">ModelSense</span> <span class="o">=</span> <span class="n">GRB</span><span class="o">.</span><span class="n">MAXIMIZE</span>
 </pre></div>
 </div>
 </div>
-</div>
 </section>
-<section id="add-the-supply-constraint">
-<h3>Add the Supply Constraint<a class="headerlink" href="#add-the-supply-constraint" title="Permalink to this heading"></a></h3>
+<section id="Add-the-Supply-Constraint">
+<h3>Add the Supply Constraint<a class="headerlink" href="#Add-the-Supply-Constraint" title="Permalink to this heading"></a></h3>
 <p>We now introduce the constraints. The first constraint is to make sure that the total number of avocados supplied is equal to <span class="math notranslate nohighlight">\(B\)</span>, which can be mathematically expressed as follows.</p>
 <div class="math notranslate nohighlight">
 \[\sum_{r} x_r = B\]</div>
 <p>The following code adds this constraint to the model.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="n">B</span><span class="p">)</span>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="n">B</span><span class="p">)</span>
 <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
-</div>
 </section>
-<section id="add-constraints-that-define-sales-quantity">
-<h3>Add Constraints That Define Sales Quantity<a class="headerlink" href="#add-constraints-that-define-sales-quantity" title="Permalink to this heading"></a></h3>
-<p>Next, we should define the predicted sales quantity in each region.
-We can assume that if we supply more than the predicted demand, we sell exactly the predicted demand.
-Otherwise, we sell exactly the allocated amount.
-Hence, the predicted sales quantity is the minimum of the allocated quantity and the predicted demand, i.e., <span class="math notranslate nohighlight">\(s_r = \min \{x_r,d_r(p_r)\}\)</span>.
-This relationship can be modeled by the following two constraints for each region <span class="math notranslate nohighlight">\(r\)</span>.</p>
+<section id="Add-Constraints-That-Define-Sales-Quantity">
+<h3>Add Constraints That Define Sales Quantity<a class="headerlink" href="#Add-Constraints-That-Define-Sales-Quantity" title="Permalink to this heading"></a></h3>
+<p>Next, we should define the predicted sales quantity in each region. We can assume that if we supply more than the predicted demand, we sell exactly the predicted demand. Otherwise, we sell exactly the allocated amount. Hence, the predicted sales quantity is the minimum of the allocated quantity and the predicted demand, i.e., <span class="math notranslate nohighlight">\(s_r = \min \{x_r,d_r(p_r)\}\)</span>. This relationship can be modeled by the following two constraints for each region <span class="math notranslate nohighlight">\(r\)</span>.</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}
-\begin{align*}
+\[\begin{split}\begin{aligned}
 s_r &amp;\leq x_r  \\
 s_r &amp;\leq d(p_r,r)
-\end{align*}
-\end{split}\]</div>
-<p>These constraints will ensure that the sales quantity <span class="math notranslate nohighlight">\(s_r\)</span> in region <span class="math notranslate nohighlight">\(r\)</span> is  greater than neither the allocated quantity nor the predicted demand. Note that the maximization objective function tries to maximize the revenue from sales, and therefore the optimizer will maximize the predicted sales quantity. This is assuming that the surplus and transportation costs are less than the sales price per avocado. Hence, these constraints along with the objective will ensure that the sales are equal to the minimum of supply and predicted demand.</p>
+\end{aligned}\end{split}\]</div>
+<p>These constraints will ensure that the sales quantity <span class="math notranslate nohighlight">\(s_r\)</span> in region <span class="math notranslate nohighlight">\(r\)</span> is greater than neither the allocated quantity nor the predicted demand. Note that the maximization objective function tries to maximize the revenue from sales, and therefore the optimizer will maximize the predicted sales quantity. This is assuming that the surplus and transportation costs are less than the sales price per avocado. Hence, these constraints along with the objective will ensure that the sales
+are equal to the minimum of supply and predicted demand.</p>
 <p>Let us now add these constraints to the model.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">s</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">)</span>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">s</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">)</span>
 <span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">s</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="p">)</span>
 <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
-</div>
 </section>
-<section id="add-the-wastage-constraints">
-<h3>Add the Wastage Constraints<a class="headerlink" href="#add-the-wastage-constraints" title="Permalink to this heading"></a></h3>
+<section id="Add-the-Wastage-Constraints">
+<h3>Add the Wastage Constraints<a class="headerlink" href="#Add-the-Wastage-Constraints" title="Permalink to this heading"></a></h3>
 <p>Finally, we should define the predicted wastage in each region, given by the supplied quantity that is not predicted to be sold. We can express this mathematically for each region <span class="math notranslate nohighlight">\(r\)</span>.</p>
 <div class="math notranslate nohighlight">
 \[w_r = x_r - s_r\]</div>
 <p>We can add these constraints to the model.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">w</span> <span class="o">==</span> <span class="n">x</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">w</span> <span class="o">==</span> <span class="n">x</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span>
 <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pred_constr</span> <span class="o">=</span> <span class="n">add_predictor_constr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">feats</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pred_constr</span> <span class="o">=</span> <span class="n">add_predictor_constr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">feats</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Warning for adding constraints: zero or small (&lt; 1e-13) coefficients, ignored
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pred_constr</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pred_constr</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model for PipelineConstr1:
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Model for PipelineConstr1:
 138 variables
 81 constraints
 60 general constraints
@@ -1115,123 +1453,131 @@ Model for layer2:
 Input has shape (3, 10)
 Output has shape (3, 1)
 Activation is identity
-</pre></div>
-</div>
-</div>
+
+
+</pre></div></div>
 </div>
 </section>
-<section id="fire-up-the-solver">
-<h3>Fire Up the Solver<a class="headerlink" href="#fire-up-the-solver" title="Permalink to this heading"></a></h3>
-<p>We have added the decision variables, objective function, and the constraints to the model.
-The model is ready to be solved.
-Before we do so, we should let the solver know what type of model this is.
-The default setting assumes that the objective and the constraints are linear functions of the variables.</p>
-<p>In our model, the objective is <strong>quadratic</strong> since we take the product of price and the predicted sales, both of which are variables.
-Maximizing a quadratic term is said to be <strong>non-convex</strong>, and we specify this by setting the value of the Gurobi parameter <strong>NonConvex</strong> to be <span class="math notranslate nohighlight">\(2\)</span>.
-See <a class="reference external" href="https://www.gurobi.com/documentation/9.5/refman/nonconvex.html">the documentation of the NonConvex parameter</a> for more details.</p>
-<div class="cell tag_remove-input docutils container">
+<section id="Fire-Up-the-Solver">
+<h3>Fire Up the Solver<a class="headerlink" href="#Fire-Up-the-Solver" title="Permalink to this heading"></a></h3>
+<p>We have added the decision variables, objective function, and the constraints to the model. The model is ready to be solved. Before we do so, we should let the solver know what type of model this is. The default setting assumes that the objective and the constraints are linear functions of the variables.</p>
+<p>In our model, the objective is <strong>quadratic</strong> since we take the product of price and the predicted sales, both of which are variables. Maximizing a quadratic term is said to be <strong>non-convex</strong>, and we specify this by setting the value of the Gurobi parameter <strong>NonConvex</strong> to be <span class="math notranslate nohighlight">\(2\)</span>. See <a class="reference external" href="https://www.gurobi.com/documentation/9.5/refman/nonconvex.html">the documentation of the NonConvex parameter</a> for more details.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
 </div>
-<div class="cell tag_remove-stdout docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">Params</span><span class="o">.</span><span class="n">NonConvex</span> <span class="o">=</span> <span class="mi">2</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">Params</span><span class="o">.</span><span class="n">NonConvex</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">m</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-<div class="cell tag_remove-input docutils container">
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gurobi 10.0.0 (mac64[x86]) logging started Fri Oct 21 17:20:45 2022
-
-Set parameter LogFile to value &quot;gurobi.log&quot;
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 Set parameter NonConvex to value 2
-Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
+Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (linux64)
 
-CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
-Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+CPU model: Intel(R) Core(TM) i5-4460  CPU @ 3.20GHz, instruction set [SSE2|AVX|AVX2]
+Thread count: 4 physical cores, 4 logical processors, using up to 4 threads
 
-Optimize a model with 91 rows, 168 columns and 618 nonzeros
-Model fingerprint: 0xcf4ad034
+Optimize a model with 91 rows, 168 columns and 633 nonzeros
+Model fingerprint: 0x68196956
 Model has 3 quadratic objective terms
 Model has 60 general constraints
 Variable types: 168 continuous, 0 integer (0 binary)
 Coefficient statistics:
-  Matrix range     [2e-13, 2e+00]
+  Matrix range     [4e-07, 2e+00]
   Objective range  [2e-01, 5e-01]
   QObjective range [2e+00, 2e+00]
   Bounds range     [6e-01, 1e+01]
-  RHS range        [3e-02, 2e+01]
-Presolve added 7 rows and 0 columns
-Presolve removed 0 rows and 68 columns
-Presolve time: 0.02s
-Presolved: 105 rows, 104 columns, 392 nonzeros
+  RHS range        [1e-02, 2e+01]
+Presolve added 4 rows and 0 columns
+Presolve removed 0 rows and 71 columns
+Presolve time: 0.01s
+Presolved: 102 rows, 101 columns, 397 nonzeros
 Presolved model has 3 bilinear constraint(s)
-Variable types: 77 continuous, 27 integer (27 binary)
+Variable types: 76 continuous, 25 integer (25 binary)
 
-Root relaxation: objective 2.604555e+01, 61 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: objective 2.596170e+01, 59 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0   26.04554    0    7          -   26.04554      -     -    0s
-H    0     0                      16.9624388   26.04554  53.5%     -    0s
-     0     0   25.55181    0    8   16.96243   25.55181  50.6%     -    0s
-H    0     0                      22.6875620   25.55181  12.6%     -    0s
-     0     0   25.12814    0   12   22.68756   25.12814  10.8%     -    0s
-     0     0   25.12572    0   13   22.68756   25.12572  10.7%     -    0s
-     0     0   25.02317    0    9   22.68756   25.02317  10.3%     -    0s
-     0     0   24.96809    0   15   22.68756   24.96809  10.1%     -    0s
-     0     0   24.96583    0    9   22.68756   24.96583  10.0%     -    0s
-     0     0   24.96291    0   14   22.68756   24.96291  10.0%     -    0s
-     0     0   24.93104    0   11   22.68756   24.93104  9.89%     -    0s
-     0     0   24.92787    0   11   22.68756   24.92787  9.87%     -    0s
-     0     0   24.92476    0   11   22.68756   24.92476  9.86%     -    0s
-     0     0   24.91607    0   11   22.68756   24.91607  9.82%     -    0s
-     0     0   24.91607    0   11   22.68756   24.91607  9.82%     -    0s
-H    0     0                      23.1043667   24.91607  7.84%     -    0s
-     0     2   24.91607    0   11   23.10436   24.91607  7.84%     -    0s
-H   38    10                      23.1148182   23.16830  0.23%   3.6    0s
-H   41    10                      23.1217855   23.15624  0.15%   3.4    0s
-*   58     5              17      23.1217855   23.14594  0.10%   2.4    0s
+     0     0   25.96170    0   17          -   25.96170      -     -    0s
+H    0     0                      18.1461893   25.96170  43.1%     -    0s
+H    0     0                      18.1461893   25.96170  43.1%     -    0s
+     0     0   25.07699    0   18   18.14618   25.07699  38.2%     -    0s
+H    0     0                      19.2825574   25.07699  30.1%     -    0s
+     0     0   25.07699    0   18   19.28255   25.07699  30.1%     -    0s
+     0     0   23.36733    0   20   19.28255   23.36733  21.2%     -    0s
+H    0     0                      19.3644709   23.36733  20.7%     -    0s
+     0     0   23.30774    0   18   19.36447   23.30774  20.4%     -    0s
+     0     0   23.09851    0   20   19.36447   23.09851  19.3%     -    0s
+     0     0   23.09034    0   21   19.36447   23.09034  19.2%     -    0s
+     0     0   23.05716    0   23   19.36447   23.05716  19.1%     -    0s
+     0     0   23.05697    0   23   19.36447   23.05697  19.1%     -    0s
+     0     0   23.04855    0   23   19.36447   23.04855  19.0%     -    0s
+     0     0   23.04808    0   22   19.36447   23.04808  19.0%     -    0s
+     0     0   22.73862    0   23   19.36447   22.73862  17.4%     -    0s
+     0     0   22.39975    0   23   19.36447   22.39975  15.7%     -    0s
+H    0     0                      19.4245924   22.34735  15.0%     -    0s
+H    0     0                      19.5891022   22.34735  14.1%     -    0s
+     0     0   22.34735    0   23   19.58910   22.34735  14.1%     -    0s
+H    0     0                      19.5901945   22.34735  14.1%     -    0s
+     0     2   22.34735    0   23   19.59019   22.34735  14.1%     -    0s
+H   65    33                      19.5937150   21.56933  10.1%   7.1    0s
+*  146    45              20      19.5971306   20.63329  5.29%   4.4    0s
+H  159    55                      19.6075335   20.63329  5.23%   4.1    0s
+*  436    24              32      19.6075353   19.75504  0.75%   2.8    0s
+H  461    34                      19.6075354   19.73561  0.65%   2.7    0s
+*  468    34              30      19.6075379   19.73561  0.65%   2.6    0s
+H  487    34                      19.6076758   19.71513  0.55%   2.6    0s
+*  493    34              25      19.6077207   19.71513  0.55%   2.6    0s
+H  560    29                      19.6077210   19.66647  0.30%   2.4    0s
 
 Cutting planes:
-  Gomory: 2
-  Cover: 9
-  Implied bound: 13
+  Gomory: 8
+  Cover: 6
+  Implied bound: 7
   Clique: 2
   MIR: 7
-  Flow cover: 13
-  RLT: 6
-  Relax-and-lift: 2
+  Flow cover: 16
+  RLT: 11
+  Relax-and-lift: 1
 
-Explored 75 nodes (331 simplex iterations) in 0.10 seconds (0.03 work units)
-Thread count was 8 (of 8 available processors)
+Explored 617 nodes (1652 simplex iterations) in 0.19 seconds (0.06 work units)
+Thread count was 4 (of 4 available processors)
 
-Solution count 5: 23.1218 23.1148 23.1044 ... 16.9624
+Solution count 10: 19.6077 19.6077 19.6075 ... 19.3645
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 2.312178556857e+01, best bound 2.312179596883e+01, gap 0.0000%
+Best objective 1.960772039877e+01, best bound 1.960867612809e+01, gap 0.0049%
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Maximal error in predicted values in solution </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pred_constr</span><span class="o">.</span><span class="n">get_error</span><span class="p">()))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Maximal error in predicted values in solution </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pred_constr</span><span class="o">.</span><span class="n">get_error</span><span class="p">()))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Maximal error in predicted values in solution 7.748407848673367e-07
+</pre></div></div>
+</div>
+<p>The solver solved the optimization problem in less than a second. Let us now analyze the optimal solution by storing it in a Pandas dataframe.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Maximal error in predicted values in solution 8.881784197001252e-16
-</pre></div>
-</div>
-</div>
-</div>
-<p>The solver solved the optimization problem in less than a second.
-Let us now analyze the optimal solution by storing it in a Pandas dataframe.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;display.max_colwidth&quot;</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;display.max_colwidth&quot;</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
 <span class="n">solution</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
 <span class="n">solution</span><span class="p">[</span><span class="s1">&#39;Region&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">regions</span>
 <span class="n">solution</span><span class="p">[</span><span class="s1">&#39;Price&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">X</span>
@@ -1246,11 +1592,21 @@ Let us now analyze the optimal solution by storing it in a Pandas dataframe.</p>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> The optimal net revenue: $23.121786 million
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+ The optimal net revenue: $19.607720 million
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
-<div class="output text_html"><div>
+<div class="output_area rendered_html docutils container">
+<div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
         vertical-align: middle;
@@ -1281,37 +1637,39 @@ Let us now analyze the optimal solution by storing it in a Pandas dataframe.</p>
       <th>0</th>
       <td>Great_Lakes</td>
       <td>2.000000</td>
-      <td>3.6413</td>
-      <td>3.6413</td>
-      <td>0.0000</td>
-      <td>3.6413</td>
+      <td>3.2456</td>
+      <td>3.2456</td>
+      <td>-0.0</td>
+      <td>3.2456</td>
     </tr>
     <tr>
       <th>1</th>
       <td>West</td>
-      <td>2.000000</td>
-      <td>6.3474</td>
-      <td>5.7598</td>
-      <td>0.5876</td>
-      <td>5.7598</td>
+      <td>1.358665</td>
+      <td>6.7827</td>
+      <td>6.7827</td>
+      <td>0.0</td>
+      <td>6.7827</td>
     </tr>
     <tr>
       <th>2</th>
       <td>Northeast</td>
-      <td>1.791883</td>
-      <td>5.0113</td>
-      <td>5.0113</td>
-      <td>0.0000</td>
-      <td>5.0113</td>
+      <td>1.653356</td>
+      <td>4.9717</td>
+      <td>4.9717</td>
+      <td>-0.0</td>
+      <td>4.9717</td>
     </tr>
   </tbody>
 </table>
-</div></div></div>
+</div></div>
 </div>
 <p>Let us now visualize a scatter plot between the price and the number of avocados sold (in millions) for the eight regions.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">plot_sol</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">solution</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;Price&#39;</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;Sold&#39;</span><span class="p">,</span><span class="n">hue</span><span class="o">=</span><span class="s1">&#39;Region&#39;</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 <span class="n">plot_waste</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">solution</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;Price&#39;</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;Wasted&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="n">hue</span><span class="o">=</span><span class="s1">&#39;Region&#39;</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">legend</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
 
@@ -1326,12 +1684,20 @@ Let us now analyze the optimal solution by storing it in a Pandas dataframe.</p>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<img alt="../_images/f99b7c47871ab59cd34ca2990dc3c74a86b086d6b3d5d08eb702db11e33c7479.png" src="../_images/f99b7c47871ab59cd34ca2990dc3c74a86b086d6b3d5d08eb702db11e33c7479.png" />
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The circles represent sales quantity and the cross markers represent the wasted quantity.
-</pre></div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/mlm-examples_price_optimization_56_0.png" src="../_images/mlm-examples_price_optimization_56_0.png" />
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The circles represent sales quantity and the cross markers represent the wasted quantity.
+</pre></div></div>
 </div>
 <p>Copyright © 2022 Gurobi Optimization, LLC</p>
 </section>

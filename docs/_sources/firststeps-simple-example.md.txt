@@ -9,7 +9,7 @@ jupytext:
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
-  name: python3
+  name: ipython3
 ---
 
 Simple Usage Example
@@ -112,24 +112,9 @@ pred_constr.print_stats()
 To finish the model, we set the objective, and then we can optimize it.
 
 ```{code-cell}
-:tags: [hide-input]
-
-# This is some trickery for output Gurobi's log doesn't display well with myst
-m.params.LogToConsole = 0
-!rm -f gurobi.log
-m.params.LogFile = 'gurobi.log'
-```
-
-```{code-cell}
 m.setObjective(output_vars@output_vars, gp.GRB.MINIMIZE)
 
 m.optimize()
-```
-
-```{code-cell}
-:tags: [hide-input]
-
-!cat gurobi.log
 ```
 
 The function `get_error` is useful to check that the solution computed by Gurobi is correct with respect to the regression model we use.

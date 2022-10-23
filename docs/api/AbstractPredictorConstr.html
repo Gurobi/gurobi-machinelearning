@@ -8,7 +8,6 @@
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
       <link rel="stylesheet" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -19,9 +18,11 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script src="../_static/design-tabs.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +52,8 @@
               <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#install">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#usage">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Simple Usage Example</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
@@ -61,13 +64,31 @@
 <p class="caption" role="heading"><span class="caption-text">Meta</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../meta-api.html">API Reference manual</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Generic Predictor Function</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Generic Predictor Function</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gurobi_ml.add_predictor_constr"><code class="docutils literal notranslate"><span class="pre">add_predictor_constr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr.get_error"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr.get_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr.print_stats"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr.print_stats()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr.remove"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr.constrs"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr.constrs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr.genconstrs"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr.genconstrs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr.input"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr.input</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr.model"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr.output"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr.output</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr.qconstrs"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr.qconstrs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr.sos"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr.sos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.modeling.AbstractPredictorConstr.vars"><code class="docutils literal notranslate"><span class="pre">AbstractPredictorConstr.vars</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../sklearn.html">Scikit-learn regression models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="KerasConstr.html">Keras Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="SequentialConstr.html">Pytorch Sequential</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta-contactus.html">Contact Us</a></li>
 </ul>
 
         </div>
@@ -95,7 +116,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
 
-  <section id="generic-predictor-function">
+
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="generic-predictor-function">
 <h1>Generic Predictor Function<a class="headerlink" href="#generic-predictor-function" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="gurobi_ml.add_predictor_constr">
@@ -129,13 +174,13 @@ predictor in it</p>
 </ul>
 </div></blockquote>
 <p>For internal use in the package they are cast into matrix variables and it is
-the prefered and most convenient format to use.</p>
+the preferred and most convenient format to use.</p>
 <p>They should have dimensions that conforms with the input/output of the predictor.
 We denote by <cite>n_features</cite> the dimension of the input of the predictor and by <cite>n_output</cite> the dimension of the output.</p>
 <p>If they are lists or a dictionaries <cite>input_vars</cite> should have length <cite>n_features</cite> and <cite>output_vars</cite>
 should have length <cite>n_output</cite>.</p>
 <p>If they are matrix variables, <cite>input_vars</cite> and <cite>output_vars</cite> can be either of shape <cite>(n_features)</cite> and
-<cite>(n_outputs,)</cite> respecitvely or <cite>(k, n_features)</cite> and <cite>(k, n_outputs)</cite> respectively (with <cite>k &gt;= 1</cite>).
+<cite>(n_outputs,)</cite> respectively or <cite>(k, n_features)</cite> and <cite>(k, n_outputs)</cite> respectively (with <cite>k &gt;= 1</cite>).
 The latter form is especially useful if the predictor is used to associate different groups of
 variables (e.g. a prediction is made for every time period in a planning horizon).</p>
 </div>
@@ -215,7 +260,7 @@ layers if it’s a neural network,…)</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="gurobi_ml.modeling.AbstractPredictorConstr.input">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input</span></span><a class="headerlink" href="#gurobi_ml.modeling.AbstractPredictorConstr.input" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the input variables of embeded predictor</p>
+<dd><p>Returns the input variables of embedded predictor</p>
 </dd></dl>
 
 <dl class="py property">
@@ -227,7 +272,7 @@ layers if it’s a neural network,…)</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="gurobi_ml.modeling.AbstractPredictorConstr.output">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output</span></span><a class="headerlink" href="#gurobi_ml.modeling.AbstractPredictorConstr.output" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the output variables of embeded predictor</p>
+<dd><p>Returns the output variables of embedded predictor</p>
 </dd></dl>
 
 <dl class="py property">
