@@ -15,7 +15,7 @@ kernelspec:
 # Student Enrollment
 
 In this example, we show how to reproduce the model of student enrollment from
-{cite:p}`JANOS` with Gurobi Machine Learning.
+<cite data-cite="JANOS">Bergman et.al. (2020)</cite> with Gurobi Machine Learning.
 
 This model was developed in the context of the development of
 [Janos](https://github.com/INFORMSJoC/2020.1023), a toolkit similar to
@@ -38,7 +38,9 @@ Finally, it is known if each student decided to join or not the college.
 Based on this data a logistic regression is trained to predict the probability that
 a student joins the college.
 
-Using this regression model, {cite:p}`JANOS` proposes the following student enrollment
+Using this regression model,
+<cite data-cite="JANOS">Bergman et.al. (2020)</cite>
+proposes the following student enrollment
 problem. The Admission Office has data for SAT and GPA scores of the admitted students for
 the incoming class, and they would want to offer scholarships to students with the goal of
 maximizing the expected number of students that enroll in the college. There is a total
@@ -73,7 +75,9 @@ $$
 \end{aligned}
 $$
 
-Note that in this example differently to {cite:p}`JANOS` we scale the features for the regression.
+Note that in this example differently to
+<cite data-cite="JANOS">Bergman et.al. (2020)</cite>
+in that we scale the features for the regression.
 Also, to fit in Gurobi's limited size license we only consider the problem where $n=250$.
 
 We note also that the model may differ from the objectives of Admission Offices and

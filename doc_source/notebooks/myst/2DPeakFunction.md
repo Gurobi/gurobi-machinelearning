@@ -17,9 +17,9 @@ kernelspec:
 Extra required packages:
 - matplotlib
 
-{cite:p}`Henao_Maravelias_2011`
-{cite:p}`Lu_Pu_2017`
-{cite:p}`Henao_Maravelias_2011`
+<cite data-cite="Henao_Maravelias_2011"></cite>
+<cite data-cite="Lu_Pu_2017"></cite>
+<cite data-cite="Henao_Maravelias_2011"></cite>
 Optimization solvers often struggle to prove a global optimum of a model when
 it holds highly nonlinear functions. The reason is often that relaxations
 of the nonlinear functions are not good enough to make the solver prove an
