@@ -5,7 +5,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -13,8 +13,8 @@ kernelspec:
 ---
 
 # Pricing and Supply problem
-*Note: This example is a limited version of the example [How Much Is Too Much? Avocado Pricing and Supply Using Mathematical Optimization](https://github.com/Gurobi/modeling-examples/tree/master/price_optimization). It is only aimed at showing the capabilities of Gurobi Machine Learning.
-In particular the model is restricted to a limited number of regions so that it can fits within Gurobi size-limited license. Please visit the full notebook page, for a more detailed explanation about the problem and detailed analysis of the results.*
+
+This example is a limited version of the example [How Much Is Too Much? Avocado Pricing and Supply Using Mathematical Optimization](https://github.com/Gurobi/modeling-examples/tree/master/price_optimization). It is only aimed at showing the capabilities of Gurobi Machine Learning. Please visit the full notebook page, for detailed explanations and analysis of the problem.
 
 A [Food Network article](https://www.foodnetwork.com/fn-dish/news/2018/3/avocado-unseats-banana-as-america-s-top-fruit-import-by-value) from March 2017 declared, "Avocado unseats banana as America's top fruit import." This declaration is incomplete and debatable for reasons other than whether  avocado is a fruit. Avocados are expensive.
 
@@ -30,13 +30,9 @@ Just like the perfect guacamole needs the right blend of onion, lemon and spices
 | <b>Avocados: a quintessential corner of a grocery store. Image Credits: [New York Post](https://nypost.com/2022/02/15/us-will-halt-mexico-avocado-imports-as-long-as-necessary/) </b>|
 
 
-**Goal**: Develop a data science pipeline for pricing and distribution of avocados to maximize revenue.
+In this example, we build a prediction model that predicts the demand for avocados as a function of price, region, year and the seasonality. We then design an optimization problem that sets the optimal price and supply quantity to maximize the net revenue while incorporating costs for wastage and transportation.
 
-This notebook walks through a decision-making pipeline that culminates in a mathematical optimization model.
-There are three stages:
-- First, understand the dataset and infer the relationships between categories such as the sales, price, region, and seasonal trends.
-- Second, build a prediction model that predicts the demand for avocados as a function of price, region, year and the seasonality.
-- Third, design an optimization problem that sets the optimal price and supply quantity to maximize the net revenue while incorporating costs for wastage and transportation.
+This example illustrates in particular how to deal with categorical features.
 
 ## Load the Packages and the Datasets
 
@@ -44,18 +40,12 @@ We use real sales data provided by the [Hass Avocado Board](https://hassavocadob
 
 We will now load the following packages for analyzing and visualizing the data.
 
-
-### Extra required packages
-- seaborn
-
-```{code-cell}
+```{code-cell} ipython3
 import pandas as pd
-import warnings
-warnings.filterwarnings("ignore")
+
 import matplotlib.pyplot as plt
-from sklearn import tree
+
 import seaborn as sns
-import sklearn
 import numpy as np
 ```
 
@@ -66,18 +56,20 @@ There are eight large regions relevant for this example, namely the Great Lakes,
 
 Now, load the data and store it into a Pandas dataframe.
 
-```{code-cell}
+```{code-cell} ipython3
 avocado = pd.read_csv('https://raw.githubusercontent.com/Gurobi/modeling-examples/master/price_optimization/HABdata_2019_2022.csv') # dataset downloaded directly from HAB
 avocado_old = pd.read_csv('https://raw.githubusercontent.com/Gurobi/modeling-examples/master/price_optimization/kaggledata_till2018.csv') # dataset downloaded from Kaggle
-avocado = avocado.append(avocado_old, ignore_index=True)
+avocado = pd.concat([avocado_old, avocado])
 avocado
 ```
 
 ## Prepare the Dataset
 
-We will now prepare the data for making sales predictions. Add new columns to the dataframe for the year and seasonality. Let each year from 2015 through 2022 be given an index from 0 through 7 in the increasing order of the year. We will define the peak season to be the months of February through July. These months are set based on visual inspection of the trends, but you can try setting other months.
+To prepare the data for making sales predictions, we add new columns to the dataframe for the year and seasonality. We give each year from 2015 through 2022 an index from 0 through 7 in the increasing order of the year. Also, we define the peak season to be the months of February through July. These months are set based on visual inspection of the trends, but you can try setting other months.
 
-```{code-cell}
+Finally, we scale the number of avocados sold to millions, we select "conventional" avocados for our model and we exclude rows of the data frame that aggregate data for the whole US.
+
+```{code-cell} ipython3
 # Add the index for each year from 2015 through 2022
 pd.set_option("display.max_colwidth",10)
 avocado['date'] = pd.to_datetime(avocado['date'])
@@ -99,118 +91,23 @@ avocado['units_sold'] = avocado['units_sold']/1000000
 # Select only conventional avocados
 avocado = avocado[avocado['type'] == 'Conventional']
 
-avocado = avocado[['date','units_sold','price','region','year','month','year_index','peak']].reset_index(drop = True)
+# Remove 'US_total' region
+avocado = avocado[avocado['region'] != 'Total_US']
 
-avocado
+
+avocado = avocado[['units_sold','price','region','year_index','peak']].reset_index(drop = True)
 ```
 
-## Part I: Observe Trends in the Data
-
-Now, we will infer sales trends in time and seasonality. For simplicity, let's proceed with data from the United States as a whole.
-
-```{code-cell}
-df_Total_US = avocado[avocado['region']=='Total_US']
-```
-
-### Sales Over the Years
-
-```{code-cell}
-fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10, 5))
-
-mean = df_Total_US.groupby('year')['units_sold'].mean()
-std  = df_Total_US.groupby('year')['units_sold'].std()
-axes.errorbar(mean.index, mean, xerr=0.5, yerr=2*std, linestyle='')
-axes.set_ylabel('Units Sold (millions)')
-axes.set_xlabel('Year')
-
-fig.tight_layout()
-```
-
-We can see that the sales generally increased over the years, albeit marginally. The dip in 2019 is the effect of the well-documented [2019 avocado shortage](https://abc7news.com/avocado-shortage-season-prices/5389855/) that led to avocados [nearly doubling in price.](https://abc7news.com/avocado-shortage-season-prices/5389855/)
-
-### Seasonality
-
-We will now see the sales trends within a year.
-
-```{code-cell}
-fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10, 5))
-
-mean = df_Total_US.groupby('month')['units_sold'].mean()
-std  = df_Total_US.groupby('month')['units_sold'].std()
-
-axes.errorbar(mean.index, mean, xerr=0.5, yerr=2*std, linestyle='')
-axes.set_ylabel('Units Sold (millions)')
-axes.set_xlabel('Month')
-
-fig.tight_layout()
-
-plt.xlabel('Month')
-axes.set_xticks(range(1,13))
-plt.ylabel('Units sold (millions)')
-plt.show()
-```
-
-We see a Super Bowl peak in February and a Cinco de Mayo peak in May.
-
-### Correlations
-
-Now, we will see how the variables are correlated with each other.
-The end goal is to predict sales given the price of an avocado, year and seasonality (peak or not).
-
-```{code-cell}
-fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(15, 5))
-sns.heatmap(df_Total_US[['units_sold', 'price', 'year', 'peak']].corr(),annot=True, center=0,ax=axes)
-
-axes.set_title('Correlations for conventional avocados')
-plt.show()
-```
-
-As expected, the sales quantity has a negative correlation with the price per avocado. The sales quantity has a positive correlation with the year and season being a peak season.
+## Predict the Sales
 
 
-### Regions
+Let us now construct a linear regressor for the sales (`"units_sold"`) using the independent variables price, year, region and seasonality.
 
-Finally, we will see how the sales differ among the different regions. This will determine the number of avocados that we want to supply to each region.
+Note that the region is a categorical variable. We use `Scikit-learn`'s `ÒneHotEncoder` to encode it for the linear  regression, and we use `make_column_transformer` to transform the data.
 
-```{code-cell}
-fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10, 5))
+To validate the regression model, we randomly split the dataset into $80\%$ training and $20\%$ testing data and learn the weights using sklearn.
 
-regions = ['Great_Lakes','Midsouth','Northeast','Northern_New_England','SouthCentral','Southeast','West','Plains']
-df = avocado[avocado.region.isin(regions)]
-
-mean = df.groupby('region')['units_sold'].mean()
-std  = df.groupby('region')['units_sold'].std()
-
-axes.errorbar(range(len(mean)), mean, xerr=0.5, yerr=2*std, linestyle='')
-
-fig.tight_layout()
-
-plt.xlabel('Region')
-plt.xticks(range(len(mean)), pd.DataFrame(mean)['units_sold'].index,rotation=20)
-plt.ylabel('Units sold (millions)')
-plt.show()
-```
-
-Clearly, west-coasters love avocados.
-
-
-## Part II: Predict the Sales
-
-The trends observed in Part I motivate us to construct a prediction model for sales using the independent variables - price, year, region and seasonality.
-Henceforth, the sales quantity will be referred to as the *predicted demand*.
-
-Let us now construct a linear regressor for the demand.
-Note that the region is a categorical variable.
-The linear regressor can be mathematically expressed as:
-
-$$demand = \beta_0 + \beta_1 \cdot price + \sum\limits_{region} \beta^{region}_3 \cdot \mathbb{1}(region)  +  \beta_4 w_{year} \cdot year +  \beta_5  \cdot \mathbb{1}(peak).$$
-
-Here, the $\beta$ values are weights (or "co-efficients") that have to be learned from the data.
-Note that the notation $\mathbb{1}(region)$ is an indicator function that takes the value $1$ for each region in the summation. The value of $\mathbb{1}(peak)$ is $1$ if we consider the peak season.
-
-To validate the regression model, we will randomly split the dataset into $80\%$ training and $20\%$ testing data and learn the weights using sklearn.
-
-```{code-cell}
+```{code-cell} ipython3
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 
@@ -218,69 +115,59 @@ from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import r2_score
 
 from gurobi_ml import add_predictor_constr
 ```
 
-```{code-cell}
-regions
-```
+Stores the column labels of features and target. When doing the optimization model it's very important in particular to always keep the features in the same order.
 
-```{code-cell}
-regions = ['Great_Lakes',
-           'Midsouth',
-           'Northeast',
-           'West',
-]
-```
-
-```{code-cell}
+```{code-cell} ipython3
 target = 'units_sold'
 features = ['price', 'year_index', 'region', 'peak']
 
-y = df.loc[:, target]
-X = df.loc[:, features]
-
-subset = X.loc[:, 'region'].isin(regions)
-X = X[subset]
-y = y[subset]
-X
+y = avocado.loc[:, target]
+X = avocado.loc[:, features]
 ```
 
-```{code-cell}
-transform = make_column_transformer((OneHotEncoder(drop="first"), ['region']), remainder='passthrough',
+We build a column transformer to encode the categorical feature.
+
+Note that Gurobi cannot deal directly with categorical variables. Therefore we need to apply the transform to the training data before fitting the regression.
+
+Later, the transormer is used to build the Gurobi Model.
+
+```{code-cell} ipython3
+transformer = make_column_transformer((OneHotEncoder(drop="first"), ['region']), remainder='passthrough',
                                     verbose_feature_names_out=False)
 
-X = transform.fit_transform(X)
+X = transformer.fit_transform(X)
 ```
 
-```{code-cell}
+Now the data can be split and the regression is fitted.
+
+```{code-cell} ipython3
 # Split the data for training and testing
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.8, random_state=1)
-```
 
-```{code-cell}
 # Train the model
-pipeline = make_pipeline(StandardScaler(), MLPRegressor([10]*2))
-pipeline.fit(X_train, y_train)
+regression = LinearRegression()
+regression.fit(X_train, y_train)
 
 # Get R^2 from test data
-y_pred = pipeline.predict(X_test)
+y_pred = regression.predict(X_test)
 print("The R^2 value in the test set is",r2_score(y_test, y_pred))
 ```
 
 We can observe a good $R^2$ value in the test set. We will now fit the weights to the full dataset.
 
-```{code-cell}
-pipeline.fit(X, y)
+```{code-cell} ipython3
+regression.fit(X, y)
 
-y_pred_full = pipeline.predict(X)
+y_pred_full = regression.predict(X)
 print("The R^2 value in the full dataset is",r2_score(y, y_pred_full))
 ```
 
-## Part III: Optimize for Price and Supply of Avocados
+## Optimize for Price and Supply of Avocados
 
 
 Knowing how the price of an avocado affects the demand, how can we set the optimal avocado price?
@@ -311,13 +198,23 @@ The cost of wasting an avocado is set to $\$0.10$.
 The cost of transporting an avocado ranges between $\$0.10$ to $\$0.50$ based on each region's distance from the southern border, where the [majority of avocado supply comes from](https://www.britannica.com/plant/avocado).
 Further, we can set the price of an avocado to not exceed $\$ 2$ apiece.
 
-```{code-cell}
-regions = ['Great_Lakes',
- 'West',
- 'Northeast']
+```{code-cell} ipython3
+onehot = transformer.named_transformers_['onehotencoder']
 ```
 
-```{code-cell}
+```{code-cell} ipython3
+regions = onehot.categories_
+```
+
+```{code-cell} ipython3
+regions
+```
+
+```{code-cell} ipython3
+regions = regions[0].tolist()
+```
+
+```{code-cell} ipython3
 import gurobipy as gp
 from gurobipy import GRB
 
@@ -326,12 +223,12 @@ m = gp.Model("Avocado_Price_Allocation")
 # Sets and parameters
 R = len(regions)   # set of all regions
 
-B = 15  # total amount ot avocado supply
+B = 30  # total amount ot avocado supply
 
 peak_or_not = 1 # 1 if it is the peak season; 1 if isn't
-year = 2022
+year = 2021
 
-c_waste = 0.5 # the cost ($) of wasting an avocado
+c_waste = 0.1 # the cost ($) of wasting an avocado
 
 # the cost of transporting an avocado
 c_transport = pd.Series({'Great_Lakes': .3,
@@ -346,30 +243,29 @@ c_transport = c_transport.loc[regions]
 # Get the lower and upper bounds from the dataset for the price and the number of products to be stocked
 a_min = 0 # minimum avocado price in each region
 a_max = 2 # maximum avocado price in each region
-b_min = df.groupby('region')['units_sold'].min().loc[regions]  # minimum number of avocados allocated to each region
-b_max = df.groupby('region')['units_sold'].max().loc[regions]   # maximum number of avocados allocated to each region
+b_min = avocado.groupby('region')['units_sold'].min().loc[regions]  # minimum number of avocados allocated to each region
+b_max = avocado.groupby('region')['units_sold'].max().loc[regions]   # maximum number of avocados allocated to each region
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 # Compute bounds for the features
 
 # First create a data frame indexed by the regions and with the features
 # as columns
-feat_bounds = pd.DataFrame(index=regions, columns=features)
-feat_bounds.loc[:, 'price'] = a_min
-feat_bounds.loc[:, 'peak'] = peak_or_not
-feat_bounds.loc[:, 'year_index'] = year - 2015
-for r in regions:
-    feat_bounds.loc[r, 'region'] = r
+feat_lb = pd.DataFrame(index=regions, data=regions, columns=['region'])
+feat_lb['price'] = a_min
+feat_lb['peak'] = peak_or_not
+feat_lb['year_index'] = year - 2015
 
+feat_lb = feat_lb.loc[regions, features]
 # Now we use our transform to transform the data to the space of the regression
-feat_bounds = pd.DataFrame(data=transform.transform(feat_bounds), columns=transform.get_feature_names_out())
+feat_lb = pd.DataFrame(data=transformer.transform(feat_lb), columns=transformer.get_feature_names_out(),
+                       index=regions)
 
-# Finally we can store the bounds
+# Construct the data frame for upper bounds
 # Price is the only feature that is not fixed and has a different upper bound
-feat_lb = feat_bounds.copy()
-feat_bounds.loc[:, 'price'] = a_max
-feat_ub = feat_bounds
+feat_ub = feat_lb.copy()
+feat_ub['price'] = a_max
 ```
 
 ### Decision Variables
@@ -388,17 +284,17 @@ $w_r = x_r - s_r$: the predicted number of avocados wasted in region $r$
 
 We will now add the variables to the Gurobi model.
 
-```{code-cell}
+```{code-cell} ipython3
 x = m.addMVar(R,name="x",lb=b_min,ub=b_max)  # quantity supplied to each region
 s = m.addMVar(R,name="s",lb=0)   # predicted amount of sales in each region for the given price
 w = m.addMVar(R,name="w",lb=0)   # excess wasteage in each region
 
 # Add variables for the regression
-feats = m.addMVar((R, X.shape[1]), lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name='reg_features')
+feats = m.addMVar(feat_lb.shape, lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name='reg_features')
 d = m.addMVar((R), lb=-gp.GRB.INFINITY, name='reg_output')
 
 # Get the price variables from the features of the regression
-price_index = transform.get_feature_names().index('price')
+price_index = np.where(transformer.get_feature_names_out() == 'price')[0][0]
 p = feats[:, price_index]
 m.update()
 ```
@@ -417,7 +313,7 @@ $$\textrm{maximize} \, \sum_{r}  (p_r \cdot s_r - c_{waste} \cdot w_r - c^r_{tra
 
 Let us now add the objective function to the model.
 
-```{code-cell}
+```{code-cell} ipython3
 m.setObjective(p@s - c_waste * w.sum()- c_transport.to_numpy() @ x)
 m.ModelSense = GRB.MAXIMIZE
 ```
@@ -430,8 +326,8 @@ $$\sum_{r} x_r = B$$
 
 The following code adds this constraint to the model.
 
-```{code-cell}
-m.addConstr(x.sum() == B)
+```{code-cell} ipython3
+m.addConstr(x.sum() <= B)
 m.update()
 ```
 
@@ -454,7 +350,7 @@ These constraints will ensure that the sales quantity $s_r$ in region $r$ is  gr
 
 Let us now add these constraints to the model.
 
-```{code-cell}
+```{code-cell} ipython3
 m.addConstr(s <= x)
 m.addConstr(s <= d)
 m.update()
@@ -468,16 +364,16 @@ $$w_r = x_r - s_r$$
 
 We can add these constraints to the model.
 
-```{code-cell}
-m.addConstr(w == x - s)
+```{code-cell} ipython3
+m.addConstr(w >= x - s)
 m.update()
 ```
 
-```{code-cell}
-pred_constr = add_predictor_constr(m, pipeline, feats, d)
+```{code-cell} ipython3
+pred_constr = add_predictor_constr(m, regression, feats, d)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 pred_constr.print_stats()
 ```
 
@@ -492,23 +388,24 @@ In our model, the objective is **quadratic** since we take the product of price 
 Maximizing a quadratic term is said to be **non-convex**, and we specify this by setting the value of the Gurobi parameter **NonConvex** to be $2$.
 See [the documentation of the NonConvex parameter](https://www.gurobi.com/documentation/9.5/refman/nonconvex.html) for more details.
 
-```{code-cell}
+```{code-cell} ipython3
 m.Params.NonConvex = 2
+m.Params.Presolve = 0
 m.optimize()
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 print(f"Maximal error in predicted values in solution {np.max(np.abs(pred_constr.get_error()))}")
 ```
 
 The solver solved the optimization problem in less than a second.
 Let us now analyze the optimal solution by storing it in a Pandas dataframe.
 
-```{code-cell}
+```{code-cell} ipython3
 pd.set_option("display.max_colwidth",50)
 solution = pd.DataFrame()
 solution['Region'] = regions
-solution['Price'] = p.X
+solution['Price'] = p.X.round(3)
 solution['Allocated'] = x.X.round(4)
 solution['Sold'] = s.X.round(4)
 solution['Wasted'] = w.X.round(4)
@@ -521,7 +418,7 @@ solution
 
 Let us now visualize a scatter plot between the price and the number of avocados sold (in millions) for the eight regions.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, ax = plt.subplots(1,1)
 plot_sol = sns.scatterplot(data=solution,x='Price',y='Sold',hue='Region',s=100)
 plot_waste = sns.scatterplot(data=solution,x='Price',y='Wasted',marker='x',hue='Region',s=100,legend = False)

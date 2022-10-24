@@ -32,7 +32,7 @@ repos:
         args: ["--count", "--select=E9,F63,F7,F82", "--show-source", "--statistics"]
 
     - repo: https://github.com/mwouts/jupytext
-      rev: v1.14.0
+      rev: v1.14.1
       hooks:
       - id: jupytext
         args: ["--sync"]
