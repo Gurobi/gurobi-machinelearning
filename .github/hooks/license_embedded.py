@@ -16,7 +16,14 @@ def python_check(content: str):
 
 def notebook_check(content: str):
     j = json.loads(content)
-    if not j["metadata"]["license"]["full_text"] == expected_license:
+    try:
+        if not j["metadata"]["license"]["full_text"] == expected_license:
+            print(
+                f"'{cur_file}' does not have the copyright.txt content as metadata. "
+                f"This should go into metadata.license.full_text"
+            )
+            exit(1)
+    except KeyError:
         print(
             f"'{cur_file}' does not have the copyright.txt content as metadata. "
             f"This should go into metadata.license.full_text"
