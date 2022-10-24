@@ -17,13 +17,14 @@ jobs:
     - name: Set up Python 3.10
       uses: actions/setup-python@v2
       with:
-        python-version: "3.9"
+        python-version: "3.10"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pytest tox tox-gh-actions
-    - uses: ammaraskar/sphinx-action@e781e9af3e80bfe0ea539e4ea46858d51e027214
-      with:
-        pre-build-command: "apt-get update --allow-releaseinfo-change -y && apt-get install -y pandoc librsvg2-bin inkscape latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended fonts-lmodern"
-        docs-folder: "doc_source"
-        build-command: "tox -e docs"
+    - name: install deps
+      run: |
+        apt-get update --allow-releaseinfo-change -y && apt-get install -y pandoc
+    - name:
+      run: |
+        tox -e docs
