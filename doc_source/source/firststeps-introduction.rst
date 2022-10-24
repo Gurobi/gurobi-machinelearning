@@ -71,6 +71,8 @@ We encourage to install the package via pip (or add it to your `requirements.txt
      * - ``tensorflow``
        - |TensorflowVersion|
 
+  Installing any of the machine learning packages is only required if the predictor you want to insert uses them
+  (i.e. to insert a Keras based predictor you need to have ``tensorflow`` installed).
 
 
 Usage
