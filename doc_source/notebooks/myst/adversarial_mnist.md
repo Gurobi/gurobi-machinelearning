@@ -18,9 +18,6 @@ In this example, we show how to use Gurobi Machine Learning to construct an adve
 
 We use the MNIST handwritten digit database (http://yann.lecun.com/exdb/mnist/) for this example.
 
-
-## Introduction
-
 For this problem, we are given a trained neural network and one well classified example $\bar x$.
 Our goal is to construct another example $x$ _close to_ $\bar x$ that is classified with another label.
 
