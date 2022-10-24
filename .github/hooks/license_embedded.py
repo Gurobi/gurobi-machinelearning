@@ -2,19 +2,16 @@ import json
 import sys
 from pathlib import Path
 
-cur_file = sys.argv[1]
-
-file_content = Path(cur_file).read_text()
 expected_license = Path("copyright.txt").read_text().rstrip()
 
 
-def python_check(content: str):
+def python_check(content: str, cur_file: str):
     if not content.startswith(expected_license):
         print(f"'{cur_file}' did not start with copyright.txt content")
         exit(1)
 
 
-def notebook_check(content: str):
+def notebook_check(content: str, cur_file: str):
     j = json.loads(content)
     try:
         if not j["metadata"]["license"]["full_text"] == expected_license:
@@ -31,13 +28,16 @@ def notebook_check(content: str):
         exit(1)
 
 
-if cur_file.endswith(".py"):
-    python_check(file_content)
-elif cur_file.endswith(".ipynb"):
-    notebook_check(file_content)
-else:
-    print(f"Incorrect file passed: '{cur_file}', expecting '.py' or '.ipynb'")
-    exit(1)
+def check_file(cur_file: str):
+    file_content = Path(cur_file).read_text()
+    if cur_file.endswith(".py"):
+        python_check(file_content, cur_file)
+    elif cur_file.endswith(".ipynb"):
+        notebook_check(file_content, cur_file)
+    else:
+        print(f"Incorrect file passed: '{cur_file}', expecting '.py' or '.ipynb'")
+        exit(1)
 
-print(f"License check passed for: '{cur_file}'")
-exit(0)
+
+for cur in sys.argv[1:]:
+    check_file(cur)
