@@ -38,7 +38,7 @@ jobs:
         LICENSE: ${{ secrets.LICENSE   }}
       run: |
         echo "$LICENSE" > $PWD/gurobi.lic
-        echo "::set-output name=grb_license_file::$PWD/gurobi.lic"
+        echo "grb_license_file=$PWD/gurobi.lic" >> $GITHUB_OUTPUT
     - name: Test with tox
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
