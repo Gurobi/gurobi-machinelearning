@@ -34,6 +34,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest tox tox-gh-actions
+    - name: install pandoc
+      run: |
+        sudo apt-get update && sudo apt-get install -y pandoc
     - shell: bash
       id: write-license
       env:
