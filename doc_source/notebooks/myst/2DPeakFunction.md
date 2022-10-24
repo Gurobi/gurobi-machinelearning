@@ -7,9 +7,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.14.0
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: gurobi-ml
   language: python
-  name: python3
+  name: Python3
 ---
 
 # Surrogate Models
@@ -19,6 +19,7 @@ that can result either in highly non-linear functions or functions
 defined by a simulation process.
 In those contexts, optimization solvers often struggle.
 The reason may be that relaxations
+
 of the nonlinear functions are not good enough to make the solver prove an
 acceptable bound in a reasonable amount of time. Another issue may be that
 the solver is not able to represent the functions.
@@ -27,9 +28,9 @@ An approach that has been proposed in the literature is
 to approximate the problematic nonlinear
 functions via neural networks with ReLU activation and use MIP technology
 to solve the constructed approximation efficiently
-(see for e.g. {cite:p}`Henao_Maravelias_2011`, {cite:p}`Schweidtmann_2022`).
+(see for e.g. <cite data-cite="Henao_Maravelias_2011"></cite>, <cite data-cite="Schweidtmann_2022"></cite>).
 This use of neural network can be motivated by their ability to provide an
-universal approximation of function (see for e.g. {cite:p}`Lu_Pu_2017`).
+universal approximation of function (see for e.g. {<cite data-cite="Lu_Pu_2017"></cite>).
 This use of ML models to replace complex processes is often referred to as surrogate models.
 
 In the following example, we show how to

@@ -10,7 +10,7 @@ USER_PREDICTORS = {}
 
 
 def sklearn_convertors():
-    """Collect known scikit-learn objects that can be embeded and the conversion class"""
+    """Collect known scikit-learn objects that can be embedded and the conversion class"""
     return (
         sklearn_transformers()
         | sklearn_predictors()
@@ -21,7 +21,7 @@ def sklearn_convertors():
 
 
 def pytorch_convertors():
-    """Collect known PyTorch objects that can be embeded and the conversion class"""
+    """Collect known PyTorch objects that can be embedded and the conversion class"""
     if "torch" in sys.modules:
         from torch import nn as pytorchnn
 
@@ -32,7 +32,7 @@ def pytorch_convertors():
 
 
 def keras_convertors():
-    """Collect known Keras objects that can be embeded and the conversion class"""
+    """Collect known Keras objects that can be embedded and the conversion class"""
     if "tensorflow" in sys.modules:
         from keras.engine.functional import Functional
         from keras.engine.training import Model
@@ -87,7 +87,7 @@ def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwarg
      * Dictionaries of variables
 
     For internal use in the package they are cast into matrix variables and it is
-    the prefered and most convenient format to use.
+    the preferred and most convenient format to use.
 
     They should have dimensions that conforms with the input/output of the predictor.
     We denote by `n_features` the dimension of the input of the predictor and by `n_output` the dimension of the output.
@@ -96,7 +96,7 @@ def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwarg
     should have length `n_output`.
 
     If they are matrix variables, `input_vars` and `output_vars` can be either of shape `(n_features)` and
-    `(n_outputs,)` respecitvely or `(k, n_features)` and `(k, n_outputs)` respectively (with `k >= 1`).
+    `(n_outputs,)` respectively or `(k, n_features)` and `(k, n_outputs)` respectively (with `k >= 1`).
     The latter form is especially useful if the predictor is used to associate different groups of
     variables (e.g. a prediction is made for every time period in a planning horizon).
     """
