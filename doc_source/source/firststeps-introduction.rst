@@ -1,6 +1,8 @@
+Basics
+======
 
 Introduction
-============
+------------
 
 Gurobi Machine Learning is a Python package to embed *trained* regression models in
 in a
@@ -26,7 +28,7 @@ not available.
 Below, we give basic installation and usage instructions.
 
 Install
-=======
+-------
 
 We encourage to install the package via pip (or add it to your `requirements.txt` file):
 
@@ -76,7 +78,7 @@ We encourage to install the package via pip (or add it to your `requirements.txt
 
 
 Usage
-=====
+-----
 
 The main function provided by the package is :py:func:`gurobi_ml.add_predictor_constr`.
 It takes as arguments: a `gurobipy model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_,
