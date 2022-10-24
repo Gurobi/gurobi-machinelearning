@@ -48,7 +48,7 @@ $$
 $$
 
 
-Our model is inspired by {cite:p}`fischetti_jo_2018`.
+Our model is inspired by <cite data-cite="fischetti_jo_2018">Fischet al. (2018)</cite>.
 
 ## Imports and loading data
 
@@ -121,8 +121,6 @@ We also need additional variables to model the $l1$-norm constraint. Namely, for
 We also set the objective which is to maximize the difference between the _wrong_ label and the _right_ label.
 
 ```{code-cell}
-:tags: [hide-output]
-
 m = gp.Model()
 delta = 5
 
@@ -195,26 +193,9 @@ Solving the adversarial problem, as we formulated it above, doesn't actually req
 We set the two parameters and optimize.
 
 ```{code-cell}
-:tags: [remove-input]
-
-# This is some trickery for output
-m.params.LogToConsole = 0
-!rm -f gurobi.log
-m.params.LogFile = 'gurobi.log'
-```
-
-```{code-cell}
-:tags: [remove-output]
-
 m.Params.BestBdStop = 0.0
 m.Params.BestObjStop = 0.0
 m.optimize()
-```
-
-```{code-cell}
-:tags: [remove-input]
-
-!cat gurobi.log
 ```
 
 ## Results
@@ -229,7 +210,5 @@ plt.show()
 example_mod = pd.DataFrame(data=x.X, columns=example.columns, index=example.index)
 print(f"Solution is classified as {nn.predict(example_mod)}")
 ```
-
-+++ {"tags": ["hide-input"]}
 
 Copyright © 2022 Gurobi Optimization, LLC
