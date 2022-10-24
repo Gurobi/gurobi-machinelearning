@@ -37,9 +37,9 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
 
     def add_regression_constr(self):
         """Add the prediction constraints to Gurobi"""
-        coefs = self.predictor.coef_.T
+        coefs = self.predictor.coef_.reshape(-1, 1)
         intercept = self.predictor.intercept_
-        self.model.addConstr(self._output == self._input @ coefs + intercept, name="linreg")
+        self.model.addConstr(self.output == self.input @ coefs + intercept, name="linreg")
 
     def print_stats(self, file=None):
         """Print statistics about submodel created"""
