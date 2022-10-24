@@ -34,13 +34,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest tox tox-gh-actions
+    - name: install pandoc
+      run: |
+        sudo apt-get update && sudo apt-get install -y pandoc
     - shell: bash
       id: write-license
       env:
         LICENSE: ${{ secrets.LICENSE   }}
       run: |
         echo "$LICENSE" > $PWD/gurobi.lic
-        echo "::set-output name=grb_license_file::$PWD/gurobi.lic"
+        echo "grb_license_file=$PWD/gurobi.lic" >> $GITHUB_OUTPUT
     - name: Test with tox
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
