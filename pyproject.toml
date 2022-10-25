@@ -28,5 +28,5 @@ repository = "https://github.com/Gurobi/gurobi-machinelearning"
 
 
 [build-system]
-requires = ["setuptools", "wheel", "importlib-metadata >= 1.0"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"

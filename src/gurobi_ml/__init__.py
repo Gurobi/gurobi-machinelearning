@@ -15,7 +15,7 @@
 
 # read version from installed package
 
-import importlib_metadata as metadata
+from importlib import metadata
 
 try:
     __version__ = metadata.version("gurobi_machinelearning")
