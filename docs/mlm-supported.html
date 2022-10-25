@@ -18,7 +18,6 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
         <script src="_static/design-tabs.js"></script>
@@ -27,7 +26,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Examples" href="mlm-examples.html" />
-    <link rel="prev" title="Simple Usage Example" href="firststeps-simple-example.html" />
+    <link rel="prev" title="Usage Example" href="firststeps-simple-example.html" />
 </head>
 
 <body class="wy-body-for-nav">
@@ -49,12 +48,10 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Start</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="firststeps-introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="firststeps-introduction.html#install">Install</a></li>
-<li class="toctree-l1"><a class="reference internal" href="firststeps-introduction.html#usage">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="firststeps-simple-example.html">Simple Usage Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firststeps-introduction.html">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firststeps-simple-example.html">Usage Example</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
 <ul class="current">
@@ -66,7 +63,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mlm-examples.html">Examples</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Meta</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="meta-bibliography.html">Bibliography</a></li>
@@ -219,13 +216,13 @@ and the function that can be used to insert it in a Gurobi model.</p>
 </section>
 <section id="id6">
 <h2>PyTorch<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h2>
-<p>In PyTorch, only <a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Sequential.html#torch.nn.Sequential" title="(in PyTorch vmaster (1.14.0a0+git9bb4926 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code></a> objects are supported.</p>
+<p>In PyTorch, only <a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Sequential.html#torch.nn.Sequential" title="(in PyTorch vmaster (1.14.0a0+git4c8e1a9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code></a> objects are supported.</p>
 <p>They can be embedded in a Gurobi model with the function <a class="reference internal" href="api/SequentialConstr.html#gurobi_ml.torch.add_sequential_constr" title="gurobi_ml.torch.add_sequential_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.torch.add_sequential_constr()</span></code></a>.</p>
 <p>Currently, only two types of layers are supported:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Linear.html#torch.nn.Linear" title="(in PyTorch vmaster (1.14.0a0+git9bb4926 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">Linear</span> <span class="pre">layers</span></code></a>,</p></li>
-<li><p><a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.ReLU.html#torch.nn.ReLU" title="(in PyTorch vmaster (1.14.0a0+git9bb4926 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReLU</span> <span class="pre">layers</span></code></a>.</p></li>
+<li><p><a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Linear.html#torch.nn.Linear" title="(in PyTorch vmaster (1.14.0a0+git4c8e1a9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">Linear</span> <span class="pre">layers</span></code></a>,</p></li>
+<li><p><a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.ReLU.html#torch.nn.ReLU" title="(in PyTorch vmaster (1.14.0a0+git4c8e1a9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReLU</span> <span class="pre">layers</span></code></a>.</p></li>
 </ul>
 </div></blockquote>
 <p class="rubric">Footnotes</p>
@@ -244,7 +241,7 @@ and the function that can be used to insert it in a Gurobi model.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="firststeps-simple-example.html" class="btn btn-neutral float-left" title="Simple Usage Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="firststeps-simple-example.html" class="btn btn-neutral float-left" title="Usage Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="mlm-examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

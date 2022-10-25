@@ -18,7 +18,6 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script src="../_static/design-tabs.js"></script>
@@ -51,12 +50,10 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Start</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#install">Install</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#usage">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Simple Usage Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Usage Example</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
 <ul class="current">
@@ -77,7 +74,7 @@
 </ul>
 </li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Meta</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
@@ -387,19 +384,7 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
----
-jupytext:
-  formats: ipynb///ipynb,myst///md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.14.0
-kernelspec:
-  display_name: Python 3 (ipykernel)
-  language: python
-  name: python3
----<section id="Student-Enrollment">
+<section id="Student-Enrollment">
 <h1>Student Enrollment<a class="headerlink" href="#Student-Enrollment" title="Permalink to this heading"></a></h1>
 <p>In this example, we show how to reproduce the model of student enrollment from <span id="id1">[<a class="reference internal" href="../meta-bibliography.html#id2" title="David Bergman, Teng Huang, Philip Brooks, Andrea Lodi, and Arvind U. Raghunathan. Janos: an integrated predictive and prescriptive modeling framework. INFORMS Journal on Computing, 34(2):807-816, 2022. URL: https://doi.org/10.1287/ijoc.2020.1023, arXiv:https://doi.org/10.1287/ijoc.2020.1023, doi:10.1287/ijoc.2020.1023.">BHB+22</a>]</span> with Gurobi Machine Learning.</p>
 <p>This model was developed in the context of the development of <a class="reference external" href="https://github.com/INFORMSJoC/2020.1023">Janos</a>, a toolkit similar to Gurobi Machine Learning to integrate ML models and Mathematical optimization.</p>
@@ -551,7 +536,6 @@ student can be offered a scholarship of at most <span class="math notranslate no
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Gurobi 10.0.0 (beta1) - expires 2022-11-21
-Restricted license - for non-production use only - expires 2022-11-22
 </pre></div></div>
 </div>
 <p>We add the objective and the budget constraint:</p>
@@ -622,54 +606,52 @@ Output has shape (250, 1)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (linux64)
+Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
 
-CPU model: Intel(R) Core(TM) i5-4460  CPU @ 3.20GHz, instruction set [SSE2|AVX|AVX2]
-Thread count: 4 physical cores, 4 logical processors, using up to 4 threads
+CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
 
 Optimize a model with 1001 rows, 2000 columns and 2750 nonzeros
-Model fingerprint: 0x83cfa402
+Model fingerprint: 0x445a31b9
 Model has 250 general constraints
 Variable types: 2000 continuous, 0 integer (0 binary)
 Coefficient statistics:
   Matrix range     [4e-01, 2e+02]
   Objective range  [1e+00, 1e+00]
-  Bounds range     [1e-02, 2e+03]
+  Bounds range     [8e-03, 2e+03]
   RHS range        [7e-01, 1e+03]
-Presolve removed 766 rows and 1291 columns
+Presolve removed 642 rows and 442 columns
 Presolve time: 0.01s
-Presolved: 235 rows, 709 columns, 1320 nonzeros
-Presolved model has 91 SOS constraint(s)
-Variable types: 696 continuous, 13 integer (13 binary)
+Presolved: 359 rows, 1558 columns, 3838 nonzeros
+Presolved model has 123 SOS constraint(s)
+Variable types: 1551 continuous, 7 integer (7 binary)
 
-Root relaxation: objective 1.593946e+02, 217 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: objective 1.439869e+02, 361 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0  159.39458    0    1          -  159.39458      -     -    0s
-H    0     0                     159.3556281  159.39458  0.02%     -    0s
-H    0     0                     159.3563309  159.39458  0.02%     -    0s
-     0     0  159.38941    0    1  159.35633  159.38941  0.02%     -    0s
-     0     0  159.38941    0    1  159.35633  159.38941  0.02%     -    0s
-     0     0  159.38941    0    1  159.35633  159.38941  0.02%     -    0s
-     0     0  159.37409    0    3  159.35633  159.37409  0.01%     -    0s
+     0     0  143.98691    0    1          -  143.98691      -     -    0s
+H    0     0                     143.7441541  143.98691  0.17%     -    0s
+H    0     0                     143.8139960  143.98691  0.12%     -    0s
+     0     0  143.96647    0    1  143.81399  143.96647  0.11%     -    0s
+H    0     0                     143.8274318  143.96647  0.10%     -    0s
+     0     0  143.96647    0    1  143.82743  143.96647  0.10%     -    0s
+H    0     0                     143.8443019  143.96647  0.08%     -    0s
+     0     0  143.90131    0    1  143.84430  143.90131  0.04%     -    0s
+     0     2  143.90131    0    1  143.84430  143.90131  0.04%     -    0s
 
-Cutting planes:
-  MIR: 1
-  Flow cover: 2
+Explored 521 nodes (3756 simplex iterations) in 0.34 seconds (0.19 work units)
+Thread count was 8 (of 8 available processors)
 
-Explored 1 nodes (292 simplex iterations) in 0.07 seconds (0.03 work units)
-Thread count was 4 (of 4 available processors)
-
-Solution count 2: 159.356 159.356
+Solution count 4: 143.844 143.827 143.814 143.744
 
 Optimal solution found (tolerance 1.00e-04)
-Warning: max constraint violation (6.0725e-03) exceeds tolerance
-Warning: max general constraint violation (6.0725e-03) exceeds tolerance
+Warning: max constraint violation (2.1814e-03) exceeds tolerance
+Warning: max general constraint violation (2.1814e-03) exceeds tolerance
   Piecewise linearization of function constraints often causes big violation.
   Try to adjust the settings of the related parameters, such as FuncPieces.
-Best objective 1.593563309103e+02, best bound 1.593650301579e+02, gap 0.0055%
+Best objective 1.438443019985e+02, best bound 1.438443019985e+02, gap 0.0000%
 </pre></div></div>
 </div>
 <p>Remember that for the logistic regression, Gurobi does a piece wise linear approximation of the logistic function. We can therefore get some significant errors when comparing the results of the Gurobi model with what is predicted by the regression.</p>
@@ -687,7 +669,7 @@ Best objective 1.593563309103e+02, best bound 1.593650301579e+02, gap 0.0055%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Error in approximating the regression 0.00607248
+Error in approximating the regression 0.00218138
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -695,7 +677,7 @@ Error in approximating the regression 0.00607248
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/pierrebonami/.local/lib/python3.10/site-packages/sklearn/base.py:450: UserWarning: X does not have valid feature names, but StandardScaler was fitted with feature names
+/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/sklearn/base.py:450: UserWarning: X does not have valid feature names, but StandardScaler was fitted with feature names
   warnings.warn(
 </pre></div></div>
 </div>
@@ -721,46 +703,52 @@ Error in approximating the regression 0.00607248
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (linux64)
+Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
 
-CPU model: Intel(R) Core(TM) i5-4460  CPU @ 3.20GHz, instruction set [SSE2|AVX|AVX2]
-Thread count: 4 physical cores, 4 logical processors, using up to 4 threads
+CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
 
 Optimize a model with 1001 rows, 2000 columns and 2750 nonzeros
-Model fingerprint: 0xd3dce040
+Model fingerprint: 0x445a31b9
 Model has 250 general constraints
 Variable types: 2000 continuous, 0 integer (0 binary)
 Coefficient statistics:
   Matrix range     [4e-01, 2e+02]
   Objective range  [1e+00, 1e+00]
-  Bounds range     [1e-02, 2e+03]
+  Bounds range     [8e-03, 2e+03]
   RHS range        [7e-01, 1e+03]
-Presolve added 0 rows and 6600 columns
-Presolve removed 554 rows and 0 columns
-Presolve time: 0.04s
-Presolved: 447 rows, 8600 columns, 24964 nonzeros
-Presolved model has 142 SOS constraint(s)
-Variable types: 8590 continuous, 10 integer (10 binary)
+Presolve removed 642 rows and 442 columns
+Presolve time: 0.01s
+Presolved: 359 rows, 1558 columns, 3838 nonzeros
+Presolved model has 123 SOS constraint(s)
+Variable types: 1551 continuous, 7 integer (7 binary)
 
-Root relaxation: objective 1.596579e+02, 1205 iterations, 0.01 seconds (0.01 work units)
+Root relaxation: objective 1.439869e+02, 361 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0  159.65792    0    1          -  159.65792      -     -    0s
-     0     0  159.65792    0    1          -  159.65792      -     -    0s
-     0     2  159.65792    0    1          -  159.65792      -     -    0s
-*   19    22               4     159.6439848  159.64398  0.00%  12.5    0s
+     0     0  143.98691    0    1          -  143.98691      -     -    0s
+H    0     0                     143.7441541  143.98691  0.17%     -    0s
+H    0     0                     143.8139960  143.98691  0.12%     -    0s
+     0     0  143.96647    0    1  143.81399  143.96647  0.11%     -    0s
+H    0     0                     143.8274318  143.96647  0.10%     -    0s
+     0     0  143.96647    0    1  143.82743  143.96647  0.10%     -    0s
+H    0     0                     143.8443019  143.96647  0.08%     -    0s
+     0     0  143.90131    0    1  143.84430  143.90131  0.04%     -    0s
+     0     2  143.90131    0    1  143.84430  143.90131  0.04%     -    0s
 
-Explored 23 nodes (1458 simplex iterations) in 0.11 seconds (0.07 work units)
-Thread count was 4 (of 4 available processors)
+Explored 521 nodes (3756 simplex iterations) in 0.31 seconds (0.19 work units)
+Thread count was 8 (of 8 available processors)
 
-Solution count 1: 159.644
+Solution count 4: 143.844 143.827 143.814 143.744
 
 Optimal solution found (tolerance 1.00e-04)
-Warning: max constraint violation (3.9459e-05) exceeds tolerance
-Warning: max general constraint violation (3.9459e-05) exceeds tolerance
-Best objective 1.596439848837e+02, best bound 1.596439848837e+02, gap 0.0000%
+Warning: max constraint violation (2.1814e-03) exceeds tolerance
+Warning: max general constraint violation (2.1814e-03) exceeds tolerance
+  Piecewise linearization of function constraints often causes big violation.
+  Try to adjust the settings of the related parameters, such as FuncPieces.
+Best objective 1.438443019985e+02, best bound 1.438443019985e+02, gap 0.0000%
 </pre></div></div>
 </div>
 <p>We can see that the error has been reduced.</p>
@@ -777,7 +765,7 @@ Best objective 1.596439848837e+02, best bound 1.596439848837e+02, gap 0.0000%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Error in approximating the regression 3.94589e-05
+Error in approximating the regression 0.00218138
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -785,7 +773,7 @@ Error in approximating the regression 3.94589e-05
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/pierrebonami/.local/lib/python3.10/site-packages/sklearn/base.py:450: UserWarning: X does not have valid feature names, but StandardScaler was fitted with feature names
+/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/sklearn/base.py:450: UserWarning: X does not have valid feature names, but StandardScaler was fitted with feature names
   warnings.warn(
 </pre></div></div>
 </div>

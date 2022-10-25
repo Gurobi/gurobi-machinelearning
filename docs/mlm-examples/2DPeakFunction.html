@@ -18,7 +18,6 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script src="../_static/design-tabs.js"></script>
@@ -51,12 +50,10 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Start</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#install">Install</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#usage">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Simple Usage Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Usage Example</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
 <ul class="current">
@@ -76,7 +73,7 @@
 </ul>
 </li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Meta</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
@@ -386,19 +383,7 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
----
-jupytext:
-  formats: ipynb///ipynb,myst///md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.14.0
-kernelspec:
-  display_name: gurobi-ml
-  language: python
-  name: Python3
----<section id="Surrogate-functions">
+<section id="Surrogate-functions">
 <h1>Surrogate functions<a class="headerlink" href="#Surrogate-functions" title="Permalink to this heading"></a></h1>
 <p>Extra required packages: - matplotlib</p>
 <p><span id="id1">[<a class="reference internal" href="../meta-bibliography.html#id4" title="Carlos A. Henao and Christos T. Maravelias. Surrogate-based superstructure optimization framework. AIChE Journal, 57(5):1216-1232, 2011. doi:https://doi.org/10.1002/aic.12341.">HM11</a>]</span> <span id="id2">[<a class="reference internal" href="../meta-bibliography.html#id5" title="Zhou Lu, Hongming Pu, Feicheng Wang, Zhiqiang Hu, and Liwei Wang. The expressive power of neural networks: a view from the width. In I. Guyon, U. Von Luxburg, S. Bengio, H. Wallach, R. Fergus, S. Vishwanathan, and R. Garnett, editors, Advances in Neural Information Processing Systems, volume 30. Curran Associates, Inc., 2017. URL: https://proceedings.neurips.cc/paper/2017/file/32cbf687880eb1674a07bf717761dd3a-Paper.pdf.">LPW+17</a>]</span> <span id="id3">[<a class="reference internal" href="../meta-bibliography.html#id4" title="Carlos A. Henao and Christos T. Maravelias. Surrogate-based superstructure optimization framework. AIChE Journal, 57(5):1216-1232, 2011. doi:https://doi.org/10.1002/aic.12341.">HM11</a>]</span> Optimization solvers often struggle to prove a global optimum of a model when it holds highly nonlinear functions. The reason is often that relaxations of the nonlinear functions are not good enough to make the solver prove an acceptable bound in a reasonable amount of time. Another issue might be that a given solver does not support nonlinear functions, but only accepts linear ones.</p>
@@ -487,7 +472,7 @@ network approximation of the nonlinear function with Gurobi.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/mlm-examples_2DPeakFunction_6_0.png" src="../_images/mlm-examples_2DPeakFunction_6_0.png" />
+<img alt="../_images/mlm-examples_2DPeakFunction_5_0.png" src="../_images/mlm-examples_2DPeakFunction_5_0.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -547,7 +532,7 @@ network approximation of the nonlinear function with Gurobi.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.9998299290530847
+0.9997364211051336
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -564,7 +549,7 @@ network approximation of the nonlinear function with Gurobi.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.04272204873063923
+0.04932321417366614
 </pre></div></div>
 </div>
 <p>The maximum error is quite high but still acceptable for the purpose of this example.</p>
@@ -593,11 +578,10 @@ network approximation of the nonlinear function with Gurobi.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/mlm-examples_2DPeakFunction_14_0.png" src="../_images/mlm-examples_2DPeakFunction_14_0.png" />
+<img alt="../_images/mlm-examples_2DPeakFunction_13_0.png" src="../_images/mlm-examples_2DPeakFunction_13_0.png" />
 </div>
 </div>
 <p>Optically, the approximation looks very close to the original function.</p>
-<p>+++</p>
 </section>
 <section id="Construct-the-optimization-model">
 <h2>Construct the optimization model<a class="headerlink" href="#Construct-the-optimization-model" title="Permalink to this heading"></a></h2>
@@ -632,7 +616,6 @@ network approximation of the nonlinear function with Gurobi.</p>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Gurobi 10.0.0 (beta1) - expires 2022-11-21
-Restricted license - for non-production use only - expires 2022-11-22
 Warning for adding constraints: zero or small (&lt; 1e-13) coefficients, ignored
 </pre></div></div>
 </div>
@@ -642,7 +625,7 @@ Warning for adding constraints: zero or small (&lt; 1e-13) coefficients, ignored
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;gurobi_ml.sklearn.pipeline.PipelineConstr at 0x7f3f53e5fdf0&gt;
+&lt;gurobi_ml.sklearn.pipeline.PipelineConstr at 0x12b4e5d60&gt;
 </pre></div></div>
 </div>
 </section>
@@ -681,101 +664,75 @@ Set parameter NonConvex to value 2
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (linux64)
+Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
 
-CPU model: Intel(R) Core(TM) i5-4460  CPU @ 3.20GHz, instruction set [SSE2|AVX|AVX2]
-Thread count: 4 physical cores, 4 logical processors, using up to 4 threads
+CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
 
-Optimize a model with 91 rows, 189 columns and 1800 nonzeros
-Model fingerprint: 0x7f5d1542
+Optimize a model with 91 rows, 189 columns and 1403 nonzeros
+Model fingerprint: 0x4774ac0f
 Model has 6 quadratic constraints
 Model has 90 general constraints
 Variable types: 189 continuous, 0 integer (0 binary)
 Coefficient statistics:
-  Matrix range     [1e-13, 1e+00]
+  Matrix range     [3e-13, 1e+00]
   QMatrix range    [1e+00, 1e+00]
   QLMatrix range   [1e+00, 1e+00]
   Objective range  [1e+00, 1e+00]
   Bounds range     [1e+00, 1e+00]
-  RHS range        [5e-04, 4e-01]
+  RHS range        [5e-03, 5e-01]
   QRHS range       [1e+00, 1e+00]
-Presolve added 142 rows and 49 columns
+Presolve added 94 rows and 1 columns
 Presolve time: 0.01s
-Presolved: 243 rows, 238 columns, 2082 nonzeros
+Presolved: 195 rows, 190 columns, 1680 nonzeros
 Presolved model has 3 bilinear constraint(s)
-Variable types: 164 continuous, 74 integer (74 binary)
+Variable types: 134 continuous, 56 integer (56 binary)
 
-Root relaxation: objective -3.073845e+01, 264 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: objective -1.286342e+01, 200 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0  -30.73844    0   48          -  -30.73844      -     -    0s
-     0     0  -27.29152    0   50          -  -27.29152      -     -    0s
-     0     0  -27.11985    0   55          -  -27.11985      -     -    0s
-     0     0  -26.02186    0   57          -  -26.02186      -     -    0s
-     0     0  -25.70173    0   57          -  -25.70173      -     -    0s
-     0     0  -24.06275    0   57          -  -24.06275      -     -    0s
-     0     0  -23.70696    0   58          -  -23.70696      -     -    0s
-H    0     0                       0.1925747  -22.76367      -     -    0s
-     0     0  -22.76367    0   59    0.19257  -22.76367      -     -    0s
-H    0     0                       0.1925740  -22.76367      -     -    0s
-     0     0  -22.69377    0   61    0.19257  -22.69377      -     -    0s
-     0     0  -21.38154    0   57    0.19257  -21.38154      -     -    0s
-     0     0  -21.22171    0   62    0.19257  -21.22171      -     -    0s
-     0     0  -20.91412    0   64    0.19257  -20.91412      -     -    0s
-     0     0  -20.85717    0   62    0.19257  -20.85717      -     -    0s
-     0     0  -20.24066    0   63    0.19257  -20.24066      -     -    0s
-     0     0  -20.12591    0   61    0.19257  -20.12591      -     -    0s
-     0     0  -19.96270    0   62    0.19257  -19.96270      -     -    0s
-     0     0  -19.86120    0   63    0.19257  -19.86120      -     -    0s
-     0     0  -19.69269    0   61    0.19257  -19.69269      -     -    0s
-     0     0  -19.49769    0   62    0.19257  -19.49769      -     -    0s
-     0     0  -19.19264    0   60    0.19257  -19.19264      -     -    0s
-H    0     0                       0.1925740  -19.19264      -     -    0s
-     0     0  -19.00775    0   63    0.19257  -19.00775  9970%     -    0s
-H    0     0                      -1.0216693  -19.00775  1760%     -    0s
-     0     0  -18.88092    0   61   -1.02166  -18.88092  1748%     -    0s
-     0     0  -18.86837    0   64   -1.02166  -18.86837  1747%     -    0s
-     0     0  -18.70369    0   64   -1.02166  -18.70369  1731%     -    0s
-     0     0  -18.66198    0   64   -1.02166  -18.66198  1727%     -    0s
-     0     0  -18.60395    0   65   -1.02166  -18.60395  1721%     -    0s
-     0     0  -18.60118    0   64   -1.02166  -18.60118  1721%     -    0s
-     0     2  -18.60118    0   64   -1.02166  -18.60118  1721%     -    0s
-H   37    39                      -1.0216693  -15.94770  1461%  73.7    0s
-H   71    82                      -1.0216694  -15.94770  1461%  53.5    0s
-H   74    82                      -1.0216696  -15.94770  1461%  54.6    0s
-H  539   390                      -1.0216697  -12.23366  1097%  31.9    1s
-H 1046   615                      -1.0216703  -11.31280  1007%  28.8    1s
-H 1048   586                      -1.0216704  -11.31280  1007%  28.7    1s
-H 1049   557                      -2.2182122  -11.31280   410%  28.7    1s
-H 1049   529                      -2.2544939  -11.31280   402%  28.7    1s
-H 1049   502                      -2.2565003  -11.31280   401%  28.7    1s
-H 1049   477                      -2.2566751  -11.31280   401%  28.7    1s
-H 1049   453                      -2.2567736  -11.31280   401%  28.7    1s
-H 1049   430                      -2.2567752  -11.31280   401%  28.7    1s
-* 1529   559              60      -2.2567757   -9.28376   311%  29.7    3s
-  6872  1874   -2.87898   26   35   -2.25677   -5.62660   149%  27.0    5s
- 21643   610   -2.48117   28   38   -2.25677   -3.14031  39.2%  26.5   10s
+     0     0  -12.86341    0   32          -  -12.86341      -     -    0s
+     0     0  -10.38706    0   36          -  -10.38706      -     -    0s
+H    0     0                      -2.2391013  -10.28161   359%     -    0s
+H    0     0                      -2.2961629  -10.28161   348%     -    0s
+     0     0  -10.28161    0   39   -2.29616  -10.28161   348%     -    0s
+     0     0   -9.44661    0   36   -2.29616   -9.44661   311%     -    0s
+     0     0   -9.31804    0   35   -2.29616   -9.31804   306%     -    0s
+     0     0   -8.45012    0   38   -2.29616   -8.45012   268%     -    0s
+     0     0   -8.31803    0   38   -2.29616   -8.31803   262%     -    0s
+     0     0   -8.11413    0   37   -2.29616   -8.11413   253%     -    0s
+H    0     0                      -2.2966220   -7.95402   246%     -    0s
+H    0     0                      -2.2966252   -7.95402   246%     -    0s
+     0     0   -7.95402    0   37   -2.29662   -7.95402   246%     -    0s
+     0     0   -7.63544    0   37   -2.29662   -7.63544   232%     -    0s
+     0     0   -7.61177    0   40   -2.29662   -7.61177   231%     -    0s
+     0     0   -7.37580    0   39   -2.29662   -7.37580   221%     -    0s
+     0     0   -7.37580    0   39   -2.29662   -7.37580   221%     -    0s
+     0     0   -7.37580    0   40   -2.29662   -7.37580   221%     -    0s
+     0     0   -7.37580    0   40   -2.29662   -7.37580   221%     -    0s
+     0     0   -6.73202    0   41   -2.29662   -6.73202   193%     -    0s
+     0     0   -6.36596    0   40   -2.29662   -6.36596   177%     -    0s
+     0     2   -6.36596    0   40   -2.29662   -6.36596   177%     -    0s
+*  270    59              32      -2.2966267   -3.74882  63.2%  20.0    0s
 
 Cutting planes:
-  Gomory: 21
-  Cover: 1
-  Implied bound: 17
-  MIR: 220
-  StrongCG: 2
-  Flow cover: 121
-  RLT: 3
-  Relax-and-lift: 14
+  Gomory: 1
+  Implied bound: 20
+  MIR: 61
+  Flow cover: 27
+  Inf proof: 1
+  Relax-and-lift: 1
 
-Explored 23031 nodes (607363 simplex iterations) in 10.28 seconds (13.65 work units)
-Thread count was 4 (of 4 available processors)
+Explored 375 nodes (8124 simplex iterations) in 0.47 seconds (0.36 work units)
+Thread count was 8 (of 8 available processors)
 
-Solution count 10: -2.25678 -2.25678 -2.25677 ... 0.192574
-No other solutions better than -2.25678
+Solution count 4: -2.29663 -2.29662 -2.29616 -2.2391
+No other solutions better than -2.29663
 
 Optimal solution found (tolerance 1.00e-01)
-Best objective -2.256775799990e+00, best bound -2.256775799990e+00, gap 0.0000%
+Best objective -2.296626768804e+00, best bound -2.296626768804e+00, gap 0.0000%
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -814,14 +771,13 @@ Best objective -2.256775799990e+00, best bound -2.256775799990e+00, gap 0.0000%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[ 0.40819392 -1.        ]
--2.256775799990192
--2.2840391783795586
-0.027263378389366544
+[ 0.38296985 -1.        ]
+-2.296626768803957
+-2.2735783548355815
+0.02304841396837576
 </pre></div></div>
 </div>
 <p>The difference between the function and the approximation at the computed solution point is noticable but acceptable given the big maximum error of the neural network approximation.</p>
-<p>+++</p>
 <p>Copyright © 2020 Gurobi Optimization, LLC</p>
 </section>
 </section>

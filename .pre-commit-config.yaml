@@ -45,3 +45,11 @@ repos:
         language: python
         types: [python]
         args: ["--line-length=127"]
+
+    - repo: local
+      hooks:
+        - id: license_embedded
+          name: license_embedded
+          entry: python3 .github/hooks/license_embedded.py
+          language: system
+          files: (src/.*\.py|.*\.ipynb)

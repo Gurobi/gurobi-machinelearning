@@ -18,7 +18,6 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script src="../_static/design-tabs.js"></script>
@@ -51,12 +50,10 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Start</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#install">Install</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#usage">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Simple Usage Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Usage Example</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
 <ul class="current">
@@ -94,7 +91,7 @@
 </ul>
 </li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Meta</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
@@ -404,21 +401,9 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
----
-jupytext:
-  formats: ipynb///ipynb,myst///md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.14.0
-kernelspec:
-  display_name: Python 3 (ipykernel)
-  language: python
-  name: python3
----<section id="Pricing-and-Supply-problem">
+<section id="Pricing-and-Supply-problem">
 <h1>Pricing and Supply problem<a class="headerlink" href="#Pricing-and-Supply-problem" title="Permalink to this heading"></a></h1>
-<p><em>Note: This example is a limited version of the example</em><a class="reference external" href="https://github.com/Gurobi/modeling-examples/tree/master/price_optimization">How Much Is Too Much? Avocado Pricing and Supply Using Mathematical Optimization</a><em>. It is only aimed at showing the capabilities of Gurobi Machine Learning. In particular the model is restricted to a limited number of regions so that it can fits within Gurobi size-limited license. Please visit the full notebook page, for a more detailed explanation about the
+<p><em>Note: This example is a limited version of the example</em> <a class="reference external" href="https://github.com/Gurobi/modeling-examples/tree/master/price_optimization">How Much Is Too Much? Avocado Pricing and Supply Using Mathematical Optimization</a><em>. It is only aimed at showing the capabilities of Gurobi Machine Learning. In particular the model is restricted to a limited number of regions so that it can fits within Gurobi size-limited license. Please visit the full notebook page, for a more detailed explanation about the
 problem and detailed analysis of the results.</em></p>
 <p>A <a class="reference external" href="https://www.foodnetwork.com/fn-dish/news/2018/3/avocado-unseats-banana-as-america-s-top-fruit-import-by-value">Food Network article</a> from March 2017 declared, “Avocado unseats banana as America’s top fruit import.” This declaration is incomplete and debatable for reasons other than whether avocado is a fruit. Avocados are expensive.</p>
 <p>As a supplier, setting an appropriate avocado price requires a delicate trade-off. Set it too high and you lose customers. Set it too low and you won’t make a profit. Equipped with good data, the avocado pricing and supply problem is <em>ripe</em> with opportunities for demonstrating the power of optimization and data science.</p>
@@ -428,7 +413,7 @@ problem and detailed analysis of the results.</em></p>
 <col style="width: 100%" />
 </colgroup>
 <thead>
-<tr class="row-odd"><th class="head"><p><img alt="d508ede375254e078ca2bf0ec733a501" class="no-scaled-link" src="https://github.com/Gurobi/modeling-examples/blob/master/price_optimization/avocado_image_grocery.jpeg?raw=1" style="width: 500px;" /></p></th>
+<tr class="row-odd"><th class="head"><p><img alt="6ea12cfdad204cc299a957d9177a285e" class="no-scaled-link" src="https://github.com/Gurobi/modeling-examples/blob/master/price_optimization/avocado_image_grocery.jpeg?raw=1" style="width: 500px;" /></p></th>
 </tr>
 </thead>
 <tbody>
@@ -831,7 +816,7 @@ the net revenue while incorporating costs for wastage and transportation.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/mlm-examples_price_optimization_12_0.png" src="../_images/mlm-examples_price_optimization_12_0.png" />
+<img alt="../_images/mlm-examples_price_optimization_9_0.png" src="../_images/mlm-examples_price_optimization_9_0.png" />
 </div>
 </div>
 <p>We can see that the sales generally increased over the years, albeit marginally. The dip in 2019 is the effect of the well-documented <a class="reference external" href="https://abc7news.com/avocado-shortage-season-prices/5389855/">2019 avocado shortage</a> that led to avocados <a class="reference external" href="https://abc7news.com/avocado-shortage-season-prices/5389855/">nearly doubling in price.</a></p>
@@ -865,7 +850,7 @@ the net revenue while incorporating costs for wastage and transportation.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/mlm-examples_price_optimization_14_0.png" src="../_images/mlm-examples_price_optimization_14_0.png" />
+<img alt="../_images/mlm-examples_price_optimization_11_0.png" src="../_images/mlm-examples_price_optimization_11_0.png" />
 </div>
 </div>
 <p>We see a Super Bowl peak in February and a Cinco de Mayo peak in May.</p>
@@ -889,7 +874,7 @@ the net revenue while incorporating costs for wastage and transportation.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/mlm-examples_price_optimization_16_0.png" src="../_images/mlm-examples_price_optimization_16_0.png" />
+<img alt="../_images/mlm-examples_price_optimization_13_0.png" src="../_images/mlm-examples_price_optimization_13_0.png" />
 </div>
 </div>
 <p>As expected, the sales quantity has a negative correlation with the price per avocado. The sales quantity has a positive correlation with the year and season being a peak season.</p>
@@ -924,7 +909,7 @@ the net revenue while incorporating costs for wastage and transportation.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/mlm-examples_price_optimization_19_0.png" src="../_images/mlm-examples_price_optimization_19_0.png" />
+<img alt="../_images/mlm-examples_price_optimization_15_0.png" src="../_images/mlm-examples_price_optimization_15_0.png" />
 </div>
 </div>
 <p>Clearly, west-coasters love avocados.</p>
@@ -1160,7 +1145,7 @@ the net revenue while incorporating costs for wastage and transportation.</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The R^2 value in the test set is 0.8603705388148124
+The R^2 value in the test set is 0.8637413176543106
 </pre></div></div>
 </div>
 <p>We can observe a good <span class="math notranslate nohighlight">\(R^2\)</span> value in the test set. We will now fit the weights to the full dataset.</p>
@@ -1180,7 +1165,7 @@ The R^2 value in the test set is 0.8603705388148124
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The R^2 value in the full dataset is 0.8611189486347879
+The R^2 value in the full dataset is 0.8762205535340608
 </pre></div></div>
 </div>
 </section>
@@ -1257,7 +1242,6 @@ avocado supply comes from</a>. Further, we can set the price of an avocado to no
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Gurobi 10.0.0 (beta1) - expires 2022-11-21
-Restricted license - for non-production use only - expires 2022-11-22
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -1477,83 +1461,84 @@ Activation is identity
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Set parameter NonConvex to value 2
-Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (linux64)
+Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
 
-CPU model: Intel(R) Core(TM) i5-4460  CPU @ 3.20GHz, instruction set [SSE2|AVX|AVX2]
-Thread count: 4 physical cores, 4 logical processors, using up to 4 threads
+CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
 
 Optimize a model with 91 rows, 168 columns and 633 nonzeros
-Model fingerprint: 0x68196956
+Model fingerprint: 0x9d1cb582
 Model has 3 quadratic objective terms
 Model has 60 general constraints
 Variable types: 168 continuous, 0 integer (0 binary)
 Coefficient statistics:
-  Matrix range     [4e-07, 2e+00]
+  Matrix range     [3e-13, 2e+00]
   Objective range  [2e-01, 5e-01]
   QObjective range [2e+00, 2e+00]
   Bounds range     [6e-01, 1e+01]
-  RHS range        [1e-02, 2e+01]
-Presolve added 4 rows and 0 columns
-Presolve removed 0 rows and 71 columns
+  RHS range        [4e-02, 2e+01]
+Presolve added 12 rows and 0 columns
+Presolve removed 0 rows and 63 columns
 Presolve time: 0.01s
-Presolved: 102 rows, 101 columns, 397 nonzeros
+Presolved: 110 rows, 109 columns, 412 nonzeros
 Presolved model has 3 bilinear constraint(s)
-Variable types: 76 continuous, 25 integer (25 binary)
+Variable types: 80 continuous, 29 integer (29 binary)
 
-Root relaxation: objective 2.596170e+01, 59 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: objective 2.600815e+01, 66 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0   25.96170    0   17          -   25.96170      -     -    0s
-H    0     0                      18.1461893   25.96170  43.1%     -    0s
-H    0     0                      18.1461893   25.96170  43.1%     -    0s
-     0     0   25.07699    0   18   18.14618   25.07699  38.2%     -    0s
-H    0     0                      19.2825574   25.07699  30.1%     -    0s
-     0     0   25.07699    0   18   19.28255   25.07699  30.1%     -    0s
-     0     0   23.36733    0   20   19.28255   23.36733  21.2%     -    0s
-H    0     0                      19.3644709   23.36733  20.7%     -    0s
-     0     0   23.30774    0   18   19.36447   23.30774  20.4%     -    0s
-     0     0   23.09851    0   20   19.36447   23.09851  19.3%     -    0s
-     0     0   23.09034    0   21   19.36447   23.09034  19.2%     -    0s
-     0     0   23.05716    0   23   19.36447   23.05716  19.1%     -    0s
-     0     0   23.05697    0   23   19.36447   23.05697  19.1%     -    0s
-     0     0   23.04855    0   23   19.36447   23.04855  19.0%     -    0s
-     0     0   23.04808    0   22   19.36447   23.04808  19.0%     -    0s
-     0     0   22.73862    0   23   19.36447   22.73862  17.4%     -    0s
-     0     0   22.39975    0   23   19.36447   22.39975  15.7%     -    0s
-H    0     0                      19.4245924   22.34735  15.0%     -    0s
-H    0     0                      19.5891022   22.34735  14.1%     -    0s
-     0     0   22.34735    0   23   19.58910   22.34735  14.1%     -    0s
-H    0     0                      19.5901945   22.34735  14.1%     -    0s
-     0     2   22.34735    0   23   19.59019   22.34735  14.1%     -    0s
-H   65    33                      19.5937150   21.56933  10.1%   7.1    0s
-*  146    45              20      19.5971306   20.63329  5.29%   4.4    0s
-H  159    55                      19.6075335   20.63329  5.23%   4.1    0s
-*  436    24              32      19.6075353   19.75504  0.75%   2.8    0s
-H  461    34                      19.6075354   19.73561  0.65%   2.7    0s
-*  468    34              30      19.6075379   19.73561  0.65%   2.6    0s
-H  487    34                      19.6076758   19.71513  0.55%   2.6    0s
-*  493    34              25      19.6077207   19.71513  0.55%   2.6    0s
-H  560    29                      19.6077210   19.66647  0.30%   2.4    0s
+     0     0   26.00815    0   12          -   26.00815      -     -    0s
+H    0     0                      16.6825552   26.00815  55.9%     -    0s
+     0     0   25.09093    0   17   16.68255   25.09093  50.4%     -    0s
+H    0     0                      19.1700877   25.09093  30.9%     -    0s
+     0     0   25.07771    0   17   19.17008   25.07771  30.8%     -    0s
+     0     0   23.92957    0   26   19.17008   23.92957  24.8%     -    0s
+     0     0   23.92616    0   22   19.17008   23.92616  24.8%     -    0s
+     0     0   23.79254    0   21   19.17008   23.79254  24.1%     -    0s
+     0     0   23.66890    0   19   19.17008   23.66890  23.5%     -    0s
+     0     0   23.66279    0   20   19.17008   23.66279  23.4%     -    0s
+     0     0   23.58215    0   20   19.17008   23.58215  23.0%     -    0s
+     0     0   23.58206    0   19   19.17008   23.58206  23.0%     -    0s
+     0     0   23.57835    0   18   19.17008   23.57835  23.0%     -    0s
+     0     0   22.98228    0   18   19.17008   22.98228  19.9%     -    0s
+     0     0   21.78701    0   19   19.17008   21.78701  13.7%     -    0s
+H    0     0                      19.4975215   21.41470  9.83%     -    0s
+     0     0   21.37648    0   20   19.49752   21.37648  9.64%     -    0s
+     0     0   20.97685    0   20   19.49752   20.97685  7.59%     -    0s
+H    0     0                      19.7001589   20.97685  6.48%     -    0s
+H    0     0                      19.7835664   20.97685  6.03%     -    0s
+     0     0   20.64916    0   17   19.78356   20.64916  4.38%     -    0s
+     0     0   20.47167    0   19   19.78356   20.47167  3.48%     -    0s
+H    0     0                      19.8016529   20.47167  3.38%     -    0s
+H    0     0                      19.8176479   20.25866  2.23%     -    0s
+     0     0   20.25866    0   19   19.81764   20.25866  2.23%     -    0s
+     0     0   20.17271    0   19   19.81764   20.17271  1.79%     -    0s
+     0     2   20.17271    0   19   19.81764   20.17271  1.79%     -    0s
+H   94     6                      19.8176912   19.81798  0.00%   5.8    0s
+*   96     6              23      19.8176936   19.81798  0.00%   5.7    0s
+H   99     6                      19.8179313   19.81794  0.00%   5.6    0s
 
 Cutting planes:
-  Gomory: 8
-  Cover: 6
-  Implied bound: 7
-  Clique: 2
+  Gomory: 6
+  Cover: 1
+  Implied bound: 14
+  Clique: 3
   MIR: 7
-  Flow cover: 16
-  RLT: 11
-  Relax-and-lift: 1
+  Flow cover: 11
+  RLT: 9
+  Relax-and-lift: 5
+  BQP: 1
+  PSD: 2
 
-Explored 617 nodes (1652 simplex iterations) in 0.19 seconds (0.06 work units)
-Thread count was 4 (of 4 available processors)
+Explored 102 nodes (911 simplex iterations) in 0.16 seconds (0.05 work units)
+Thread count was 8 (of 8 available processors)
 
-Solution count 10: 19.6077 19.6077 19.6075 ... 19.3645
+Solution count 9: 19.8179 19.8177 19.8176 ... 16.6826
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 1.960772039877e+01, best bound 1.960867612809e+01, gap 0.0049%
+Best objective 1.981793091464e+01, best bound 1.981794764962e+01, gap 0.0001%
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1569,7 +1554,7 @@ Best objective 1.960772039877e+01, best bound 1.960867612809e+01, gap 0.0049%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Maximal error in predicted values in solution 7.748407848673367e-07
+Maximal error in predicted values in solution 3.4988534736157817e-07
 </pre></div></div>
 </div>
 <p>The solver solved the optimization problem in less than a second. Let us now analyze the optimal solution by storing it in a Pandas dataframe.</p>
@@ -1598,7 +1583,7 @@ Maximal error in predicted values in solution 7.748407848673367e-07
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
- The optimal net revenue: $19.607720 million
+ The optimal net revenue: $19.817931 million
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1636,29 +1621,29 @@ Maximal error in predicted values in solution 7.748407848673367e-07
     <tr>
       <th>0</th>
       <td>Great_Lakes</td>
-      <td>2.000000</td>
-      <td>3.2456</td>
-      <td>3.2456</td>
+      <td>1.999994</td>
+      <td>3.0814</td>
+      <td>3.0814</td>
       <td>-0.0</td>
-      <td>3.2456</td>
+      <td>3.0814</td>
     </tr>
     <tr>
       <th>1</th>
       <td>West</td>
-      <td>1.358665</td>
-      <td>6.7827</td>
-      <td>6.7827</td>
+      <td>1.187608</td>
+      <td>7.3322</td>
+      <td>7.3322</td>
       <td>0.0</td>
-      <td>6.7827</td>
+      <td>7.3322</td>
     </tr>
     <tr>
       <th>2</th>
       <td>Northeast</td>
-      <td>1.653356</td>
-      <td>4.9717</td>
-      <td>4.9717</td>
-      <td>-0.0</td>
-      <td>4.9717</td>
+      <td>2.000000</td>
+      <td>4.5863</td>
+      <td>4.5863</td>
+      <td>0.0</td>
+      <td>4.5863</td>
     </tr>
   </tbody>
 </table>
@@ -1688,7 +1673,7 @@ Maximal error in predicted values in solution 7.748407848673367e-07
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/mlm-examples_price_optimization_56_0.png" src="../_images/mlm-examples_price_optimization_56_0.png" />
+<img alt="../_images/mlm-examples_price_optimization_48_0.png" src="../_images/mlm-examples_price_optimization_48_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">

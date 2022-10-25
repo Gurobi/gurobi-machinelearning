@@ -9,10 +9,10 @@ jupytext:
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
-  name: ipython3
+  name: python3
 ---
 
-Simple Usage Example
+Usage Example
 ====================
 
 In this page, we provide a simple example of using the Gurobi Machine Learning package.

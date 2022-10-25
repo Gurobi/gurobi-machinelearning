@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simple Usage Example &mdash; Gurobi Machine Learning  documentation</title>
+  <title>Usage Example &mdash; Gurobi Machine Learning  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
@@ -18,7 +18,6 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
         <script src="_static/design-tabs.js"></script>
@@ -29,7 +28,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Supported Regression models" href="mlm-supported.html" />
-    <link rel="prev" title="Introduction" href="firststeps-introduction.html" />
+    <link rel="prev" title="Basics" href="firststeps-introduction.html" />
 </head>
 
 <body class="wy-body-for-nav">
@@ -51,19 +50,17 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Start</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="firststeps-introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="firststeps-introduction.html#install">Install</a></li>
-<li class="toctree-l1"><a class="reference internal" href="firststeps-introduction.html#usage">Usage</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Simple Usage Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firststeps-introduction.html">Basics</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Example</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="mlm-supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mlm-examples.html">Examples</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Meta</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="meta-bibliography.html">Bibliography</a></li>
@@ -84,7 +81,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Simple Usage Example</li>
+      <li>Usage Example</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/firststeps-simple-example.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -372,20 +369,8 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
----
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.14.0
-kernelspec:
-  display_name: Python 3 (ipykernel)
-  language: python
-  name: ipython3
----<section id="Simple-Usage-Example">
-<h1>Simple Usage Example<a class="headerlink" href="#Simple-Usage-Example" title="Permalink to this heading"></a></h1>
+<section id="Usage-Example">
+<h1>Usage Example<a class="headerlink" href="#Usage-Example" title="Permalink to this heading"></a></h1>
 <p>In this page, we provide a simple example of using the Gurobi Machine Learning package.</p>
 <p>The example is entirely abstract. Its aim is only to illustrate the basic functionalities of the package in the most simple way. For some more realistic applications, please refer to the notebooks.</p>
 <p>Before proceeding to the example itself, we need to import a number of packages. Here, we will use <code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code> to train regression models. We generate random data for the regression using the :external+sklearn:py:func:<code class="docutils literal notranslate"><span class="pre">sklearn.datasets.make_regression</span></code>. For the regression model, we use a neural network :external:py:class:<code class="docutils literal notranslate"><span class="pre">sklearn.neural_network.MLPRegressor</span></code>, import the corresponding objects.</p>
@@ -467,7 +452,6 @@ kernelspec:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Gurobi 10.0.0 (beta1) - expires 2022-11-21
-Restricted license - for non-production use only - expires 2022-11-22
 </pre></div></div>
 </div>
 <p>Our only decision variables in this case, are the five inputs and outputs for the regression. We use <code class="docutils literal notranslate"><span class="pre">gurobipy.MVar</span></code> matrix variables that are most convenient in this case.</p>
@@ -556,53 +540,52 @@ Activation is identity
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (linux64)
+Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
 
-CPU model: Intel(R) Core(TM) i5-4460  CPU @ 3.20GHz, instruction set [SSE2|AVX|AVX2]
-Thread count: 4 physical cores, 4 logical processors, using up to 4 threads
+CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
 
 Optimize a model with 82 rows, 182 columns and 1322 nonzeros
-Model fingerprint: 0x76fadadd
+Model fingerprint: 0x456f38bd
 Model has 2 quadratic objective terms
 Model has 80 general constraints
 Variable types: 182 continuous, 0 integer (0 binary)
 Coefficient statistics:
-  Matrix range     [2e-04, 2e+00]
+  Matrix range     [3e-03, 2e+00]
   Objective range  [0e+00, 0e+00]
   QObjective range [2e+00, 2e+00]
-  Bounds range     [4e-03, 2e+00]
-  RHS range        [2e-02, 1e+00]
-Presolve added 10 rows and 0 columns
-Presolve removed 0 rows and 81 columns
-Presolve time: 0.01s
-Presolved: 92 rows, 101 columns, 666 nonzeros
+  Bounds range     [3e-04, 2e+00]
+  RHS range        [5e-02, 1e+00]
+Presolve removed 1 rows and 91 columns
+Presolve time: 0.04s
+Presolved: 81 rows, 91 columns, 576 nonzeros
 Presolved model has 1 quadratic objective terms
-Variable types: 72 continuous, 29 integer (29 binary)
+Variable types: 66 continuous, 25 integer (25 binary)
 
-Root relaxation: objective 0.000000e+00, 141 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: objective 5.060052e+01, 115 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0    0.00000    0   11          -    0.00000      -     -    0s
-     0     0    0.00000    0   12          -    0.00000      -     -    0s
-H    0     0                       0.0000000    0.00000  0.00%     -    0s
-     0     0    0.00000    0   12    0.00000    0.00000  0.00%     -    0s
+     0     0   50.60052    0   10          -   50.60052      -     -    0s
+H    0     0                      96.2506397   50.60052  47.4%     -    0s
+H    0     0                      50.6005235   50.60052  0.00%     -    0s
+     0     0   50.60052    0   10   50.60052   50.60052  0.00%     -    0s
 
 Cutting planes:
-  Cover: 1
-  Implied bound: 5
-  Clique: 3
-  Flow cover: 5
-  Relax-and-lift: 8
+  Cover: 9
+  Implied bound: 7
+  MIR: 1
+  Flow cover: 11
+  Relax-and-lift: 11
 
-Explored 1 nodes (191 simplex iterations) in 0.04 seconds (0.01 work units)
-Thread count was 4 (of 4 available processors)
+Explored 1 nodes (137 simplex iterations) in 0.07 seconds (0.01 work units)
+Thread count was 8 (of 8 available processors)
 
-Solution count 1: 0
+Solution count 2: 50.6005 96.2506
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 0.000000000000e+00, best bound 0.000000000000e+00, gap 0.0000%
+Best objective 5.060052358051e+01, best bound 5.060052358051e+01, gap 0.0000%
 </pre></div></div>
 </div>
 <p>The function <code class="docutils literal notranslate"><span class="pre">get_error</span></code> is useful to check that the solution computed by Gurobi is correct with respect to the regression model we use.</p>
@@ -622,7 +605,7 @@ Best objective 0.000000000000e+00, best bound 0.000000000000e+00, gap 0.0000%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([[-2.58126853e-15, -5.94246874e-14]])
+array([[1.62092562e-14, 1.59872116e-14]])
 </pre></div></div>
 </div>
 <p>Finally, we can look at the computed values for the output variables and compare them with the original targets values.</p>
@@ -640,7 +623,7 @@ array([[-2.58126853e-15, -5.94246874e-14]])
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([0., 0.])
+array([0.       , 7.1134045])
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -657,7 +640,7 @@ array([0., 0.])
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([-6.91348057, 21.53899807])
+array([114.06590814, 126.35525345])
 </pre></div></div>
 </div>
 </section>
@@ -666,7 +649,7 @@ array([-6.91348057, 21.53899807])
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="firststeps-introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="firststeps-introduction.html" class="btn btn-neutral float-left" title="Basics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="mlm-supported.html" class="btn btn-neutral float-right" title="Supported Regression models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
