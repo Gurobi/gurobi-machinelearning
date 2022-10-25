@@ -285,7 +285,7 @@ print("The R^2 value in the full dataset is",r2_score(y, y_pred_full))
 +++
 
 Knowing how the price of an avocado affects the demand, how can we set the optimal avocado price?
-We don't want to set the price too high, since that could drive demand and sales down. At the same time, setting the price too low could be sub-optimal when maximizing revenue. So what is the sweet spot?
+We don't want to set the price too high, since that could drive demand and sales down. At the same time, setting the price too low could be suboptimal when maximizing revenue. So what is the sweet spot?
 
 On the distribution logistics, we want to make sure that there are enough avocados across the regions. We can address these considerations in a mathematical optimization model.
 An optimization model finds the **best solution** according to an **objective function** such that the solution satisfies a set of **constraints**.
@@ -314,7 +314,7 @@ Further, we can set the price of an avocado to not exceed $\$ 2$ apiece.
 
 * Note that here there are subtle but significant differences with the original notebook:
   - We are going to use Matrix variables. Instead of having variables indexed by regions those variables will just be vectors in matrices. The set of regions is therefore just the number of regions.
-  - Because of the point above, we have to make certain that the data is always presented with the regions in the same order. We repeatidly use `.loc[regions]` on the parameters to make sure of that.
+  - Because of the point above, we have to make certain that the data is always presented with the regions in the same order. We repeatedly use `.loc[regions]` on the parameters to make sure of that.
 
 ```{code-cell}
 import gurobipy as gp
@@ -514,7 +514,8 @@ m.update()
 
 ### Add the constraints to predict demand
 
-Using the variables we created above, we just need to call `add_predictor_constr`.
+Using the variables we created above, we just need to call
+[add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr).
 
 ```{code-cell}
 from gurobi_ml import add_predictor_constr

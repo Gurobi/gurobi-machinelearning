@@ -25,8 +25,6 @@ In this example, we illustrate in particular how to use the logistic regression 
 to tune the piece wise linear approximation of the logistic function.
 We also show how to deal with fixed features in the optimization model using pandas data frames.
 
-## Introduction
-
 In this model, data of students admissions in a college is used to predict the probability
 that a student enrolls to the college.
 
@@ -233,7 +231,7 @@ The specific parameters are explained in the documentation of
 [Functions Constraints](https://www.gurobi.com/documentation/9.1/refman/constraints.html#subsubsection:GenConstrFunction)
 in Gurobi's manual.
 
-We can pass those parameters, to the `add_predictor_constr` function in the form of a dictionary with the keyword
+We can pass those parameters, to the [add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr) function in the form of a dictionary with the keyword
 parameter `gc_attributes`.
 
 Now we want a more precise solution, so we remove the current constraint, add a new one that does a tighter approximation and resolve the model.

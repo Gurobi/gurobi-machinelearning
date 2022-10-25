@@ -18,9 +18,6 @@ In this example, we show how to use Gurobi Machine Learning to construct an adve
 
 We use the MNIST handwritten digit database (http://yann.lecun.com/exdb/mnist/) for this example.
 
-
-## Introduction
-
 For this problem, we are given a trained neural network and one well classified example $\bar x$.
 Our goal is to construct another example $x$ _close to_ $\bar x$ that is classified with another label.
 
@@ -160,7 +157,7 @@ Note that this case is not as straightforward as others. The reason is that the 
 
 For this reason, we change manually the last layer activation before adding the network to the Gurobi model.
 
-Also, we use the function `add_mlp_regressor_constr` directly. The network being actually for classification (i.e. of type `MLPClassifier`, the `add_predictor_constr` function would not handle it automatically.
+Also, we use the function [add_mlp_regressor_constr](../api/MlpRegressorConstr.rst#gurobi_ml.sklearn.add_mlp_regressor_constr) directly. The network being actually for classification (i.e. of type `MLPClassifier`, the [add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr) function would not handle it automatically.
 
 Note that in the output, you should see a warning about adding constraints with very small coefficients that are ignored. Neural-networks often contains very small coefficients in their expression. Any coefficient with an absolute value smaller than $10^-{13}$ is ignored by Gurobi. This may result in slightly different predicted values but should be negligible.
 
