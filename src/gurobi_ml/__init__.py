@@ -14,6 +14,12 @@
 # ==============================================================================
 
 # read version from installed package
-__version__ = "0.1.0"
+
+import importlib_metadata as metadata
+
+try:
+    __version__ = metadata.version("gurobi_machinelearning")
+except metadata.PackageNotFoundError:
+    __version__ = "dev"
 
 from .add_predictor import add_predictor_constr
