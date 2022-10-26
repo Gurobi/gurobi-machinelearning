@@ -23,8 +23,10 @@ All linear models should work:
 Also does :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
 """
 
+import gurobipy as gp
 import numpy as np
 
+from ..exceptions import NoModel, ParameterError
 from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 
@@ -39,8 +41,8 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, **kwargs):
-        SKgetter.__init__(self, predictor)
+    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, output_type="", **kwargs):
+        SKgetter.__init__(self, predictor, output_type, **kwargs)
         AbstractPredictorConstr.__init__(
             self,
             grbmodel,
@@ -86,11 +88,26 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
 
     """
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, pwl_attributes=None, **kwargs):
+    def __init__(
+        self,
+        grbmodel,
+        predictor,
+        input_vars,
+        output_vars=None,
+        output_type="classification",
+        epsilon=0.0,
+        pwl_attributes=None,
+        **kwargs,
+    ):
+        if len(predictor.classes_) > 2:
+            raise NoModel("Logistic regression only supported for two classes")
         if pwl_attributes is None:
             self.attributes = self.default_pwl_attributes()
         else:
             self.attributes = pwl_attributes
+        if output_type not in ("classification", "probability"):
+            raise ParameterError("output_type should be either 'classification' or 'probability'")
+        self.epsilon = epsilon
 
         BaseSKlearnRegressionConstr.__init__(
             self,
@@ -98,6 +115,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             predictor,
             input_vars,
             output_vars,
+            output_type,
             **kwargs,
         )
 
@@ -116,11 +134,23 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         self._create_output_vars(self._input, name="affine_trans")
         affinevars = self._output
         self.add_regression_constr()
+        if self.output_type == "classification":
+            # For classification we need an extra binary variable
+            self._create_output_vars(self._input, name="log_result")
+            log_result = self._output
+            self.model.addConstr(outputvars >= log_result - 0.5 + self.epsilon)
+            self.model.addConstr(outputvars <= log_result + 0.5)
+            outputvars.VType = gp.GRB.BINARY
+            outputvars.LB = 0.0
+            outputvars.UB = 1.0
+        else:
+            log_result = outputvars
+
         self._output = outputvars
         for index in np.ndindex(outputvars.shape):
             gc = self.model.addGenConstrLogistic(
                 affinevars[index],
-                outputvars[index],
+                log_result[index],
                 name=_name(index, "logistic"),
             )
         numgc = self.model.NumGenConstrs
@@ -128,6 +158,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         for gc in self.model.getGenConstrs()[numgc:]:
             for attr, val in self.attributes.items():
                 gc.setAttr(attr, val)
+        self.model.update()
 
 
 def add_linear_regression_constr(model, linear_regression, input_vars, output_vars=None, **kwargs):
@@ -160,7 +191,16 @@ def add_linear_regression_constr(model, linear_regression, input_vars, output_va
     return LinearRegressionConstr(model, linear_regression, input_vars, output_vars, **kwargs)
 
 
-def add_logistic_regression_constr(model, logistic_regression, input_vars, output_vars=None, pwl_attributes=None, **kwargs):
+def add_logistic_regression_constr(
+    model,
+    logistic_regression,
+    input_vars,
+    output_vars=None,
+    output_type="classification",
+    epsilon=0.0,
+    pwl_attributes=None,
+    **kwargs,
+):
     """Use `logistic_regression` to predict the value of `output_vars` using `input_vars` in `model`
 
     Parameters
@@ -173,6 +213,18 @@ def add_logistic_regression_constr(model, logistic_regression, input_vars, outpu
         Decision variables used as input for predictor in model.
     output_vars: mvar_array_like, optional
         Decision variables used as output for predictor in model.
+    output_type: {'classification', 'probability'}, default='classification'
+        If the option chosen is 'classification' the output is the class label
+        of either 0 or 1 given by the logistic regression.
+        If the option 'probability' is chosen the output is the probabilty of the class 1.
+    epsilon: float, default=0.0
+        When the `output_type` is 'classification', this tolerance can be set
+        to enforce that class 1 is chosen, if the result of the logistic function is greater or
+        equal to 0.5 + `epsilon`.
+
+        By default, with the value of 0.0, if the result of the logistic function is
+        very close to 0.5 (up to Gurobi tolerance) in the solution of the optimization model,
+        the output can be either 0 or 1 (the model doesn't distinguish between the two values).
     pwl_attributes: dict, optional
         Dictionary for non-default attributes for Gurobi to build the piecewise linear
         approximation of the logistic function.

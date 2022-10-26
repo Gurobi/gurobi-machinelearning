@@ -201,12 +201,13 @@ m.addConstr(x.sum() <= 0.2 * nstudents)
 m.update()
 ```
 
-Finally, we insert the constraints from the regression. Note that due to the shape of the `feature_vars` matrix and `y`, this will insert one regression constraint for each student.
+Finally, we insert the constraints from the regression. In this model we want to have use the probability
+estimate of a student joining the college, so we choose the parameter `output_type` to be `"probability"`. Note that due to the shapes of the `feature_vars` matrix and `y`, this will insert one regression constraint for each student.
 
 With the `print_stats` function we display what was added to the model.
 
 ```{code-cell} ipython3
-pred_constr = add_predictor_constr(m, pipe, feature_vars, y)
+pred_constr = add_predictor_constr(m, pipe, feature_vars, y, output_type="probability")
 
 pred_constr.print_stats()
 ```
@@ -222,7 +223,7 @@ Remember that for the logistic regression, Gurobi does a piecewise-linear approx
 We print the error. Here we need to use `get_error_proba`.
 
 ```{code-cell} ipython3
-print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error_proba()))))
+print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error()))))
 ```
 
 The error we get might be considered too large, but we can use Gurobi parameters to
@@ -241,7 +242,7 @@ Now we want a more precise solution, so we remove the current constraint, add a 
 pred_constr.remove()
 
 pwl_attributes={"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 1e-4, "FuncPieceRatio": -1.0}
-pred_constr = add_predictor_constr(m, pipe, feature_vars, y, pwl_attributes=pwl_attributes)
+pred_constr = add_predictor_constr(m, pipe, feature_vars, y, output_type="probability", pwl_attributes=pwl_attributes)
 
 m.optimize()
 ```
@@ -249,11 +250,7 @@ m.optimize()
 We can see that the error has been reduced.
 
 ```{code-cell} ipython3
-print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error_proba()))))
+print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error()))))
 ```
 
 Copyright © 2022 Gurobi Optimization, LLC
-
-```{code-cell} ipython3
-
-```
