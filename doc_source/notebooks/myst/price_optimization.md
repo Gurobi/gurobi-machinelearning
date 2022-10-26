@@ -17,8 +17,7 @@ kernelspec:
 <div class="alert alert-info">
 Note
 
-This example is adapted from the example in Gurobi's modeling examples [How Much Is Too Much? Avocado Pricing and Supply Using Mathematical Optimization](https://github.com/Gurobi/modeling
--examples/tree/master/price_optimization).
+This example is adapted from the example in Gurobi's modeling examples [How Much Is Too Much? Avocado Pricing and Supply Using Mathematical Optimization](https://github.com/Gurobi/modeling-examples/tree/master/price_optimization).
 
 The main difference is that it uses `Scikit-learn` for the regression model and Gurobi Machine Learning to embed the regression in a Gurobi model.
 
@@ -51,6 +50,7 @@ Just like the perfect guacamole needs the right blend of onion, lemon and spices
 
 This notebook walks through a decision-making pipeline that culminates in a mathematical optimization model.
 There are three stages:
+
 - First, understand the dataset and infer the relationships between categories such as the sales, price, region, and seasonal trends.
 - Second, build a prediction model that predicts the demand for avocados as a function of price, region, year and the seasonality.
 - Third, design an optimization problem that sets the optimal price and supply quantity to maximize the net revenue while incorporating costs for wastage and transportation.
@@ -223,7 +223,7 @@ Henceforth, the sales quantity will be referred to as the *predicted demand*.
 Let us now construct a linear regressor for the demand.
 Note that the region is a categorical variable, to encode it for the regression we will use the `OneHotEncoder` of `Scikit-learn`.
 
-Because Gurobi Machine Learning doesn't support this column transform at this point, we need to apply the transform to the data directly **before** applying the regression. We will then show below how to use it to build the model.
+Because Gurobi Machine Learning doesn't support this column transformation at this point, we need to apply the transform to the data directly **before** applying the regression. We will then show below how to use it to build the model.
 
 +++
 
@@ -426,7 +426,7 @@ The following notation is used to model these decision variables.
 
 $p$ of shape `(R,)`the price of an avocado ($\$$) in each region,
 
-$x$ of shape `(R,)`the number of products avocados supplied to each region,
+$x$ of shape `(R,)`the number of avocados supplied to each region,
 
 $s$ of shape `(R,)` the predicted number of avocados sold in each region,
 
@@ -549,8 +549,8 @@ Before we do so, we should let the solver know what type of model this is.
 The default setting assumes that the objective and the constraints are linear functions of the variables.
 
 In our model, the objective is **quadratic** since we take the product of price and the predicted sales, both of which are variables.
-Maximizing a quadratic term is said to be **non-convex**, and we specify this using a Gurobi parameter value to be $2$.
-See [here](https://www.gurobi.com/documentation/9.5/refman/nonconvex.html) for more details.
+Maximizing a quadratic term is said to be **non-convex**, and we specify this by setting the value of the
+[Gurobi NonConvex parameter](https://www.gurobi.com/documentation/9.5/refman/nonconvex.html) to be $2$.
 
 ```{code-cell}
 m.Params.NonConvex = 2
@@ -592,9 +592,8 @@ print("The circles represent sales quantity and the cross markers represent the 
 ```
 
 We have shown how to model the price and supply optimization problem with Gurobi Machine Learning.
-In the [Gurobi modeling examples notebook](<https://github.com/Gurobi/modeling>
--examples/tree/master/price_optimization) more analysis of the solutions this model
-can give is done interactively. Be sure to take look at it.
+In the [Gurobi modeling examples notebook](https://github.com/Gurobi/modeling-examples/tree/master/price_optimization)
+more analysis of the solutions this model can give is done interactively. Be sure to take look at it.
 
 +++
 
