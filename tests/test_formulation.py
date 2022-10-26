@@ -88,12 +88,12 @@ class TestFixedModel(unittest.TestCase):
                 print("Test {}".format(exampleno))
                 self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"])
 
-    def do_one_case(self, one_case, X, n_sample, combine):
+    def do_one_case(self, one_case, X, n_sample, combine, isproba=False):
         choice = np.random.randint(X.shape[0], size=n_sample)
         examples = X[choice, :]
         if combine == "all":
             # Do the average case
-            examples = examples.sum(axis=0) / n_sample
+            examples = (examples.sum(axis=0) / n_sample).reshape(1, -1)
         else:
             assert combine == "pairs"
             # Make pairwise combination of the examples
@@ -107,7 +107,7 @@ class TestFixedModel(unittest.TestCase):
         with super().subTest(regressor=predictor, exampleno=choice, n_sample=n_sample, combine=combine):
             if VERBOSE:
                 print(f"Doing {predictor} with example {choice}")
-            self.fixed_model(predictor, examples, one_case["nonconvex"])
+            self.fixed_model(predictor, examples, one_case["nonconvex"], isproba)
 
     def test_diabetes_sklearn(self):
         data = datasets.load_diabetes()
@@ -166,9 +166,8 @@ class TestFixedModel(unittest.TestCase):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            onecase = {"predictor": regressor, "nonconvex": 0}
-            self.do_one_case(onecase, X, 5, "all")
-            self.do_one_case(onecase, X, 6, "pairs")
+            self.do_one_case(onecase, X, 5, "all", True)
+            self.do_one_case(onecase, X, 6, "pairs", True)
 
 
 class TestReLU(unittest.TestCase):
