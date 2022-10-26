@@ -27,7 +27,7 @@ class SequentialConstr(BaseNNConstr):
     """Transform a pytorch Sequential Neural Network to Gurobi constraint with
     input and output as matrices of variables."""
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
+    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, **kwargs):
         linear = None
         for step in predictor:
             if isinstance(step, nn.ReLU):
@@ -75,7 +75,9 @@ class SequentialConstr(BaseNNConstr):
                     layer_weight = param.detach().numpy().T
                 elif name == "bias":
                     layer_bias = param.detach().numpy()
-            self.add_dense_layer(_input, layer_weight, layer_bias, self.actdict["identity"], output)
+            layer = self.add_dense_layer(_input, layer_weight, layer_bias, self.actdict["identity"], output)
+        if self._output is None:
+            self._output = layer.output
 
     def get_error(self):
         """Returns error in Gurobi's solution with respect to prediction from input

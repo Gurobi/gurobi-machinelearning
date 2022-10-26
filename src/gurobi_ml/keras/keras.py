@@ -24,7 +24,7 @@ from ..modeling.neuralnet import BaseNNConstr
 
 
 class KerasNetworkConstr(BaseNNConstr):
-    def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
+    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, **kwargs):
         assert predictor.built
         for step in predictor.layers:
             if isinstance(step, keras.layers.Dense):
@@ -79,6 +79,8 @@ class KerasNetworkConstr(BaseNNConstr):
                     name=f"{i}",
                 )
                 _input = layer.output
+        if self._output is None:
+            self._output = layer.output
 
     def get_error(self):
         """Returns error in Gurobi's solution with respect to prediction from input

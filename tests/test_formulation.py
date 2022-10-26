@@ -23,7 +23,7 @@ class TestFixedModel(unittest.TestCase):
     """Test that if we fix the input of the predictor the feasible solution from
     Gurobi is identical to what the predict function would return."""
 
-    def fixed_model(self, predictor, example, nonconvex, isproba=False):
+    def fixed_model(self, predictor, examples, nonconvex, isproba=False):
         params = {
             "OutputFlag": 0,
             "NonConvex": 2,
@@ -35,10 +35,11 @@ class TestFixedModel(unittest.TestCase):
                 pass
 
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
-            x = gpm.addMVar(example.shape, lb=example - 1e-4, ub=example + 1e-4)
-            y = gpm.addMVar(1, lb=-gp.GRB.INFINITY)
+            x = gpm.addMVar(examples.shape, lb=examples - 1e-4, ub=examples + 1e-4)
 
-            pred_constr = add_predictor_constr(gpm, predictor, x, y, epsilon=1e-5, float_type=np.float32)
+            pred_constr = add_predictor_constr(gpm, predictor, x, epsilon=1e-5, float_type=np.float32)
+
+            y = pred_constr.output
             with self.assertRaises(NoSolution):
                 pred_constr.get_error()
             with open(os.devnull, "w") as outnull:
@@ -61,16 +62,16 @@ class TestFixedModel(unittest.TestCase):
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
             tol = max(tol, vio)
-            tol *= np.abs(pred_constr.output.X)
+            tol *= np.max(np.abs(y.X))
             if isproba:
                 abserror = np.abs(pred_constr.get_error_proba()).astype(float)
             else:
                 abserror = np.abs(pred_constr.get_error()).astype(float)
             if (abserror > tol).any():
                 if isproba:
-                    print(f"Error: {y.X} != {predictor.predict_proba(example.reshape(1, -1))}")
+                    print(f"Error: {y.X} != {predictor.predict_proba(examples)}")
                 else:
-                    print(f"Error: {y.X} != {predictor.predict(example.reshape(1, -1))}")
+                    print(f"Error: {y.X} != {predictor.predict(examples)}")
 
             self.assertLessEqual(np.max(abserror), tol)
 
@@ -87,7 +88,28 @@ class TestFixedModel(unittest.TestCase):
                 print("Test {}".format(exampleno))
                 self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"])
 
-    def test_diabetes(self):
+    def do_one_case(self, one_case, X, n_sample, combine):
+        choice = np.random.randint(X.shape[0], size=n_sample)
+        examples = X[choice, :]
+        if combine == "all":
+            # Do the average case
+            examples = examples.sum(axis=0) / n_sample
+        else:
+            assert combine == "pairs"
+            # Make pairwise combination of the examples
+            even_rows = examples[::2, :]
+            odd_rows = examples[1::2, :]
+            assert odd_rows.shape == even_rows.shape
+            examples = (even_rows + odd_rows) / 2.0 + 1e-2
+            assert examples.shape == even_rows.shape
+
+        predictor = one_case["predictor"]
+        with super().subTest(regressor=predictor, exampleno=choice, n_sample=n_sample, combine=combine):
+            if VERBOSE:
+                print(f"Doing {predictor} with example {choice}")
+            self.fixed_model(predictor, examples, one_case["nonconvex"])
+
+    def test_diabetes_sklearn(self):
         data = datasets.load_diabetes()
 
         X = data["data"]
@@ -95,13 +117,8 @@ class TestFixedModel(unittest.TestCase):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            regressor = onecase["predictor"]
-            for _ in range(1):
-                exampleno = random.randint(0, X.shape[0] - 1)
-                with super().subTest(regressor=regressor, exampleno=exampleno):
-                    if VERBOSE:
-                        print(f"Doing {regressor} with example {exampleno}")
-                    self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"])
+            self.do_one_case(onecase, X, 5, "all")
+            self.do_one_case(onecase, X, 6, "pairs")
 
     def test_diabetes_pytorch(self):
         data = datasets.load_diabetes()
@@ -110,42 +127,31 @@ class TestFixedModel(unittest.TestCase):
 
         filename = os.path.join(os.path.dirname(__file__), "predictors", "diabetes__pytorch.pt")
         regressor = torch.load(filename)
-        for _ in range(1):
-            exampleno = random.randint(0, X.shape[0] - 1)
-            with super().subTest(regressor=regressor, exampleno=exampleno):
-                if VERBOSE:
-                    print(f"Doing {regressor} with example {exampleno}")
-                self.fixed_model(regressor, X[exampleno, :].astype(np.float32), 0)
+        onecase = {"predictor": regressor, "nonconvex": 0}
+        self.do_one_case(onecase, X, 5, "all")
+        self.do_one_case(onecase, X, 6, "pairs")
 
     def test_diabetes_keras(self):
         data = datasets.load_diabetes()
 
         X = data["data"]
-        cases = DiabetesCases()
 
         filename = os.path.join(os.path.dirname(__file__), "predictors", "diabetes_keras")
         regressor = tf.keras.models.load_model(filename)
-        for _ in range(1):
-            exampleno = random.randint(0, X.shape[0] - 1)
-            with super().subTest(regressor=regressor, exampleno=exampleno):
-                if VERBOSE:
-                    print(f"Doing {regressor} with example {exampleno}")
-                self.fixed_model(regressor, X[exampleno, :].astype(np.float32), 0)
+        onecase = {"predictor": regressor, "nonconvex": 0}
+        self.do_one_case(onecase, X, 5, "all")
+        self.do_one_case(onecase, X, 6, "pairs")
 
     def test_diabetes_keras_alt(self):
         data = datasets.load_diabetes()
 
         X = data["data"]
-        cases = DiabetesCases()
 
         filename = os.path.join(os.path.dirname(__file__), "predictors", "diabetes_keras_v2")
         regressor = tf.keras.models.load_model(filename)
-        for _ in range(1):
-            exampleno = random.randint(0, X.shape[0] - 1)
-            with super().subTest(regressor=regressor, exampleno=exampleno):
-                if VERBOSE:
-                    print(f"Doing {regressor} with example {exampleno}")
-                self.fixed_model(regressor, X[exampleno, :].astype(np.float32), 0)
+        onecase = {"predictor": regressor, "nonconvex": 0}
+        self.do_one_case(onecase, X, 5, "all")
+        self.do_one_case(onecase, X, 6, "pairs")
 
     def test_iris(self):
         data = datasets.load_iris()
@@ -160,13 +166,9 @@ class TestFixedModel(unittest.TestCase):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            regressor = onecase["predictor"]
-            for _ in range(1):
-                exampleno = random.randint(0, X.shape[0] - 1)
-                with super().subTest(regressor=regressor, exampleno=exampleno):
-                    if VERBOSE:
-                        print(f"Doing {regressor} with example {exampleno}")
-                    self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"], 1)
+            onecase = {"predictor": regressor, "nonconvex": 0}
+            self.do_one_case(onecase, X, 5, "all")
+            self.do_one_case(onecase, X, 6, "pairs")
 
 
 class TestReLU(unittest.TestCase):
