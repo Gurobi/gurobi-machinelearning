@@ -27,14 +27,14 @@ An approach that has been proposed in the literature is
 to approximate the problematic nonlinear
 functions via neural networks with ReLU activation and use MIP technology
 to solve the constructed approximation
-(see for e.g. <cite data-cite="Henao_Maravelias_2011">Heneao Maravelias 2011</cite>, <cite data-cite="Schweidtmann_2022">
-Schweitdmann 2022</cite>).
+(see e.g. <cite data-cite="Henao_Maravelias_2011">[Heneao Maravelias 2011](https://doi.org/https://doi.org/10.1002/aic.12341)</cite>, <cite data-cite="Schweidtmann_2022">
+[Schweitdmann et.al. 2022](https://arxiv.org/abs/2207.12722)</cite>).
 This use of neural network can be motivated by their ability to provide a
-universal approximation (see for e.g. {<cite data-cite="Lu_Pu_2017"></cite>).
+universal approximation (see e.g. <cite data-cite="Lu_Pu_2017">[Lu et.al. 2017](https://proceedings.neurips.cc/paper/2017/file/32cbf687880eb1674a07bf717761dd3a-Paper.pdf)</cite>).
 This use of ML models to replace complex processes is often referred to as *surrogate models*.
 
 In the following example, we
-approximate a nonlinear function via `Scikit-learn` `MLPRegressor` and then to solve an
+approximate a nonlinear function via `Scikit-learn` `MLPRegressor` and then solve an
 optimization problem that uses the approximation of the nonlinear function with Gurobi.
 
 The purpose of this example is solely illustrative and doesn't
@@ -46,35 +46,26 @@ The function is given as
 
 $$
 \begin{aligned}
-f(x,y) = & 3 \cdot (1-x)^2 \cdot \exp(-x^2 - (y+1)^2) - \\
-         & 10 \cdot (\frac{x}{5} - x^3 - y^5) \cdot \exp(-x^2 - y^2) - \\
-         & \frac{1}{3} \cdot \exp(-(x+1)^2 - y^2).
+f(x) = & 3 \cdot (1-x_1)^2 \cdot \exp(-x_1^2 - (x_2+1)^2) - \\
+         & 10 \cdot (\frac{x_1}{5} - x_1^3 - x_2^5) \cdot \exp(-x_1^2 - x_2^2) - \\
+         & \frac{1}{3} \cdot \exp(-(x_1+1)^2 - x_2^2).
 \end{aligned}
 $$
 
-In this example, we want to find the minimum of $f$ over the interval $[-2, 2]$.
+In this example, we want to find the minimum of $f$ over the interval $[-2, 2]$:
 
 $$
-\begin{aligned}
-&\min_{x,y} f(x,y)\\
-&\text{s.t.}\\
-&x,y \in [-2,2].
-\end{aligned}
+y = \min \{f(x) : x \in [-2,2]^2\}.
 $$
 
-The global minimum of this problem can be found numerically
-to have value $-6.55113$ at the point $(0.2283, -1.6256)$
-(see for example [here](https://www.math.uwaterloo.ca/~hwolkowi/henry/reports/talks.d/t09talks.d/09waterloomatlab.d/optimTipsWebinar/html/optimTipsTricksWalkthrough.html#18)).
+The [global minimum of this problem can be found numerically](<https://www.math.uwaterloo.ca/~hwolkowi/henry/reports/talks.d/t09talks.d/09waterloomatlab.d/optimTipsWebinar/html/optimTipsTricksWalkthrough.html#18>)
+to have value $-6.55113$ at the point $(0.2283, -1.6256)$.
 
-Here to find this minimum of $f$, we approximate $f(x,y)$ through a neural
-network function $g(x,y)$ to obtain a MIP and solve
+Here to find this minimum of $f$, we approximate $f(x)$ through a neural
+network function $g(x)$ to obtain a MIP and solve
 
 $$
-\begin{aligned}
-&\min_{x,y} g(x,y) \approx f(x,y)\\
-&\text{s.t.}\\
-&x,y \in [-2,2].
-\end{aligned}
+\hat y = \min \{g(x) : x \in [-2,2]^2\} \approx y.
 $$
 
 First import the necessary packages. Before applying the neural network,
@@ -101,28 +92,26 @@ from gurobi_ml import add_predictor_constr
 We define the 2D peak function as a python function.
 
 ```{code-cell} ipython3
-def peak2d(xx, yy):
+def peak2d(x1, x2):
     return (
-        3 * (1 - xx) ** 2.0 * np.exp(-(xx**2) - (yy + 1) ** 2)
-        - 10 * (xx / 5 - xx**3 - yy**5) * np.exp(-(xx**2) - yy**2)
-        - 1 / 3 * np.exp(-((xx + 1) ** 2) - yy**2)
+        3 * (1 - x1) ** 2.0 * np.exp(-(x1**2) - (x2 + 1) ** 2)
+        - 10 * (x1 / 5 - x1**3 - x2**5) * np.exp(-(x1**2) - x2**2)
+        - 1 / 3 * np.exp(-((x1 + 1) ** 2) - x2**2)
     )
 ```
 
 To train the neural network, we make a uniform sample of the domain of the
-function in the region of interest using `numpy`'s `meshgrid` function.
+function in the region of interest using `numpy`'s `arrange` function.
 
-We then plot the function with `matplotlib`
+We then plot the function with `matplotlib`.
 
 ```{code-cell} ipython3
-x = np.arange(-2, 2, 0.01)
-y = np.arange(-2, 2, 0.01)
-xx, yy = np.meshgrid(x, y)
-z = peak2d(xx, yy)
+x1, x2 = np.meshgrid(np.arange(-2, 2, 0.01), np.arange(-2, 2, 0.01))
+y = peak2d(x1, x2)
 
 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 # Plot the surface.
-surf = ax.plot_surface(xx, yy, z, cmap=cm.coolwarm,
+surf = ax.plot_surface(x1, x2, y, cmap=cm.coolwarm,
                        linewidth=0.01, antialiased=False)
 # Add a color bar which maps values to colors.
 fig.colorbar(surf, shrink=0.5, aspect=5)
@@ -132,12 +121,12 @@ plt.show()
 
 ## Approximate the function
 
-To fit a model, we need to reshape our data. We concatenate the values of `x` and `y` in
-an array `X` and make `z` one dimensional.
+To fit a model, we need to reshape our data. We concatenate the values of `x1` and `x2` in
+an array `X` and make `y` one dimensional.
 
 ```{code-cell} ipython3
-X = np.concatenate([xx.ravel().reshape(-1, 1), yy.ravel().reshape(-1, 1)], axis=1)
-z = z.ravel()
+X = np.concatenate([x1.ravel().reshape(-1, 1), x2.ravel().reshape(-1, 1)], axis=1)
+y = y.ravel()
 ```
 
 To approximate the function, we use a `Pipeline` with polynomial features and
@@ -148,7 +137,7 @@ a neural-network regressor. We do a relatively small neural-network.
 layers = [30]*2
 regression = MLPRegressor(hidden_layer_sizes=layers, activation="relu")
 pipe = make_pipeline(PolynomialFeatures(), regression)
-pipe.fit(X=X, y=z)
+pipe.fit(X=X, y=y)
 ```
 
 To test the accuracy of the approximation, we take a random sample of points, and
@@ -169,9 +158,9 @@ example we still deem it acceptable. We plot the function.
 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 # Plot the surface.
 surf = ax.plot_surface(
-    xx,
-    yy,
-    pipe.predict(X).reshape(xx.shape),
+    x1,
+    x2,
+    pipe.predict(X).reshape(x1.shape),
     cmap=cm.coolwarm,
     linewidth=0.01,
     antialiased=False,
@@ -184,10 +173,10 @@ plt.show()
 
 Visually, the approximation looks close enough to the original function.
 
-## Build and Solve Optimization Model
+## Build and Solve the Optimization Model
 
 We now turn to the optimization model. For this model we want to find the minimal value
-of $y$.
+of `y_approx` which is the approximation given by our pipeline on the interval.
 
 Note that in this simple example, we don't use matrix variables but regular Gurobi variables
 instead.
@@ -196,18 +185,18 @@ instead.
 m = gp.Model()
 
 x = m.addVars(2, lb=-2, ub=2, name="x")
-y = m.addVar(lb=-GRB.INFINITY, name="y")
+y_approx = m.addVar(lb=-GRB.INFINITY, name="y")
 
-m.setObjective(y, gp.GRB.MINIMIZE)
+m.setObjective(y_approx, gp.GRB.MINIMIZE)
 
 # add "surrogate constraint"
-pred_constr = add_predictor_constr(m, pipe, x, y)
+pred_constr = add_predictor_constr(m, pipe, x, y_approx)
 
 pred_constr.print_stats()
 ```
 
 Now call `optimize`. Since we use polynomial features the resulting model is a
-non-convex quadratic problem. In Gurobi, we need to set the parameter `NonConex`
+non-convex quadratic problem. In Gurobi, we need to set the parameter `NonConvex`
 to 2 to be able to solve it.
 
 ```{code-cell} ipython3
@@ -228,12 +217,14 @@ Finally, we look at the solution and the objective value
 found.
 
 ```{code-cell} ipython3
-print(f"solution point of the approximated problem ({x[0].X:.4}, {x[1].X:.4})" +
-        f"Objective value {m.ObjVal}.")
+print(f"solution point of the approximated problem ({x[0].X:.4}, {x[1].X:.4}), " +
+        f"objective value {m.ObjVal}.")
 print(f"Function value at the solution point {peak2d(x[0].X, x[1].X)} error {abs(peak2d(x[0].X, x[1].X) - m.ObjVal)}.")
 ```
 
-The difference between the function and the approximation at the computed solution point is noticeable, but the point we found is reasonably close to the actual global minima.
+The difference between the function and the approximation at the computed solution point is noticeable, but the point we found is reasonably close to the actual global minimum.
 Depending on the use case this might be deemed acceptable. Of course, training a larger network should result in a better approximation.
+
++++
 
 Copyright © 2020 Gurobi Optimization, LLC
