@@ -40,7 +40,7 @@ import gurobipy as gp
 from gurobi_ml import add_predictor_constr
 ```
 
-We start by building artificial data for training our regressions. To do so, we use _make_regression_ to obtain
+We start by building artificial data to train our regressions. To do so, we use _make_regression_ to obtain
 data with 10 features.
 
 ```{code-cell}

@@ -67,7 +67,7 @@ from gurobi_ml.sklearn import add_mlp_regressor_constr
 
 Now we can load the data.
 
-We load a neural network that was pre-trained with Scikit-learn MLPRegressor. The network is quite small (2 hidden layers of 50 neurons), finding counter example shouldn't be too difficult.
+We load a neural network that was pre-trained with Scikit-learn MLPRegressor. The network is quite small (2 hidden layers of 50 neurons), finding a counter example shouldn't be too difficult.
 
 We also load the first 100 training examples of the MNIST dataset that we saved to avoid having to reload the full data set.
 
@@ -80,7 +80,7 @@ X = load("../../../tests/predictors/MNIST_first100.joblib")
 ## Choose an example and set labels
 
 Now we choose an example. Here we chose arbitrarily example 26.
-We plot, the example and verify it is well predicted by calling the `predict` function.
+We plot, the example and verify if it is well predicted by calling the `predict` function.
 
 ```{code-cell}
 # Choose an example
@@ -109,11 +109,11 @@ wrong_label = sorted_labels[-2]
 
 ## Building the optimization model
 
-Now that all the data is gathered we can proceed to building the optimization model.
+Now that all the data is gathered we can proceed to build the optimization model.
 
 We need to create a matrix variable `x` corresponding to the new input of the neural network we want to compute and a `y` variables for the output of the neural network. Those variables should have respectively the shape of the example we picked and the shape of the return value of `predict_proba`.
 
-We also need additional variables to model the $l1$-norm constraint. Namely, for each pixel in the image, we need to model the absolute difference between $x$ and $\bar x$. We will detail the model below. For now, we create the necessary variables that are another matrix of variable of same shape as `x`.
+We also need additional variables to model the $l1$-norm constraint. Namely, for each pixel in the image, we need to model the absolute difference between $x$ and $\bar x$. We will detail the model below. For now, we create the necessary variables that are another matrix of variables of same shape as `x`.
 
 We also set the objective which is to maximize the difference between the _wrong_ label and the _right_ label.
 
@@ -139,7 +139,7 @@ $$
 
 With $\eta$ denoting the `absdiff` variables.
 
-Those constraints are naturally expressed with Gurobi Matrix API. Note that we need to convert the example which is a `pandas.DataFrame` to `numpy` for the matrix API.
+Those constraints are naturally expressed with Gurobi's Matrix API. Note that we need to convert the example which is a `pandas.DataFrame` to `numpy` for the matrix API.
 
 ```{code-cell}
 # Bound on the distance to example in norm-1
@@ -157,9 +157,9 @@ Note that this case is not as straightforward as others. The reason is that the 
 
 For this reason, we change manually the last layer activation before adding the network to the Gurobi model.
 
-Also, we use the function [add_mlp_regressor_constr](../api/MlpRegressorConstr.rst#gurobi_ml.sklearn.add_mlp_regressor_constr) directly. The network being actually for classification (i.e. of type `MLPClassifier`, the [add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr) function would not handle it automatically.
+Also, we use the function [add_mlp_regressor_constr](../api/MlpRegressorConstr.rst#gurobi_ml.sklearn.add_mlp_regressor_constr) directly. The network being actually for classification (i.e. of type `MLPClassifier`) the [add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr) function would not handle it automatically.
 
-Note that in the output, you should see a warning about adding constraints with very small coefficients that are ignored. Neural-networks often contains very small coefficients in their expression. Any coefficient with an absolute value smaller than $10^-{13}$ is ignored by Gurobi. This may result in slightly different predicted values but should be negligible.
+Note that in the output, you should see a warning about adding constraints with very small coefficients that are ignored. Neural-networks often contain very small coefficients in their expressions. Any coefficient with an absolute value smaller than $10^{-13}$ is ignored by Gurobi. This may result in slightly different predicted values but should be negligible.
 
 ```{code-cell}
 # Change last layer activation to identity
@@ -185,7 +185,7 @@ Solving the adversarial problem, as we formulated it above, doesn't actually req
    - find a feasible solution with a positive objective cost (i.e. a counter-example), or
    - prove that there is no solution of positive cost (i.e. no counter-example in the neighborhood).
 
- We can use Gurobi parameters to limit the optimization to answer those questions: setting BestObjStop (https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop) to 0.0 will stop the optimizer if a counter-example is found, setting BestBdStop (https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop) to 0.0 will stop the optimization if the optimizer has shown there is no counter-example.
+ We can use Gurobi parameters to limit the optimization to answer those questions: setting [BestObjStop](https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop) to 0.0 will stop the optimizer if a counter-example is found, setting [BestBdStop](https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop) to 0.0 will stop the optimization if the optimizer has shown there is no counter-example.
 
 We set the two parameters and optimize.
 
@@ -197,7 +197,7 @@ m.optimize()
 
 ## Results
 
-Normally for the example and $\delta$ we chose a counter example is found. We finish this notebook by plotting the example and printing how it is classified by the neural network.
+Normally, for the example and $\delta$ we chose, a counter example that gets the wrong label is found. We finish this notebook by plotting the counter example and printing how it is classified by the neural network.
 
 ```{code-cell}
 pixels = x.X.reshape((28, 28))
