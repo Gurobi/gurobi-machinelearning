@@ -27,7 +27,8 @@ An approach that has been proposed in the literature is
 to approximate the problematic nonlinear
 functions via neural networks with ReLU activation and use MIP technology
 to solve the constructed approximation
-(see for e.g. <cite data-cite="Henao_Maravelias_2011"></cite>, <cite data-cite="Schweidtmann_2022"></cite>).
+(see for e.g. <cite data-cite="Henao_Maravelias_2011">Heneao Maravelias 2011</cite>, <cite data-cite="Schweidtmann_2022">
+Schweitdmann 2022</cite>).
 This use of neural network can be motivated by their ability to provide a
 universal approximation (see for e.g. {<cite data-cite="Lu_Pu_2017"></cite>).
 This use of ML models to replace complex processes is often referred to as *surrogate models*.
@@ -82,7 +83,7 @@ will help us to approximate the smooth function.
 Besides, `gurobipy`, `numpy` and the appropriate
 `sklearn` objects, we also use `matplotlib` to plot the function, and it's approximation.
 
-```{code-cell}
+```{code-cell} ipython3
 import gurobipy as gp
 import numpy as np
 from gurobipy import GRB
@@ -99,7 +100,7 @@ from gurobi_ml import add_predictor_constr
 
 We define the 2D peak function as a python function.
 
-```{code-cell}
+```{code-cell} ipython3
 def peak2d(xx, yy):
     return (
         3 * (1 - xx) ** 2.0 * np.exp(-(xx**2) - (yy + 1) ** 2)
@@ -113,7 +114,7 @@ function in the region of interest using `numpy`'s `meshgrid` function.
 
 We then plot the function with `matplotlib`
 
-```{code-cell}
+```{code-cell} ipython3
 x = np.arange(-2, 2, 0.01)
 y = np.arange(-2, 2, 0.01)
 xx, yy = np.meshgrid(x, y)
@@ -134,7 +135,7 @@ plt.show()
 To fit a model, we need to reshape our data. We concatenate the values of `x` and `y` in
 an array `X` and make `z` one dimensional.
 
-```{code-cell}
+```{code-cell} ipython3
 X = np.concatenate([xx.ravel().reshape(-1, 1), yy.ravel().reshape(-1, 1)], axis=1)
 z = z.ravel()
 ```
@@ -142,7 +143,7 @@ z = z.ravel()
 To approximate the function, we use a `Pipeline` with polynomial features and
 a neural-network regressor. We do a relatively small neural-network.
 
-```{code-cell}
+```{code-cell} ipython3
 # Run our regression
 layers = [30]*2
 regression = MLPRegressor(hidden_layer_sizes=layers, activation="relu")
@@ -153,7 +154,7 @@ pipe.fit(X=X, y=z)
 To test the accuracy of the approximation, we take a random sample of points, and
 we print the $R^2$ value and the maximal error.
 
-```{code-cell}
+```{code-cell} ipython3
 X_test = np.random.random((100, 2)) * 4 - 2
 
 r2_score = metrics.r2_score(peak2d(X_test[:, 0], X_test[:, 1]), pipe.predict(X_test))
@@ -164,7 +165,7 @@ print("R2 error {}, maximal error {}".format(r2_score, max_error))
 While the $R^2$ value is good, the maximal error is quite high. For the purpose of this
 example we still deem it acceptable. We plot the function.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 # Plot the surface.
 surf = ax.plot_surface(
@@ -191,7 +192,7 @@ of $y$.
 Note that in this simple example, we don't use matrix variables but regular Gurobi variables
 instead.
 
-```{code-cell}
+```{code-cell} ipython3
 m = gp.Model()
 
 x = m.addVars(2, lb=-2, ub=2, name="x")
@@ -209,7 +210,7 @@ Now call `optimize`. Since we use polynomial features the resulting model is a
 non-convex quadratic problem. In Gurobi, we need to set the parameter `NonConex`
 to 2 to be able to solve it.
 
-```{code-cell}
+```{code-cell} ipython3
 m.Params.TimeLimit = 20
 m.Params.MIPGap = 0.1
 m.Params.NonConvex = 2
@@ -219,14 +220,14 @@ m.optimize()
 
 After solving the model, we check the error in the estimate of the Gurobi solution.
 
-```{code-cell}
+```{code-cell} ipython3
 print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error()))))
 ```
 
 Finally, we look at the solution and the objective value
 found.
 
-```{code-cell}
+```{code-cell} ipython3
 print(f"solution point of the approximated problem ({x[0].X:.4}, {x[1].X:.4})" +
         f"Objective value {m.ObjVal}.")
 print(f"Function value at the solution point {peak2d(x[0].X, x[1].X)} error {abs(peak2d(x[0].X, x[1].X) - m.ObjVal)}.")
