@@ -7,9 +7,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.14.1
 kernelspec:
-  display_name: gurobi-ml
+  display_name: Python 3 (ipykernel)
   language: python
-  name: Python3
+  name: python3
 ---
 
 # Surrogate Models
@@ -19,7 +19,6 @@ that can result either in highly non-linear functions or functions
 defined by a simulation process.
 In those contexts, optimization solvers often struggle.
 The reason may be that relaxations
-
 of the nonlinear functions are not good enough to make the solver prove an
 acceptable bound in a reasonable amount of time. Another issue may be that
 the solver is not able to represent the functions.
@@ -27,54 +26,60 @@ the solver is not able to represent the functions.
 An approach that has been proposed in the literature is
 to approximate the problematic nonlinear
 functions via neural networks with ReLU activation and use MIP technology
-to solve the constructed approximation efficiently
+to solve the constructed approximation
 (see for e.g. <cite data-cite="Henao_Maravelias_2011"></cite>, <cite data-cite="Schweidtmann_2022"></cite>).
-This use of neural network can be motivated by their ability to provide an
-universal approximation of function (see for e.g. {<cite data-cite="Lu_Pu_2017"></cite>).
-This use of ML models to replace complex processes is often referred to as surrogate models.
+This use of neural network can be motivated by their ability to provide a
+universal approximation (see for e.g. {<cite data-cite="Lu_Pu_2017"></cite>).
+This use of ML models to replace complex processes is often referred to as *surrogate models*.
 
-In the following example, we show how to
-approximate a nonlinear function via Scikit-learn `MLPRegressor` and then to solve an
+In the following example, we
+approximate a nonlinear function via `Scikit-learn` `MLPRegressor` and then to solve an
 optimization problem that uses the approximation of the nonlinear function with Gurobi.
 
-The purpose of this example is solely illustrative and doesn't relate to an
-application.
+The purpose of this example is solely illustrative and doesn't
+relate to any particular application.
 
-The function we approximate is the 2D peak function which can be found on
-many mathematical company logos and book covers. The function is given as
+The function we approximate is the [2D peaks function](https://www.mathworks.com/help/matlab/ref/peaks.html#mw_46aeee28-390e-4373-aa47-e4a52447fc85).
+
+The function is given as
 
 $$
-\begin{multline}
-f(x,y) = 3 \cdot (1-x)^2 \cdot \exp(-x^2 - (y+1)^2) - \\
-         10 \cdot (\frac{x}{5} - x^3 - y^5) \cdot \exp(-x^2 - y^2) - \\
-         \frac{1}{3} \cdot \exp(-(x+1)^2 - y^2).
-\end{multline}
+\begin{aligned}
+f(x,y) = & 3 \cdot (1-x)^2 \cdot \exp(-x^2 - (y+1)^2) - \\
+         & 10 \cdot (\frac{x}{5} - x^3 - y^5) \cdot \exp(-x^2 - y^2) - \\
+         & \frac{1}{3} \cdot \exp(-(x+1)^2 - y^2).
+\end{aligned}
 $$
 
-In this example, we want to find the minimum of $f$ over a small interval.
+In this example, we want to find the minimum of $f$ over the interval $[-2, 2]$.
 
 $$
 \begin{aligned}
 &\min_{x,y} f(x,y)\\
 &\text{s.t.}\\
-&x,y \in [-1,1].
+&x,y \in [-2,2].
 \end{aligned}
 $$
 
-To find this minimum of $f$, we approximate $f(x,y)$ through a neural
+The global minimum of this problem can be found numerically
+to have value $-6.55113$ at the point $(0.2283, -1.6256)$
+(see for example [here](https://www.math.uwaterloo.ca/~hwolkowi/henry/reports/talks.d/t09talks.d/09waterloomatlab.d/optimTipsWebinar/html/optimTipsTricksWalkthrough.html#18)).
+
+Here to find this minimum of $f$, we approximate $f(x,y)$ through a neural
 network function $g(x,y)$ to obtain a MIP and solve
 
 $$
 \begin{aligned}
 &\min_{x,y} g(x,y) \approx f(x,y)\\
 &\text{s.t.}\\
-&x,y \in [-1,1].
+&x,y \in [-2,2].
 \end{aligned}
 $$
 
 First import the necessary packages. Before applying the neural network,
 we do a preprocessing to extract polynomial features of degree 2. Hopefully this
-helps to approximate the smooth function. Besides, `gurobipy`, `numpy` and the appropriate
+will help us to approximate the smooth function.
+Besides, `gurobipy`, `numpy` and the appropriate
 `sklearn` objects, we also use `matplotlib` to plot the function, and it's approximation.
 
 ```{code-cell}
@@ -109,8 +114,8 @@ function in the region of interest using `numpy`'s `meshgrid` function.
 We then plot the function with `matplotlib`
 
 ```{code-cell}
-x = np.arange(-1, 1, 0.01)
-y = np.arange(-1, 1, 0.01)
+x = np.arange(-2, 2, 0.01)
+y = np.arange(-2, 2, 0.01)
 xx, yy = np.meshgrid(x, y)
 z = peak2d(xx, yy)
 
@@ -139,7 +144,7 @@ a neural-network regressor. We do a relatively small neural-network.
 
 ```{code-cell}
 # Run our regression
-layers = [30, 30, 30]
+layers = [30]*2
 regression = MLPRegressor(hidden_layer_sizes=layers, activation="relu")
 pipe = make_pipeline(PolynomialFeatures(), regression)
 pipe.fit(X=X, y=z)
@@ -149,7 +154,7 @@ To test the accuracy of the approximation, we take a random sample of points, an
 we print the $R^2$ value and the maximal error.
 
 ```{code-cell}
-X_test = np.random.random((100, 2)) * 2 - 1
+X_test = np.random.random((100, 2)) * 4 - 2
 
 r2_score = metrics.r2_score(peak2d(X_test[:, 0], X_test[:, 1]), pipe.predict(X_test))
 max_error = metrics.max_error(peak2d(X_test[:, 0], X_test[:, 1]), pipe.predict(X_test))
@@ -189,7 +194,7 @@ instead.
 ```{code-cell}
 m = gp.Model()
 
-x = m.addVars(2, lb=-1, ub=1, name="x")
+x = m.addVars(2, lb=-2, ub=2, name="x")
 y = m.addVar(lb=-GRB.INFINITY, name="y")
 
 m.setObjective(y, gp.GRB.MINIMIZE)
@@ -227,6 +232,7 @@ print(f"solution point of the approximated problem ({x[0].X:.4}, {x[1].X:.4})" +
 print(f"Function value at the solution point {peak2d(x[0].X, x[1].X)} error {abs(peak2d(x[0].X, x[1].X) - m.ObjVal)}.")
 ```
 
-The difference between the function and the approximation at the computed solution point is noticeable. Training a larger network should result in a better approximation. Depending on the use case this might be deemed acceptable.
+The difference between the function and the approximation at the computed solution point is noticeable, but the point we found is reasonably close to the actual global minima.
+Depending on the use case this might be deemed acceptable. Of course, training a larger network should result in a better approximation.
 
 Copyright © 2020 Gurobi Optimization, LLC
