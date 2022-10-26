@@ -19,10 +19,10 @@ In this example, we show how to reproduce the model of student enrollment from
 
 This model was developed in the context of the development of
 [Janos](https://github.com/INFORMSJoC/2020.1023), a toolkit similar to
-Gurobi Machine Learning to integrate ML models and Mathematical optimization.
+Gurobi Machine Learning to integrate ML models and Mathematical Optimization.
 
-In this example, we illustrate in particular how to use the logistic regression and changing parameters
-to tune the piece wise linear approximation of the logistic function.
+In this example, we illustrate in particular how to use the logistic regression and change parameters
+to tune the piecewise-linear approximation of the logistic function.
 We also show how to deal with fixed features in the optimization model using pandas data frames.
 
 In this model, data of students admissions in a college is used to predict the probability
@@ -31,7 +31,7 @@ that a student enrolls to the college.
 The data has 3 features:
 the SAT and GPA scores of each student,
 and the scholarship (or merit) that was offered to each student.
-Finally, it is known if each student decided to join or not the college.
+Finally, it is known if each student decided to join the college or not.
 
 Based on this data a logistic regression is trained to predict the probability that
 a student joins the college.
@@ -42,13 +42,13 @@ proposes the following student enrollment
 problem. The Admission Office has data for SAT and GPA scores of the admitted students for
 the incoming class, and they would want to offer scholarships to students with the goal of
 maximizing the expected number of students that enroll in the college. There is a total
-of $n$ student that are admitted. The maximal
+of $n$ students that are admitted. The maximal
 budget for the sum of all scholarships offered is $0.2 n \, \text{K\$}$ and each student can be offered a
-scholarship of at most $2.5 \, K\$$.
+scholarship of at most $2.5 \, \text{K\$}$.
 
 This problem can be expressed as a mathematical optimization problem as follows.
 Two vectors of decision variables $x$ and $y$ of dimension $n$ are used to model
-respectively the scholarship offered to each student in $K\$$ and the probability
+respectively the scholarship offered to each student in $\text{K\$}$ and the probability
 that they join.
 Denoting by $g$ the prediction function for the probability of the logistic regression we then have for each student $i$:
 
@@ -75,7 +75,7 @@ $$
 
 Note that in this example differently to
 <cite data-cite="JANOS">Bergman et.al. (2020)</cite>
-in that we scale the features for the regression.
+we scale the features for the regression.
 Also, to fit in Gurobi's limited size license we only consider the problem where $n=250$.
 
 We note also that the model may differ from the objectives of Admission Offices and
@@ -216,7 +216,7 @@ We can now optimize the problem.
 m.optimize()
 ```
 
-Remember that for the logistic regression, Gurobi does a piece wise linear approximation of the logistic function. We can therefore get some significant errors when comparing the results of the Gurobi model with what is predicted by the regression.
+Remember that for the logistic regression, Gurobi does a piecewise-linear approximation of the logistic function. We can therefore get some significant errors when comparing the results of the Gurobi model with what is predicted by the regression.
 
 We print the error. Here we need to use `get_error_proba`.
 
@@ -225,13 +225,13 @@ print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_co
 ```
 
 The error we get might be considered too large, but we can use Gurobi parameters to
-tune the piece wise linear approximation made by Gurobi (at the expense of a harder models).
+tune the piecewise-linear approximation made by Gurobi (at the expense of a harder models).
 
 The specific parameters are explained in the documentation of
 [Functions Constraints](https://www.gurobi.com/documentation/9.1/refman/constraints.html#subsubsection:GenConstrFunction)
 in Gurobi's manual.
 
-We can pass those parameters, to the [add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr) function in the form of a dictionary with the keyword
+We can pass those parameters to the [add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr) function in the form of a dictionary with the keyword
 parameter `gc_attributes`.
 
 Now we want a more precise solution, so we remove the current constraint, add a new one that does a tighter approximation and resolve the model.
