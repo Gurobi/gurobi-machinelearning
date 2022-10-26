@@ -29,7 +29,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
     def __init__(self, grbmodel, pipeline, input_vars, output_vars=None, **kwargs):
         self._steps = []
         self._kwargs = kwargs
-        SKgetter.__init__(self, pipeline)
+        SKgetter.__init__(self, pipeline, **kwargs)
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
     def _mip_model(self):

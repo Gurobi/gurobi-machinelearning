@@ -25,6 +25,7 @@ Also does :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
 
 import numpy as np
 
+from ..exceptions import NoModel, ParameterError
 from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 
@@ -39,8 +40,8 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, **kwargs):
-        SKgetter.__init__(self, predictor)
+    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, output_type="", **kwargs):
+        SKgetter.__init__(self, predictor, output_type, **kwargs)
         AbstractPredictorConstr.__init__(
             self,
             grbmodel,
@@ -86,11 +87,26 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
 
     """
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, pwl_attributes=None, **kwargs):
+    def __init__(
+        self,
+        grbmodel,
+        predictor,
+        input_vars,
+        output_vars=None,
+        output_type="classification",
+        epsilon=0.0,
+        pwl_attributes=None,
+        **kwargs,
+    ):
+        if len(predictor.classes_) > 2:
+            raise NoModel("Logistic regression only supported for two classes")
         if pwl_attributes is None:
             self.attributes = self.default_pwl_attributes()
         else:
             self.attributes = pwl_attributes
+        if output_type not in ("classification", "probability"):
+            raise ParameterError("output_type should be either 'classification' or 'regression'")
+        self.epsilon = epsilon
 
         BaseSKlearnRegressionConstr.__init__(
             self,
@@ -98,6 +114,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             predictor,
             input_vars,
             output_vars,
+            output_type,
             **kwargs,
         )
 
@@ -115,12 +132,21 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         outputvars = self._output
         self._create_output_vars(self._input, name="affine_trans")
         affinevars = self._output
+        if self.output_type == "classification":
+            # For classification we need an extra binary variable
+            self._create_output_vars(self._input, name="log_result")
+            log_result = self._output
+            self.model.addConstr(log_result >= affinevars - 0.5 + self.epsilon)
+            self.model.addConstr(log_result <= affinevars + 0.5)
+        else:
+            log_result = outputvars
+
         self.add_regression_constr()
         self._output = outputvars
         for index in np.ndindex(outputvars.shape):
             gc = self.model.addGenConstrLogistic(
                 affinevars[index],
-                outputvars[index],
+                log_result[index],
                 name=_name(index, "logistic"),
             )
         numgc = self.model.NumGenConstrs

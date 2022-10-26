@@ -34,6 +34,11 @@ class ModelingError(Exception):
         super().__init__(message)
 
 
+class ParameterError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
 class InternalError(Exception):
     def __init__(self, message):
         super().__init__(message)

@@ -23,7 +23,7 @@ class TestFixedModel(unittest.TestCase):
     """Test that if we fix the input of the predictor the feasible solution from
     Gurobi is identical to what the predict function would return."""
 
-    def fixed_model(self, predictor, examples, nonconvex, isproba=False):
+    def fixed_model(self, predictor, examples, nonconvex, output_type=""):
         params = {
             "OutputFlag": 0,
             "NonConvex": 2,
@@ -37,7 +37,7 @@ class TestFixedModel(unittest.TestCase):
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
             x = gpm.addMVar(examples.shape, lb=examples - 1e-4, ub=examples + 1e-4)
 
-            pred_constr = add_predictor_constr(gpm, predictor, x, epsilon=1e-5, float_type=np.float32)
+            pred_constr = add_predictor_constr(gpm, predictor, x, epsilon=1e-5, float_type=np.float32, output_type=output_type)
 
             y = pred_constr.output
             with self.assertRaises(NoSolution):
@@ -63,15 +63,9 @@ class TestFixedModel(unittest.TestCase):
                 warnings.warn(UserWarning(f"predictor {predictor}"))
             tol = max(tol, vio)
             tol *= np.max(np.abs(y.X))
-            if isproba:
-                abserror = np.abs(pred_constr.get_error_proba()).astype(float)
-            else:
-                abserror = np.abs(pred_constr.get_error()).astype(float)
+            abserror = np.abs(pred_constr.get_error()).astype(float)
             if (abserror > tol).any():
-                if isproba:
-                    print(f"Error: {y.X} != {predictor.predict_proba(examples)}")
-                else:
-                    print(f"Error: {y.X} != {predictor.predict(examples)}")
+                print(f"Error: {y.X} != {predictor.predict(examples)}")
 
             self.assertLessEqual(np.max(abserror), tol)
 
@@ -166,8 +160,8 @@ class TestFixedModel(unittest.TestCase):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", True)
-            self.do_one_case(onecase, X, 6, "pairs", True)
+            self.do_one_case(onecase, X, 5, "all", "probability")
+            self.do_one_case(onecase, X, 6, "pairs", "probability")
 
 
 class TestReLU(unittest.TestCase):
