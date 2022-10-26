@@ -232,7 +232,7 @@ The specific parameters are explained in the documentation of
 in Gurobi's manual.
 
 We can pass those parameters to the [add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr) function in the form of a dictionary with the keyword
-parameter `gc_attributes`.
+parameter `pwd_attributes`.
 
 Now we want a more precise solution, so we remove the current constraint, add a new one that does a tighter approximation and resolve the model.
 

@@ -197,7 +197,7 @@ m.optimize()
 
 ## Results
 
-Normally for the example and $\delta$ we chose the first counter example found. We finish this notebook by plotting the counter example and printing how it is classified by the neural network.
+Normally, for the example and $\delta$ we chose, a counter example that gets the wrong label is found. We finish this notebook by plotting the counter example and printing how it is classified by the neural network.
 
 ```{code-cell}
 pixels = x.X.reshape((28, 28))
