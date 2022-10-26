@@ -21,8 +21,9 @@ This model was developed in the context of the development of
 [Janos](https://github.com/INFORMSJoC/2020.1023), a toolkit similar to
 Gurobi Machine Learning to integrate ML models and Mathematical Optimization.
 
-In this example, we illustrate in particular how to use the logistic regression and change parameters
-to tune the piecewise-linear approximation of the logistic function.
+This example, we illustrate in particular how to use the logistic regression and tune
+the piecewise-linear approximation of the logistic function.
+
 We also show how to deal with fixed features in the optimization model using pandas data frames.
 
 In this model, data of students admissions in a college is used to predict the probability

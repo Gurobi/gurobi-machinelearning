@@ -7,70 +7,74 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.14.1
 kernelspec:
-  display_name: gurobi-ml
+  display_name: Python 3 (ipykernel)
   language: python
-  name: Python3
+  name: python3
 ---
 
-# Surrogate functions
+# Surrogate Models
 
-Extra required packages:
-- matplotlib
-
-<cite data-cite="Henao_Maravelias_2011"></cite>
-<cite data-cite="Lu_Pu_2017"></cite>
-<cite data-cite="Henao_Maravelias_2011"></cite>
-Optimization solvers often struggle to prove a global optimum of a model when
-it holds highly nonlinear functions. The reason is often that relaxations
+Some industrial applications require modeling complex processes
+that can result either in highly non-linear functions or functions
+defined by a simulation process.
+In those contexts, optimization solvers often struggle.
+The reason may be that relaxations
 of the nonlinear functions are not good enough to make the solver prove an
-acceptable bound in a reasonable amount of time. Another issue might be that a
-given solver does not support nonlinear functions, but only accepts linear ones.
+acceptable bound in a reasonable amount of time. Another issue may be that
+the solver is not able to represent the functions.
 
-One possible solution for this problem is to approximate the problematic nonlinear
-functions via neural networks and use MIP technology to solve the constructed
-approximation efficiently. A piecewise-linear approximation of the nonlinear
-function of interest might be considered but usually gets more expensive and hard to
-model with increasing function dimensions. In the following example, we show how to
-approximate a nonlinear function via sklearn's MLPRegressor and accordingly solve the
-neural network approximation of the nonlinear function with Gurobi.
+An approach that has been proposed in the literature is
+to approximate the problematic nonlinear
+functions via neural networks with ReLU activation and use MIP technology
+to solve the constructed approximation
+(see e.g. <cite data-cite="Henao_Maravelias_2011">[Heneao Maravelias 2011](https://doi.org/https://doi.org/10.1002/aic.12341)</cite>, <cite data-cite="Schweidtmann_2022">
+[Schweitdmann et.al. 2022](https://arxiv.org/abs/2207.12722)</cite>).
+This use of neural network can be motivated by their ability to provide a
+universal approximation (see e.g. <cite data-cite="Lu_Pu_2017">[Lu et.al. 2017](https://proceedings.neurips.cc/paper/2017/file/32cbf687880eb1674a07bf717761dd3a-Paper.pdf)</cite>).
+This use of ML models to replace complex processes is often referred to as *surrogate models*.
 
-The purpose of this example is solely to present the idea of approximating
-any given function via neural networks and solving the approximation through MIP
-technology.
+In the following example, we
+approximate a nonlinear function via `Scikit-learn` `MLPRegressor` and then solve an
+optimization problem that uses the approximation of the nonlinear function with Gurobi.
 
-The function we will approximate is the 2D peak function which can be found on
-many mathematical company logos and book covers. The function is given as
+The purpose of this example is solely illustrative and doesn't
+relate to any particular application.
 
-$$
-f(x,y) = 3 \cdot (1-x)^2 \cdot \exp(-x^2 - (y+1)^2) - 10
-         \cdot (\frac{x}{5} - x^3 - y^5) \cdot \exp(-x^2 - y^2) -
-         \frac{1}{3} \cdot \exp(-(x+1)^2 - y^2).
-$$
+The function we approximate is the [2D peaks function](https://www.mathworks.com/help/matlab/ref/peaks.html#mw_46aeee28-390e-4373-aa47-e4a52447fc85).
 
-In this example, we will search for the global minimum of %f% over a small interval.
+The function is given as
 
 $$
 \begin{aligned}
-&\min_{x,y} f(x,y)\\
-&\text{s.t.}\\
-&x,y \in [-1,1]
+f(x) = & 3 \cdot (1-x_1)^2 \cdot \exp(-x_1^2 - (x_2+1)^2) - \\
+         & 10 \cdot (\frac{x_1}{5} - x_1^3 - x_2^5) \cdot \exp(-x_1^2 - x_2^2) - \\
+         & \frac{1}{3} \cdot \exp(-(x_1+1)^2 - x_2^2).
 \end{aligned}
 $$
 
-To find the global minimum of $f$, we will approximate $f(x,y)$ through a neural
-network function $g(x,y)$ to obtain a MIP and solve
+In this example, we want to find the minimum of $f$ over the interval $[-2, 2]$:
 
 $$
-\begin{aligned}
-&\min_{x,y} g(x,y) \approx f(x,y)\\
-&\text{s.t.}\\
-&x,y \in [-1,1]
-\end{aligned}
+y = \min \{f(x) : x \in [-2,2]^2\}.
 $$
 
-with Gurobi.
+The [global minimum of this problem can be found numerically](<https://www.math.uwaterloo.ca/~hwolkowi/henry/reports/talks.d/t09talks.d/09waterloomatlab.d/optimTipsWebinar/html/optimTipsTricksWalkthrough.html#18>)
+to have value $-6.55113$ at the point $(0.2283, -1.6256)$.
 
-```{code-cell}
+Here to find this minimum of $f$, we approximate $f(x)$ through a neural
+network function $g(x)$ to obtain a MIP and solve
+
+$$
+\hat y = \min \{g(x) : x \in [-2,2]^2\} \approx y.
+$$
+
+First import the necessary packages. Before applying the neural network,
+we do a preprocessing to extract polynomial features of degree 2. Hopefully this
+will help us to approximate the smooth function.
+Besides, `gurobipy`, `numpy` and the appropriate
+`sklearn` objects, we also use `matplotlib` to plot the function, and it's approximation.
+
+```{code-cell} ipython3
 import gurobipy as gp
 import numpy as np
 from gurobipy import GRB
@@ -80,31 +84,34 @@ from sklearn import metrics
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
-from gurobi_ml.sklearn import PipelineConstr
+from gurobi_ml import add_predictor_constr
 ```
 
-##### Define the nonlinear function of interest
+## Define the nonlinear function of interest
 
-```{code-cell}
-def peak2d(xx, yy):
+We define the 2D peak function as a python function.
+
+```{code-cell} ipython3
+def peak2d(x1, x2):
     return (
-        3 * (1 - xx) ** 2.0 * np.exp(-(xx**2) - (yy + 1) ** 2)
-        - 10 * (xx / 5 - xx**3 - yy**5) * np.exp(-(xx**2) - yy**2)
-        - 1 / 3 * np.exp(-((xx + 1) ** 2) - yy**2)
+        3 * (1 - x1) ** 2.0 * np.exp(-(x1**2) - (x2 + 1) ** 2)
+        - 10 * (x1 / 5 - x1**3 - x2**5) * np.exp(-(x1**2) - x2**2)
+        - 1 / 3 * np.exp(-((x1 + 1) ** 2) - x2**2)
     )
 ```
 
-```{code-cell}
-x = np.arange(-1, 1, 0.01)
-y = np.arange(-1, 1, 0.01)
-xx, yy = np.meshgrid(x, y)
-z = peak2d(xx, yy)
-```
+To train the neural network, we make a uniform sample of the domain of the
+function in the region of interest using `numpy`'s `arrange` function.
 
-```{code-cell}
+We then plot the function with `matplotlib`.
+
+```{code-cell} ipython3
+x1, x2 = np.meshgrid(np.arange(-2, 2, 0.01), np.arange(-2, 2, 0.01))
+y = peak2d(x1, x2)
+
 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 # Plot the surface.
-surf = ax.plot_surface(xx, yy, z, cmap=cm.coolwarm,
+surf = ax.plot_surface(x1, x2, y, cmap=cm.coolwarm,
                        linewidth=0.01, antialiased=False)
 # Add a color bar which maps values to colors.
 fig.colorbar(surf, shrink=0.5, aspect=5)
@@ -112,42 +119,48 @@ fig.colorbar(surf, shrink=0.5, aspect=5)
 plt.show()
 ```
 
-```{code-cell}
-X = np.concatenate([xx.ravel().reshape(-1, 1), yy.ravel().reshape(-1, 1)], axis=1)
-y = z.ravel()
+## Approximate the function
+
+To fit a model, we need to reshape our data. We concatenate the values of `x1` and `x2` in
+an array `X` and make `y` one dimensional.
+
+```{code-cell} ipython3
+X = np.concatenate([x1.ravel().reshape(-1, 1), x2.ravel().reshape(-1, 1)], axis=1)
+y = y.ravel()
 ```
 
-##### Approximate the function and define a test set
+To approximate the function, we use a `Pipeline` with polynomial features and
+a neural-network regressor. We do a relatively small neural-network.
 
-```{code-cell}
+```{code-cell} ipython3
 # Run our regression
-layers = [30, 30, 30]
+layers = [30]*2
 regression = MLPRegressor(hidden_layer_sizes=layers, activation="relu")
 pipe = make_pipeline(PolynomialFeatures(), regression)
 pipe.fit(X=X, y=y)
 ```
 
-```{code-cell}
-X_test = np.random.random((100, 2)) * 2 - 1
+To test the accuracy of the approximation, we take a random sample of points, and
+we print the $R^2$ value and the maximal error.
+
+```{code-cell} ipython3
+X_test = np.random.random((100, 2)) * 4 - 2
+
+r2_score = metrics.r2_score(peak2d(X_test[:, 0], X_test[:, 1]), pipe.predict(X_test))
+max_error = metrics.max_error(peak2d(X_test[:, 0], X_test[:, 1]), pipe.predict(X_test))
+print("R2 error {}, maximal error {}".format(r2_score, max_error))
 ```
 
-```{code-cell}
-metrics.r2_score(peak2d(X_test[:, 0], X_test[:, 1]), pipe.predict(X_test))
-```
+While the $R^2$ value is good, the maximal error is quite high. For the purpose of this
+example we still deem it acceptable. We plot the function.
 
-```{code-cell}
-metrics.max_error(peak2d(X_test[:, 0], X_test[:, 1]), pipe.predict(X_test))
-```
-
-The maximum error is quite high but still acceptable for the purpose of this example.
-
-```{code-cell}
+```{code-cell} ipython3
 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 # Plot the surface.
 surf = ax.plot_surface(
-    xx,
-    yy,
-    pipe.predict(X).reshape(xx.shape),
+    x1,
+    x2,
+    pipe.predict(X).reshape(x1.shape),
     cmap=cm.coolwarm,
     linewidth=0.01,
     antialiased=False,
@@ -158,53 +171,60 @@ fig.colorbar(surf, shrink=0.5, aspect=5)
 plt.show()
 ```
 
-Optically, the approximation looks very close to the original function.
+Visually, the approximation looks close enough to the original function.
 
+## Build and Solve the Optimization Model
 
-##### Construct the optimization model
+We now turn to the optimization model. For this model we want to find the minimal value
+of `y_approx` which is the approximation given by our pipeline on the interval.
 
-```{code-cell}
-optfeat = [0, 1]
-```
+Note that in this simple example, we don't use matrix variables but regular Gurobi variables
+instead.
 
-```{code-cell}
-# Start with classical part of the model
+```{code-cell} ipython3
 m = gp.Model()
 
-x = m.addMVar((len(optfeat)), lb=-1, ub=1, name="x")
-y = m.addVar(lb=-GRB.INFINITY, name="y")
+x = m.addVars(2, lb=-2, ub=2, name="x")
+y_approx = m.addVar(lb=-GRB.INFINITY, name="y")
 
-m.setObjective(y, gp.GRB.MINIMIZE)
+m.setObjective(y_approx, gp.GRB.MINIMIZE)
 
-# create transforms to turn scikit-learn pipeline into Gurobi constraints
-PipelineConstr(m, pipe, x, y)
+# add "surrogate constraint"
+pred_constr = add_predictor_constr(m, pipe, x, y_approx)
+
+pred_constr.print_stats()
 ```
 
-##### Finally optimize the model
+Now call `optimize`. Since we use polynomial features the resulting model is a
+non-convex quadratic problem. In Gurobi, we need to set the parameter `NonConvex`
+to 2 to be able to solve it.
 
-```{code-cell}
+```{code-cell} ipython3
 m.Params.TimeLimit = 20
 m.Params.MIPGap = 0.1
 m.Params.NonConvex = 2
-```
 
-```{code-cell}
 m.optimize()
 ```
 
-```{code-cell}
-m.NumVars
+After solving the model, we check the error in the estimate of the Gurobi solution.
+
+```{code-cell} ipython3
+print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error()))))
 ```
 
-##### Look at the solution and objective value
+Finally, we look at the solution and the objective value
+found.
 
-```{code-cell}
-print(x.X) # solution point of the approximated problem
-print(m.ObjVal) # objective value of the approximated problem
-print(peak2d(x[0].X, x[1].X)) # function value at the solution point of the approximated problem
-print(abs(peak2d(x[0].X, x[1].X) - m.ObjVal)) # error of the approximation
+```{code-cell} ipython3
+print(f"solution point of the approximated problem ({x[0].X:.4}, {x[1].X:.4}), " +
+        f"objective value {m.ObjVal}.")
+print(f"Function value at the solution point {peak2d(x[0].X, x[1].X)} error {abs(peak2d(x[0].X, x[1].X) - m.ObjVal)}.")
 ```
 
-The difference between the function and the approximation at the computed solution point is noticable but acceptable given the big maximum error of the neural network approximation.
+The difference between the function and the approximation at the computed solution point is noticeable, but the point we found is reasonably close to the actual global minimum.
+Depending on the use case this might be deemed acceptable. Of course, training a larger network should result in a better approximation.
+
++++
 
 Copyright © 2020 Gurobi Optimization, LLC
