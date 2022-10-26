@@ -23,6 +23,7 @@ All linear models should work:
 Also does :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
 """
 
+import gurobipy as gp
 import numpy as np
 
 from ..exceptions import NoModel, ParameterError
@@ -132,16 +133,19 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         outputvars = self._output
         self._create_output_vars(self._input, name="affine_trans")
         affinevars = self._output
+        self.add_regression_constr()
         if self.output_type == "classification":
             # For classification we need an extra binary variable
             self._create_output_vars(self._input, name="log_result")
             log_result = self._output
-            self.model.addConstr(log_result >= affinevars - 0.5 + self.epsilon)
-            self.model.addConstr(log_result <= affinevars + 0.5)
+            self.model.addConstr(outputvars >= log_result - 0.5 + self.epsilon)
+            self.model.addConstr(outputvars <= log_result + 0.5)
+            outputvars.VType = gp.GRB.BINARY
+            outputvars.LB = 0.0
+            outputvars.UB = 1.0
         else:
             log_result = outputvars
 
-        self.add_regression_constr()
         self._output = outputvars
         for index in np.ndindex(outputvars.shape):
             gc = self.model.addGenConstrLogistic(
@@ -154,6 +158,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         for gc in self.model.getGenConstrs()[numgc:]:
             for attr, val in self.attributes.items():
                 gc.setAttr(attr, val)
+        self.model.update()
 
 
 def add_linear_regression_constr(model, linear_regression, input_vars, output_vars=None, **kwargs):

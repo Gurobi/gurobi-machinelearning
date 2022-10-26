@@ -147,7 +147,7 @@ class TestFixedModel(unittest.TestCase):
         self.do_one_case(onecase, X, 5, "all")
         self.do_one_case(onecase, X, 6, "pairs")
 
-    def test_iris(self):
+    def test_iris_proba(self):
         data = datasets.load_iris()
 
         X = data.data
@@ -162,6 +162,22 @@ class TestFixedModel(unittest.TestCase):
             onecase = cases.get_case(regressor)
             self.do_one_case(onecase, X, 5, "all", "probability")
             self.do_one_case(onecase, X, 6, "pairs", "probability")
+
+    def test_iris_clf(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        y = data.target
+
+        # Make it a simple classification
+        X = X[y != 2]
+        y = y[y != 2]
+        cases = IrisCases()
+
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            self.do_one_case(onecase, X, 5, "all", "classification")
+            self.do_one_case(onecase, X, 6, "pairs", "classification")
 
 
 class TestReLU(unittest.TestCase):
