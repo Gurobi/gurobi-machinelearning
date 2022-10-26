@@ -1,8 +1,10 @@
+Basics
+======
 
 Introduction
-============
+------------
 
-Gurobi Machine Learning is a Python package to embed *trained* regression models in
+Gurobi Machine Learning is an open-source Python package to embed *trained* regression models in
 in a
 `gurobipy model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_
 to be solved with the `Gurobi <https://www.gurobi.com>`_ solver.
@@ -17,16 +19,18 @@ The aim of the package is to:
    #. Allow to easily compare the effect of using different regression models in the same mathematical optimization application.
    #. Improve the algorithmic performance of Gurobi on those models.
 
-The package currently supports various `scikit-learn <https://scikit-learn.org/stable/>`_ objects and has limited support
-for `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_ neural networks with ReLU activation.
+The package currently supports various `scikit-learn <https://scikit-learn.org/stable/>`_ objects.
+It has limited support for the `Keras <https://keras.io/>`_ API of `TensorFlow <https://www.tensorflow.org/>`
+and `PyTorch <https://pytorch.org/>`_. Only neural networks with ReLU activation can be used with these
+two packages.
 
-It is actively developed and users are encouraged to :doc:`contact us <meta-contactus>` if they have applications where they use a regression model that is currently
+The package is actively developed and users are encouraged to :doc:`contact us <meta-contactus>` if they have applications where they use a regression model that is currently
 not available.
 
 Below, we give basic installation and usage instructions.
 
 Install
-=======
+-------
 
 We encourage to install the package via pip (or add it to your `requirements.txt` file):
 
@@ -76,7 +80,7 @@ We encourage to install the package via pip (or add it to your `requirements.txt
 
 
 Usage
-=====
+-----
 
 The main function provided by the package is :py:func:`gurobi_ml.add_predictor_constr`.
 It takes as arguments: a `gurobipy model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_,

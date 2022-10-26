@@ -32,7 +32,7 @@ repos:
         args: ["--count", "--select=E9,F63,F7,F82", "--show-source", "--statistics"]
 
     - repo: https://github.com/mwouts/jupytext
-      rev: v1.14.0
+      rev: v1.14.1
       hooks:
       - id: jupytext
         args: ["--sync"]
@@ -45,3 +45,11 @@ repos:
         language: python
         types: [python]
         args: ["--line-length=127"]
+
+    - repo: local
+      hooks:
+        - id: license_embedded
+          name: license_embedded
+          entry: python3 .github/hooks/license_embedded.py
+          language: system
+          files: (src/.*\.py|.*\.ipynb)

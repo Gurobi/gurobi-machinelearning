@@ -18,7 +18,6 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script src="../_static/design-tabs.js"></script>
@@ -49,32 +48,23 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Start</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#install">Install</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html#usage">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Simple Usage Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-introduction.html">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../firststeps-simple-example.html">Usage Example</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Machine Learning Models</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../mlm-supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mlm-examples.html">Examples</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Meta</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../meta-api.html">API Reference manual</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="AbstractPredictorConstr.html">Generic Predictor Function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../sklearn.html">Scikit-learn regression models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="KerasConstr.html">Keras Model</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Pytorch Sequential</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#gurobi_ml.torch.add_sequential_constr"><code class="docutils literal notranslate"><span class="pre">add_sequential_constr()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr"><code class="docutils literal notranslate"><span class="pre">SequentialConstr</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gurobi_ml.torch.SequentialConstr.get_error"><code class="docutils literal notranslate"><span class="pre">SequentialConstr.get_error()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Pytorch Sequential</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
@@ -140,7 +130,7 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grbmodel</strong> (<a class="reference external" href="https://www.gurobi.com/documentation/9.5/refman/py_model.html">gp.Model</a>) – The gurobipy model where the predictor should be inserted.</p></li>
-<li><p><strong>sequential_model</strong> (<a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Sequential.html#torch.nn.Sequential" title="(in PyTorch vmaster (1.14.0a0+git9bb4926 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code></a>) – The sequential model to insert as predictor.</p></li>
+<li><p><strong>sequential_model</strong> (<a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Sequential.html#torch.nn.Sequential" title="(in PyTorch vmaster (1.14.0a0+git4c8e1a9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code></a>) – The sequential model to insert as predictor.</p></li>
 <li><p><strong>input_vars</strong> (<em>mvar_array_like</em>) – Decision variables used as input for predictor in model.</p></li>
 <li><p><strong>output_vars</strong> (<em>mvar_array_like</em><em>, </em><em>optional</em>) – Decision variables used as output for predictor in model.</p></li>
 </ul>

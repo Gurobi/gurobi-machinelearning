@@ -30,7 +30,7 @@ different machine learning frameworks (scikit-learn, Keras and PyTorch).
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Basics
+   :caption: Start
 
    firststeps-introduction
    firststeps-simple-example
@@ -46,7 +46,7 @@ different machine learning frameworks (scikit-learn, Keras and PyTorch).
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Meta
+   :caption: Reference
 
    meta-api
    meta-bibliography

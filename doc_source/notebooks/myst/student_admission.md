@@ -5,7 +5,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -86,7 +86,7 @@ don't encourage its use in real life. The example is for illustration purposes o
 We import the necessary packages. Besides the usual (`numpy`, `gurobipy`, `pandas`), for this we will use
 Scikit-learn's Pipeline, StandardScaler and LogisticRegression.
 
-```{code-cell}
+```{code-cell} ipython3
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -103,7 +103,7 @@ We now retrieve the historical data used to build the regression from Janos repo
 The features we use for the regression are `"merit"` (scholarship), `"SAT"` and `"GPA"` and the target is `"enroll"`.
 We store those values.
 
-```{code-cell}
+```{code-cell} ipython3
 # Base URL for retrieving data
 janos_data_url = 'https://raw.githubusercontent.com/INFORMSJoC/2020.1023/master/data/'
 historical_data = pd.read_csv(janos_data_url + 'college_student_enroll-s1-1.csv', index_col=0)
@@ -119,7 +119,7 @@ target = "enroll"
 For the regression, we use a pipeline with a standard scaler and a logistic regression.
 We build it using the `make_pipeline` from `scikit-learn`.
 
-```{code-cell}
+```{code-cell} ipython3
 # Run our regression
 regression = LogisticRegression(random_state=1)
 pipe = make_pipeline(StandardScaler(), LogisticRegression(random_state=1))
@@ -132,7 +132,7 @@ We now turn to building the mathematical optimization model for Gurobi.
 
 First, retrieve the data for the new students. We won't use all the data there, we randomly pick 250 students from it.
 
-```{code-cell}
+```{code-cell} ipython3
 # Retrieve new data used to build the optimization problem
 studentsdata = pd.read_csv(janos_data_url + 'college_applications6000.csv', index_col=0)
 
@@ -160,7 +160,7 @@ To construct the lower bounds, we first make a copy of `studentsdata` and then a
 `"merit"` column with a value of $0$. We then do the same for the upper bound, except that
 the value for `"merit"`is $2.5$.
 
-```{code-cell}
+```{code-cell} ipython3
 # Construct lower bounds data frame
 feat_lb = studentsdata.copy()
 feat_lb.loc[:, "merit"] = 0
@@ -181,7 +181,7 @@ For the rest of the model, we want to recover from the `feature_vars` matrix, th
 With `pandas`, we can use the `get_indexer` function to recover the index of this column in
 our `MVar` matrix.
 
-```{code-cell}
+```{code-cell} ipython3
 # Start with classical part of the model
 m = gp.Model()
 
@@ -193,7 +193,7 @@ x = feature_vars[:, feat_lb.columns.get_indexer(['merit'])][:, 0]
 
 We add the objective and the budget constraint:
 
-```{code-cell}
+```{code-cell} ipython3
 m.setObjective(y.sum(), gp.GRB.MAXIMIZE)
 
 m.addConstr(x.sum() <= 0.2 * nstudents)
@@ -204,7 +204,7 @@ Finally, we insert the constraints from the regression. Note that due to the sha
 
 With the `print_stats` function we display what was added to the model.
 
-```{code-cell}
+```{code-cell} ipython3
 pred_constr = add_predictor_constr(m, pipe, feature_vars, y)
 
 pred_constr.print_stats()
@@ -212,7 +212,7 @@ pred_constr.print_stats()
 
 We can now optimize the problem.
 
-```{code-cell}
+```{code-cell} ipython3
 m.optimize()
 ```
 
@@ -220,7 +220,7 @@ Remember that for the logistic regression, Gurobi does a piece wise linear appro
 
 We print the error. Here we need to use `get_error_proba`.
 
-```{code-cell}
+```{code-cell} ipython3
 print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error_proba()))))
 ```
 
@@ -231,24 +231,28 @@ The specific parameters are explained in the documentation of
 [Functions Constraints](https://www.gurobi.com/documentation/9.1/refman/constraints.html#subsubsection:GenConstrFunction)
 in Gurobi's manual.
 
-We can pass those parameters, to the `add_predictor_constr` function in the form of a dictionary with the keyword
+We can pass those parameters, to the [add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr) function in the form of a dictionary with the keyword
 parameter `gc_attributes`.
 
 Now we want a more precise solution, so we remove the current constraint, add a new one that does a tighter approximation and resolve the model.
 
-```{code-cell}
+```{code-cell} ipython3
 pred_constr.remove()
 
-gc_attributes={"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 1e-4, "FuncPieceRatio": -1.0}
-pred_constr = add_predictor_constr(m, pipe, feature_vars, y, gc_attributes=gc_attributes)
+pwl_attributes={"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 1e-4, "FuncPieceRatio": -1.0}
+pred_constr = add_predictor_constr(m, pipe, feature_vars, y, pwl_attributes=pwl_attributes)
 
 m.optimize()
 ```
 
 We can see that the error has been reduced.
 
-```{code-cell}
+```{code-cell} ipython3
 print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error_proba()))))
 ```
 
 Copyright © 2022 Gurobi Optimization, LLC
+
+```{code-cell} ipython3
+
+```
