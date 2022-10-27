@@ -26,7 +26,7 @@ and the function that can be used to insert it in a Gurobi model.
    * - Ordinary Least Square
      - :external:py:class:`LinearRegression <sklearn.linear_model.LinearRegression>`
      - :py:func:`add_linear_regression_constr <gurobi_ml.sklearn.add_linear_regression_constr>`
-   * - Logistic regression
+   * - Logistic regression [#]_
      - :external:py:class:`LogisticRegression <sklearn.linear_model.LogisticRegression>`
      - :py:func:`add_logistic_regression_constr <gurobi_ml.sklearn.add_logistic_regression_constr>`
    * - Neural-network [#]_
@@ -89,5 +89,6 @@ Currently, only two types of layers are supported:
 
 .. rubric:: Footnotes
 
+.. [#] Only binary classification
 .. [#] Only networks with `"relu"` activation for hidden layers and `'identity'` for the output layer.
 .. [#] Only polynomial features of degree 2.

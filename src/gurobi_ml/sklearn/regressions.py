@@ -205,26 +205,38 @@ def add_logistic_regression_constr(
 
     Parameters
     ----------
+
     model: `gp.Model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_
         The gurobipy model where the predictor should be inserted.
+
     logistic_regression: :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
         The logistic regression to insert.
+
     input_vars: mvar_array_like
         Decision variables used as input for predictor in model.
+
     output_vars: mvar_array_like, optional
         Decision variables used as output for predictor in model.
+
     output_type: {'classification', 'probability'}, default='classification'
         If the option chosen is 'classification' the output is the class label
         of either 0 or 1 given by the logistic regression.
         If the option 'probability' is chosen the output is the probabilty of the class 1.
+
     epsilon: float, default=0.0
         When the `output_type` is 'classification', this tolerance can be set
-        to enforce that class 1 is chosen, if the result of the logistic function is greater or
-        equal to 0.5 + `epsilon`.
+        to enforce that class 1 is chosen when the result of the logistic function is greater or
+        equal to *0.5 + epsilon*.
 
-        By default, with the value of 0.0, if the result of the logistic function is
-        very close to 0.5 (up to Gurobi tolerance) in the solution of the optimization model,
-        the output can be either 0 or 1 (the model doesn't distinguish between the two values).
+        By default, with the value of *0.0*, if the result of the logistic function is
+        very close to *0.5* (up to Gurobi tolerances) in the solution of the optimization model,
+        the output of the regression can be either 0 or 1.
+        The optimization model doesn't make a distinction between the two values.
+
+        Setting *esilon* to a small value will remove this ambiguity on the output but may
+        also make the model infeasible if the problem is very constrained:
+        the open interval *(0.5, 0.5 + epsilon)* is excluded from the feasible set of the optimization
+        problem.
     pwl_attributes: dict, optional
         Dictionary for non-default attributes for Gurobi to build the piecewise linear
         approximation of the logistic function.
@@ -240,10 +252,19 @@ def add_logistic_regression_constr(
         Object containing information about what was added to model to insert the
         predictor in it
 
+    Raises
+    ------
+
+    NoModel
+        If the logistic regression is not a binary label regression
+
+    ParameterError
+        If the value of outut_type is set to a non-comforming value (see above).
+
     Note
     ----
     See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
     """
     return LogisticRegressionConstr(
-        model, logistic_regression, input_vars, output_vars, pwl_attributes=pwl_attributes, **kwargs
+        model, logistic_regression, input_vars, output_vars, output_type, epsilon, pwl_attributes=pwl_attributes, **kwargs
     )
