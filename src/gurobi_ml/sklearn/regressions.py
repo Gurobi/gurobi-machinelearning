@@ -42,6 +42,7 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
     """
 
     def __init__(self, grbmodel, predictor, input_vars, output_vars=None, output_type="", **kwargs):
+        self.n_outputs_ = 1
         SKgetter.__init__(self, predictor, output_type, **kwargs)
         AbstractPredictorConstr.__init__(
             self,

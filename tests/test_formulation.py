@@ -7,7 +7,7 @@ import gurobipy as gp
 import numpy as np
 import tensorflow as tf
 import torch
-from base_cases import DiabetesCases, IrisCases
+from base_cases import CircleCase, DiabetesCases, IrisCases
 from gurobipy import GurobiError
 from joblib import load
 from sklearn import datasets
@@ -176,6 +176,15 @@ class TestFixedModel(unittest.TestCase):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
+            self.do_one_case(onecase, X, 5, "all", "classification")
+            self.do_one_case(onecase, X, 6, "pairs", "classification")
+
+    def test_circle(self):
+        cases = CircleCase()
+
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            X = onecase["data"]
             self.do_one_case(onecase, X, 5, "all", "classification")
             self.do_one_case(onecase, X, 6, "pairs", "classification")
 
