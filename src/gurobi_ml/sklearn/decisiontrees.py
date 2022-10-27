@@ -55,6 +55,12 @@ def add_decision_tree_regressor_constr(
     Note
     ----
     See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+
+    Warning
+    -------
+    Although the formulation of the decision tree with multiple output is regularly tested and should
+    be correct, it was never used in a non-trivial optimization model. It should be used with care at
+    this point.
     """
     return DecisionTreeRegressorConstr(
         grbmodel, decision_tree_regressor, input_vars, output_vars, epsilon, scale, float_type, **kwargs
@@ -111,6 +117,7 @@ def add_random_forest_regressor_constr(grbmodel, random_forest_regressor, input_
     Note
     ----
     See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+
     """
     return RandomForestRegressorConstr(grbmodel, random_forest_regressor, input_vars, output_vars, **kwargs)
 
