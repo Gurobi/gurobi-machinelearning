@@ -123,11 +123,6 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         self.epsilon = epsilon
         self.scale = scale
         self.float_type = float_type
-        if predictor.n_outputs_ != 1:
-            raise NoModel(
-                predictor,
-                "Can only deal with 1-dimensional regression trees. Output dimension {}".format(predictor.n_outputs_),
-            )
         SKgetter.__init__(self, predictor)
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
@@ -161,6 +156,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                 threshold = self.float_type(threshold)
             scale = max(abs(1 / threshold), self.scale)
             if left >= 0:
+                # Intermediate node
                 model.addConstrs(
                     (nodes[k, left].item() == 1) >> (scale * _input[k, tree.feature[node]] <= scale * threshold)
                     for k in range(nex)
@@ -171,7 +167,12 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                     for k in range(nex)
                 )
             else:
-                model.addConstrs((nodes[k, node].item() == 1) >> (output[k, 0] == tree.value[node][0][0]) for k in range(nex))
+                # Leaf node:
+                model.addConstrs(
+                    (nodes[k, node].item() == 1) >> (output[k, i] == tree.value[node][i][0])
+                    for i in range(self.n_outputs_)
+                    for k in range(nex)
+                )
 
         # We should attain 1 leaf
         model.addConstr(nodes[:, leafs].sum(axis=1) == 1)

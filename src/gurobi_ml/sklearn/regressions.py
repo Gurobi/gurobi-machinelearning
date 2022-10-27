@@ -42,6 +42,7 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
     """
 
     def __init__(self, grbmodel, predictor, input_vars, output_vars=None, output_type="", **kwargs):
+        self.n_outputs_ = 1
         SKgetter.__init__(self, predictor, output_type, **kwargs)
         AbstractPredictorConstr.__init__(
             self,
@@ -245,5 +246,5 @@ def add_logistic_regression_constr(
     See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
     """
     return LogisticRegressionConstr(
-        model, logistic_regression, input_vars, output_vars, pwl_attributes=pwl_attributes, **kwargs
+        model, logistic_regression, input_vars, output_vars, output_type, epsilon, pwl_attributes=pwl_attributes, **kwargs
     )

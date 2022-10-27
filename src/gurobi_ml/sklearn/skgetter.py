@@ -36,7 +36,7 @@ class SKgetter:
         try:
             self.n_outputs_ = predictor.n_outputs_
         except AttributeError:
-            self.n_outputs_ = 1
+            pass
 
     def get_error(self):
         """Returns error in Gurobi's solution with respect to prediction from input
@@ -56,7 +56,10 @@ class SKgetter:
         """
         if self._has_solution():
             if self.output_type == "probability":
-                return self.predictor.predict_proba(self.input.X)[:, 1] - self.output.X.T
+                predicted = self.predictor.predict_proba(self.input.X)[:, 1]
             else:
-                return self.predictor.predict(self.input.X) - self.output.X.T
+                predicted = self.predictor.predict(self.input.X)
+            if len(predicted.shape) == 1:
+                predicted = predicted.reshape(-1, 1)
+            return predicted - self.output.X
         raise NoSolution()

@@ -19,7 +19,7 @@
 
 from ..exceptions import NoModel
 from ..modeling import AbstractPredictorConstr
-from .list import sklearn_predictors, sklearn_transformers
+from .predictors_list import sklearn_predictors, sklearn_transformers
 from .skgetter import SKgetter
 
 

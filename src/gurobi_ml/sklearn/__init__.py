@@ -22,9 +22,9 @@ from .decisiontrees import (
     add_gradient_boosting_regressor_constr,
     add_random_forest_regressor_constr,
 )
-from .list import sklearn_predictors, sklearn_transformers
 from .mlpregressor import MLPRegressorConstr, add_mlp_regressor_constr
 from .pipeline import PipelineConstr, add_pipeline_constr
+from .predictors_list import sklearn_predictors, sklearn_transformers
 from .preprocessing import (
     PolynomialFeaturesConstr,
     StandardScalerConstr,
