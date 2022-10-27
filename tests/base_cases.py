@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 from joblib import dump, load
 from sklearn import __version__ as sklearn_version
 from sklearn import datasets
@@ -92,7 +93,6 @@ class DiabetesCases(Cases):
         self.dataset = "diabetes"
         super().__init__(excluded=excluded)
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
-        version = None
 
     def build_predictors(self):
         data = datasets.load_diabetes()
@@ -131,7 +131,6 @@ class IrisCases(Cases):
         self.dataset = "iris"
         super().__init__(excluded=excluded)
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
-        version = None
 
     def build_predictors(self):
         data = datasets.load_iris()
@@ -154,5 +153,50 @@ class IrisCases(Cases):
                         break
 
             rval = {"predictor": predictor, "input_shape": X.shape, "output_shape": y.shape, "nonconvex": nonconvex}
+
+            dump(rval, os.path.join(self.basedir, filename))
+
+
+class CircleCase(Cases):
+    def __init__(self):
+        excluded = [
+            "LinearRegression",
+            "Ridge",
+            "Lasso",
+            "LogisticRegression",
+            "GradientBoostingRegressor",
+            "RandomForestRegressor",
+            "MLPRegressor",
+        ]
+        self.dataset = "circle"
+        super().__init__(excluded=excluded)
+        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
+
+    def build_predictors(self):
+        # Inspired bu Scikit-learn example
+        # Create a dataset drawing a circle (don't put noise at it's not
+        # really relevant here)
+        rng = np.random.RandomState(1)
+        X = np.sort(200 * rng.rand(100, 1) - 100, axis=0)
+        y = np.array([np.pi * np.sin(X).ravel(), np.pi * np.cos(X).ravel()]).T
+
+        for predictor in self:
+            predictor.fit(X, y)
+            filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
+            nonconvex = False
+            if isinstance(predictor, Pipeline):
+                for element in predictor:
+                    if isinstance(element, PolynomialFeatures):
+                        nonconvex = True
+                        break
+
+            rval = {
+                "predictor": predictor,
+                "input_shape": X.shape,
+                "output_shape": y.shape,
+                "nonconvex": nonconvex,
+                "data": X,
+                "target": y,
+            }
 
             dump(rval, os.path.join(self.basedir, filename))
