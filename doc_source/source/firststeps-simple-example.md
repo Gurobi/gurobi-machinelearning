@@ -13,7 +13,7 @@ kernelspec:
 ---
 
 Usage Example
-====================
+=============
 
 In this page, we provide a simple example of using the Gurobi Machine Learning package.
 
@@ -62,7 +62,7 @@ Denoting by $X^E$ our set of examples and by $g$ the prediction function of our 
 
 $$
 \begin{aligned}
-&\min \sum_{i=1}^5 y_i^2 \\
+&\min \sum_{i=1}^n y_i^2 \\
 &\text{s.t.:}\\
 &y_i = g(X_i) & & i = 1, \ldots, n,\\
 &X^E - \delta \leq X \leq X^E + \delta,\\

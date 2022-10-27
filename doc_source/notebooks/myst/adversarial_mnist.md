@@ -80,7 +80,7 @@ X = load("../../../tests/predictors/MNIST_first100.joblib")
 ## Choose an example and set labels
 
 Now we choose an example. Here we chose arbitrarily example 26.
-We plot, the example and verify if it is well predicted by calling the `predict` function.
+We plot the example and verify if it is well predicted by calling the `predict` function.
 
 ```{code-cell}
 # Choose an example
