@@ -202,12 +202,12 @@ m.update()
 ```
 
 Finally, we insert the constraints from the regression. In this model we want to have use the probability
-estimate of a student joining the college, so we choose the parameter `output_type` to be `"probability"`. Note that due to the shapes of the `feature_vars` matrix and `y`, this will insert one regression constraint for each student.
+estimate of a student joining the college, so we choose the parameter `output_type` to be `"probability_1"`. Note that due to the shapes of the `feature_vars` matrix and `y`, this will insert one regression constraint for each student.
 
 With the `print_stats` function we display what was added to the model.
 
 ```{code-cell} ipython3
-pred_constr = add_predictor_constr(m, pipe, feature_vars, y, output_type="probability")
+pred_constr = add_predictor_constr(m, pipe, feature_vars, y, output_type="probability_1")
 
 pred_constr.print_stats()
 ```
@@ -242,7 +242,7 @@ Now we want a more precise solution, so we remove the current constraint, add a 
 pred_constr.remove()
 
 pwl_attributes={"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 1e-4, "FuncPieceRatio": -1.0}
-pred_constr = add_predictor_constr(m, pipe, feature_vars, y, output_type="probability", pwl_attributes=pwl_attributes)
+pred_constr = add_predictor_constr(m, pipe, feature_vars, y, output_type="probability_1", pwl_attributes=pwl_attributes)
 
 m.optimize()
 ```

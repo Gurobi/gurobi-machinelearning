@@ -57,15 +57,22 @@ class SKgetter:
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         if self._has_solution():
-            if self.output_type == "probability":
+            print(self.output_type)
+            if self.output_type == "probability_1":
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore", category=UserWarning)
                     predicted = self.predictor.predict_proba(self.input.X)[:, 1]
+            elif self.output_type == "probability":
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=UserWarning)
+                    predicted = self.predictor.predict_proba(self.input.X)
             else:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore", category=UserWarning)
                     predicted = self.predictor.predict(self.input.X)
             if len(predicted.shape) == 1:
                 predicted = predicted.reshape(-1, 1)
+            print(predicted.shape)
+            print(self.output.X.shape)
             return predicted - self.output.X
         raise NoSolution()

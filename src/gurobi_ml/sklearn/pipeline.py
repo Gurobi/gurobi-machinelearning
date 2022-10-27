@@ -19,7 +19,8 @@
 
 from ..exceptions import NoModel
 from ..modeling import AbstractPredictorConstr
-from .predictors_list import sklearn_predictors, sklearn_transformers
+from ..registered_predictors import registered_predictors
+from .predictors_list import sklearn_transformers
 from .skgetter import SKgetter
 
 
@@ -49,7 +50,11 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
             input_vars = steps[-1].output
         name, obj = pipeline.steps[-1]
         predictors = {}
-        for key, item in sklearn_predictors().items():
+        for key, item in registered_predictors().items():
+            print(f"I am {key}, {type(key)}")
+            if not isinstance(key, str):
+                key = key.__name__
+            print(f"My name is {key}")
             predictors[key.lower()] = item
         try:
             steps.append(predictors[name](model, obj, input_vars, output_vars, **self._kwargs))

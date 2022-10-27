@@ -15,61 +15,10 @@
 
 """ Define generic function that can add any known trained predictor
 """
-import sys
 
 from .exceptions import NotRegistered
-from .sklearn import PipelineConstr, sklearn_predictors, sklearn_transformers
-
-USER_PREDICTORS = {}
-
-
-def sklearn_convertors():
-    """Collect known scikit-learn objects that can be embedded and the conversion class"""
-    return (
-        sklearn_transformers()
-        | sklearn_predictors()
-        | {
-            "Pipeline": PipelineConstr,
-        }
-    )
-
-
-def pytorch_convertors():
-    """Collect known PyTorch objects that can be embedded and the conversion class"""
-    if "torch" in sys.modules:
-        from torch import nn as pytorchnn
-
-        from .torch import SequentialConstr as TorchSequential
-
-        return {pytorchnn.Sequential: TorchSequential}
-    return {}
-
-
-def keras_convertors():
-    """Collect known Keras objects that can be embedded and the conversion class"""
-    if "tensorflow" in sys.modules:
-        from keras.engine.functional import Functional
-        from keras.engine.training import Model
-        from tensorflow import keras
-
-        from .keras import KerasNetworkConstr as KerasPredictor
-
-        return {keras.Sequential: KerasPredictor, Functional: KerasPredictor, Model: KerasPredictor}
-    return {}
-
-
-def register_predictor_constr(predictor, predictor_constr):
-    """Register a new predictor that can be added using use_predictor_constr
-
-    Parameters
-    ----------
-    predictor:
-        Class of the predictor
-    predictor_constr:
-        Class implementing the MIP model that embeds a trained object of
-        class predictor in a gurobi Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>
-    """
-    USER_PREDICTORS[predictor] = predictor_constr
+from .registered_predictors import registered_predictors
+from .sklearn import PipelineConstr, sklearn_transformers
 
 
 def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwargs):
@@ -114,11 +63,11 @@ def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwarg
     The latter form is especially useful if the predictor is used to associate different groups of
     variables (e.g. a prediction is made for every time period in a planning horizon).
     """
-    convertors = {}
-    convertors |= sklearn_convertors()
-    convertors |= pytorch_convertors()
-    convertors |= keras_convertors()
-    convertors |= USER_PREDICTORS
+    convertors = registered_predictors()
+    convertors |= sklearn_transformers()
+    convertors |= {
+        "Pipeline": PipelineConstr,
+    }
     try:
         convertor = convertors[type(predictor)]
     except KeyError:
