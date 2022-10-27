@@ -17,3 +17,4 @@
 __version__ = "0.1.0"
 
 from .add_predictor import add_predictor_constr
+from .sklearn.predictors_list import register_predictor_constr

@@ -96,7 +96,7 @@ class DiabetesCases(Cases):
     """Base class to have cases for testing regression models on diabetes set"""
 
     def __init__(self):
-        excluded = ["LogisticRegression", "MLPClassifier"]
+        excluded = ["LogisticRegression"]
         self.dataset = "diabetes"
         super().__init__(excluded=excluded)
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
@@ -157,7 +157,11 @@ class IrisCases(Cases):
 class CircleCase(Cases):
     def __init__(self):
         self.dataset = "circle"
-        super().__init__(regressors="DecisionTreeRegressor")
+        super().__init__(
+            regressors=[
+                "DecisionTreeRegressor",
+            ]
+        )
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):

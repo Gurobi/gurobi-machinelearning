@@ -6,7 +6,8 @@ import unittest
 import gurobipy as gp
 from sklearn.svm import LinearSVC, LinearSVR
 
-from gurobi_ml.add_predictor import add_predictor_constr, register_predictor_constr
+from gurobi_ml import register_predictor_constr
+from gurobi_ml.add_predictor import add_predictor_constr
 from gurobi_ml.exceptions import NotRegistered
 from gurobi_ml.modeling import AbstractPredictorConstr
 

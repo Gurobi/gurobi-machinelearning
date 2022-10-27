@@ -17,9 +17,9 @@
 """
 import sys
 
-from .sklearn.predictors_list import sklearn_predictors
+from gurobi_ml.sklearn.predictors_list import sklearn_predictors, user_predictors
 
-USER_PREDICTORS = {}
+from .sklearn.predictors_list import sklearn_predictors
 
 
 def pytorch_convertors():
@@ -46,25 +46,11 @@ def keras_convertors():
     return {}
 
 
-def register_predictor_constr(predictor, predictor_constr):
-    """Register a new predictor that can be added using use_predictor_constr
-
-    Parameters
-    ----------
-    predictor:
-        Class of the predictor
-    predictor_constr:
-        Class implementing the MIP model that embeds a trained object of
-        class predictor in a gurobi Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>
-    """
-    USER_PREDICTORS[predictor] = predictor_constr
-
-
 def registered_predictors():
     """Return the list of registered predictors"""
     convertors = {}
     convertors |= sklearn_predictors()
     convertors |= pytorch_convertors()
     convertors |= keras_convertors()
-    convertors |= USER_PREDICTORS
+    convertors |= user_predictors()
     return convertors

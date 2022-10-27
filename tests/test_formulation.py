@@ -9,11 +9,9 @@ import tensorflow as tf
 import torch
 from gurobipy import GurobiError
 from sklearn import datasets
-from sklearn.neural_network import MLPClassifier
 
-from gurobi_ml import add_predictor_constr
+from gurobi_ml import add_predictor_constr, register_predictor_constr
 from gurobi_ml.exceptions import NoSolution
-from gurobi_ml.registered_predictors import register_predictor_constr
 from gurobi_ml.sklearn import MLPRegressorConstr
 
 VERBOSE = False
@@ -159,8 +157,8 @@ class TestFixedRegressionModel(unittest.TestCase):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", "probability")
-            self.do_one_case(onecase, X, 6, "pairs", "probability")
+            self.do_one_case(onecase, X, 5, "all", "probability_1")
+            self.do_one_case(onecase, X, 6, "pairs", "probability_1")
 
     def test_iris_clf(self):
         data = datasets.load_iris()
@@ -201,7 +199,7 @@ class TestMNIST(unittest.TestCase):
             x = gpm.addMVar(examples.shape, lb=lb, ub=ub)
 
             predictor.out_activation_ = "identity"
-            register_predictor_constr(MLPClassifier, MLPRegressorConstr)
+            register_predictor_constr("MLPClassifier", MLPRegressorConstr)
             pred_constr = add_predictor_constr(gpm, predictor, x, output_type="probability")
 
             y = pred_constr.output
