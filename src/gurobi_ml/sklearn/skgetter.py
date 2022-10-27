@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
+import warnings
+
 from sklearn.utils.validation import check_is_fitted
 
 from ..exceptions import NoSolution
@@ -56,7 +58,11 @@ class SKgetter:
         """
         if self._has_solution():
             if self.output_type == "probability":
-                return self.predictor.predict_proba(self.input.X)[:, 1] - self.output.X.T
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=UserWarning)
+                    return self.predictor.predict_proba(self.input.X)[:, 1] - self.output.X.T
             else:
-                return self.predictor.predict(self.input.X) - self.output.X.T
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=UserWarning)
+                    return self.predictor.predict(self.input.X) - self.output.X.T
         raise NoSolution()
