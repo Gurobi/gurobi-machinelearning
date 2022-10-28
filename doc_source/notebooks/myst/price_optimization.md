@@ -379,15 +379,15 @@ of an avocado to not exceed $\$ 2$ apiece.
 <div class="alert alert-info">
 Note
 
- Here, there are subtle but significant differences with the original notebook:
+There are subtle but significant differences in the model with respect to the original notebook.
 
-  1. We are using Matrix variables instead of having variables indexed by
-      regions. Our variables are then only vectors and matrices. Instead of
-      using a set of regions names, our regions is therefore just the number of
-      them.
-  2. Because of the point above, we have to make certain that the data is always
-     presented with the regions in the exact same order. We repeatedly use
-     `.loc[regions]` on the data stored in pandas to make sure of that.
+Here, we use Gurobi matrix variables API instead of variables indexed by the
+regions. Our variables are then vectors and matrices and are not indexed by
+regions (they are just indexed by their row and column numbers).
+
+Because of this, we have to make certain that the data is always presented with
+the regions in the exact same order. We repeatedly use `.loc[regions]` on the
+data stored in pandas to make sure of that.
 
 </div>
 
