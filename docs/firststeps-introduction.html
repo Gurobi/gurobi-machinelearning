@@ -64,12 +64,14 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="mlm-supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mlm-examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlm-further-reading.html">Further Reading</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="meta-bibliography.html">Bibliography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="meta-contactus.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meta-license.html">License</a></li>
 </ul>
 
         </div>
@@ -124,45 +126,58 @@
 <h1>Basics<a class="headerlink" href="#basics" title="Permalink to this heading"></a></h1>
 <section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h2>
-<p>Gurobi Machine Learning is a Python package to embed <em>trained</em> regression models in
-in a
-<a class="reference external" href="https://www.gurobi.com/documentation/current/refman/py_model.html">gurobipy model</a>
-to be solved with the <a class="reference external" href="https://www.gurobi.com">Gurobi</a> solver.</p>
-<p>When the regression model is embedded in an optimization model, its input and output are decision variables.
-They are linked by the regression in that the output variables values are the values predicted by the regression from the input variables in a feasible solution.</p>
+<p>The integration of Machine Learning (ML) techniques and Mathematical
+Optimization is a topic of growing interest. One particular approach is to
+be able to use <em>trained</em> ML models in optimization models
+(<span id="id1">Bergman <em>et al.</em> [<a class="reference internal" href="meta-bibliography.html#id2" title="David Bergman, Teng Huang, Philip Brooks, Andrea Lodi, and Arvind U. Raghunathan. Janos: an integrated predictive and prescriptive modeling framework. INFORMS Journal on Computing, 34(2):807-816, 2022. URL: https://doi.org/10.1287/ijoc.2020.1023, arXiv:https://doi.org/10.1287/ijoc.2020.1023, doi:10.1287/ijoc.2020.1023.">BHB+22</a>]</span>, <span id="id2">Maragno <em>et al.</em> [<a class="reference internal" href="meta-bibliography.html#id11" title="Donato Maragno, Holly Wiberg, Dimitris Bertsimas, S. Ilker Birbil, Dick den Hertog, and Adejuyigbe Fajemisin. Mixed-integer optimization with constraint learning. 2021. URL: https://arxiv.org/abs/2111.04469, doi:10.48550/ARXIV.2111.04469.">MWB+21</a>]</span>, <span id="id3">Ceccon <em>et al.</em> [<a class="reference internal" href="meta-bibliography.html#id9" title="F. Ceccon, J. Jalving, J. Haddad, A. Thebelt, C. Tsay, C. D. Laird, and R. Misener. Omlt: optimization &amp; machine learning toolkit. 2022. arXiv:2202.02414.">CJH+22</a>]</span>). In this approach, the
+features and the prediction of the ML model become decision variables of the
+optimization while its parameters are fixed. We say that the ML model is
+embedded in the optimization model, and we refer to the features and predictions
+as input and output variables respectively. They are linked in that, in a
+feasible solution, the output variables values are the values predicted by the
+ML model from the input variables values.</p>
+<p>Gurobi Machine Learning is an <a class="reference internal" href="meta-license.html"><span class="doc">open-source</span></a> Python package to embed <em>trained
+regression</em> models <a class="footnote-reference brackets" href="#id7" id="id4">1</a> in a <a class="reference external" href="https://www.gurobi.com/documentation/current/refman/py_model.html">gurobipy model</a> to be
+solved with the <a class="reference external" href="https://www.gurobi.com">Gurobi</a> solver.</p>
 <p>The aim of the package is to:</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li><p>Provide a simple way to embed regression models in a gurobipy model.</p></li>
-<li><p>Promote a deeper integration between predictive and prescriptive analytics.</p></li>
-<li><p>Allow to easily compare the effect of using different regression models in the same mathematical optimization application.</p></li>
+<li><p>Promote a deeper integration between predictive and prescriptive
+analytics.</p></li>
+<li><p>Allow to easily compare the effect of using different regression models in
+the same mathematical optimization application.</p></li>
 <li><p>Improve the algorithmic performance of Gurobi on those models.</p></li>
 </ol>
 </div></blockquote>
-<p>The package currently supports various <a class="reference external" href="https://scikit-learn.org/stable/">scikit-learn</a> objects and has limited support
-for <a class="reference external" href="https://keras.io/">Keras</a> and <a class="reference external" href="https://pytorch.org/">PyTorch</a> neural networks with ReLU activation.</p>
-<p>It is actively developed and users are encouraged to <a class="reference internal" href="meta-contactus.html"><span class="doc">contact us</span></a> if they have applications where they use a regression model that is currently
-not available.</p>
+<p>The package currently supports various <a class="reference external" href="https://scikit-learn.org/stable/">scikit-learn</a> objects. It has limited support for the
+<a class="reference external" href="https://keras.io/">Keras</a> API of <a class="reference external" href="https://www.tensorflow.org/">TensorFlow</a>
+and <a class="reference external" href="https://pytorch.org/">PyTorch</a>. Only neural networks with ReLU activation
+can be used with these two packages.</p>
+<p>The package is actively developed and users are encouraged to <a class="reference internal" href="meta-contactus.html"><span class="doc">contact us</span></a> if they have applications where they use a regression model
+that is currently not available.</p>
 <p>Below, we give basic installation and usage instructions.</p>
 </section>
 <section id="install">
 <h2>Install<a class="headerlink" href="#install" title="Permalink to this heading"></a></h2>
-<p>We encourage to install the package via pip (or add it to your <cite>requirements.txt</cite> file):</p>
+<p>We encourage to install the package via pip (or add it to your
+<cite>requirements.txt</cite> file):</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="go">pip install gurobi-machinelearning</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If not already installed, this should install the <code class="docutils literal notranslate"><span class="pre">gurobipy</span></code> and
-<code class="docutils literal notranslate"><span class="pre">numpy</span></code> packages.</p>
+<p>If not already installed, this should install the <code class="docutils literal notranslate"><span class="pre">gurobipy</span></code> and <code class="docutils literal notranslate"><span class="pre">numpy</span></code>
+packages.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The package has been tested with and is supported for Python 3.9 and Python 3.10.</p>
-<p>Table <a class="reference internal" href="#table-versions">table-versions</a> lists the version of the relevant packages that are tested and
-supported in the current version (1.0.0.dev1).</p>
-<span id="table-versions"></span><table class="colwidths-given docutils align-center" id="id3">
-<caption><span class="caption-text">Supported packages with version 1.0.0.dev1</span><a class="headerlink" href="#id3" title="Permalink to this table"></a></caption>
+<p>The package has been tested with and is supported for Python 3.9 and Python
+3.10.</p>
+<p>Table <a class="reference internal" href="#table-versions">table-versions</a> lists the version of the relevant packages that are
+tested and supported in the current version (1.0.0.dev1).</p>
+<span id="table-versions"></span><table class="colwidths-given docutils align-center" id="id8">
+<caption><span class="caption-text">Supported packages with version 1.0.0.dev1</span><a class="headerlink" href="#id8" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 50%" />
 <col style="width: 50%" />
@@ -193,52 +208,61 @@ supported in the current version (1.0.0.dev1).</p>
 </tr>
 </tbody>
 </table>
-<p>Installing any of the machine learning packages is only required if the predictor you want to insert uses them
-(i.e. to insert a Keras based predictor you need to have <code class="docutils literal notranslate"><span class="pre">tensorflow</span></code> installed).</p>
+<p>Installing any of the machine learning packages is only required if the
+predictor you want to insert uses them (i.e. to insert a Keras based predictor
+you need to have <code class="docutils literal notranslate"><span class="pre">tensorflow</span></code> installed).</p>
 </div>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
-<p>The main function provided by the package is <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.add_predictor_constr()</span></code></a>.
-It takes as arguments: a <a class="reference external" href="https://www.gurobi.com/documentation/current/refman/py_model.html">gurobipy model</a>,
-a <a class="reference internal" href="mlm-supported.html"><span class="doc">supported regression model</span></a>,
-input <a class="reference external" href="https://www.gurobi.com/documentation/current/refman/variables.html">Gurobi variables</a> and
+<p>The main function provided by the package is
+<a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.add_predictor_constr()</span></code></a>. It takes as arguments: a <a class="reference external" href="https://www.gurobi.com/documentation/current/refman/py_model.html">gurobipy
+model</a>, a
+<a class="reference internal" href="mlm-supported.html"><span class="doc">supported regression model</span></a>, input <a class="reference external" href="https://www.gurobi.com/documentation/current/refman/variables.html">Gurobi variables</a> and
 output <a class="reference external" href="https://www.gurobi.com/documentation/current/refman/variables.html">Gurobi variables</a>.</p>
 <p>By invoking the function, the gurobipy model is augmented with variables and
-constraints so that, in a solution, the values of the output variables
-are predicted by the regression model from the values of the input variables.
-More formally, if we denote by <span class="math notranslate nohighlight">\(g\)</span> the prediction function of the regression model, by
-<span class="math notranslate nohighlight">\(x\)</span> the input variables
-and by <span class="math notranslate nohighlight">\(y\)</span> the output variables, <span class="math notranslate nohighlight">\(y = g(x)\)</span> in any solution.</p>
-<p>The function <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_predictor_constr</span></code></a> returns a
-modeling object derived from the class
-<a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr" title="gurobi_ml.modeling.AbstractPredictorConstr"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPredictorConstr</span></code></a>.
-That object keeps track of all the variables and constraints that have been added
-to the gurobipy model to establish the relationship between input and output variables
-of the regression.</p>
+constraints so that, in a solution, the values of the output variables are
+predicted by the regression model from the values of the input variables. More
+formally, if we denote by <span class="math notranslate nohighlight">\(g\)</span> the prediction function of the regression
+model, by <span class="math notranslate nohighlight">\(x\)</span> the input variables and by <span class="math notranslate nohighlight">\(y\)</span> the output variables,
+<span class="math notranslate nohighlight">\(y = g(x)\)</span> in any solution.</p>
+<p>The function <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_predictor_constr</span></code></a>
+returns a modeling object derived from the class
+<a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr" title="gurobi_ml.modeling.AbstractPredictorConstr"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractPredictorConstr</span></code></a>. That object keeps track of all
+the variables and constraints that have been added to the gurobipy model to
+establish the relationship between input and output variables of the regression.</p>
 <p>The modeling object can perform a few tasks:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>Everything it created (i.e. variables and constraints to establish the relationship
-between input and output) can be removed with the
-<a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr.remove" title="gurobi_ml.modeling.AbstractPredictorConstr.remove"><code class="xref py py-meth docutils literal notranslate"><span class="pre">remove</span></code></a> member function.</p></li>
-<li><p>It can print a summary of what it added with the
-<a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr.print_stats" title="gurobi_ml.modeling.AbstractPredictorConstr.print_stats"><code class="xref py py-meth docutils literal notranslate"><span class="pre">print_stats</span></code></a> member function.</p></li>
-<li><p>Once Gurobi computed a solution to the optimization problem, it can compute the difference
-between what the regression model predicts from the input values and the values
-of the output variables in Gurobi’s solution with the
+<li><p>Everything it created (i.e. variables and constraints to establish the
+relationship between input and output) can be removed with the
+<a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr.remove" title="gurobi_ml.modeling.AbstractPredictorConstr.remove"><code class="xref py py-meth docutils literal notranslate"><span class="pre">remove</span></code></a>
+member function.</p></li>
+<li><p>It can print a summary of what it added with the <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr.print_stats" title="gurobi_ml.modeling.AbstractPredictorConstr.print_stats"><code class="xref py py-meth docutils literal notranslate"><span class="pre">print_stats</span></code></a> member function.</p></li>
+<li><p>Once Gurobi computed a solution to the optimization problem, it can compute
+the difference between what the regression model predicts from the input
+values and the values of the output variables in Gurobi’s solution with the
 <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr.print_stats" title="gurobi_ml.modeling.AbstractPredictorConstr.print_stats"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_error</span></code></a> member function.</p></li>
 </ul>
 </div></blockquote>
-<p>The function <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_predictor_constr</span></code></a>
-is a shorthand that should add the correct model for any supported regression model,
-but individual functions for each regression model are also available.
-For the list of frameworks and regression models supported and the corresponding functions please
-refer to the <a class="reference internal" href="mlm-supported.html"><span class="doc">Supported Regression models</span></a> section.</p>
-<p>For some regression models, additional optional parameters can be set to tune the way the predictor is inserted in the Gurobi model.
-Those are documented in the corresponding function linked from <a class="reference internal" href="mlm-supported.html"><span class="doc">Supported Regression models</span></a>.</p>
-<p>For a simple example on how to use the package please refer to the <a class="reference internal" href="firststeps-simple-example.html"><span class="doc">Usage Example</span></a> section.
-More advanced examples are available in the <a class="reference internal" href="mlm-examples.html"><span class="doc">Examples</span></a> section.</p>
+<p>The function <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_predictor_constr</span></code></a> is
+a shorthand that should add the correct model for any supported regression
+model, but individual functions for each regression model are also available.
+For the list of frameworks and regression models supported and the corresponding
+functions please refer to the <a class="reference internal" href="mlm-supported.html"><span class="doc">Supported Regression models</span></a> section.</p>
+<p>For some regression models, additional optional parameters can be set to tune
+the way the predictor is inserted in the Gurobi model. Those are documented in
+the corresponding function linked from <a class="reference internal" href="mlm-supported.html"><span class="doc">Supported Regression models</span></a>.</p>
+<p>For a simple example on how to use the package please refer to
+<a class="reference internal" href="firststeps-simple-example.html"><span class="doc">Usage Example</span></a>. More advanced examples are available
+in the <a class="reference internal" href="mlm-examples.html"><span class="doc">Examples</span></a> section.</p>
+<p class="rubric">Footnotes</p>
+<dl class="footnote brackets">
+<dt class="label" id="id7"><span class="brackets"><a class="fn-backref" href="#id4">1</a></span></dt>
+<dd><p>Classification models are currently not supported (except binary logistic
+regression) but it is planned to add support to some models over time.</p>
+</dd>
+</dl>
 </section>
 </section>
 

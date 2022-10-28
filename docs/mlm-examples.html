@@ -25,7 +25,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Surrogate functions" href="mlm-examples/2DPeakFunction.html" />
+    <link rel="next" title="Surrogate Models" href="mlm-examples/2DPeakFunction.html" />
     <link rel="prev" title="Supported Regression models" href="mlm-supported.html" />
 </head>
 
@@ -57,18 +57,20 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="mlm-supported.html">Supported Regression models</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mlm-examples/2DPeakFunction.html">Surrogate functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mlm-examples/2DPeakFunction.html">Surrogate Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mlm-examples/adversarial_mnist.html">Adversarial Machine Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mlm-examples/student_admission.html">Student Enrollment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mlm-examples/price_optimization.html">Pricing and Supply problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mlm-examples/price_optimization.html">Price Optimization</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="mlm-further-reading.html">Further Reading</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="meta-bibliography.html">Bibliography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="meta-contactus.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meta-license.html">License</a></li>
 </ul>
 
         </div>
@@ -121,14 +123,26 @@
 </style>
 <section id="examples">
 <h1>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h1>
+<p>We develop here examples that showcase specific applications where
+Gurobi Machine Learning can be used. Each example should be self-contained, and explains
+different aspects of using the package.</p>
+<p>In <a class="reference internal" href="mlm-examples/2DPeakFunction.html"><span class="doc">Surrogate Models</span></a>, we show how to approximate a nonlinear function with
+a neural network to use it in a Gurobi model.</p>
+<p>In <a class="reference internal" href="mlm-examples/adversarial_mnist.html"><span class="doc">Adversarial Machine Learning</span></a>, we show how to build a model to construct
+adversarial examples on the MNIST digit database.</p>
+<p>In <a class="reference internal" href="mlm-examples/student_admission.html"><span class="doc">Student Enrollment</span></a>, we use a logistic regression and embed it in
+a Gurobi model.</p>
+<p>In <a class="reference internal" href="mlm-examples/price_optimization.html"><span class="doc">Price Optimization</span></a>, we use a linear regression with categorical
+features and show how it can be embedded in a Gurobi model <a class="footnote-reference brackets" href="#id2" id="id1">1</a>.</p>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="mlm-examples/2DPeakFunction.html">Surrogate functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mlm-examples/adversarial_mnist.html">Adversarial Machine Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mlm-examples/student_admission.html">Student Enrollment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mlm-examples/price_optimization.html">Pricing and Supply problem</a></li>
-</ul>
 </div>
+<p class="rubric">Footnotes</p>
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Support for categorical feature is very limited and in particular they can’t be
+used easily as variables.</p>
+</dd>
+</dl>
 </section>
 
 
@@ -136,7 +150,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="mlm-supported.html" class="btn btn-neutral float-left" title="Supported Regression models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mlm-examples/2DPeakFunction.html" class="btn btn-neutral float-right" title="Surrogate functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mlm-examples/2DPeakFunction.html" class="btn btn-neutral float-right" title="Surrogate Models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

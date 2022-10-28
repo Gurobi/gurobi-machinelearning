@@ -57,6 +57,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../mlm-supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mlm-examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mlm-further-reading.html">Further Reading</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -80,6 +81,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-contactus.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta-license.html">License</a></li>
 </ul>
 
         </div>
@@ -162,6 +164,12 @@ predictor in it</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>See <a class="reference internal" href="AbstractPredictorConstr.html#gurobi_ml.add_predictor_constr" title="gurobi_ml.add_predictor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_predictor_constr</span></code></a> for acceptable values for input_vars and output_vars</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Although the formulation of the decision tree with multiple output is regularly tested and should
+be correct, it was never used in a non-trivial optimization model. It should be used with care at
+this point.</p>
 </div>
 </dd></dl>
 

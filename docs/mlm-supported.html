@@ -57,17 +57,19 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Supported Regression models</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#id1">Scikit-learn</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id4">Keras</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id6">PyTorch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">Keras</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">PyTorch</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mlm-examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlm-further-reading.html">Further Reading</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="meta-bibliography.html">Bibliography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="meta-contactus.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meta-license.html">License</a></li>
 </ul>
 
         </div>
@@ -120,19 +122,19 @@
 </style>
 <section id="supported-regression-models">
 <h1>Supported Regression models<a class="headerlink" href="#supported-regression-models" title="Permalink to this heading"></a></h1>
-<p>The package currently support various <a class="reference external" href="https://scikit-learn.org/stable/">scikit-learn</a> objects.
-It also has limited support
-for <a class="reference external" href="https://keras.io/">Keras</a> and <a class="reference external" href="https://pytorch.org/">PyTorch</a>.
-Only sequential neural networks with ReLU activation function are currently supported.</p>
-<p>The versions of those packages tested with the current version (1.0.0.dev1) are listed in
-the table <a class="reference internal" href="firststeps-introduction.html#table-versions"><span class="std std-ref">Supported packages with version 1.0.0.dev1</span></a>.</p>
+<p>The package currently support various <a class="reference external" href="https://scikit-learn.org/stable/">scikit-learn</a> objects. It also has limited support for
+<a class="reference external" href="https://keras.io/">Keras</a> and <a class="reference external" href="https://pytorch.org/">PyTorch</a>. Only
+sequential neural networks with ReLU activation function are currently
+supported.</p>
+<p>The versions of those packages tested with the current version (1.0.0.dev1) are
+listed in the table <a class="reference internal" href="firststeps-introduction.html#table-versions"><span class="std std-ref">Supported packages with version 1.0.0.dev1</span></a>.</p>
 <section id="id1">
 <h2>Scikit-learn<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
-<p>The following tables list the name of the models supported,
-the name of the corresponding object in the python framework,
-and the function that can be used to insert it in a Gurobi model.</p>
-<table class="colwidths-given docutils align-default" id="id9">
-<caption><span class="caption-text">Supported regression models of <a class="reference external" href="https://scikit-learn.org/stable/user_guide.html" title="(in scikit-learn v1.1)"><span class="xref std std-doc">scikit-learn</span></a></span><a class="headerlink" href="#id9" title="Permalink to this table"></a></caption>
+<p>The following tables list the name of the models supported, the name of the
+corresponding object in the python framework, and the function that can be used
+to insert it in a Gurobi model.</p>
+<table class="colwidths-given docutils align-default" id="id11">
+<caption><span class="caption-text">Supported regression models of <a class="reference external" href="https://scikit-learn.org/stable/user_guide.html" title="(in scikit-learn v1.1)"><span class="xref std std-doc">scikit-learn</span></a></span><a class="headerlink" href="#id11" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 25%" />
 <col style="width: 25%" />
@@ -149,11 +151,11 @@ and the function that can be used to insert it in a Gurobi model.</p>
 <td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearRegression</span></code></a></p></td>
 <td><p><a class="reference internal" href="api/LinearRegressionConstr.html#gurobi_ml.sklearn.add_linear_regression_constr" title="gurobi_ml.sklearn.add_linear_regression_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_linear_regression_constr</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p>Logistic regression</p></td>
+<tr class="row-odd"><td><p>Logistic regression <a class="footnote-reference brackets" href="#id8" id="id2">1</a></p></td>
 <td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogisticRegression</span></code></a></p></td>
 <td><p><a class="reference internal" href="api/LogisticRegressionConstr.html#gurobi_ml.sklearn.add_logistic_regression_constr" title="gurobi_ml.sklearn.add_logistic_regression_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_logistic_regression_constr</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p>Neural-network <a class="footnote-reference brackets" href="#id7" id="id2">1</a></p></td>
+<tr class="row-even"><td><p>Neural-network <a class="footnote-reference brackets" href="#id9" id="id3">2</a></p></td>
 <td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html#sklearn.neural_network.MLPRegressor" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLPRegressor</span></code></a></p></td>
 <td><p><a class="reference internal" href="api/MlpRegressorConstr.html#gurobi_ml.sklearn.add_mlp_regressor_constr" title="gurobi_ml.sklearn.add_mlp_regressor_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_mlp_regressor_constr</span></code></a></p></td>
 </tr>
@@ -171,8 +173,8 @@ and the function that can be used to insert it in a Gurobi model.</p>
 </tr>
 </tbody>
 </table>
-<table class="colwidths-given docutils align-default" id="id10">
-<caption><span class="caption-text">Transformers in <a class="reference external" href="https://scikit-learn.org/stable/user_guide.html" title="(in scikit-learn v1.1)"><span class="xref std std-doc">scikit-learn</span></a></span><a class="headerlink" href="#id10" title="Permalink to this table"></a></caption>
+<table class="colwidths-given docutils align-default" id="id12">
+<caption><span class="caption-text">Transformers in <a class="reference external" href="https://scikit-learn.org/stable/user_guide.html" title="(in scikit-learn v1.1)"><span class="xref std std-doc">scikit-learn</span></a></span><a class="headerlink" href="#id12" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 25%" />
 <col style="width: 25%" />
@@ -194,43 +196,52 @@ and the function that can be used to insert it in a Gurobi model.</p>
 <td><p><a class="reference internal" href="api/PipelineConstr.html#gurobi_ml.sklearn.add_pipeline_constr" title="gurobi_ml.sklearn.add_pipeline_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.sklearn.add_pipeline_constr()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p>PolynomialFeatures</p></td>
-<td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PolynomialFeatures.html#sklearn.preprocessing.PolynomialFeatures" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolynomialFeatures</span></code></a> <a class="footnote-reference brackets" href="#id8" id="id3">2</a></p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PolynomialFeatures.html#sklearn.preprocessing.PolynomialFeatures" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolynomialFeatures</span></code></a> <a class="footnote-reference brackets" href="#id10" id="id4">3</a></p></td>
 <td><p><a class="reference internal" href="api/PolynomialFeaturesConstr.html#gurobi_ml.sklearn.add_polynomial_features_constr" title="gurobi_ml.sklearn.add_polynomial_features_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.sklearn.add_polynomial_features_constr()</span></code></a></p></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="id4">
-<h2>Keras<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h2>
-<p><a class="reference external" href="https://keras.io/">Keras</a> neural networks generated either using the <a class="reference external" href="https://keras.io/guides/functional_api/">functional API</a>,
-<a class="reference external" href="https://keras.io/guides/making_new_layers_and_models_via_subclassing/">subclassing model</a> or the
+<section id="id5">
+<h2>Keras<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="https://keras.io/">Keras</a> neural networks generated either using the
+<a class="reference external" href="https://keras.io/guides/functional_api/">functional API</a>, <a class="reference external" href="https://keras.io/guides/making_new_layers_and_models_via_subclassing/">subclassing model</a> or the
 <a class="reference external" href="https://keras.io/api/models/sequential/">Sequential</a> class.</p>
-<p>They can be embedded in a Gurobi model with the function <a class="reference internal" href="api/KerasConstr.html#gurobi_ml.keras.add_keras_constr" title="gurobi_ml.keras.add_keras_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.keras.add_keras_constr()</span></code></a>.</p>
+<p>They can be embedded in a Gurobi model with the function
+<a class="reference internal" href="api/KerasConstr.html#gurobi_ml.keras.add_keras_constr" title="gurobi_ml.keras.add_keras_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.keras.add_keras_constr()</span></code></a>.</p>
 <p>Currently, only two types of layers are supported:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a class="reference external" href="https://keras.io/api/layers/core_layers/dense/">Dense layers</a> (possibly with <cite>relu</cite> activation),</p></li>
-<li><p><a class="reference external" href="https://keras.io/api/layers/activation_layers/relu/">ReLU layers</a> with default settings.</p></li>
+<li><p><a class="reference external" href="https://keras.io/api/layers/core_layers/dense/">Dense layers</a> (possibly
+with <cite>relu</cite> activation),</p></li>
+<li><p><a class="reference external" href="https://keras.io/api/layers/activation_layers/relu/">ReLU layers</a> with
+default settings.</p></li>
 </ul>
 </div></blockquote>
 </section>
-<section id="id6">
-<h2>PyTorch<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h2>
-<p>In PyTorch, only <a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Sequential.html#torch.nn.Sequential" title="(in PyTorch vmaster (1.14.0a0+git4c8e1a9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code></a> objects are supported.</p>
-<p>They can be embedded in a Gurobi model with the function <a class="reference internal" href="api/SequentialConstr.html#gurobi_ml.torch.add_sequential_constr" title="gurobi_ml.torch.add_sequential_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.torch.add_sequential_constr()</span></code></a>.</p>
+<section id="id7">
+<h2>PyTorch<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h2>
+<p>In PyTorch, only <a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Sequential.html#torch.nn.Sequential" title="(in PyTorch vmaster (1.14.0a0+git6cc4ae3 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code></a> objects are
+supported.</p>
+<p>They can be embedded in a Gurobi model with the function
+<a class="reference internal" href="api/SequentialConstr.html#gurobi_ml.torch.add_sequential_constr" title="gurobi_ml.torch.add_sequential_constr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gurobi_ml.torch.add_sequential_constr()</span></code></a>.</p>
 <p>Currently, only two types of layers are supported:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Linear.html#torch.nn.Linear" title="(in PyTorch vmaster (1.14.0a0+git4c8e1a9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">Linear</span> <span class="pre">layers</span></code></a>,</p></li>
-<li><p><a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.ReLU.html#torch.nn.ReLU" title="(in PyTorch vmaster (1.14.0a0+git4c8e1a9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReLU</span> <span class="pre">layers</span></code></a>.</p></li>
+<li><p><a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Linear.html#torch.nn.Linear" title="(in PyTorch vmaster (1.14.0a0+git6cc4ae3 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">Linear</span> <span class="pre">layers</span></code></a>,</p></li>
+<li><p><a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.ReLU.html#torch.nn.ReLU" title="(in PyTorch vmaster (1.14.0a0+git6cc4ae3 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReLU</span> <span class="pre">layers</span></code></a>.</p></li>
 </ul>
 </div></blockquote>
 <p class="rubric">Footnotes</p>
 <dl class="footnote brackets">
-<dt class="label" id="id7"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
-<dd><p>Only networks with <cite>“relu”</cite> activation for hidden layers and <cite>‘identity’</cite> for the output layer.</p>
+<dt class="label" id="id8"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
+<dd><p>Only binary classification</p>
 </dd>
-<dt class="label" id="id8"><span class="brackets"><a class="fn-backref" href="#id3">2</a></span></dt>
+<dt class="label" id="id9"><span class="brackets"><a class="fn-backref" href="#id3">2</a></span></dt>
+<dd><p>Only networks with <cite>“relu”</cite> activation for hidden layers and <cite>‘identity’</cite>
+for the output layer.</p>
+</dd>
+<dt class="label" id="id10"><span class="brackets"><a class="fn-backref" href="#id4">3</a></span></dt>
 <dd><p>Only polynomial features of degree 2.</p>
 </dd>
 </dl>

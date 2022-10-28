@@ -28,7 +28,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Student Enrollment" href="student_admission.html" />
-    <link rel="prev" title="Surrogate functions" href="2DPeakFunction.html" />
+    <link rel="prev" title="Surrogate Models" href="2DPeakFunction.html" />
 </head>
 
 <body class="wy-body-for-nav">
@@ -59,9 +59,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../mlm-supported.html">Supported Regression models</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../mlm-examples.html">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="2DPeakFunction.html">Surrogate functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2DPeakFunction.html">Surrogate Models</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Adversarial Machine Learning</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Introduction">Introduction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Imports-and-loading-data">Imports and loading data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Choose-an-example-and-set-labels">Choose an example and set labels</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Building-the-optimization-model">Building the optimization model</a></li>
@@ -70,15 +69,17 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="student_admission.html">Student Enrollment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="price_optimization.html">Pricing and Supply problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="price_optimization.html">Price Optimization</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../mlm-further-reading.html">Further Reading</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-contactus.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta-license.html">License</a></li>
 </ul>
 
         </div>
@@ -388,8 +389,6 @@ div.rendered_html tbody tr:hover {
 <h1>Adversarial Machine Learning<a class="headerlink" href="#Adversarial-Machine-Learning" title="Permalink to this heading"></a></h1>
 <p>In this example, we show how to use Gurobi Machine Learning to construct an adversarial example for a trained neural network.</p>
 <p>We use the MNIST handwritten digit database (<a class="reference external" href="http://yann.lecun.com/exdb/mnist/">http://yann.lecun.com/exdb/mnist/</a>) for this example.</p>
-<section id="Introduction">
-<h2>Introduction<a class="headerlink" href="#Introduction" title="Permalink to this heading"></a></h2>
 <p>For this problem, we are given a trained neural network and one well classified example <span class="math notranslate nohighlight">\(\bar x\)</span>. Our goal is to construct another example <span class="math notranslate nohighlight">\(x\)</span> <em>close to</em> <span class="math notranslate nohighlight">\(\bar x\)</span> that is classified with another label.</p>
 <p>For the hand digit recognition problem, the input is a grayscale image of <span class="math notranslate nohighlight">\(28 \times 28\)</span> (<span class="math notranslate nohighlight">\(=784\)</span>) pixels and the output is a vector of length 10 (each entry corresponding to a digit). We denote the output vector by <span class="math notranslate nohighlight">\(y\)</span>. The image is classified according to the largest entry of <span class="math notranslate nohighlight">\(y\)</span>.</p>
 <p>For the training example, assume that coordinate <span class="math notranslate nohighlight">\(l\)</span> of the output vector was the one with the largest value giving the correct label. We pick a coordinate corresponding to another label, denoted <span class="math notranslate nohighlight">\(w\)</span>, and we want the difference between <span class="math notranslate nohighlight">\(y_w - y_l\)</span> to be as large as possible.</p>
@@ -399,18 +398,15 @@ div.rendered_html tbody tr:hover {
 \[|| x - \bar x ||_1 \le \delta.\]</div>
 <p>If we denote by <span class="math notranslate nohighlight">\(g\)</span> the prediction function of the neural network. Our full optimization model reads:</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}\begin{aligned}
-&amp;\max y_w - y_l \\
+\[\begin{split} \begin{aligned} &amp;\max y_w - y_l \\
 &amp;\text{subject to:}\\
 &amp;|| x - \bar x ||_1 \le \delta,\\
-&amp; y = g(x).
-\end{aligned}\end{split}\]</div>
+&amp; y = g(x). \end{aligned}\end{split}\]</div>
 <p>Our model is inspired by <span id="id1">[<a class="reference internal" href="../meta-bibliography.html#id3" title="Matteo Fischetti and Jason Jo. Deep neural networks and mixed integer linear optimization. Constraints, 23(2):296-309, 2018. URL: https://doi.org/10.1007/s10601-018-9285-6, doi:10.1007/s10601-018-9285-6.">FJ18</a>]</span>.</p>
-</section>
 <section id="Imports-and-loading-data">
 <h2>Imports and loading data<a class="headerlink" href="#Imports-and-loading-data" title="Permalink to this heading"></a></h2>
 <p>First, we import the required packages for this example.</p>
-<p>In addition to the usual packages, we will need <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> to plot the digits, <code class="docutils literal notranslate"><span class="pre">joblib</span></code> to load a pre-trained network and <code class="docutils literal notranslate"><span class="pre">pandas</span></code> that is the format in which training examples are stored.</p>
+<p>In addition to the usual packages, we will need <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> to plot the digits, and <code class="docutils literal notranslate"><span class="pre">joblib</span></code> to load a pre-trained network and part of the training data.</p>
 <p>Note that from the <code class="docutils literal notranslate"><span class="pre">gurobi_ml</span></code> package we need to use directly the <code class="docutils literal notranslate"><span class="pre">add_mlp_regressor_constr</span></code> function for reasons that will be clarified later.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -418,7 +414,6 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gurobipy</span> <span class="k">as</span> <span class="nn">gp</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">load</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 
@@ -427,31 +422,32 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <p>Now we can load the data.</p>
-<p>We load a neural network that was pre-trained with Scikit-learn MLPRegressor. The network is quite small (2 hidden layers of 50 neurons), finding counter example shouldn’t be too difficult.</p>
+<p>We load a neural network that was pre-trained with Scikit-learn MLPRegressor. The network is quite small (2 hidden layers of 50 neurons), finding a counter example shouldn’t be too difficult.</p>
 <p>We also load the first 100 training examples of the MNIST dataset that we saved to avoid having to reload the full data set.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the trained network and the examples</span>
-<span class="n">nn</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">&quot;../../../tests/predictors/MNIST_50_50.joblib&quot;</span><span class="p">)</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">&quot;../../../tests/predictors/MNIST_first100.joblib&quot;</span><span class="p">)</span>
+<span class="n">mnist_data</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">&quot;../../../tests/predictors/mnist__mlpclassifier.joblib&quot;</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">mnist_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+<span class="n">nn</span> <span class="o">=</span> <span class="n">mnist_data</span><span class="p">[</span><span class="s2">&quot;predictor&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 </section>
 <section id="Choose-an-example-and-set-labels">
 <h2>Choose an example and set labels<a class="headerlink" href="#Choose-an-example-and-set-labels" title="Permalink to this heading"></a></h2>
-<p>Now we choose an example. Here we chose arbitrarily example 26. We plot, the example and verify it is well predicted by calling the <code class="docutils literal notranslate"><span class="pre">predict</span></code> function.</p>
+<p>Now we choose an example. Here we chose arbitrarily example 26. We plot the example and verify if it is well predicted by calling the <code class="docutils literal notranslate"><span class="pre">predict</span></code> function.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Choose an example</span>
 <span class="n">exampleno</span> <span class="o">=</span> <span class="mi">26</span>
-<span class="n">example</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">exampleno</span> <span class="p">:</span> <span class="n">exampleno</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">example</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">exampleno</span> <span class="p">:</span> <span class="n">exampleno</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
 
-<span class="n">pixels</span> <span class="o">=</span> <span class="n">example</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">))</span>
+<span class="n">pixels</span> <span class="o">=</span> <span class="n">example</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">pixels</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
@@ -490,9 +486,9 @@ Predicted label [&#39;4&#39;]
 </section>
 <section id="Building-the-optimization-model">
 <h2>Building the optimization model<a class="headerlink" href="#Building-the-optimization-model" title="Permalink to this heading"></a></h2>
-<p>Now that all the data is gathered we can proceed to building the optimization model.</p>
+<p>Now that all the data is gathered we can proceed to build the optimization model.</p>
 <p>We need to create a matrix variable <code class="docutils literal notranslate"><span class="pre">x</span></code> corresponding to the new input of the neural network we want to compute and a <code class="docutils literal notranslate"><span class="pre">y</span></code> variables for the output of the neural network. Those variables should have respectively the shape of the example we picked and the shape of the return value of <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code>.</p>
-<p>We also need additional variables to model the <span class="math notranslate nohighlight">\(l1\)</span>-norm constraint. Namely, for each pixel in the image, we need to model the absolute difference between <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(\bar x\)</span>. We will detail the model below. For now, we create the necessary variables that are another matrix of variable of same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<p>We also need additional variables to model the <span class="math notranslate nohighlight">\(l1\)</span>-norm constraint. Namely, for each pixel in the image, we need to model the absolute difference between <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(\bar x\)</span>. We will detail the model below. For now, we create the necessary variables that are another matrix of variables of same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
 <p>We also set the objective which is to maximize the difference between the <em>wrong</em> label and the <em>right</em> label.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -520,18 +516,18 @@ Gurobi 10.0.0 (beta1) - expires 2022-11-21
 </div>
 <p>The <span class="math notranslate nohighlight">\(l1-\)</span>norm constraint is formulated with:</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}\eta \ge x - \bar x \\
+\[\begin{split} \eta \ge x - \bar x \\
 \eta \ge \bar x - x \\
 \sum \eta \le \delta\end{split}\]</div>
 <p>With <span class="math notranslate nohighlight">\(\eta\)</span> denoting the <code class="docutils literal notranslate"><span class="pre">absdiff</span></code> variables.</p>
-<p>Those constraints are naturally expressed with Gurobi Matrix API. Note that we need to convert the example which is a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> to <code class="docutils literal notranslate"><span class="pre">numpy</span></code> for the matrix API.</p>
+<p>Those constraints are naturally expressed with Gurobi’s Matrix API.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bound on the distance to example in norm-1</span>
-<span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">abs_diff</span> <span class="o">&gt;=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">example</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
-<span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">abs_diff</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">x</span> <span class="o">+</span> <span class="n">example</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+<span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">abs_diff</span> <span class="o">&gt;=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">example</span><span class="p">)</span>
+<span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">abs_diff</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">x</span> <span class="o">+</span> <span class="n">example</span><span class="p">)</span>
 <span class="n">m</span><span class="o">.</span><span class="n">addConstr</span><span class="p">(</span><span class="n">abs_diff</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">delta</span><span class="p">)</span>
 
 <span class="c1"># Update the model</span>
@@ -542,8 +538,8 @@ Gurobi 10.0.0 (beta1) - expires 2022-11-21
 <p>Finally, we insert the neural network in the <code class="docutils literal notranslate"><span class="pre">gurobipy</span></code> model to link <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p>
 <p>Note that this case is not as straightforward as others. The reason is that the neural network is trained for classification with a <code class="docutils literal notranslate"><span class="pre">&quot;softmax&quot;</span></code> activation in the last layer. But in this model we are using the network without activation in the last layer.</p>
 <p>For this reason, we change manually the last layer activation before adding the network to the Gurobi model.</p>
-<p>Also, we use the function <code class="docutils literal notranslate"><span class="pre">add_mlp_regressor_constr</span></code> directly. The network being actually for classification (i.e. of type <code class="docutils literal notranslate"><span class="pre">MLPClassifier</span></code>, the <code class="docutils literal notranslate"><span class="pre">add_predictor_constr</span></code> function would not handle it automatically.</p>
-<p>Note that in the output, you should see a warning about adding constraints with very small coefficients that are ignored. Neural-networks often contains very small coefficients in their expression. Any coefficient with an absolute value smaller than <span class="math notranslate nohighlight">\(10^-{13}\)</span> is ignored by Gurobi. This may result in slightly different predicted values but should be negligible.</p>
+<p>Also, we use the function <a class="reference internal" href="../api/MlpRegressorConstr.html#gurobi_ml.sklearn.add_mlp_regressor_constr"><span class="std std-ref">add_mlp_regressor_constr</span></a> directly. The network being actually for classification (i.e. of type <code class="docutils literal notranslate"><span class="pre">MLPClassifier</span></code>) the <a class="reference internal" href="../api/AbstractPredictorConstr.html#gurobi_ml.add_predictor_constr"><span class="std std-ref">add_predictor_constr</span></a> function would not handle it automatically.</p>
+<p>Note that in the output, you should see a warning about adding constraints with very small coefficients that are ignored. Neural-networks often contain very small coefficients in their expressions. Any coefficient with an absolute value smaller than <span class="math notranslate nohighlight">\(10^{-13}\)</span> is ignored by Gurobi. This may result in slightly different predicted values but should be negligible.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -621,7 +617,7 @@ Activation is identity
 <li><p>find a feasible solution with a positive objective cost (i.e. a counter-example), or</p></li>
 <li><p>prove that there is no solution of positive cost (i.e. no counter-example in the neighborhood).</p></li>
 </ul>
-<p>We can use Gurobi parameters to limit the optimization to answer those questions: setting BestObjStop (<a class="reference external" href="https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop">https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop</a>) to 0.0 will stop the optimizer if a counter-example is found, setting BestBdStop (<a class="reference external" href="https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop">https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop</a>) to 0.0 will stop the optimization if the optimizer has shown there is no counter-example.</p>
+<p>We can use Gurobi parameters to limit the optimization to answer those questions: setting <a class="reference external" href="https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop">BestObjStop</a> to 0.0 will stop the optimizer if a counter-example is found, setting <a class="reference external" href="https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop">BestBdStop</a> to 0.0 will stop the optimization if the optimizer has shown there is no counter-example.</p>
 <p>We set the two parameters and optimize.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -645,86 +641,92 @@ Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
 CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
 Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
 
-Optimize a model with 1679 rows, 1778 columns and 41886 nonzeros
-Model fingerprint: 0xb6d4cf4e
+Optimize a model with 1679 rows, 1778 columns and 41725 nonzeros
+Model fingerprint: 0xdb301e0a
 Model has 100 general constraints
 Variable types: 1778 continuous, 0 integer (0 binary)
 Coefficient statistics:
   Matrix range     [1e-13, 2e+00]
   Objective range  [1e+00, 1e+00]
   Bounds range     [1e+00, 1e+00]
-  RHS range        [5e-03, 5e+00]
-Presolve removed 1244 rows and 728 columns
+  RHS range        [6e-04, 5e+00]
+Presolve removed 1244 rows and 732 columns
 Presolve time: 0.12s
-Presolved: 435 rows, 1050 columns, 37955 nonzeros
-Variable types: 969 continuous, 81 integer (76 binary)
+Presolved: 435 rows, 1046 columns, 37679 nonzeros
+Variable types: 968 continuous, 78 integer (76 binary)
 
-Root relaxation: objective 2.043941e+03, 307 iterations, 0.01 seconds (0.01 work units)
+Root relaxation: objective 2.251182e+03, 334 iterations, 0.01 seconds (0.01 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0 2043.94128    0   54          - 2043.94128      -     -    0s
-     0     0 1897.57636    0   56          - 1897.57636      -     -    0s
-     0     0 1896.49495    0   56          - 1896.49495      -     -    0s
-     0     0 1482.45016    0   55          - 1482.45016      -     -    0s
-     0     0 1450.37640    0   58          - 1450.37640      -     -    0s
-     0     0 1448.89827    0   57          - 1448.89827      -     -    0s
-     0     0 1448.89475    0   57          - 1448.89475      -     -    0s
-     0     0 1112.77985    0   63          - 1112.77985      -     -    0s
-     0     0 1065.67917    0   62          - 1065.67917      -     -    0s
-     0     0 1059.91754    0   63          - 1059.91754      -     -    0s
-     0     0 1059.79205    0   63          - 1059.79205      -     -    0s
-     0     0  923.09348    0   63          -  923.09348      -     -    0s
-     0     0  892.67944    0   64          -  892.67944      -     -    0s
-     0     0  891.26578    0   64          -  891.26578      -     -    0s
-     0     0  890.31741    0   65          -  890.31741      -     -    0s
-     0     0  890.25318    0   65          -  890.25318      -     -    0s
-     0     0  837.17798    0   70          -  837.17798      -     -    0s
-     0     0  817.18410    0   69          -  817.18410      -     -    0s
-     0     0  813.64600    0   69          -  813.64600      -     -    0s
-     0     0  812.98647    0   69          -  812.98647      -     -    0s
-     0     0  685.35456    0   71          -  685.35456      -     -    0s
-     0     0  677.98993    0   70          -  677.98993      -     -    1s
-     0     0  677.26643    0   70          -  677.26643      -     -    1s
-     0     0  613.10331    0   67          -  613.10331      -     -    1s
-     0     0  601.69584    0   69          -  601.69584      -     -    1s
-     0     0  600.79638    0   69          -  600.79638      -     -    1s
-     0     0  592.44202    0   70          -  592.44202      -     -    1s
-     0     0  588.88877    0   69          -  588.88877      -     -    1s
-     0     0  587.87876    0   71          -  587.87876      -     -    1s
-     0     0  532.17511    0   71          -  532.17511      -     -    1s
-     0     0  522.52872    0   71          -  522.52872      -     -    1s
-     0     0  521.51021    0   71          -  521.51021      -     -    1s
-     0     0  475.43240    0   71          -  475.43240      -     -    1s
-     0     0  473.06311    0   71          -  473.06311      -     -    1s
-     0     0  472.56686    0   71          -  472.56686      -     -    1s
-     0     0  468.51596    0   71          -  468.51596      -     -    1s
-H    0     0                     -19.5745944  468.51596  2493%     -    1s
-     0     0  468.51596    0   71  -19.57459  468.51596  2493%     -    1s
-     0     2  468.51596    0   71  -19.57459  468.51596  2493%     -    1s
-*  270   232              53       0.4709289  354.13155      -  54.3    2s
+     0     0 2251.18190    0   56          - 2251.18190      -     -    0s
+     0     0 2124.15733    0   57          - 2124.15733      -     -    0s
+     0     0 2124.15733    0   58          - 2124.15733      -     -    0s
+     0     0 2124.15733    0   59          - 2124.15733      -     -    0s
+     0     0 2124.15733    0   59          - 2124.15733      -     -    0s
+     0     0 1823.08384    0   58          - 1823.08384      -     -    0s
+     0     0 1798.13954    0   63          - 1798.13954      -     -    0s
+     0     0 1798.13954    0   62          - 1798.13954      -     -    0s
+     0     0 1798.13954    0   62          - 1798.13954      -     -    0s
+     0     0 1798.13954    0   63          - 1798.13954      -     -    0s
+     0     0 1702.98409    0   56          - 1702.98409      -     -    0s
+     0     0 1679.16677    0   58          - 1679.16677      -     -    0s
+     0     0 1678.18529    0   58          - 1678.18529      -     -    0s
+     0     0 1677.63340    0   58          - 1677.63340      -     -    0s
+     0     0 1677.61650    0   59          - 1677.61650      -     -    0s
+     0     0 1512.83600    0   61          - 1512.83600      -     -    0s
+     0     0 1460.38657    0   64          - 1460.38657      -     -    0s
+     0     0 1446.97943    0   66          - 1446.97943      -     -    0s
+     0     0 1446.31807    0   66          - 1446.31807      -     -    0s
+     0     0 1446.24129    0   66          - 1446.24129      -     -    0s
+     0     0 1140.80645    0   68          - 1140.80645      -     -    1s
+     0     0 1094.97928    0   67          - 1094.97928      -     -    1s
+     0     0 1093.61380    0   67          - 1093.61380      -     -    1s
+     0     0 1092.94001    0   68          - 1092.94001      -     -    1s
+     0     0  887.73798    0   68          -  887.73798      -     -    1s
+     0     0  879.96479    0   68          -  879.96479      -     -    1s
+     0     0  878.23176    0   67          -  878.23176      -     -    1s
+     0     0  878.17794    0   67          -  878.17794      -     -    1s
+H    0     0                      -4.4363082  839.13317      -     -    1s
+     0     0  836.20673    0   66   -4.43630  836.20673      -     -    1s
+     0     0  825.16023    0   69   -4.43630  825.16023      -     -    1s
+     0     0  822.15827    0   68   -4.43630  822.15827      -     -    1s
+     0     0  821.52591    0   66   -4.43630  821.52591      -     -    1s
+     0     0  589.25039    0   70   -4.43630  589.25039      -     -    1s
+H    0     0                      -4.4363081  589.25039      -     -    1s
+     0     0  576.25925    0   71   -4.43630  576.25925      -     -    1s
+     0     0  574.02188    0   70   -4.43630  574.02188      -     -    1s
+     0     0  573.40652    0   69   -4.43630  573.40652      -     -    1s
+     0     0  488.21951    0   69   -4.43630  488.21951      -     -    1s
+     0     0  477.83494    0   71   -4.43630  477.83494      -     -    1s
+     0     0  477.00556    0   71   -4.43630  477.00556      -     -    1s
+     0     0  443.36176    0   68   -4.43630  443.36176      -     -    1s
+     0     0  438.28955    0   68   -4.43630  438.28955  9980%     -    1s
+     0     0  435.59212    0   69   -4.43630  435.59212  9919%     -    1s
+     0     0  435.19091    0   69   -4.43630  435.19091  9910%     -    1s
+H    0     0                      10.8340164  435.19091  3917%     -    1s
 
 Cutting planes:
   Gomory: 1
-  Implied bound: 9
-  MIR: 110
-  Flow cover: 78
-  Relax-and-lift: 1
+  Implied bound: 7
+  MIR: 117
+  Flow cover: 64
+  Relax-and-lift: 4
 
-Explored 275 nodes (18426 simplex iterations) in 2.50 seconds (5.28 work units)
+Explored 1 nodes (4576 simplex iterations) in 1.92 seconds (1.94 work units)
 Thread count was 8 (of 8 available processors)
 
-Solution count 2: 0.470929 -19.5746
+Solution count 3: 10.834 -4.43631 -4.43631
 
 Optimization achieved user objective limit
-Best objective 4.709289733611e-01, best bound 3.541315550317e+02, gap 75098.5066%
+Best objective 1.083401643517e+01, best bound 4.351909153187e+02, gap 3916.8936%
 </pre></div></div>
 </div>
 </section>
 <section id="Results">
 <h2>Results<a class="headerlink" href="#Results" title="Permalink to this heading"></a></h2>
-<p>Normally for the example and <span class="math notranslate nohighlight">\(\delta\)</span> we chose a counter example is found. We finish this notebook by plotting the example and printing how it is classified by the neural network.</p>
+<p>Normally, for the example and <span class="math notranslate nohighlight">\(\delta\)</span> we chose, a counter example that gets the wrong label is found. We finish this notebook by plotting the counter example and printing how it is classified by the neural network.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
@@ -733,8 +735,7 @@ Best objective 4.709289733611e-01, best bound 3.541315550317e+02, gap 75098.5066
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">pixels</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<span class="n">example_mod</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">example</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">example</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Solution is classified as </span><span class="si">{</span><span class="n">nn</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">example_mod</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Solution is classified as </span><span class="si">{</span><span class="n">nn</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -761,7 +762,7 @@ Solution is classified as [&#39;9&#39;]
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="2DPeakFunction.html" class="btn btn-neutral float-left" title="Surrogate functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="2DPeakFunction.html" class="btn btn-neutral float-left" title="Surrogate Models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="student_admission.html" class="btn btn-neutral float-right" title="Student Enrollment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

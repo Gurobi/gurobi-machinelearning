@@ -57,6 +57,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../mlm-supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mlm-examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mlm-further-reading.html">Further Reading</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -69,6 +70,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-contactus.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta-license.html">License</a></li>
 </ul>
 
         </div>
@@ -130,7 +132,7 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grbmodel</strong> (<a class="reference external" href="https://www.gurobi.com/documentation/9.5/refman/py_model.html">gp.Model</a>) – The gurobipy model where the predictor should be inserted.</p></li>
-<li><p><strong>sequential_model</strong> (<a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Sequential.html#torch.nn.Sequential" title="(in PyTorch vmaster (1.14.0a0+git4c8e1a9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code></a>) – The sequential model to insert as predictor.</p></li>
+<li><p><strong>sequential_model</strong> (<a class="reference external" href="https://pytorch.org/docs/master/generated/torch.nn.Sequential.html#torch.nn.Sequential" title="(in PyTorch vmaster (1.14.0a0+git6cc4ae3 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Sequential</span></code></a>) – The sequential model to insert as predictor.</p></li>
 <li><p><strong>input_vars</strong> (<em>mvar_array_like</em>) – Decision variables used as input for predictor in model.</p></li>
 <li><p><strong>output_vars</strong> (<em>mvar_array_like</em><em>, </em><em>optional</em>) – Decision variables used as output for predictor in model.</p></li>
 </ul>
@@ -155,7 +157,7 @@ predictor in it</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gurobi_ml.torch.SequentialConstr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gurobi_ml.torch.</span></span><span class="sig-name descname"><span class="pre">SequentialConstr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grbmodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.torch.SequentialConstr" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gurobi_ml.torch.</span></span><span class="sig-name descname"><span class="pre">SequentialConstr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grbmodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.torch.SequentialConstr" title="Permalink to this definition"></a></dt>
 <dd><p>Transform a pytorch Sequential Neural Network to Gurobi constraint with
 input and output as matrices of variables.</p>
 <dl class="py method">

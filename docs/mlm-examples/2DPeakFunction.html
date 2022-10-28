@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Surrogate functions &mdash; Gurobi Machine Learning  documentation</title>
+  <title>Surrogate Models &mdash; Gurobi Machine Learning  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -59,25 +59,25 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../mlm-supported.html">Supported Regression models</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../mlm-examples.html">Examples</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Surrogate functions</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Surrogate Models</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#Define-the-nonlinear-function-of-interest">Define the nonlinear function of interest</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Approximate-the-function-and-define-a-test-set">Approximate the function and define a test set</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Construct-the-optimization-model">Construct the optimization model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Finally-optimize-the-model">Finally optimize the model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Look-at-the-solution-and-objective-value">Look at the solution and objective value</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Approximate-the-function">Approximate the function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Build-and-Solve-the-Optimization-Model">Build and Solve the Optimization Model</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="adversarial_mnist.html">Adversarial Machine Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="student_admission.html">Student Enrollment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="price_optimization.html">Pricing and Supply problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="price_optimization.html">Price Optimization</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../mlm-further-reading.html">Further Reading</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-contactus.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta-license.html">License</a></li>
 </ul>
 
         </div>
@@ -95,7 +95,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../mlm-examples.html">Examples</a> &raquo;</li>
-      <li>Surrogate functions</li>
+      <li>Surrogate Models</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/mlm-examples/2DPeakFunction.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -383,33 +383,29 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<section id="Surrogate-functions">
-<h1>Surrogate functions<a class="headerlink" href="#Surrogate-functions" title="Permalink to this heading"></a></h1>
-<p>Extra required packages: - matplotlib</p>
-<p><span id="id1">[<a class="reference internal" href="../meta-bibliography.html#id4" title="Carlos A. Henao and Christos T. Maravelias. Surrogate-based superstructure optimization framework. AIChE Journal, 57(5):1216-1232, 2011. doi:https://doi.org/10.1002/aic.12341.">HM11</a>]</span> <span id="id2">[<a class="reference internal" href="../meta-bibliography.html#id5" title="Zhou Lu, Hongming Pu, Feicheng Wang, Zhiqiang Hu, and Liwei Wang. The expressive power of neural networks: a view from the width. In I. Guyon, U. Von Luxburg, S. Bengio, H. Wallach, R. Fergus, S. Vishwanathan, and R. Garnett, editors, Advances in Neural Information Processing Systems, volume 30. Curran Associates, Inc., 2017. URL: https://proceedings.neurips.cc/paper/2017/file/32cbf687880eb1674a07bf717761dd3a-Paper.pdf.">LPW+17</a>]</span> <span id="id3">[<a class="reference internal" href="../meta-bibliography.html#id4" title="Carlos A. Henao and Christos T. Maravelias. Surrogate-based superstructure optimization framework. AIChE Journal, 57(5):1216-1232, 2011. doi:https://doi.org/10.1002/aic.12341.">HM11</a>]</span> Optimization solvers often struggle to prove a global optimum of a model when it holds highly nonlinear functions. The reason is often that relaxations of the nonlinear functions are not good enough to make the solver prove an acceptable bound in a reasonable amount of time. Another issue might be that a given solver does not support nonlinear functions, but only accepts linear ones.</p>
-<p>One possible solution for this problem is to approximate the problematic nonlinear functions via neural networks and use MIP technology to solve the constructed approximation efficiently. A piecewise-linear approximation of the nonlinear function of interest might be considered but usually gets more expensive and hard to model with increasing function dimensions. In the following example, we show how to approximate a nonlinear function via sklearn’s MLPRegressor and accordingly solve the neural
-network approximation of the nonlinear function with Gurobi.</p>
-<p>The purpose of this example is solely to present the idea of approximating any given function via neural networks and solving the approximation through MIP technology.</p>
-<p>The function we will approximate is the 2D peak function which can be found on many mathematical company logos and book covers. The function is given as</p>
+<section id="Surrogate-Models">
+<h1>Surrogate Models<a class="headerlink" href="#Surrogate-Models" title="Permalink to this heading"></a></h1>
+<p>Some industrial applications require modeling complex processes that can result either in highly non-linear functions or functions defined by a simulation process. In those contexts, optimization solvers often struggle. The reason may be that relaxations of the nonlinear functions are not good enough to make the solver prove an acceptable bound in a reasonable amount of time. Another issue may be that the solver is not able to represent the functions.</p>
+<p>An approach that has been proposed in the literature is to approximate the problematic nonlinear functions via neural networks with ReLU activation and use MIP technology to solve the constructed approximation (see e.g. <span id="id1">[<a class="reference internal" href="../meta-bibliography.html#id4" title="Carlos A. Henao and Christos T. Maravelias. Surrogate-based superstructure optimization framework. AIChE Journal, 57(5):1216-1232, 2011. doi:https://doi.org/10.1002/aic.12341.">HM11</a>]</span>, <span id="id2">[<a class="reference internal" href="../meta-bibliography.html#id6" title="Artur M. Schweidtmann, Dominik Bongartz, and Alexander Mitsos. Optimization with trained machine learning models embedded. 2022. URL: https://arxiv.org/abs/2207.12722, doi:10.48550/ARXIV.2207.12722.">SBM22</a>]</span>). This use of neural network can be motivated by their ability to provide a universal approximation (see e.g. <span id="id3">[<a class="reference internal" href="../meta-bibliography.html#id5" title="Zhou Lu, Hongming Pu, Feicheng Wang, Zhiqiang Hu, and Liwei Wang. The expressive power of neural networks: a view from the width. In I. Guyon, U. Von Luxburg, S. Bengio, H. Wallach, R. Fergus, S. Vishwanathan, and R. Garnett, editors, Advances in Neural Information Processing Systems, volume 30. Curran Associates, Inc., 2017. URL: https://proceedings.neurips.cc/paper/2017/file/32cbf687880eb1674a07bf717761dd3a-Paper.pdf.">LPW+17</a>]</span>). This use of ML models to replace complex processes is often referred to as <em>surrogate
+models</em>.</p>
+<p>In the following example, we approximate a nonlinear function via <code class="docutils literal notranslate"><span class="pre">Scikit-learn</span></code> <code class="docutils literal notranslate"><span class="pre">MLPRegressor</span></code> and then solve an optimization problem that uses the approximation of the nonlinear function with Gurobi.</p>
+<p>The purpose of this example is solely illustrative and doesn’t relate to any particular application.</p>
+<p>The function we approximate is the <a class="reference external" href="https://www.mathworks.com/help/matlab/ref/peaks.html#mw_46aeee28-390e-4373-aa47-e4a52447fc85">2D peaks function</a>.</p>
+<p>The function is given as</p>
 <div class="math notranslate nohighlight">
-\[f(x,y) = 3 \cdot (1-x)^2 \cdot \exp(-x^2 - (y+1)^2) - 10
-         \cdot (\frac{x}{5} - x^3 - y^5) \cdot \exp(-x^2 - y^2) -
-         \frac{1}{3} \cdot \exp(-(x+1)^2 - y^2).\]</div>
-<p>In this example, we will search for the global minimum of %f% over a small interval.</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\begin{aligned}
-&amp;\min_{x,y} f(x,y)\\
-&amp;\text{s.t.}\\
-&amp;x,y \in [-1,1]
+\[\begin{split} \begin{aligned} f(x) = &amp; 3 \cdot (1-x_1)^2 \cdot \exp(-x_1^2 - (x_2+1)^2) -
+\\
+         &amp; 10 \cdot (\frac{x_1}{5} - x_1^3 - x_2^5) \cdot \exp(-x_1^2 - x_2^2) - \\
+         &amp; \frac{1}{3} \cdot \exp(-(x_1+1)^2 - x_2^2).
 \end{aligned}\end{split}\]</div>
-<p>To find the global minimum of <span class="math notranslate nohighlight">\(f\)</span>, we will approximate <span class="math notranslate nohighlight">\(f(x,y)\)</span> through a neural network function <span class="math notranslate nohighlight">\(g(x,y)\)</span> to obtain a MIP and solve</p>
+<p>In this example, we want to find the minimum of <span class="math notranslate nohighlight">\(f\)</span> over the interval <span class="math notranslate nohighlight">\([-2, 2]\)</span>:</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}\begin{aligned}
-&amp;\min_{x,y} g(x,y) \approx f(x,y)\\
-&amp;\text{s.t.}\\
-&amp;x,y \in [-1,1]
-\end{aligned}\end{split}\]</div>
-<p>with Gurobi.</p>
+\[y = \min \{f(x) : x \in [-2,2]^2\}.\]</div>
+<p>The <a class="reference external" href="https://www.math.uwaterloo.ca/~hwolkowi/henry/reports/talks.d/t09talks.d/09waterloomatlab.d/optimTipsWebinar/html/optimTipsTricksWalkthrough.html#18">global minimum of this problem can be found numerically</a> to have value <span class="math notranslate nohighlight">\(-6.55113\)</span> at the point <span class="math notranslate nohighlight">\((0.2283, -1.6256)\)</span>.</p>
+<p>Here to find this minimum of <span class="math notranslate nohighlight">\(f\)</span>, we approximate <span class="math notranslate nohighlight">\(f(x)\)</span> through a neural network function <span class="math notranslate nohighlight">\(g(x)\)</span> to obtain a MIP and solve</p>
+<div class="math notranslate nohighlight">
+\[\hat y = \min \{g(x) : x \in [-2,2]^2\} \approx y.\]</div>
+<p>First import the necessary packages. Before applying the neural network, we do a preprocessing to extract polynomial features of degree 2. Hopefully this will help us to approximate the smooth function. Besides, <code class="docutils literal notranslate"><span class="pre">gurobipy</span></code>, <code class="docutils literal notranslate"><span class="pre">numpy</span></code> and the appropriate <code class="docutils literal notranslate"><span class="pre">sklearn</span></code> objects, we also use <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> to plot the function, and it’s approximation.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -423,43 +419,38 @@ network approximation of the nonlinear function with Gurobi.</p>
 <span class="kn">from</span> <span class="nn">sklearn.neural_network</span> <span class="kn">import</span> <span class="n">MLPRegressor</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
 <span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">make_pipeline</span>
-<span class="kn">from</span> <span class="nn">gurobi_ml.sklearn</span> <span class="kn">import</span> <span class="n">PipelineConstr</span>
+<span class="kn">from</span> <span class="nn">gurobi_ml</span> <span class="kn">import</span> <span class="n">add_predictor_constr</span>
 </pre></div>
 </div>
 </div>
 <section id="Define-the-nonlinear-function-of-interest">
 <h2>Define the nonlinear function of interest<a class="headerlink" href="#Define-the-nonlinear-function-of-interest" title="Permalink to this heading"></a></h2>
+<p>We define the 2D peak function as a python function.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">peak2d</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">peak2d</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">xx</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">xx</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">yy</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="o">-</span> <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">xx</span> <span class="o">/</span> <span class="mi">5</span> <span class="o">-</span> <span class="n">xx</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="n">yy</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">xx</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">yy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-        <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">xx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">yy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x1</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">x2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">/</span> <span class="mi">5</span> <span class="o">-</span> <span class="n">x1</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="n">x2</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x1</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">x2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">x1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">x2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
+<p>To train the neural network, we make a uniform sample of the domain of the function in the region of interest using <code class="docutils literal notranslate"><span class="pre">numpy</span></code>’s <code class="docutils literal notranslate"><span class="pre">arrange</span></code> function.</p>
+<p>We then plot the function with <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>.</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
-<span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="n">z</span> <span class="o">=</span> <span class="n">peak2d</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">subplot_kw</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;projection&quot;</span><span class="p">:</span> <span class="s2">&quot;3d&quot;</span><span class="p">})</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">peak2d</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">subplot_kw</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;projection&quot;</span><span class="p">:</span> <span class="s2">&quot;3d&quot;</span><span class="p">})</span>
 <span class="c1"># Plot the surface.</span>
-<span class="n">surf</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">coolwarm</span><span class="p">,</span>
+<span class="n">surf</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">coolwarm</span><span class="p">,</span>
                        <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">antialiased</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="c1"># Add a color bar which maps values to colors.</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">surf</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
@@ -475,24 +466,26 @@ network approximation of the nonlinear function with Gurobi.</p>
 <img alt="../_images/mlm-examples_2DPeakFunction_5_0.png" src="../_images/mlm-examples_2DPeakFunction_5_0.png" />
 </div>
 </div>
+</section>
+<section id="Approximate-the-function">
+<h2>Approximate the function<a class="headerlink" href="#Approximate-the-function" title="Permalink to this heading"></a></h2>
+<p>To fit a model, we need to reshape our data. We concatenate the values of <code class="docutils literal notranslate"><span class="pre">x1</span></code> and <code class="docutils literal notranslate"><span class="pre">x2</span></code> in an array <code class="docutils literal notranslate"><span class="pre">X</span></code> and make <code class="docutils literal notranslate"><span class="pre">y</span></code> one dimensional.</p>
 <div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">x1</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">x2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>To approximate the function, we use a <code class="docutils literal notranslate"><span class="pre">Pipeline</span></code> with polynomial features and a neural-network regressor. We do a relatively small neural-network.</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">xx</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">yy</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</section>
-<section id="Approximate-the-function-and-define-a-test-set">
-<h2>Approximate the function and define a test set<a class="headerlink" href="#Approximate-the-function-and-define-a-test-set" title="Permalink to this heading"></a></h2>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run our regression</span>
-<span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+<span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span>
 <span class="n">regression</span> <span class="o">=</span> <span class="n">MLPRegressor</span><span class="p">(</span><span class="n">hidden_layer_sizes</span><span class="o">=</span><span class="n">layers</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">)</span>
 <span class="n">pipe</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(),</span> <span class="n">regression</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
@@ -500,69 +493,46 @@ network approximation of the nonlinear function with Gurobi.</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
 <style>#sk-container-id-1 {color: black;background-color: white;}#sk-container-id-1 pre{padding: 0;}#sk-container-id-1 div.sk-toggleable {background-color: white;}#sk-container-id-1 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-1 label.sk-toggleable__label-arrow:before {content: "▸";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-1 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-1 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-1 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: "▾";}#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-1 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-1 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-1 div.sk-parallel-item::after {content: "";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-serial::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-1 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-1 div.sk-item {position: relative;z-index: 1;}#sk-container-id-1 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-1 div.sk-item::before, #sk-container-id-1 div.sk-parallel-item::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-1 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-1 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-1 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-1 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-1 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-1 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-1 div.sk-label-container {text-align: center;}#sk-container-id-1 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-1 div.sk-text-repr-fallback {display: none;}</style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>Pipeline(steps=[(&#x27;polynomialfeatures&#x27;, PolynomialFeatures()),
-                (&#x27;mlpregressor&#x27;,
-                 MLPRegressor(hidden_layer_sizes=[30, 30, 30]))])</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" ><label for="sk-estimator-id-1" class="sk-toggleable__label sk-toggleable__label-arrow">Pipeline</label><div class="sk-toggleable__content"><pre>Pipeline(steps=[(&#x27;polynomialfeatures&#x27;, PolynomialFeatures()),
-                (&#x27;mlpregressor&#x27;,
-                 MLPRegressor(hidden_layer_sizes=[30, 30, 30]))])</pre></div></div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-2" type="checkbox" ><label for="sk-estimator-id-2" class="sk-toggleable__label sk-toggleable__label-arrow">PolynomialFeatures</label><div class="sk-toggleable__content"><pre>PolynomialFeatures()</pre></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-3" type="checkbox" ><label for="sk-estimator-id-3" class="sk-toggleable__label sk-toggleable__label-arrow">MLPRegressor</label><div class="sk-toggleable__content"><pre>MLPRegressor(hidden_layer_sizes=[30, 30, 30])</pre></div></div></div></div></div></div></div></div>
+                (&#x27;mlpregressor&#x27;, MLPRegressor(hidden_layer_sizes=[30, 30]))])</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" ><label for="sk-estimator-id-1" class="sk-toggleable__label sk-toggleable__label-arrow">Pipeline</label><div class="sk-toggleable__content"><pre>Pipeline(steps=[(&#x27;polynomialfeatures&#x27;, PolynomialFeatures()),
+                (&#x27;mlpregressor&#x27;, MLPRegressor(hidden_layer_sizes=[30, 30]))])</pre></div></div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-2" type="checkbox" ><label for="sk-estimator-id-2" class="sk-toggleable__label sk-toggleable__label-arrow">PolynomialFeatures</label><div class="sk-toggleable__content"><pre>PolynomialFeatures()</pre></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-3" type="checkbox" ><label for="sk-estimator-id-3" class="sk-toggleable__label sk-toggleable__label-arrow">MLPRegressor</label><div class="sk-toggleable__content"><pre>MLPRegressor(hidden_layer_sizes=[30, 30])</pre></div></div></div></div></div></div></div></div>
 </div>
-<div class="nbinput nblast docutils container">
+<p>To test the accuracy of the approximation, we take a random sample of points, and we print the <span class="math notranslate nohighlight">\(R^2\)</span> value and the maximal error.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">2</span>
+
+<span class="n">r2_score</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">peak2d</span><span class="p">(</span><span class="n">X_test</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_test</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">))</span>
+<span class="n">max_error</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">max_error</span><span class="p">(</span><span class="n">peak2d</span><span class="p">(</span><span class="n">X_test</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_test</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;R2 error </span><span class="si">{}</span><span class="s2">, maximal error </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r2_score</span><span class="p">,</span> <span class="n">max_error</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+R2 error 0.9998082589854138, maximal error 0.08621217150112725
+</pre></div></div>
+</div>
+<p>While the <span class="math notranslate nohighlight">\(R^2\)</span> value is good, the maximal error is quite high. For the purpose of this example we still deem it acceptable. We plot the function.</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">peak2d</span><span class="p">(</span><span class="n">X_test</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_test</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-0.9997364211051336
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metrics</span><span class="o">.</span><span class="n">max_error</span><span class="p">(</span><span class="n">peak2d</span><span class="p">(</span><span class="n">X_test</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_test</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-0.04932321417366614
-</pre></div></div>
-</div>
-<p>The maximum error is quite high but still acceptable for the purpose of this example.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">subplot_kw</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;projection&quot;</span><span class="p">:</span> <span class="s2">&quot;3d&quot;</span><span class="p">})</span>
 <span class="c1"># Plot the surface.</span>
 <span class="n">surf</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span>
-    <span class="n">xx</span><span class="p">,</span>
-    <span class="n">yy</span><span class="p">,</span>
-    <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">xx</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+    <span class="n">x1</span><span class="p">,</span>
+    <span class="n">x2</span><span class="p">,</span>
+    <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x1</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
     <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">coolwarm</span><span class="p">,</span>
     <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
     <span class="n">antialiased</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -581,63 +551,99 @@ network approximation of the nonlinear function with Gurobi.</p>
 <img alt="../_images/mlm-examples_2DPeakFunction_13_0.png" src="../_images/mlm-examples_2DPeakFunction_13_0.png" />
 </div>
 </div>
-<p>Optically, the approximation looks very close to the original function.</p>
+<p>Visually, the approximation looks close enough to the original function.</p>
 </section>
-<section id="Construct-the-optimization-model">
-<h2>Construct the optimization model<a class="headerlink" href="#Construct-the-optimization-model" title="Permalink to this heading"></a></h2>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">optfeat</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
+<section id="Build-and-Solve-the-Optimization-Model">
+<h2>Build and Solve the Optimization Model<a class="headerlink" href="#Build-and-Solve-the-Optimization-Model" title="Permalink to this heading"></a></h2>
+<p>We now turn to the optimization model. For this model we want to find the minimal value of <code class="docutils literal notranslate"><span class="pre">y_approx</span></code> which is the approximation given by our pipeline on the interval.</p>
+<p>Note that in this simple example, we don’t use matrix variables but regular Gurobi variables instead.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start with classical part of the model</span>
-<span class="n">m</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span>
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addMVar</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">optfeat</span><span class="p">)),</span> <span class="n">lb</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addVar</span><span class="p">(</span><span class="n">lb</span><span class="o">=-</span><span class="n">GRB</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addVars</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">lb</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="n">y_approx</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">addVar</span><span class="p">(</span><span class="n">lb</span><span class="o">=-</span><span class="n">GRB</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
 
-<span class="n">m</span><span class="o">.</span><span class="n">setObjective</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">GRB</span><span class="o">.</span><span class="n">MINIMIZE</span><span class="p">)</span>
+<span class="n">m</span><span class="o">.</span><span class="n">setObjective</span><span class="p">(</span><span class="n">y_approx</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">GRB</span><span class="o">.</span><span class="n">MINIMIZE</span><span class="p">)</span>
 
-<span class="c1"># create transforms to turn scikit-learn pipeline into Gurobi constraints</span>
-<span class="n">PipelineConstr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">pipe</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="c1"># add &quot;surrogate constraint&quot;</span>
+<span class="n">pred_constr</span> <span class="o">=</span> <span class="n">add_predictor_constr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">pipe</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y_approx</span><span class="p">)</span>
+
+<span class="n">pred_constr</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Gurobi 10.0.0 (beta1) - expires 2022-11-21
 Warning for adding constraints: zero or small (&lt; 1e-13) coefficients, ignored
+Model for PipelineConstr1:
+126 variables
+61 constraints
+6 quadratic constraints
+60 general constraints
+Input has shape (1, 2)
+Output has shape (1, 1)
+
+Pipeline has 2 steps:
+polynomialfeatures1 mlpregressor1
+
+Model for polynomialfeatures1:
+6 variables
+0 constraints
+6 quadratic constraints
+Input has shape (1, 2)
+Output has shape (1, 6)
+
+Model for mlpregressor1:
+120 variables
+61 constraints
+60 general constraints
+Input has shape (1, 6)
+Output has shape (1, 1)
+
+mlpregressor1 has 3 layers:
+Model for layer0:
+60 variables
+30 constraints
+30 general constraints
+Input has shape (1, 6)
+Output has shape (1, 30)
+Activation is relu
+
+Model for layer1:
+60 variables
+30 constraints
+30 general constraints
+Input has shape (1, 30)
+Output has shape (1, 30)
+Activation is relu
+
+Model for layer2:
+0 variables
+1 constraints
+Input has shape (1, 30)
+Output has shape (1, 1)
+Activation is identity
+
+
 </pre></div></div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;gurobi_ml.sklearn.pipeline.PipelineConstr at 0x12b4e5d60&gt;
-</pre></div></div>
-</div>
-</section>
-<section id="Finally-optimize-the-model">
-<h2>Finally optimize the model<a class="headerlink" href="#Finally-optimize-the-model" title="Permalink to this heading"></a></h2>
+<p>Now call <code class="docutils literal notranslate"><span class="pre">optimize</span></code>. Since we use polynomial features the resulting model is a non-convex quadratic problem. In Gurobi, we need to set the parameter <code class="docutils literal notranslate"><span class="pre">NonConvex</span></code> to 2 to be able to solve it.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">Params</span><span class="o">.</span><span class="n">TimeLimit</span> <span class="o">=</span> <span class="mi">20</span>
 <span class="n">m</span><span class="o">.</span><span class="n">Params</span><span class="o">.</span><span class="n">MIPGap</span> <span class="o">=</span> <span class="mf">0.1</span>
 <span class="n">m</span><span class="o">.</span><span class="n">Params</span><span class="o">.</span><span class="n">NonConvex</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="n">m</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -649,120 +655,95 @@ Warning for adding constraints: zero or small (&lt; 1e-13) coefficients, ignored
 Set parameter TimeLimit to value 20
 Set parameter MIPGap to value 0.1
 Set parameter NonConvex to value 2
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
 Gurobi Optimizer version 10.0.0 build v10.0.0beta1 (mac64[x86])
 
 CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
 Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
 
-Optimize a model with 91 rows, 189 columns and 1403 nonzeros
-Model fingerprint: 0x4774ac0f
+Optimize a model with 61 rows, 129 columns and 1065 nonzeros
+Model fingerprint: 0x0d6d080d
 Model has 6 quadratic constraints
-Model has 90 general constraints
-Variable types: 189 continuous, 0 integer (0 binary)
+Model has 60 general constraints
+Variable types: 129 continuous, 0 integer (0 binary)
 Coefficient statistics:
-  Matrix range     [3e-13, 1e+00]
+  Matrix range     [3e-09, 1e+00]
   QMatrix range    [1e+00, 1e+00]
   QLMatrix range   [1e+00, 1e+00]
   Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+00]
-  RHS range        [5e-03, 5e-01]
+  Bounds range     [2e+00, 2e+00]
+  RHS range        [8e-03, 6e-01]
   QRHS range       [1e+00, 1e+00]
-Presolve added 94 rows and 1 columns
+Presolve added 78 rows and 15 columns
 Presolve time: 0.01s
-Presolved: 195 rows, 190 columns, 1680 nonzeros
+Presolved: 149 rows, 144 columns, 1229 nonzeros
 Presolved model has 3 bilinear constraint(s)
-Variable types: 134 continuous, 56 integer (56 binary)
+Variable types: 103 continuous, 41 integer (41 binary)
 
-Root relaxation: objective -1.286342e+01, 200 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: objective -4.517112e+01, 161 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0  -12.86341    0   32          -  -12.86341      -     -    0s
-     0     0  -10.38706    0   36          -  -10.38706      -     -    0s
-H    0     0                      -2.2391013  -10.28161   359%     -    0s
-H    0     0                      -2.2961629  -10.28161   348%     -    0s
-     0     0  -10.28161    0   39   -2.29616  -10.28161   348%     -    0s
-     0     0   -9.44661    0   36   -2.29616   -9.44661   311%     -    0s
-     0     0   -9.31804    0   35   -2.29616   -9.31804   306%     -    0s
-     0     0   -8.45012    0   38   -2.29616   -8.45012   268%     -    0s
-     0     0   -8.31803    0   38   -2.29616   -8.31803   262%     -    0s
-     0     0   -8.11413    0   37   -2.29616   -8.11413   253%     -    0s
-H    0     0                      -2.2966220   -7.95402   246%     -    0s
-H    0     0                      -2.2966252   -7.95402   246%     -    0s
-     0     0   -7.95402    0   37   -2.29662   -7.95402   246%     -    0s
-     0     0   -7.63544    0   37   -2.29662   -7.63544   232%     -    0s
-     0     0   -7.61177    0   40   -2.29662   -7.61177   231%     -    0s
-     0     0   -7.37580    0   39   -2.29662   -7.37580   221%     -    0s
-     0     0   -7.37580    0   39   -2.29662   -7.37580   221%     -    0s
-     0     0   -7.37580    0   40   -2.29662   -7.37580   221%     -    0s
-     0     0   -7.37580    0   40   -2.29662   -7.37580   221%     -    0s
-     0     0   -6.73202    0   41   -2.29662   -6.73202   193%     -    0s
-     0     0   -6.36596    0   40   -2.29662   -6.36596   177%     -    0s
-     0     2   -6.36596    0   40   -2.29662   -6.36596   177%     -    0s
-*  270    59              32      -2.2966267   -3.74882  63.2%  20.0    0s
+     0     0  -45.17111    0   31          -  -45.17111      -     -    0s
+     0     0  -45.15802    0   30          -  -45.15802      -     -    0s
+     0     0  -38.87818    0   33          -  -38.87818      -     -    0s
+     0     0  -38.59209    0   34          -  -38.59209      -     -    0s
+     0     0  -34.12067    0   33          -  -34.12067      -     -    0s
+     0     0  -33.97101    0   32          -  -33.97101      -     -    0s
+     0     0  -31.91216    0   38          -  -31.91216      -     -    0s
+     0     0  -31.78538    0   39          -  -31.78538      -     -    0s
+     0     0  -31.25878    0   37          -  -31.25878      -     -    0s
+H    0     0                      -1.8167513  -30.90466  1601%     -    0s
+     0     0  -30.90466    0   35   -1.81675  -30.90466  1601%     -    0s
+H    0     0                      -1.8405435  -30.90466  1579%     -    0s
+     0     0  -27.40870    0   39   -1.84054  -27.40870  1389%     -    0s
+     0     0  -27.07735    0   40   -1.84054  -27.07735  1371%     -    0s
+     0     0  -26.35862    0   42   -1.84054  -26.35862  1332%     -    0s
+     0     0  -26.16072    0   38   -1.84054  -26.16072  1321%     -    0s
+H    0     0                      -6.2122942  -26.16072   321%     -    0s
+     0     0  -26.00516    0   38   -6.21229  -26.00516   319%     -    0s
+     0     0  -25.89494    0   38   -6.21229  -25.89494   317%     -    0s
+     0     0  -25.81840    0   39   -6.21229  -25.81840   316%     -    0s
+     0     0  -25.79547    0   37   -6.21229  -25.79547   315%     -    0s
+     0     0  -25.61017    0   38   -6.21229  -25.61017   312%     -    0s
+     0     0  -25.44729    0   38   -6.21229  -25.44729   310%     -    0s
+     0     0  -25.29134    0   39   -6.21229  -25.29134   307%     -    0s
+     0     0  -25.20516    0   40   -6.21229  -25.20516   306%     -    0s
+     0     0  -24.86362    0   41   -6.21229  -24.86362   300%     -    0s
+     0     0  -24.80745    0   41   -6.21229  -24.80745   299%     -    0s
+     0     0  -24.74488    0   40   -6.21229  -24.74488   298%     -    0s
+     0     0  -24.74488    0   40   -6.21229  -24.74488   298%     -    0s
+     0     2  -24.74488    0   40   -6.21229  -24.74488   298%     -    0s
+H   75    64                      -6.5536566  -20.32768   210%  14.6    0s
+*  786   243              32      -6.5641886  -13.50800   106%  14.2    0s
+*  788   243              33      -6.5673996  -13.50800   106%  14.2    0s
+H 1611   183                      -6.5673996  -10.42608  58.8%  16.7    0s
+* 1652   183              35      -6.5677476  -10.21942  55.6%  16.7    0s
+* 1654   183              36      -6.5693696  -10.21942  55.6%  16.7    0s
+* 1656   183              37      -6.5693876  -10.21942  55.6%  16.7    0s
 
 Cutting planes:
-  Gomory: 1
-  Implied bound: 20
-  MIR: 61
-  Flow cover: 27
-  Inf proof: 1
+  Implied bound: 27
+  MIR: 98
+  Flow cover: 30
   Relax-and-lift: 1
 
-Explored 375 nodes (8124 simplex iterations) in 0.47 seconds (0.36 work units)
+Explored 2098 nodes (37279 simplex iterations) in 0.79 seconds (0.68 work units)
 Thread count was 8 (of 8 available processors)
 
-Solution count 4: -2.29663 -2.29662 -2.29616 -2.2391
-No other solutions better than -2.29663
+Solution count 9: -6.56939 -6.56937 -6.56775 ... -1.81675
+No other solutions better than -6.56939
 
 Optimal solution found (tolerance 1.00e-01)
-Best objective -2.296626768804e+00, best bound -2.296626768804e+00, gap 0.0000%
+Best objective -6.569387658071e+00, best bound -6.569387658071e+00, gap 0.0000%
 </pre></div></div>
 </div>
+<p>After solving the model, we check the error in the estimate of the Gurobi solution.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">NumVars</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-189
-</pre></div></div>
-</div>
-</section>
-<section id="Look-at-the-solution-and-objective-value">
-<h2>Look at the solution and objective value<a class="headerlink" href="#Look-at-the-solution-and-objective-value" title="Permalink to this heading"></a></h2>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">X</span><span class="p">)</span> <span class="c1"># solution point of the approximated problem</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">ObjVal</span><span class="p">)</span> <span class="c1"># objective value of the approximated problem</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">peak2d</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">X</span><span class="p">))</span> <span class="c1"># function value at the solution point of the approximated problem</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">peak2d</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="n">m</span><span class="o">.</span><span class="n">ObjVal</span><span class="p">))</span> <span class="c1"># error of the approximation</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error in approximating the regression </span><span class="si">{:.6}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pred_constr</span><span class="o">.</span><span class="n">get_error</span><span class="p">()))))</span>
 </pre></div>
 </div>
 </div>
@@ -771,13 +752,30 @@ Best objective -2.296626768804e+00, best bound -2.296626768804e+00, gap 0.0000%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[ 0.38296985 -1.        ]
--2.296626768803957
--2.2735783548355815
-0.02304841396837576
+Error in approximating the regression 1.61583e-07
 </pre></div></div>
 </div>
-<p>The difference between the function and the approximation at the computed solution point is noticable but acceptable given the big maximum error of the neural network approximation.</p>
+<p>Finally, we look at the solution and the objective value found.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;solution point of the approximated problem (</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">X</span><span class="si">:</span><span class="s2">.4</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">X</span><span class="si">:</span><span class="s2">.4</span><span class="si">}</span><span class="s2">), &quot;</span> <span class="o">+</span>
+        <span class="sa">f</span><span class="s2">&quot;objective value </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">ObjVal</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Function value at the solution point </span><span class="si">{</span><span class="n">peak2d</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">X</span><span class="p">)</span><span class="si">}</span><span class="s2"> error </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">peak2d</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="n">m</span><span class="o">.</span><span class="n">ObjVal</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+solution point of the approximated problem (0.2217, -1.602), objective value -6.56938765807123.
+Function value at the solution point -6.542197481611961 error 0.027190176459269466.
+</pre></div></div>
+</div>
+<p>The difference between the function and the approximation at the computed solution point is noticeable, but the point we found is reasonably close to the actual global minimum. Depending on the use case this might be deemed acceptable. Of course, training a larger network should result in a better approximation.</p>
 <p>Copyright © 2020 Gurobi Optimization, LLC</p>
 </section>
 </section>

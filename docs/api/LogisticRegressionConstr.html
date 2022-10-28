@@ -57,6 +57,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../mlm-supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mlm-examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mlm-further-reading.html">Further Reading</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -80,6 +81,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-bibliography.html">Bibliography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../meta-contactus.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta-license.html">License</a></li>
 </ul>
 
         </div>
@@ -136,7 +138,7 @@
 <h1>Logistic Regression<a class="headerlink" href="#logistic-regression" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="gurobi_ml.sklearn.add_logistic_regression_constr">
-<span class="sig-prename descclassname"><span class="pre">gurobi_ml.sklearn.</span></span><span class="sig-name descname"><span class="pre">add_logistic_regression_constr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logistic_regression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pwl_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.add_logistic_regression_constr" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gurobi_ml.sklearn.</span></span><span class="sig-name descname"><span class="pre">add_logistic_regression_constr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logistic_regression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'classification'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pwl_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.add_logistic_regression_constr" title="Permalink to this definition"></a></dt>
 <dd><p>Use <cite>logistic_regression</cite> to predict the value of <cite>output_vars</cite> using <cite>input_vars</cite> in <cite>model</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -145,6 +147,21 @@
 <li><p><strong>logistic_regression</strong> (<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.linear_model.LogisticRegression</span></code></a>) – The logistic regression to insert.</p></li>
 <li><p><strong>input_vars</strong> (<em>mvar_array_like</em>) – Decision variables used as input for predictor in model.</p></li>
 <li><p><strong>output_vars</strong> (<em>mvar_array_like</em><em>, </em><em>optional</em>) – Decision variables used as output for predictor in model.</p></li>
+<li><p><strong>output_type</strong> (<em>{'classification'</em><em>, </em><em>'probability_1'}</em><em>, </em><em>default='classification'</em>) – If the option chosen is ‘classification’ the output is the class label
+of either 0 or 1 given by the logistic regression.
+If the option ‘probability_1’ is chosen the output is the probabilty of the class 1.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>default=0.0</em>) – <p>When the <cite>output_type</cite> is ‘classification’, this tolerance can be set
+to enforce that class 1 is chosen when the result of the logistic function is greater or
+equal to <em>0.5 + epsilon</em>.</p>
+<p>By default, with the value of <em>0.0</em>, if the result of the logistic function is
+very close to <em>0.5</em> (up to Gurobi tolerances) in the solution of the optimization model,
+the output of the regression can be either 0 or 1.
+The optimization model doesn’t make a distinction between the two values.</p>
+<p>Setting <em>esilon</em> to a small value will remove this ambiguity on the output but may
+also make the model infeasible if the problem is very constrained:
+the open interval <em>(0.5, 0.5 + epsilon)</em> is excluded from the feasible set of the optimization
+problem.</p>
+</p></li>
 <li><p><strong>pwl_attributes</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary for non-default attributes for Gurobi to build the piecewise linear
 approximation of the logistic function.
 The default values for those attributes set in the package can be obtained
@@ -160,6 +177,12 @@ predictor in it</p>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#gurobi_ml.sklearn.LogisticRegressionConstr" title="gurobi_ml.sklearn.LogisticRegressionConstr">LogisticRegressionConstr</a></p>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NoModel</strong> – If the logistic regression is not a binary label regression</p></li>
+<li><p><strong>ParameterError</strong> – If the value of outut_type is set to a non-comforming value (see above).</p></li>
+</ul>
+</dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -169,7 +192,7 @@ predictor in it</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="gurobi_ml.sklearn.LogisticRegressionConstr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gurobi_ml.sklearn.</span></span><span class="sig-name descname"><span class="pre">LogisticRegressionConstr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grbmodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pwl_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.LogisticRegressionConstr" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gurobi_ml.sklearn.</span></span><span class="sig-name descname"><span class="pre">LogisticRegressionConstr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grbmodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'classification'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pwl_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gurobi_ml.sklearn.LogisticRegressionConstr" title="Permalink to this definition"></a></dt>
 <dd><p>Predict a Gurobi variable using a logistic regression that
 takes another Gurobi matrix variable as input.</p>
 <dl class="py method">

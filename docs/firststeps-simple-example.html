@@ -59,12 +59,14 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="mlm-supported.html">Supported Regression models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mlm-examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlm-further-reading.html">Further Reading</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="meta-api.html">API Reference manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="meta-bibliography.html">Bibliography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="meta-contactus.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meta-license.html">License</a></li>
 </ul>
 
         </div>
@@ -384,7 +386,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<p>Certainly, we also need <code class="docutils literal notranslate"><span class="pre">gurobipy</span></code> to build an optimization model and from the <code class="docutils literal notranslate"><span class="pre">gurobi_ml</span></code> package we need the <code class="docutils literal notranslate"><span class="pre">add_predictor_constr</span></code> function. We will also need <code class="docutils literal notranslate"><span class="pre">numpy</span></code>.</p>
+<p>Certainly, we also need <code class="docutils literal notranslate"><span class="pre">gurobipy</span></code> to build an optimization model and from the <code class="docutils literal notranslate"><span class="pre">gurobi_ml</span></code> package we need the <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.add_predictor_constr"><span class="std std-ref">add_predictor_constr</span></a> function. We will also need <code class="docutils literal notranslate"><span class="pre">numpy</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -395,7 +397,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<p>We start by building artificial data for training our regressions. To do so, we use <em>make_regression</em> to obtain data with 10 features.</p>
+<p>We start by building artificial data to train our regressions. To do so, we use <em>make_regression</em> to obtain data with 10 features.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -426,7 +428,7 @@ div.rendered_html tbody tr:hover {
 <p>Denoting by <span class="math notranslate nohighlight">\(X^E\)</span> our set of examples and by <span class="math notranslate nohighlight">\(g\)</span> the prediction function of our regression model, our optimization problem reads:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{aligned}
-&amp;\min \sum_{i=1}^5 y_i^2 \\
+&amp;\min \sum_{i=1}^n y_i^2 \\
 &amp;\text{s.t.:}\\
 &amp;y_i = g(X_i) &amp; &amp; i = 1, \ldots, n,\\
 &amp;X^E - \delta \leq X \leq X^E + \delta,\\
@@ -466,9 +468,9 @@ Gurobi 10.0.0 (beta1) - expires 2022-11-21
 </pre></div>
 </div>
 </div>
-<p>The constraints linking <code class="docutils literal notranslate"><span class="pre">input_vars</span></code> and <code class="docutils literal notranslate"><span class="pre">output_vars</span></code> can now be added with the function <code class="docutils literal notranslate"><span class="pre">add_predictor_constr</span></code>.</p>
+<p>The constraints linking <code class="docutils literal notranslate"><span class="pre">input_vars</span></code> and <code class="docutils literal notranslate"><span class="pre">output_vars</span></code> can now be added with the function <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.add_predictor_constr"><span class="std std-ref">add_predictor_constr</span></a>.</p>
 <p>Note that because of the shape of the variables this will add the 5 different constraints.</p>
-<p>The function returns a modeling object that we can use later on.</p>
+<p>The function returns a <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr"><span class="std std-ref">modeling object</span></a> that we can use later on.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -477,7 +479,7 @@ Gurobi 10.0.0 (beta1) - expires 2022-11-21
 </pre></div>
 </div>
 </div>
-<p>The member function <code class="docutils literal notranslate"><span class="pre">print_stats</span></code> of the modeling object outputs the details of the regression model that was added to the Gurobi.</p>
+<p>The member function <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr.print_stats"><span class="std std-ref">print_stats</span></a> of the modeling object outputs the details of the regression model that was added to the Gurobi.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
@@ -546,49 +548,46 @@ CPU model: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
 Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
 
 Optimize a model with 82 rows, 182 columns and 1322 nonzeros
-Model fingerprint: 0x456f38bd
+Model fingerprint: 0xe812300b
 Model has 2 quadratic objective terms
 Model has 80 general constraints
 Variable types: 182 continuous, 0 integer (0 binary)
 Coefficient statistics:
-  Matrix range     [3e-03, 2e+00]
+  Matrix range     [6e-05, 2e+00]
   Objective range  [0e+00, 0e+00]
   QObjective range [2e+00, 2e+00]
-  Bounds range     [3e-04, 2e+00]
-  RHS range        [5e-02, 1e+00]
-Presolve removed 1 rows and 91 columns
-Presolve time: 0.04s
-Presolved: 81 rows, 91 columns, 576 nonzeros
+  Bounds range     [3e-02, 2e+00]
+  RHS range        [3e-02, 1e+00]
+Presolve removed 48 rows and 139 columns
+Presolve time: 0.03s
+Presolved: 34 rows, 43 columns, 249 nonzeros
 Presolved model has 1 quadratic objective terms
-Variable types: 66 continuous, 25 integer (25 binary)
+Variable types: 35 continuous, 8 integer (8 binary)
 
-Root relaxation: objective 5.060052e+01, 115 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: objective 9.607447e+04, 111 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0   50.60052    0   10          -   50.60052      -     -    0s
-H    0     0                      96.2506397   50.60052  47.4%     -    0s
-H    0     0                      50.6005235   50.60052  0.00%     -    0s
-     0     0   50.60052    0   10   50.60052   50.60052  0.00%     -    0s
+     0     0 96074.4652    0    8          - 96074.4652      -     -    0s
+H    0     0                    98230.352739 96074.4652  2.19%     -    0s
 
 Cutting planes:
-  Cover: 9
-  Implied bound: 7
-  MIR: 1
-  Flow cover: 11
-  Relax-and-lift: 11
+  Gomory: 1
+  Implied bound: 4
+  Flow cover: 3
+  Relax-and-lift: 1
 
-Explored 1 nodes (137 simplex iterations) in 0.07 seconds (0.01 work units)
+Explored 1 nodes (111 simplex iterations) in 0.06 seconds (0.00 work units)
 Thread count was 8 (of 8 available processors)
 
-Solution count 2: 50.6005 96.2506
+Solution count 1: 98230.4
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 5.060052358051e+01, best bound 5.060052358051e+01, gap 0.0000%
+Best objective 9.823035273903e+04, best bound 9.823035273903e+04, gap 0.0000%
 </pre></div></div>
 </div>
-<p>The function <code class="docutils literal notranslate"><span class="pre">get_error</span></code> is useful to check that the solution computed by Gurobi is correct with respect to the regression model we use.</p>
+<p>The function <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr.get_error"><span class="std std-ref">get_error</span></a> is useful to check that the solution computed by Gurobi is correct with respect to the regression model we use.</p>
 <p>Let <span class="math notranslate nohighlight">\((\bar X, \bar y)\)</span> be the values of the input and output variables in the computed solution. The function returns <span class="math notranslate nohighlight">\(g(\bar X) - y\)</span> using the original regression (in this case the <code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code>) object.</p>
 <p>Normally, all values should be small and below Gurobi’s tolerances.</p>
 <div class="nbinput docutils container">
@@ -605,10 +604,11 @@ Best objective 5.060052358051e+01, best bound 5.060052358051e+01, gap 0.0000%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([[1.62092562e-14, 1.59872116e-14]])
+array([[-2.84217094e-14],
+       [-1.13686838e-13]])
 </pre></div></div>
 </div>
-<p>Finally, we can look at the computed values for the output variables and compare them with the original targets values.</p>
+<p>We can look at the computed values for the output variables and compare them with the original targets values.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
@@ -623,7 +623,7 @@ array([[1.62092562e-14, 1.59872116e-14]])
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([0.       , 7.1134045])
+array([-160.66011158, -269.10719293])
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -640,8 +640,17 @@ array([0.       , 7.1134045])
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-array([114.06590814, 126.35525345])
+array([-271.5437513 , -378.96885752])
 </pre></div></div>
+</div>
+<p>Finally, we can remove <code class="docutils literal notranslate"><span class="pre">pred_constr</span></code> with the function <a class="reference internal" href="api/AbstractPredictorConstr.html#gurobi_ml.modeling.AbstractPredictorConstr.remove"><span class="std std-ref">remove</span></a>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pred_constr</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+</pre></div>
+</div>
 </div>
 </section>
 
