@@ -49,5 +49,7 @@ different machine learning frameworks (scikit-learn, Keras and PyTorch).
    :caption: Reference
 
    meta-api
+   meta-further-reading
    meta-bibliography
    meta-contactus
+   meta-license
