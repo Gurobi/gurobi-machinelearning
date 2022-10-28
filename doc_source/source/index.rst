@@ -42,6 +42,7 @@ different machine learning frameworks (scikit-learn, Keras and PyTorch).
 
    mlm-supported
    mlm-examples
+   mlm-further-reading
 
 .. toctree::
    :maxdepth: 2
@@ -49,7 +50,6 @@ different machine learning frameworks (scikit-learn, Keras and PyTorch).
    :caption: Reference
 
    meta-api
-   meta-further-reading
    meta-bibliography
    meta-contactus
    meta-license
