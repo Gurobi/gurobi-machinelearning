@@ -1,7 +1,7 @@
 License
 =======
 
-Gurobi Machine Learning is distributed under the Apache License 2.0.
+Gurobi Machine Learning is distributed under the `Apache License 2.0 <https://www.apache.org/licenses/LICENSE-2.0.txt>`_.
 
 Note that Gurobi itself is a commercial software and requires a license. When
 installed via pip or conda, gurobipy ships with a `limited license
