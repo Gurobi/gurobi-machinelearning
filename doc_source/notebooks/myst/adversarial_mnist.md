@@ -51,14 +51,13 @@ Our model is inspired by <cite data-cite="fischetti_jo_2018">Fischet al. (2018)<
 
 First, we import the required packages for this example.
 
-In addition to the usual packages, we will need `matplotlib` to plot the digits, `joblib` to load a pre-trained network and `pandas` that is the format in which training examples are stored.
+In addition to the usual packages, we will need `matplotlib` to plot the digits, and `joblib` to load a pre-trained network and part of the training data.
 
 Note that from the `gurobi_ml` package we need to use directly the `add_mlp_regressor_constr` function for reasons that will be clarified later.
 
 ```{code-cell}
 import gurobipy as gp
 import numpy as np
-import pandas as pd
 from joblib import load
 from matplotlib import pyplot as plt
 
@@ -73,8 +72,9 @@ We also load the first 100 training examples of the MNIST dataset that we saved 
 
 ```{code-cell}
 # Load the trained network and the examples
-nn = load("../../../tests/predictors/MNIST_50_50.joblib")
-X = load("../../../tests/predictors/MNIST_first100.joblib")
+mnist_data = load("../../../tests/predictors/mnist__mlpclassifier.joblib")
+X = mnist_data["data"]
+nn = mnist_data["predictor"]
 ```
 
 ## Choose an example and set labels
@@ -85,9 +85,9 @@ We plot the example and verify if it is well predicted by calling the `predict` 
 ```{code-cell}
 # Choose an example
 exampleno = 26
-example = X.iloc[exampleno : exampleno + 1, :]
+example = X[exampleno : exampleno + 1, :]
 
-pixels = example.to_numpy().reshape((28, 28))
+pixels = example.reshape((28, 28))
 plt.imshow(pixels, cmap="gray")
 plt.show()
 
@@ -139,12 +139,12 @@ $$
 
 With $\eta$ denoting the `absdiff` variables.
 
-Those constraints are naturally expressed with Gurobi's Matrix API. Note that we need to convert the example which is a `pandas.DataFrame` to `numpy` for the matrix API.
+Those constraints are naturally expressed with Gurobi's Matrix API.
 
 ```{code-cell}
 # Bound on the distance to example in norm-1
-m.addConstr(abs_diff >= x - example.to_numpy())
-m.addConstr(abs_diff >= -x + example.to_numpy())
+m.addConstr(abs_diff >= x - example)
+m.addConstr(abs_diff >= -x + example)
 m.addConstr(abs_diff.sum() <= delta)
 
 # Update the model
@@ -204,8 +204,7 @@ pixels = x.X.reshape((28, 28))
 plt.imshow(pixels, cmap="gray")
 plt.show()
 
-example_mod = pd.DataFrame(data=x.X, columns=example.columns, index=example.index)
-print(f"Solution is classified as {nn.predict(example_mod)}")
+print(f"Solution is classified as {nn.predict(x.X)}")
 ```
 
 Copyright © 2022 Gurobi Optimization, LLC
