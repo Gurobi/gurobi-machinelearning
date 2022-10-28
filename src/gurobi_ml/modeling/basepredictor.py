@@ -15,7 +15,7 @@
 
 import gurobipy as gp
 
-from ..exceptions import InternalError, ModelingError
+from ..exceptions import InternalError, ParameterError
 from .submodel import SubModel
 
 
@@ -51,7 +51,7 @@ def validate_gpvars(gpvars, isinput):
             return gpvars.reshape(1, -1)
         if gpvars.ndim in (1, 2):
             return gpvars
-        raise ModelingError("Variables should be an MVar of dimension 1 or 2")
+        raise ParameterError("Variables should be an MVar of dimension 1 or 2")
     if isinstance(gpvars, dict):
         gpvars = gpvars.values()
     if isinstance(gpvars, list):
@@ -60,7 +60,7 @@ def validate_gpvars(gpvars, isinput):
         return gp.MVar.fromlist(gpvars)
     if isinstance(gpvars, gp.Var):
         return gp.MVar.fromlist([gpvars]).reshape(1, 1)
-    raise ModelingError("Could not validate variables")
+    raise ParameterError("Could not validate variables")
 
 
 class AbstractPredictorConstr(SubModel):
@@ -102,9 +102,9 @@ class AbstractPredictorConstr(SubModel):
     def _validate(input_vars, output_vars):
         """Validate input and output variables (check shapes, reshape if needed)."""
         if input_vars is None:
-            raise ModelingError("No input variables")
+            raise ParameterError("No input variables")
         if output_vars is None:
-            raise ModelingError("No output variables")
+            raise ParameterError("No output variables")
         if output_vars.ndim == 1:
             if input_vars.shape[0] == 1:
                 output_vars = output_vars.reshape((1, -1))
@@ -112,7 +112,7 @@ class AbstractPredictorConstr(SubModel):
                 output_vars = output_vars.reshape((-1, 1))
 
         if output_vars.shape[0] != input_vars.shape[0]:
-            raise ModelingError(
+            raise ParameterError(
                 "Non-conforming dimension between "
                 + "input variable and output variable: "
                 + f"{output_vars.shape[0]} != {input_vars.shape[0]}"

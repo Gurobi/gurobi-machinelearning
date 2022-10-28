@@ -6,7 +6,7 @@ import gurobipy as gp
 from base_cases import DiabetesCases, IrisCases
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import ModelingError, NoSolution
+from gurobi_ml.exceptions import NoSolution, ParameterError
 
 
 class TestAddRemove(unittest.TestCase):
@@ -72,7 +72,7 @@ class TestAddRemove(unittest.TestCase):
             numvars = model.numvars
 
             model.Params.OutputFlag = 0
-            with self.assertRaises(ModelingError):
+            with self.assertRaises(ParameterError):
                 # All of these should fail
 
                 # Both dimensions too big

@@ -25,9 +25,11 @@ from .sklearn.predictors_list import sklearn_predictors
 def pytorch_convertors():
     """Collect known PyTorch objects that can be embedded and the conversion class"""
     if "torch" in sys.modules:
-        from torch import nn as pytorchnn
+        from torch import nn as pytorchnn  # pylint: disable=import-outside-toplevel
 
-        from .torch import SequentialConstr as TorchSequential
+        from .torch import (
+            SequentialConstr as TorchSequential,  # pylint: disable=import-outside-toplevel
+        )
 
         return {pytorchnn.Sequential: TorchSequential}
     return {}
@@ -36,11 +38,17 @@ def pytorch_convertors():
 def keras_convertors():
     """Collect known Keras objects that can be embedded and the conversion class"""
     if "tensorflow" in sys.modules:
-        from keras.engine.functional import Functional
-        from keras.engine.training import Model
-        from tensorflow import keras
+        from keras.engine.functional import (
+            Functional,  # pylint: disable=import-outside-toplevel
+        )
+        from keras.engine.training import (
+            Model,  # pylint: disable=import-outside-toplevel
+        )
+        from tensorflow import keras  # pylint: disable=import-outside-toplevel
 
-        from .keras import KerasNetworkConstr as KerasPredictor
+        from .keras import (
+            KerasNetworkConstr as KerasPredictor,  # pylint: disable=import-outside-toplevel
+        )
 
         return {keras.Sequential: KerasPredictor, Functional: KerasPredictor, Model: KerasPredictor}
     return {}
