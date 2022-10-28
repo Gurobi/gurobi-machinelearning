@@ -8,7 +8,7 @@ from sklearn.ensemble import GradientBoostingRegressor  # noqa
 from sklearn.ensemble import RandomForestRegressor  # noqa
 from sklearn.linear_model import LogisticRegression  # noqa
 from sklearn.linear_model import Lasso, LinearRegression, Ridge  # noqa
-from sklearn.neural_network import MLPRegressor  # noqa
+from sklearn.neural_network import MLPClassifier, MLPRegressor  # noqa
 from sklearn.pipeline import Pipeline  # noqa
 from sklearn.pipeline import make_pipeline  # noqa
 from sklearn.preprocessing import PolynomialFeatures  # noqa
@@ -21,6 +21,8 @@ from gurobi_ml.sklearn import sklearn_predictors, sklearn_transformers
 def predictor_params(name):
     if name == "MLPRegressor":
         return "[20, 20]"
+    if name == "MLPClassifier":
+        return "[50, 50]"
     if name == "GradientBoostingRegressor":
         return "n_estimators=10, max_depth=4, max_leaf_nodes=10"
     if name == "RandomForestRegressor":
@@ -56,18 +58,23 @@ def predictor_as_string(predictor):
 class Cases:
     """Base class to have cases for testing"""
 
-    def __init__(self, excluded):
+    def __init__(self, excluded=None, regressors=None, transformers=None):
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
         version = None
 
-        regressors = [r for r in sklearn_predictors().keys() if r not in excluded]
-        transformers = list(sklearn_transformers().keys())
+        if regressors is None:
+            regressors = [r for r in sklearn_predictors().keys() if r not in excluded]
+        if transformers is None:
+            transformers = list(sklearn_transformers().keys())
 
         self.all_test = [init_predictor(reg) for reg in regressors]
 
-        self.all_test += [
-            make_pipeline(init_predictor(trans), init_predictor(reg)) for trans in transformers for reg in regressors
-        ]
+        if len(transformers):
+            self.all_test += [
+                make_pipeline(init_predictor(trans), init_predictor(reg)) for trans in transformers for reg in regressors
+            ]
+        else:
+            self.all_test += [make_pipeline(init_predictor(reg)) for reg in regressors]
         with open(os.path.join(self.basedir, "sklearn_version")) as filein:
             version = filein.read().strip()
         if version != sklearn_version:
@@ -89,7 +96,7 @@ class DiabetesCases(Cases):
     """Base class to have cases for testing regression models on diabetes set"""
 
     def __init__(self):
-        excluded = ["LogisticRegression", "MLPClassifier"]
+        excluded = ["LogisticRegression"]
         self.dataset = "diabetes"
         super().__init__(excluded=excluded)
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
@@ -115,21 +122,11 @@ class DiabetesCases(Cases):
 
 
 class IrisCases(Cases):
-    """Base class to have cases for testing regression models on diabetes set"""
+    """Base class to have cases for testing regression models on iris set"""
 
     def __init__(self):
-        excluded = [
-            "LinearRegression",
-            "Ridge",
-            "Lasso",
-            "DecisionTreeRegressor",
-            "GradientBoostingRegressor",
-            "RandomForestRegressor",
-            "MLPRegressor",
-            "MLPClassifier",
-        ]
         self.dataset = "iris"
-        super().__init__(excluded=excluded)
+        super().__init__(regressors=["LogisticRegression"])
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):
@@ -159,17 +156,12 @@ class IrisCases(Cases):
 
 class CircleCase(Cases):
     def __init__(self):
-        excluded = [
-            "LinearRegression",
-            "Ridge",
-            "Lasso",
-            "LogisticRegression",
-            "GradientBoostingRegressor",
-            "RandomForestRegressor",
-            "MLPRegressor",
-        ]
         self.dataset = "circle"
-        super().__init__(excluded=excluded)
+        super().__init__(
+            regressors=[
+                "DecisionTreeRegressor",
+            ]
+        )
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):
@@ -197,6 +189,46 @@ class CircleCase(Cases):
                 "nonconvex": nonconvex,
                 "data": X,
                 "target": y,
+            }
+
+            dump(rval, os.path.join(self.basedir, filename))
+
+
+class MNISTCase(Cases):
+    def __init__(self):
+        self.dataset = "mnist"
+        super().__init__(
+            regressors=[
+                "MLPClassifier",
+            ],
+            transformers=[],
+        )
+        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
+
+    def build_predictors(self):
+        mnist = datasets.fetch_openml("mnist_784")
+        X, y = mnist.data, mnist.target
+
+        X = X.to_numpy()
+        y = y.to_numpy()
+        X /= 255.0  # scaling
+        for predictor in self:
+            predictor.fit(X, y)
+            filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
+            nonconvex = False
+            if isinstance(predictor, Pipeline):
+                for element in predictor:
+                    if isinstance(element, PolynomialFeatures):
+                        nonconvex = True
+                        break
+
+            rval = {
+                "predictor": predictor,
+                "input_shape": X.shape,
+                "output_shape": y.shape,
+                "nonconvex": nonconvex,
+                "data": X[:100, :],
+                "target": y[:100],
             }
 
             dump(rval, os.path.join(self.basedir, filename))

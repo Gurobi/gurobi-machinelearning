@@ -1,25 +1,23 @@
 import os
-import random
 import unittest
 import warnings
 
+import base_cases
 import gurobipy as gp
 import numpy as np
 import tensorflow as tf
 import torch
-from base_cases import CircleCase, DiabetesCases, IrisCases
 from gurobipy import GurobiError
-from joblib import load
 from sklearn import datasets
 
-from gurobi_ml import add_predictor_constr
+from gurobi_ml import add_predictor_constr, register_predictor_constr
 from gurobi_ml.exceptions import NoSolution
-from gurobi_ml.sklearn import add_mlp_regressor_constr
+from gurobi_ml.sklearn import MLPRegressorConstr
 
 VERBOSE = False
 
 
-class TestFixedModel(unittest.TestCase):
+class TestFixedRegressionModel(unittest.TestCase):
     """Test that if we fix the input of the predictor the feasible solution from
     Gurobi is identical to what the predict function would return."""
 
@@ -73,7 +71,7 @@ class TestFixedModel(unittest.TestCase):
         data = datasets.load_diabetes()
 
         X = data["data"]
-        cases = DiabetesCases()
+        cases = base_cases.DiabetesCases()
 
         onecase = cases.get_case(cases.all_test[17])
         regressor = onecase["predictor"]
@@ -88,8 +86,7 @@ class TestFixedModel(unittest.TestCase):
         if combine == "all":
             # Do the average case
             examples = (examples.sum(axis=0) / n_sample).reshape(1, -1)
-        else:
-            assert combine == "pairs"
+        elif combine == "pairs":
             # Make pairwise combination of the examples
             even_rows = examples[::2, :]
             odd_rows = examples[1::2, :]
@@ -107,7 +104,7 @@ class TestFixedModel(unittest.TestCase):
         data = datasets.load_diabetes()
 
         X = data["data"]
-        cases = DiabetesCases()
+        cases = base_cases.DiabetesCases()
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
@@ -156,12 +153,12 @@ class TestFixedModel(unittest.TestCase):
         # Make it a simple classification
         X = X[y != 2]
         y = y[y != 2]
-        cases = IrisCases()
+        cases = base_cases.IrisCases()
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", "probability")
-            self.do_one_case(onecase, X, 6, "pairs", "probability")
+            self.do_one_case(onecase, X, 5, "all", "probability_1")
+            self.do_one_case(onecase, X, 6, "pairs", "probability_1")
 
     def test_iris_clf(self):
         data = datasets.load_iris()
@@ -172,7 +169,7 @@ class TestFixedModel(unittest.TestCase):
         # Make it a simple classification
         X = X[y != 2]
         y = y[y != 2]
-        cases = IrisCases()
+        cases = base_cases.IrisCases()
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
@@ -180,7 +177,7 @@ class TestFixedModel(unittest.TestCase):
             self.do_one_case(onecase, X, 6, "pairs", "classification")
 
     def test_circle(self):
-        cases = CircleCase()
+        cases = base_cases.CircleCase()
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
@@ -189,66 +186,67 @@ class TestFixedModel(unittest.TestCase):
             self.do_one_case(onecase, X, 6, "pairs", "classification")
 
 
-class TestReLU(unittest.TestCase):
+class TestMNIST(unittest.TestCase):
     """Test that various versions of ReLU work and give the same results."""
 
-    def adversarial_model(self, m, nn, example, epsilon, activation=None):
-        ex_prob = nn.predict_proba(example)
-        output_shape = ex_prob.shape
-        sortedidx = np.argsort(ex_prob)[0]
+    def fixed_model(self, predictor, examples):
+        params = {
+            "OutputFlag": 0,
+        }
+        with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
+            lb = np.maximum(examples - 1e-4, 0.0)
+            ub = np.minimum(examples + 1e-4, 1.0)
+            x = gpm.addMVar(examples.shape, lb=lb, ub=ub)
 
-        x = m.addMVar(example.shape, lb=0.0, ub=1.0, name="X")
-        absdiff = m.addMVar(example.shape, lb=0, ub=1, name="dplus")
-        output = m.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="y")
+            predictor.out_activation_ = "identity"
+            register_predictor_constr("MLPClassifier", MLPRegressorConstr)
+            pred_constr = add_predictor_constr(gpm, predictor, x, output_type="probability")
 
-        m.setObjective(output[0, sortedidx[-2]] - output[0, sortedidx[-1]], gp.GRB.MAXIMIZE)
+            y = pred_constr.output
+            with self.assertRaises(NoSolution):
+                pred_constr.get_error()
+            with open(os.devnull, "w") as outnull:
+                pred_constr.print_stats(file=outnull)
+            try:
+                gpm.optimize()
+            except GurobiError as E:
+                if E.errno == 10010:
+                    warnings.warn(UserWarning("Limited license"))
+                    self.skipTest("Model too large for limited license")
+                else:
+                    raise
 
-        # Bound on the distance to example in norm-2
-        m.addConstr(absdiff[0, :] >= x[0, :] - example.to_numpy()[0, :])
-        m.addConstr(absdiff[0, :] >= -x[0, :] + example.to_numpy()[0, :])
-        m.addConstr(absdiff[0, :].sum() <= epsilon)
+            tol = 1e-5
+            vio = gpm.MaxVio
+            if vio > 1e-5:
+                warnings.warn(UserWarning(f"Big solution violation {vio}"))
+                warnings.warn(UserWarning(f"predictor {predictor}"))
+            tol = max(tol, vio)
+            tol *= np.max(np.abs(y.X))
+            abserror = np.abs(pred_constr.get_error()).astype(float)
+            if (abserror > tol).any():
+                print(f"Error: {y.X} != {predictor.predict_proba(examples)}")
 
-        self.assertEqual(nn.out_activation_, "identity")
-        # Code to add the neural network to the constraints
-        if activation is not None:
-            activation_models = {"relu": activation}
-        else:
-            activation_models = {}
+            self.assertLessEqual(np.max(abserror), tol)
 
-        nn_constr = add_mlp_regressor_constr(m, nn, x, output, activation_models=activation_models)
-        # pipe2gurobi.steps[-1].actdict['softmax'] = Identity()
-        return nn_constr
+    def do_one_case(self, one_case, X, n_sample):
+        choice = np.random.randint(X.shape[0], size=n_sample)
+        examples = X[choice, :]
+        predictor = one_case["predictor"]
+        with super().subTest(regressor=predictor, exampleno=choice):
+            if VERBOSE:
+                print(f"Doing {predictor} with example {choice}")
+            self.fixed_model(predictor, examples)
 
-    def test_adversarial_sklearn(self):
-        # Load the trained network and the examples
-        dirname = os.path.dirname(__file__)
-        nn = load(os.path.join(dirname, "predictors/MNIST_50_50.joblib"))
-        X = load(os.path.join(dirname, "predictors/MNIST_first100.joblib"))
+    def test_mnist(self):
+        cases = base_cases.MNISTCase()
 
-        # Change the out_activation of neural network to identity
-        nn.out_activation_ = "identity"
-
-        # Choose an example
-        exampleno = random.randint(0, 99)
-        example = X.iloc[exampleno : exampleno + 1, :]
-        epsilon = 0.01
-        activations = (None,)
-        value = None
-        for activation in activations:
-            with gp.Model() as m:
-                m.Params.OutputFlag = 0
-                with self.subTest(
-                    example=exampleno,
-                    epsilon=epsilon,
-                    activation=activation,
-                    obbt=False,
-                ):
-                    self.adversarial_model(m, nn, example, epsilon, activation=activation)
-                    m.optimize()
-                    if value is None:
-                        value = m.ObjVal
-                    else:
-                        self.assertAlmostEqual(value, m.ObjVal, places=5)
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            X = onecase["data"]
+            self.do_one_case(onecase, X, 1)
+            break
+            self.do_one_case(onecase, X, 3)
 
 
 if __name__ == "__main__":

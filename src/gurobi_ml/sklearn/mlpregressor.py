@@ -26,7 +26,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
     """
 
     def __init__(self, grbmodel, predictor, input_vars, output_vars=None, clean_predictor=False, **kwargs):
-        SKgetter.__init__(self, predictor)
+        SKgetter.__init__(self, predictor, **kwargs)
         BaseNNConstr.__init__(
             self,
             grbmodel,

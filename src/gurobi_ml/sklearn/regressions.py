@@ -106,8 +106,8 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             self.attributes = self.default_pwl_attributes()
         else:
             self.attributes = pwl_attributes
-        if output_type not in ("classification", "probability"):
-            raise ParameterError("output_type should be either 'classification' or 'probability'")
+        if output_type not in ("classification", "probability_1"):
+            raise ParameterError("output_type should be either 'classification' or 'probability_1'")
         self.epsilon = epsilon
 
         BaseSKlearnRegressionConstr.__init__(
@@ -219,10 +219,10 @@ def add_logistic_regression_constr(
     output_vars: mvar_array_like, optional
         Decision variables used as output for predictor in model.
 
-    output_type: {'classification', 'probability'}, default='classification'
+    output_type: {'classification', 'probability_1'}, default='classification'
         If the option chosen is 'classification' the output is the class label
         of either 0 or 1 given by the logistic regression.
-        If the option 'probability' is chosen the output is the probabilty of the class 1.
+        If the option 'probability_1' is chosen the output is the probabilty of the class 1.
 
     epsilon: float, default=0.0
         When the `output_type` is 'classification', this tolerance can be set
