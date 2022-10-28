@@ -4,15 +4,21 @@ Basics
 Introduction
 ------------
 
+The integration of Machine Learning (ML) techniques and Mathematical
+Optimization (MO) is a topic of growing interest. One particular approach is to
+be able to use *trained* ML models in optimization models
+(:cite:t:`JANOS`, :cite:t:`Maragano.et.al2021`, :cite:t:`ceccon2022omlt`). In this approach, the
+features and the prediction of the ML model become decision variables of the
+optimization while its parameters are fixed. We say that the ML model is
+embedded in the optimization model, and we refer to the features and predictions
+as input and output variables respectively. They are linked in that, in a
+feasible solution, the output variables values are the values predicted by the
+regression from the input variables values.
+
 Gurobi Machine Learning is an open-source Python package to embed *trained*
-regression models in in a `gurobipy model
+regression models [#]_ in a `gurobipy model
 <https://www.gurobi.com/documentation/current/refman/py_model.html>`_ to be
 solved with the `Gurobi <https://www.gurobi.com>`_ solver.
-
-When the regression model is embedded in an optimization model, its input and
-output are decision variables. They are linked by the regression in that the
-output variables values are the values predicted by the regression from the
-input variables in a feasible solution.
 
 The aim of the package is to:
 
@@ -138,6 +144,30 @@ For some regression models, additional optional parameters can be set to tune
 the way the predictor is inserted in the Gurobi model. Those are documented in
 the corresponding function linked from :doc:`mlm-supported`.
 
-For a simple example on how to use the package please refer to the
-:doc:`firststeps-simple-example` section. More advanced examples are available
+For a simple example on how to use the package please refer to
+:doc:`firststeps-simple-example`. More advanced examples are available
 in the :doc:`mlm-examples` section.
+
+License
+-------
+
+Gurobi Machine Learning is distributed under the Apache License 2.0.
+
+Note that Gurobi itself is a commercial software and requires a license. When
+installed via pip or conda, gurobipy ships with a `limited license
+<https://pypi.org/project/gurobipy/>`_ which can only solve models of limited
+size. All the examples given in this documentation can be solved using
+this license.
+
+If you are a student or staff member of an academic institution you qualify for
+a free, full product license of Gurobi. For more information, see:
+
+    https://www.gurobi.com/academia/academic-program-and-licenses/
+
+For a commercial evaluation, you can request an `evaluation license
+<https://www.gurobi.com/free-trial/?utm_source=internal&utm_medium=documentation&utm_campaign=fy21_pipinstall_eval_pypipointer&utm_content=c_na&utm_term=pypi>`_.
+
+.. rubric:: Footnotes
+
+.. [#] Classification models are currently not supported (except binary logistic
+    regression) but it is planned to add support to some models over time.
