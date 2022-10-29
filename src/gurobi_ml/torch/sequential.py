@@ -69,15 +69,6 @@ class SequentialConstr(BaseNNConstr):
                 )
                 linear = None
                 _input = layer.output
-            else:
-                raise NoModel(network, "Unsupported network structure")
-        if linear is not None:
-            for name, param in linear.named_parameters():
-                if name == "weight":
-                    layer_weight = param.detach().numpy().T
-                elif name == "bias":
-                    layer_bias = param.detach().numpy()
-            layer = self.add_dense_layer(_input, layer_weight, layer_bias, self.actdict["identity"], output)
         if self._output is None:
             self._output = layer.output
 
