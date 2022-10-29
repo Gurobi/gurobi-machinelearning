@@ -15,7 +15,7 @@
 
 import gurobipy as gp
 
-from ..exceptions import InternalError, ParameterError
+from ..exceptions import ParameterError
 from .submodel import SubModel
 
 
@@ -191,7 +191,7 @@ class AbstractPredictorConstr(SubModel):
         NoSolution
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
-        raise InternalError("Not implemented")
+        assert False, "Not implemented"
 
     @property
     def output(self):

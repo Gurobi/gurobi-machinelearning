@@ -46,10 +46,3 @@ class ParameterError(Exception):
 
     def __init__(self, message):
         super().__init__(message)
-
-
-class InternalError(Exception):
-    """Internal error of the package (shouldn't happen!)"""
-
-    def __init__(self, message):
-        super().__init__(f"Internal package error: {message}")

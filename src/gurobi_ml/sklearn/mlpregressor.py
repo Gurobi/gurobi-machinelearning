@@ -61,8 +61,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
             layer = self.add_dense_layer(input_vars, layer_coefs, layer_intercept, activation, output, name=f"layer{i}")
             input_vars = layer._output  # pylint: disable=W0212
             self._model.update()
-        if self._output is None:
-            self._output = layer.output
+        assert self._output is not None  # Should never happen since sklearn object defines n_ouputs_
 
 
 def add_mlp_regressor_constr(grbmodel, mlpregressor, input_vars, output_vars=None, **kwargs):

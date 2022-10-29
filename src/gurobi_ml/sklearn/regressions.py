@@ -101,7 +101,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         **kwargs,
     ):
         if len(predictor.classes_) > 2:
-            raise NoModel("Logistic regression only supported for two classes")
+            raise NoModel(predictor, "Logistic regression only supported for two classes")
         if pwl_attributes is None:
             self.attributes = self.default_pwl_attributes()
         else:

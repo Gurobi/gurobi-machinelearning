@@ -50,8 +50,6 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         name, obj = pipeline.steps[-1]
         predictors = {}
         for key, item in sklearn_predictors().items():
-            if not isinstance(key, str):
-                key = key.__name__
             predictors[key.lower()] = item
         for key, item in user_predictors().items():
             if not isinstance(key, str):

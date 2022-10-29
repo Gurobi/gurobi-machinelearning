@@ -21,7 +21,7 @@ class TestFixedRegressionModel(unittest.TestCase):
     """Test that if we fix the input of the predictor the feasible solution from
     Gurobi is identical to what the predict function would return."""
 
-    def fixed_model(self, predictor, examples, nonconvex, output_type=""):
+    def fixed_model(self, predictor, examples, nonconvex, **kwargs):
         params = {
             "OutputFlag": 0,
             "NonConvex": 2,
@@ -35,7 +35,7 @@ class TestFixedRegressionModel(unittest.TestCase):
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
             x = gpm.addMVar(examples.shape, lb=examples - 1e-4, ub=examples + 1e-4)
 
-            pred_constr = add_predictor_constr(gpm, predictor, x, epsilon=1e-5, float_type=np.float32, output_type=output_type)
+            pred_constr = add_predictor_constr(gpm, predictor, x, **kwargs)
 
             y = pred_constr.output
             with self.assertRaises(NoSolution):
@@ -80,7 +80,7 @@ class TestFixedRegressionModel(unittest.TestCase):
                 print("Test {}".format(exampleno))
                 self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"])
 
-    def do_one_case(self, one_case, X, n_sample, combine, isproba=False):
+    def do_one_case(self, one_case, X, n_sample, combine, **kwargs):
         choice = np.random.randint(X.shape[0], size=n_sample)
         examples = X[choice, :]
         if combine == "all":
@@ -98,7 +98,7 @@ class TestFixedRegressionModel(unittest.TestCase):
         with super().subTest(regressor=predictor, exampleno=choice, n_sample=n_sample, combine=combine):
             if VERBOSE:
                 print(f"Doing {predictor} with example {choice}")
-            self.fixed_model(predictor, examples, one_case["nonconvex"], isproba)
+            self.fixed_model(predictor, examples, one_case["nonconvex"], **kwargs)
 
     def test_diabetes_sklearn(self):
         data = datasets.load_diabetes()
@@ -157,8 +157,8 @@ class TestFixedRegressionModel(unittest.TestCase):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", "probability_1")
-            self.do_one_case(onecase, X, 6, "pairs", "probability_1")
+            self.do_one_case(onecase, X, 5, "all", output_type="probability_1")
+            self.do_one_case(onecase, X, 6, "pairs", output_type="probability_1")
 
     def test_iris_clf(self):
         data = datasets.load_iris()
@@ -173,8 +173,23 @@ class TestFixedRegressionModel(unittest.TestCase):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", "classification")
-            self.do_one_case(onecase, X, 6, "pairs", "classification")
+            self.do_one_case(onecase, X, 5, "all", output_type="classification")
+            self.do_one_case(onecase, X, 6, "pairs", output_type="classification")
+
+    def test_iris_pwl_args(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        y = data.target
+
+        # Make it a simple classification
+        X = X[y != 2]
+        y = y[y != 2]
+        cases = base_cases.IrisCases()
+
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            self.do_one_case(onecase, X, 5, "all", output_type="classification", pwl_attributes={"FuncPieces": 5})
 
     def test_circle(self):
         cases = base_cases.CircleCase()
@@ -182,8 +197,8 @@ class TestFixedRegressionModel(unittest.TestCase):
         for regressor in cases:
             onecase = cases.get_case(regressor)
             X = onecase["data"]
-            self.do_one_case(onecase, X, 5, "all", "classification")
-            self.do_one_case(onecase, X, 6, "pairs", "classification")
+            self.do_one_case(onecase, X, 5, "all")
+            self.do_one_case(onecase, X, 6, "pairs")
 
 
 class TestMNIST(unittest.TestCase):
