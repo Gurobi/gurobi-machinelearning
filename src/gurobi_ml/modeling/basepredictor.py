@@ -95,16 +95,10 @@ class AbstractPredictorConstr(SubModel):
             self._output = None
         SubModel.__init__(self, grbmodel, **kwargs)
 
-    def _set_output(self, output_vars):
-        self._output = validate_gpvars(output_vars, False)
-
-    @staticmethod
-    def _validate(input_vars, output_vars):
+    def _validate(self):
         """Validate input and output variables (check shapes, reshape if needed)."""
-        if input_vars is None:
-            raise ParameterError("No input variables")
-        if output_vars is None:
-            raise ParameterError("No output variables")
+        input_vars = self._input
+        output_vars = self._output
         if output_vars.ndim == 1:
             if input_vars.shape[0] == 1:
                 output_vars = output_vars.reshape((1, -1))
@@ -118,14 +112,15 @@ class AbstractPredictorConstr(SubModel):
                 + f"{output_vars.shape[0]} != {input_vars.shape[0]}"
             )
 
-        return (input_vars, output_vars)
+        self._input = input_vars
+        self._output = output_vars
 
     def _build_submodel(self, model, *args, **kwargs):
         """Predict output from input using predictor or transformer"""
         if self._output is None:
             self._create_output_vars(self._input)
         if self._output is not None:
-            self._input, self._output = self._validate(self._input, self._output)
+            self._validate()
         else:
             self._input = validate_gpvars(self._input, True)
         self._mip_model()
