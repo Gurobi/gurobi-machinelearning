@@ -2,7 +2,6 @@ import unittest
 
 import gurobipy as gp
 import numpy as np
-import skorch
 import tensorflow as tf
 import torch
 from tensorflow import keras
@@ -137,14 +136,6 @@ class TestUnsuportedTorch(unittest.TestCase):
             torch.nn.Linear(64, 10),
             torch.nn.Softmax(1),
         )
-
-        clf = skorch.NeuralNetClassifier(
-            nn_model,
-            max_epochs=0,
-            lr=0.1,
-            iterator_train__shuffle=True,
-        )
-        clf.fit(X=self.x_train, y=self.y_train)
 
         example = self.x_train[18, :]
 
