@@ -20,8 +20,6 @@ class NotRegistered(Exception):
     """Predictor is not supported by gurobi_ml"""
 
     def __init__(self, predictor):
-        if not isinstance(predictor, str):
-            predictor = type(predictor).__name__
         super().__init__(f"Object of type {predictor} is not registered/supported with gurobi_ml")
 
 

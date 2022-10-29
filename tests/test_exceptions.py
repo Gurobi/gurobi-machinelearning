@@ -8,7 +8,7 @@ from sklearn import datasets
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import QuantileTransformer
+from sklearn.preprocessing import PolynomialFeatures, QuantileTransformer
 from sklearn.svm import LinearSVR
 from tensorflow import keras
 
@@ -213,6 +213,23 @@ class TestUnsuportedSklearn(unittest.TestCase):
         y = data.target
 
         mlpreg = make_pipeline(QuantileTransformer(), MLPRegressor([10] * 2))
+        mlpreg.fit(X, y)
+        example = X[10, :]
+
+        m = gp.Model()
+
+        x = m.addMVar(example.shape, name="x")
+
+        with self.assertRaises(NoModel):
+            add_predictor_constr(m, mlpreg, x)
+
+    def test_polynomial_feature_degree3(self):
+        data = datasets.load_diabetes()
+
+        X = data.data
+        y = data.target
+
+        mlpreg = make_pipeline(PolynomialFeatures(3), MLPRegressor([10] * 2))
         mlpreg.fit(X, y)
         example = X[10, :]
 

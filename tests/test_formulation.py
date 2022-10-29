@@ -12,7 +12,7 @@ from sklearn import datasets
 
 from gurobi_ml import add_predictor_constr, register_predictor_constr
 from gurobi_ml.exceptions import NoSolution
-from gurobi_ml.sklearn import MLPRegressorConstr
+from gurobi_ml.sklearn import add_mlp_regressor_constr
 
 VERBOSE = False
 
@@ -214,7 +214,7 @@ class TestMNIST(unittest.TestCase):
             x = gpm.addMVar(examples.shape, lb=lb, ub=ub)
 
             predictor.out_activation_ = "identity"
-            register_predictor_constr("MLPClassifier", MLPRegressorConstr)
+            register_predictor_constr("MLPClassifier", add_mlp_regressor_constr)
             pred_constr = add_predictor_constr(gpm, predictor, x, output_type="probability")
 
             y = pred_constr.output

@@ -211,8 +211,8 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         nex = _input.shape[0]
 
         outdim = output.shape[1]
-        if outdim != 1:
-            raise NoModel(predictor, "Can only deal with 1-dimensional regression. Output dimension {}".format(outdim))
+        assert outdim == 1, "Output dimension of gradient boosting regressor should be 1"
+
         treevars = model.addMVar((nex, predictor.n_estimators_), lb=-GRB.INFINITY, name="estimator")
         constant = predictor.init_.constant_
 
@@ -234,7 +234,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         if predictor.n_outputs_ != 1:
             raise NoModel(
                 predictor,
-                "Can only deal with 1-dimensional regression trees. Output dimension {}".format(predictor.n_outputs_),
+                "Can only deal with 1-dimensional random forest. Output dimension {}".format(predictor.n_outputs_),
             )
         SKgetter.__init__(self, predictor)
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)

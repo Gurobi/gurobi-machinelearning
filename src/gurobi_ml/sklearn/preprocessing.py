@@ -92,7 +92,7 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
                 self.model.addConstr(output[k, i] == qexpr, name=f"polyfeat[{k},{i}]")
 
 
-def add_polynomial_features_constr(grbmodel, polynomial_features, input_vars, output_vars=None, **kwargs):
+def add_polynomial_features_constr(grbmodel, polynomial_features, input_vars, **kwargs):
     """Use `polynomial_features` to predict the value of `output_vars` using `input_vars` in `grbmodel`
 
     Parameters
@@ -116,10 +116,10 @@ def add_polynomial_features_constr(grbmodel, polynomial_features, input_vars, ou
     ----
     See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
     """
-    return PolynomialFeaturesConstr(grbmodel, polynomial_features, input_vars, output_vars, **kwargs)
+    return PolynomialFeaturesConstr(grbmodel, polynomial_features, input_vars, **kwargs)
 
 
-def add_standard_scaler_constr(grbmodel, standard_scaler, input_vars, output_vars=None, **kwargs):
+def add_standard_scaler_constr(grbmodel, standard_scaler, input_vars, **kwargs):
     """Use a `standard_scaler` to predict the value of `output_vars` using `input_vars` in `grbmodel`
 
     Parameters
@@ -143,4 +143,4 @@ def add_standard_scaler_constr(grbmodel, standard_scaler, input_vars, output_var
     ----
     See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
     """
-    return StandardScalerConstr(grbmodel, standard_scaler, input_vars, output_vars, **kwargs)
+    return StandardScalerConstr(grbmodel, standard_scaler, input_vars, **kwargs)

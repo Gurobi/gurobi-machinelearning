@@ -18,7 +18,7 @@
 
 from .exceptions import NotRegistered
 from .registered_predictors import registered_predictors
-from .sklearn import PipelineConstr, sklearn_transformers
+from .sklearn import add_pipeline_constr, sklearn_transformers
 
 
 def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwargs):
@@ -66,7 +66,7 @@ def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwarg
     convertors = registered_predictors()
     convertors |= sklearn_transformers()
     convertors |= {
-        "Pipeline": PipelineConstr,
+        "Pipeline": add_pipeline_constr,
     }
     try:
         convertor = convertors[type(predictor)]

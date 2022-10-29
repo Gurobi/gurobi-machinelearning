@@ -17,9 +17,7 @@
 """
 import sys
 
-from gurobi_ml.sklearn.predictors_list import sklearn_predictors, user_predictors
-
-from .sklearn.predictors_list import sklearn_predictors
+from .sklearn.predictors_list import sklearn_predictors, user_predictors
 
 
 def pytorch_convertors():
@@ -28,10 +26,10 @@ def pytorch_convertors():
         from torch import nn as pytorchnn  # pylint: disable=import-outside-toplevel
 
         from .torch import (
-            SequentialConstr as TorchSequential,  # pylint: disable=import-outside-toplevel
+            add_sequential_constr as add_torch_sequential_constr,  # pylint: disable=import-outside-toplevel
         )
 
-        return {pytorchnn.Sequential: TorchSequential}
+        return {pytorchnn.Sequential: add_torch_sequential_constr}
     return {}
 
 
@@ -47,10 +45,10 @@ def keras_convertors():
         from tensorflow import keras  # pylint: disable=import-outside-toplevel
 
         from .keras import (
-            KerasNetworkConstr as KerasPredictor,  # pylint: disable=import-outside-toplevel
+            add_keras_constr as add_keras_constr,  # pylint: disable=import-outside-toplevel
         )
 
-        return {keras.Sequential: KerasPredictor, Functional: KerasPredictor, Model: KerasPredictor}
+        return {keras.Sequential: add_keras_constr, Functional: add_keras_constr, Model: add_keras_constr}
     return {}
 
 
