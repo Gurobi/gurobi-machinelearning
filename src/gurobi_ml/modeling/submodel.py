@@ -117,8 +117,6 @@ class SubModel:
 
         if default_name is not None:
             self._default_name = default_name
-        elif model_function is not None:
-            self._default_name = model_function.__name__
         else:
             self._default_name = type(self).__name__
 
@@ -324,9 +322,6 @@ class SubModel:
             Text stream to which output should be redirected. By default sys.stdout.
         """
         name = self._name
-        if name == "":
-            name = self.default_name
-
         print(f"Model for {name}:", file=file)
         print(f"{len(self.vars)} variables", file=file)
         print(f"{len(self.constrs)} constraints", file=file)
@@ -344,13 +339,6 @@ class SubModel:
     def model(self):
         """Access model the submodel is a part of"""
         return self._model
-
-    @property
-    def results(self):
-        """Access the results from the _build_submodel() method.
-
-        :meta private:"""
-        return self._objects
 
     @property
     def default_name(self):
@@ -383,20 +371,3 @@ class SubModel:
             self._last_callback = None
             self._model = None
             self._objects = None
-
-    # Methods to give direct access to result dict
-
-    def keys(self):
-        """Returns all keys of the results dictionary
-
-        :meta private:"""
-        return self._objects.keys()
-
-    def __getitem__(self, key):
-        return self._objects[key]
-
-    def __iter__(self):
-        return self._objects.__iter__()
-
-    def __len__(self):
-        return self._objects.__len__()

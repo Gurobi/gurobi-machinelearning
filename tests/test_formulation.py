@@ -9,10 +9,12 @@ import tensorflow as tf
 import torch
 from gurobipy import GurobiError
 from sklearn import datasets
+from sklearn.pipeline import Pipeline
 
 from gurobi_ml import add_predictor_constr, register_predictor_constr
 from gurobi_ml.exceptions import NoSolution
 from gurobi_ml.sklearn import add_mlp_regressor_constr
+from gurobi_ml.sklearn.pipeline import PipelineConstr
 
 VERBOSE = False
 
@@ -38,6 +40,16 @@ class TestFixedRegressionModel(unittest.TestCase):
             pred_constr = add_predictor_constr(gpm, predictor, x, **kwargs)
 
             y = pred_constr.output
+
+            if isinstance(predictor, Pipeline):
+                self.assertIsInstance(pred_constr, PipelineConstr)
+                self.assertEqual(len(predictor), len(pred_constr))
+                for i in range(len(pred_constr)):
+                    predictor_name = type(predictor[i]).__name__
+                    linear = ["Lasso", "Ridge"]
+                    if predictor_name in linear:
+                        predictor_name = "LinearRegression"
+                    self.assertEqual(predictor_name, type(pred_constr[i]).__name__[: -len("Constr")])
             with self.assertRaises(NoSolution):
                 pred_constr.get_error()
             with open(os.devnull, "w") as outnull:
