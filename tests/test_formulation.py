@@ -99,11 +99,12 @@ class TestFixedRegressionModel(unittest.TestCase):
             # Do the average case
             examples = (examples.sum(axis=0) / n_sample).reshape(1, -1)
         elif combine == "pairs":
+            np.random.shuffle(examples)
             # Make pairwise combination of the examples
             even_rows = examples[::2, :]
             odd_rows = examples[1::2, :]
             assert odd_rows.shape == even_rows.shape
-            examples = (even_rows + odd_rows) / 2.0 + 1e-2
+            examples = (even_rows + odd_rows) / 2.0 - 1e-2
             assert examples.shape == even_rows.shape
 
         predictor = one_case["predictor"]
@@ -120,8 +121,8 @@ class TestFixedRegressionModel(unittest.TestCase):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all")
-            self.do_one_case(onecase, X, 6, "pairs")
+            self.do_one_case(onecase, X, 5, "all", float_type=np.float32)
+            self.do_one_case(onecase, X, 6, "pairs", float_type=np.float32)
 
     def test_diabetes_pytorch(self):
         data = datasets.load_diabetes()
