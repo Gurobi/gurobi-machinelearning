@@ -4,8 +4,8 @@ version = "1.0.0.dev1"
 description = "package to insert ML models in Gurobi"
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "APACHE"}
-keywords = ["optimization", "mip", "lp", "gurobi", "scikit-learn", "pytorch", "tensorflow", "ml"]
+license = {text="Apache-2.0"}
+keywords = ["mathematical optimization", "gurobi", "scikit-learn", "pytorch", "tensorflow", "ml"]
 authors = [
   {email = "bonami@gurobi.com"},
   {name = "Pierre Bonami"}
