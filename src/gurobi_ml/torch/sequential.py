@@ -41,10 +41,12 @@ class SequentialConstr(BaseNNConstr):
     def _mip_model(self):
         network = self.predictor
         _input = self._input
-        output = self._output
+        output = None
+        numlayers = len(network)
 
-        linear = None
         for i, step in enumerate(network):
+            if i == numlayers - 1:
+                output = self._output
             if isinstance(step, nn.ReLU):
                 layer = self.add_activation_layer(
                     _input,
@@ -64,10 +66,9 @@ class SequentialConstr(BaseNNConstr):
                     layer_weight,
                     layer_bias,
                     self.actdict["identity"],
-                    None,
+                    output,
                     name=f"{i}",
                 )
-                linear = None
                 _input = layer.output
         if self._output is None:
             self._output = layer.output
