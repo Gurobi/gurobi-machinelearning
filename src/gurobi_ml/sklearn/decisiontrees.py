@@ -19,7 +19,6 @@
 import numpy as np
 from gurobipy import GRB
 
-from ..exceptions import NoModel
 from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 
@@ -213,16 +212,16 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         outdim = output.shape[1]
         assert outdim == 1, "Output dimension of gradient boosting regressor should be 1"
 
-        treevars = model.addMVar((nex, predictor.n_estimators_), lb=-GRB.INFINITY, name="estimator")
+        treevars = model.addMVar((nex, predictor.n_estimators_, 1), lb=-GRB.INFINITY, name="estimator")
         constant = predictor.init_.constant_
 
         estimators = []
         for i in range(predictor.n_estimators_):
             tree = predictor.estimators_[i]
-            estimators.append(DecisionTreeRegressorConstr(model, tree[0], _input, treevars[:, i], default_name="gbt_tree"))
+            estimators.append(DecisionTreeRegressorConstr(model, tree[0], _input, treevars[:, i, :], default_name="gbt_tree"))
         self.estimators_ = estimators
 
-        model.addConstr(output[:, 0] == predictor.learning_rate * treevars.sum(axis=1) + constant[0][0])
+        model.addConstr(output == predictor.learning_rate * treevars.sum(axis=1) + constant[0][0])
 
 
 class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
@@ -231,11 +230,6 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
     def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
         self.n_outputs_ = predictor.n_outputs_
         self.estimators_ = []
-        if predictor.n_outputs_ != 1:
-            raise NoModel(
-                predictor,
-                "Can only deal with 1-dimensional random forest. Output dimension {}".format(predictor.n_outputs_),
-            )
         SKgetter.__init__(self, predictor)
         AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
 
@@ -252,12 +246,12 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         output = self._output
         nex = _input.shape[0]
 
-        treevars = model.addMVar((nex, predictor.n_estimators), lb=-GRB.INFINITY, name="estimator")
+        treevars = model.addMVar((nex, predictor.n_estimators, self.n_outputs_), lb=-GRB.INFINITY, name="estimator")
 
         estimators = []
         for i in range(predictor.n_estimators):
             tree = predictor.estimators_[i]
-            estimators.append(DecisionTreeRegressorConstr(model, tree, _input, treevars[:, i], default_name="rf_tree"))
+            estimators.append(DecisionTreeRegressorConstr(model, tree, _input, treevars[:, i, :], default_name="rf_tree"))
         self.estimators_ = estimators
 
-        model.addConstr(predictor.n_estimators * output[:, 0] == treevars.sum(axis=1))
+        model.addConstr(predictor.n_estimators * output == treevars.sum(axis=1))
