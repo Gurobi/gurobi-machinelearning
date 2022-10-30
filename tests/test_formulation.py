@@ -23,6 +23,9 @@ class TestFixedRegressionModel(unittest.TestCase):
     """Test that if we fix the input of the predictor the feasible solution from
     Gurobi is identical to what the predict function would return."""
 
+    def setUp(self) -> None:
+        self.rng = np.random.default_rng(1)
+
     def fixed_model(self, predictor, examples, nonconvex, **kwargs):
         params = {
             "OutputFlag": 0,
@@ -93,13 +96,12 @@ class TestFixedRegressionModel(unittest.TestCase):
                 self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"])
 
     def do_one_case(self, one_case, X, n_sample, combine, **kwargs):
-        choice = np.random.randint(X.shape[0], size=n_sample)
+        choice = self.rng.integers(X.shape[0], size=n_sample)
         examples = X[choice, :]
         if combine == "all":
             # Do the average case
-            examples = (examples.sum(axis=0) / n_sample).reshape(1, -1)
+            examples = (examples.sum(axis=0) / n_sample).reshape(1, -1) - 1e-2
         elif combine == "pairs":
-            np.random.shuffle(examples)
             # Make pairwise combination of the examples
             even_rows = examples[::2, :]
             odd_rows = examples[1::2, :]
@@ -217,6 +219,9 @@ class TestFixedRegressionModel(unittest.TestCase):
 class TestMNIST(unittest.TestCase):
     """Test that various versions of ReLU work and give the same results."""
 
+    def setUp(self) -> None:
+        self.rng = np.random.default_rng(1)
+
     def fixed_model(self, predictor, examples):
         params = {
             "OutputFlag": 0,
@@ -258,7 +263,7 @@ class TestMNIST(unittest.TestCase):
             self.assertLessEqual(np.max(abserror), tol)
 
     def do_one_case(self, one_case, X, n_sample):
-        choice = np.random.randint(X.shape[0], size=n_sample)
+        choice = self.rng.integers(X.shape[0], size=n_sample)
         examples = X[choice, :]
         predictor = one_case["predictor"]
         with super().subTest(regressor=predictor, exampleno=choice):

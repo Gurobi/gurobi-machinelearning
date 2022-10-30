@@ -24,7 +24,7 @@ from .skgetter import SKgetter
 
 
 def add_decision_tree_regressor_constr(
-    grbmodel, decision_tree_regressor, input_vars, output_vars=None, epsilon=0.0, scale=1.0, float_type=None, **kwargs
+    grbmodel, decision_tree_regressor, input_vars, output_vars=None, epsilon=0.0, scale=1.0, float_type=np.float32, **kwargs
 ):
     """Use a `decision_tree_regressor` to predict the value of `output_vars` using `input_vars` in `grbmodel`
 
@@ -124,7 +124,9 @@ def add_random_forest_regressor_constr(grbmodel, random_forest_regressor, input_
 class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model a trained decision tree in a Gurobi model"""
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, epsilon=0.0, scale=1.0, float_type=None, **kwargs):
+    def __init__(
+        self, grbmodel, predictor, input_vars, output_vars=None, epsilon=0.0, scale=1.0, float_type=np.float32, **kwargs
+    ):
         self.n_outputs_ = predictor.n_outputs_
         self.epsilon = epsilon
         self.scale = scale
@@ -158,8 +160,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
             left = tree.children_left[node]
             right = tree.children_right[node]
             threshold = tree.threshold[node]
-            if self.float_type is not None:
-                threshold = self.float_type(threshold)
+            threshold = self.float_type(threshold)
             scale = max(abs(1 / threshold), self.scale)
             if left >= 0:
                 # Intermediate node

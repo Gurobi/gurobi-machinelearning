@@ -1,7 +1,9 @@
 import unittest
+import warnings
 
 import gurobipy as gp
 from sklearn import datasets
+from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
@@ -20,7 +22,9 @@ class TestUnsuportedSklearn(unittest.TestCase):
         y = data.target
 
         logreg = LogisticRegression()
-        logreg.fit(X, y)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=ConvergenceWarning)
+            logreg.fit(X, y)
         example = X[10, :]
 
         m = gp.Model()
@@ -55,7 +59,9 @@ class TestUnsuportedSklearn(unittest.TestCase):
         y = data.target
 
         mlpreg = MLPRegressor([10] * 2, activation="logistic")
-        mlpreg.fit(X, y)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=ConvergenceWarning)
+            mlpreg.fit(X, y)
         example = X[10, :]
 
         m = gp.Model()
@@ -72,7 +78,10 @@ class TestUnsuportedSklearn(unittest.TestCase):
         y = data.target
 
         mlpreg = make_pipeline(QuantileTransformer(), MLPRegressor([10] * 2))
-        mlpreg.fit(X, y)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=ConvergenceWarning)
+            warnings.simplefilter("ignore", category=UserWarning)
+            mlpreg.fit(X, y)
         example = X[10, :]
 
         m = gp.Model()
@@ -89,7 +98,9 @@ class TestUnsuportedSklearn(unittest.TestCase):
         y = data.target
 
         mlpreg = make_pipeline(PolynomialFeatures(3), MLPRegressor([10] * 2))
-        mlpreg.fit(X, y)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=ConvergenceWarning)
+            mlpreg.fit(X, y)
         example = X[10, :]
 
         m = gp.Model()
