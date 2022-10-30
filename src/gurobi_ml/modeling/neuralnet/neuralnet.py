@@ -93,8 +93,6 @@ class BaseNNConstr(AbstractPredictorConstr):
             Text stream to which output should be redirected. By default sys.stdout.
         """
         name = self._name
-        if name == "":
-            name = self.default_name
         super().print_stats(file)
         print(file=file)
         print(f"{name} has {len(self._layers)} layers:", file=file)

@@ -15,7 +15,7 @@
 
 import gurobipy as gp
 
-from ..exceptions import InternalError, ModelingError
+from ..exceptions import ParameterError
 from .submodel import SubModel
 
 
@@ -51,7 +51,7 @@ def validate_gpvars(gpvars, isinput):
             return gpvars.reshape(1, -1)
         if gpvars.ndim in (1, 2):
             return gpvars
-        raise ModelingError("Variables should be an MVar of dimension 1 or 2")
+        raise ParameterError("Variables should be an MVar of dimension 1 or 2")
     if isinstance(gpvars, dict):
         gpvars = gpvars.values()
     if isinstance(gpvars, list):
@@ -60,7 +60,7 @@ def validate_gpvars(gpvars, isinput):
         return gp.MVar.fromlist(gpvars)
     if isinstance(gpvars, gp.Var):
         return gp.MVar.fromlist([gpvars]).reshape(1, 1)
-    raise ModelingError("Could not validate variables")
+    raise ParameterError("Could not validate variables")
 
 
 class AbstractPredictorConstr(SubModel):
@@ -95,16 +95,10 @@ class AbstractPredictorConstr(SubModel):
             self._output = None
         SubModel.__init__(self, grbmodel, **kwargs)
 
-    def _set_output(self, output_vars):
-        self._output = validate_gpvars(output_vars, False)
-
-    @staticmethod
-    def _validate(input_vars, output_vars):
+    def _validate(self):
         """Validate input and output variables (check shapes, reshape if needed)."""
-        if input_vars is None:
-            raise ModelingError("No input variables")
-        if output_vars is None:
-            raise ModelingError("No output variables")
+        input_vars = self._input
+        output_vars = self._output
         if output_vars.ndim == 1:
             if input_vars.shape[0] == 1:
                 output_vars = output_vars.reshape((1, -1))
@@ -112,20 +106,21 @@ class AbstractPredictorConstr(SubModel):
                 output_vars = output_vars.reshape((-1, 1))
 
         if output_vars.shape[0] != input_vars.shape[0]:
-            raise ModelingError(
+            raise ParameterError(
                 "Non-conforming dimension between "
                 + "input variable and output variable: "
                 + f"{output_vars.shape[0]} != {input_vars.shape[0]}"
             )
 
-        return (input_vars, output_vars)
+        self._input = input_vars
+        self._output = output_vars
 
     def _build_submodel(self, model, *args, **kwargs):
         """Predict output from input using predictor or transformer"""
         if self._output is None:
             self._create_output_vars(self._input)
         if self._output is not None:
-            self._input, self._output = self._validate(self._input, self._output)
+            self._validate()
         else:
             self._input = validate_gpvars(self._input, True)
         self._mip_model()
@@ -191,7 +186,7 @@ class AbstractPredictorConstr(SubModel):
         NoSolution
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
-        raise InternalError("Not implemented")
+        assert False, "Not implemented"
 
     @property
     def output(self):

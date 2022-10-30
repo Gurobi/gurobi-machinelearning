@@ -157,11 +157,7 @@ class IrisCases(Cases):
 class CircleCase(Cases):
     def __init__(self):
         self.dataset = "circle"
-        super().__init__(
-            regressors=[
-                "DecisionTreeRegressor",
-            ]
-        )
+        super().__init__(regressors=["DecisionTreeRegressor", "RandomForestRegressor"])
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):

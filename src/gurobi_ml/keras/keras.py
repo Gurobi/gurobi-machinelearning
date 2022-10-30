@@ -29,19 +29,20 @@ class KerasNetworkConstr(BaseNNConstr):
         for step in predictor.layers:
             if isinstance(step, keras.layers.Dense):
                 config = step.get_config()
-                if config["activation"] not in ("relu", "linear"):
-                    raise NoModel(predictor, "Unsupported network structure")
+                activation = config["activation"]
+                if activation not in ("relu", "linear"):
+                    raise NoModel(predictor, f"Unsupported activation {activation}")
             elif isinstance(step, keras.layers.ReLU):
-                pass
-            elif isinstance(step, keras.layers.InputLayer):
                 if step.negative_slope != 0.0:
                     raise NoModel(predictor, "Only handle ReLU layers with negative slope 0.0")
                 if step.threshold != 0.0:
                     raise NoModel(predictor, "Only handle ReLU layers with threshold of 0.0")
                 if step.max_value is not None and step.max_value < float("inf"):
                     raise NoModel(predictor, "Only handle ReLU layers without maxvalue")
+            elif isinstance(step, keras.layers.InputLayer):
+                pass
             else:
-                raise NoModel(predictor, "Unsupported network structure")
+                raise NoModel(predictor, f"Unsupported network layer {type(step).__name__}")
 
         super().__init__(grbmodel, predictor, input_vars, output_vars, **kwargs)
 

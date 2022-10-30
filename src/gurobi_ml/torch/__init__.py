@@ -13,4 +13,4 @@
 # limitations under the License.
 # ==============================================================================
 
-from .sequential import SequentialConstr, add_sequential_constr
+from .sequential import add_sequential_constr

@@ -14,13 +14,13 @@
 # ==============================================================================
 
 from .decisiontrees import (
-    DecisionTreeRegressorConstr,
-    GradientBoostingRegressorConstr,
-    RandomForestRegressorConstr,
+    add_decision_tree_regressor_constr,
+    add_gradient_boosting_regressor_constr,
+    add_random_forest_regressor_constr,
 )
-from .mlpregressor import MLPRegressorConstr
-from .preprocessing import PolynomialFeaturesConstr, StandardScalerConstr
-from .regressions import LinearRegressionConstr, LogisticRegressionConstr
+from .mlpregressor import add_mlp_regressor_constr
+from .preprocessing import add_polynomial_features_constr, add_standard_scaler_constr
+from .regressions import add_linear_regression_constr, add_logistic_regression_constr
 
 USER_PREDICTORS = {}
 
@@ -41,21 +41,21 @@ def register_predictor_constr(predictor, predictor_constr):
 
 def sklearn_transformers():
     return {
-        "StandardScaler": StandardScalerConstr,
-        "PolynomialFeatures": PolynomialFeaturesConstr,
+        "StandardScaler": add_standard_scaler_constr,
+        "PolynomialFeatures": add_polynomial_features_constr,
     }
 
 
 def sklearn_predictors():
     return {
-        "LinearRegression": LinearRegressionConstr,
-        "Ridge": LinearRegressionConstr,
-        "Lasso": LinearRegressionConstr,
-        "LogisticRegression": LogisticRegressionConstr,
-        "DecisionTreeRegressor": DecisionTreeRegressorConstr,
-        "GradientBoostingRegressor": GradientBoostingRegressorConstr,
-        "RandomForestRegressor": RandomForestRegressorConstr,
-        "MLPRegressor": MLPRegressorConstr,
+        "LinearRegression": add_linear_regression_constr,
+        "Ridge": add_linear_regression_constr,
+        "Lasso": add_linear_regression_constr,
+        "LogisticRegression": add_logistic_regression_constr,
+        "DecisionTreeRegressor": add_decision_tree_regressor_constr,
+        "GradientBoostingRegressor": add_gradient_boosting_regressor_constr,
+        "RandomForestRegressor": add_random_forest_regressor_constr,
+        "MLPRegressor": add_mlp_regressor_constr,
     }
 
 

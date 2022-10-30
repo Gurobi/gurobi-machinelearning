@@ -6,7 +6,7 @@ import gurobipy as gp
 from base_cases import DiabetesCases, IrisCases
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import ModelingError, NoSolution
+from gurobi_ml.exceptions import NoSolution, ParameterError
 
 
 class TestAddRemove(unittest.TestCase):
@@ -72,23 +72,10 @@ class TestAddRemove(unittest.TestCase):
             numvars = model.numvars
 
             model.Params.OutputFlag = 0
-            with self.assertRaises(ModelingError):
-                # All of these should fail
-
+            # All of these should fail
+            with self.assertRaises(ParameterError):
                 # Both dimensions too big
-                pred2grb = add_predictor_constr(model, predictor, x, y)
-
-                # Second dimension (features) too big
-                pred2grb = add_predictor_constr(model, predictor, x.reshape(a, b + 1), y)
-
-                # Second dimension (features too small
-                pred2grb = add_predictor_constr(model, predictor, x.reshape(a, b - 1), y)
-
-                # Empty input variable
-                pred2grb = add_predictor_constr(model, predictor, None, y)
-
-                # Mismatch in input output dimensions
-                pred2grb = add_predictor_constr(model, predictor, x.reshape(a - 1, b), y)
+                add_predictor_constr(model, predictor, x, y)
 
     def add_remove_no_output(self, predictor, input_shape, output_shape, nonconvex):
         """Add and remove the predictor to model"""

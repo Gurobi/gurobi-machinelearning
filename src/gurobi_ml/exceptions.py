@@ -13,32 +13,34 @@
 # limitations under the License.
 # ==============================================================================
 
+""" Exceptions for gurobi_ml """
+
 
 class NotRegistered(Exception):
+    """Predictor is not supported by gurobi_ml"""
+
     def __init__(self, predictor):
-        super().__init__("Object of type {} is not registered/supported with gurobi_ml".format(type(predictor).__name__))
+        super().__init__(f"Object of type {predictor} is not registered/supported with gurobi_ml")
 
 
 class NoModel(Exception):
+    """No model is known for some structure"""
+
     def __init__(self, predictor, reason):
-        super().__init__("Can't do model for {}: {}".format(type(predictor).__name__, reason))
+        if not isinstance(predictor, str):
+            predictor = type(predictor).__name__
+        super().__init__(f"Can't do model for {predictor}: {reason}")
 
 
 class NoSolution(Exception):
+    """Gurobi doesn't have a solution"""
+
     def __init__(self):
         super().__init__("No solution available")
 
 
-class ModelingError(Exception):
-    def __init__(self, message):
-        super().__init__(message)
-
-
 class ParameterError(Exception):
-    def __init__(self, message):
-        super().__init__(message)
+    """Wrong parameter to a function"""
 
-
-class InternalError(Exception):
     def __init__(self, message):
         super().__init__(message)

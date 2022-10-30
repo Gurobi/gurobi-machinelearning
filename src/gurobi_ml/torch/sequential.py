@@ -31,25 +31,32 @@ class SequentialConstr(BaseNNConstr):
         linear = None
         for step in predictor:
             if isinstance(step, nn.ReLU):
-                assert linear is not None
-                linear = None
+                pass
             elif isinstance(step, nn.Linear):
-                assert linear is None
-                linear = step
+                pass
             else:
-                print(step)
-                raise NoModel(predictor, "Unsupported network structure")
+                raise NoModel(predictor, f"Unsupported layer {type(step).__name__}")
         super().__init__(grbmodel, predictor, input_vars, output_vars, default_name="torchsequential")
 
     def _mip_model(self):
         network = self.predictor
         _input = self._input
-        output = self._output
+        output = None
+        numlayers = len(network)
 
-        linear = None
         for i, step in enumerate(network):
+            if i == numlayers - 1:
+                output = self._output
             if isinstance(step, nn.ReLU):
-                for name, param in linear.named_parameters():
+                layer = self.add_activation_layer(
+                    _input,
+                    self.actdict["relu"],
+                    output,
+                    name=f"{i}",
+                )
+                _input = layer.output
+            elif isinstance(step, nn.Linear):
+                for name, param in step.named_parameters():
                     if name == "weight":
                         layer_weight = param.detach().numpy().T
                     elif name == "bias":
@@ -58,24 +65,11 @@ class SequentialConstr(BaseNNConstr):
                     _input,
                     layer_weight,
                     layer_bias,
-                    self.actdict["relu"],
-                    None,
+                    self.actdict["identity"],
+                    output,
                     name=f"{i}",
                 )
-                linear = None
                 _input = layer.output
-            elif isinstance(step, nn.Linear):
-                assert linear is None
-                linear = step
-            else:
-                raise NoModel(network, "Unsupported network structure")
-        if linear is not None:
-            for name, param in linear.named_parameters():
-                if name == "weight":
-                    layer_weight = param.detach().numpy().T
-                elif name == "bias":
-                    layer_bias = param.detach().numpy()
-            layer = self.add_dense_layer(_input, layer_weight, layer_bias, self.actdict["identity"], output)
         if self._output is None:
             self._output = layer.output
 

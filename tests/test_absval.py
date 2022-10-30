@@ -8,7 +8,7 @@ from sklearn.exceptions import ConvergenceWarning
 from sklearn.neural_network import MLPRegressor
 
 from gurobi_ml.modeling.neuralnet.activations import ReLU
-from gurobi_ml.sklearn import MLPRegressorConstr
+from gurobi_ml.sklearn import add_mlp_regressor_constr
 
 
 def build_abs_network():
@@ -53,7 +53,7 @@ def absmodel(X, y, nn, infbound, relumodel=None):
 
         if nn:
             # create transforms to turn scikit-learn pipeline into Gurobi constraints
-            MLPRegressorConstr(model, nn, diff, absdiff, activations_models={"relu": relumodel})
+            add_mlp_regressor_constr(model, nn, diff, absdiff, activations_models={"relu": relumodel})
         else:
             for i in range(samples):
                 model.addConstr(absdiff[i, 0].item() == gp.abs_(diff[i, 0].item()))

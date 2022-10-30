@@ -38,7 +38,7 @@ class TestDummyConstr(unittest.TestCase):
             with self.assertRaises(DummyPredictorError):
                 add_predictor_constr(m, svc, inp, out)
 
-    def test_unregeistered_predictor_constr(self):
+    def test_unregesitered_predictor_constr(self):
         with gp.Model() as m:
             inp = m.addVar()
             out = m.addVar()
