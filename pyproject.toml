@@ -7,6 +7,9 @@ requires-python = ">=3.9"
 license = {text="Apache-2.0"}
 keywords = ["mathematical optimization", "gurobi", "scikit-learn", "pytorch", "tensorflow", "ml"]
 authors = [
+  {name = "Gurobi Optimization LLC"}
+]
+maintainers = [
   {email = "bonami@gurobi.com"},
   {name = "Pierre Bonami"}
 ]
@@ -24,7 +27,7 @@ dependencies = [
 [project.urls]
 homepage = "https://github.com/Gurobi/gurobi-machinelearning"
 repository = "https://github.com/Gurobi/gurobi-machinelearning"
-"bug tracker" = "https://github.com/Gurobi/gurobi.machinelearning/issues"
+"bug tracker" = "https://github.com/Gurobi/gurobi-machinelearning/issues"
 
 
 [build-system]
