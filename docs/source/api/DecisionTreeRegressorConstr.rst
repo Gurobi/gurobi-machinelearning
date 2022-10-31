@@ -1,9 +1,10 @@
 Decision Tree Regressor
 ===========================
 
-Function to add a :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`.
+.. automodule:: gurobi_ml.sklearn.decision_tree_regressor
 
-.. autofunction:: gurobi_ml.sklearn.add_decision_tree_regressor_constr
+.. autofunction:: gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor_constr
 
-.. autoclass:: gurobi_ml.sklearn.DecisionTreeRegressorConstr
+.. autoclass:: gurobi_ml.sklearn.decision_tree_regressor.DecisionTreeRegressorConstr
+    :show-inheritance:
     :members:

@@ -13,11 +13,47 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for inserting an :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` into a gurobipy model
+""" Module for embeding a :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` into a
+:gurobipy:`model`
 """
 from ..exceptions import NoModel
 from ..modeling.neuralnet import BaseNNConstr
 from .skgetter import SKgetter
+
+
+def add_mlp_regressor_constr(gp_model, mlp_regressor, input_vars, output_vars=None, **kwargs):
+    """Embed mlp_regressor into gp_model
+
+    Predict the values of output_vars using input_vars
+
+    Parameters
+    ----------
+    gp_model: :gurobipy:`model`
+        The gurobipy model where the predictor should be inserted.
+    mlpregressor: :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor`
+        The multi-layer perceptron regressor to insert as predictor.
+    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+        Decision variables used as input for regression in model.
+    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+        Decision variables used as output for regression in model.
+
+    Returns
+    -------
+    MLPRegressorConstr
+        Object containing information about what was added to gp_model to embed the
+        predictor into it
+
+    Raises
+    ------
+    NoModel
+        If the translation to Gurobi of the activation function for the network
+        is not implemented.
+
+    Note
+    ----
+    |VariablesDimensionsWarn|
+    """
+    return MLPRegressorConstr(gp_model, mlp_regressor, input_vars, output_vars, **kwargs)
 
 
 class MLPRegressorConstr(SKgetter, BaseNNConstr):
@@ -27,7 +63,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
 
     def __init__(
         self,
-        grbmodel,
+        gp_model,
         predictor,
         input_vars,
         output_vars=None,
@@ -37,7 +73,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         SKgetter.__init__(self, predictor, **kwargs)
         BaseNNConstr.__init__(
             self,
-            grbmodel,
+            gp_model,
             predictor,
             input_vars,
             output_vars,
@@ -78,40 +114,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
                 name=f"layer{i}",
             )
             input_vars = layer._output  # pylint: disable=W0212
-            self._model.update()
+            self._gp_model.update()
         assert (
             self._output is not None
         )  # Should never happen since sklearn object defines n_ouputs_
-
-
-def add_mlp_regressor_constr(grbmodel, mlpregressor, input_vars, output_vars=None, **kwargs):
-    """Use a `decision_tree_regressor` to predict the value of `output_vars` using `input_vars` in `grbmodel`
-
-    Parameters
-    ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-        The gurobipy model where the predictor should be inserted.
-    mlpregressor: :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor`
-        The multi-layer perceptron regressor to insert as predictor.
-    input_vars: mvar_array_like
-        Decision variables used as input for predictor in model.
-    output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in model.
-
-    Returns
-    -------
-    MLPRegressorConstr
-        Object containing information about what was added to model to insert the
-        predictor in it
-
-    Raises
-    ------
-    NoModel
-        If the translation to Gurobi of the activation function for the network
-        is not implemented.
-
-    Note
-    ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
-    """
-    return MLPRegressorConstr(grbmodel, mlpregressor, input_vars, output_vars, **kwargs)

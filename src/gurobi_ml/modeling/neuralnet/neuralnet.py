@@ -24,7 +24,7 @@ from .layers import ActivationLayer, DenseLayer
 class BaseNNConstr(AbstractPredictorConstr):
     """Base class for inserting a regressor based on neural-network/tensor into Gurobi"""
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
+    def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.predictor = predictor
         self.actdict = {
             "relu": ReLU(),
@@ -39,7 +39,7 @@ class BaseNNConstr(AbstractPredictorConstr):
 
         default_name = kwargs.pop("default_name", _default_name(predictor))
         super().__init__(
-            grbmodel=grbmodel,
+            gp_model=gp_model,
             input_vars=input_vars,
             output_vars=output_vars,
             default_name=default_name,
@@ -58,7 +58,7 @@ class BaseNNConstr(AbstractPredictorConstr):
         activation_vars=None,
         **kwargs,
     ):
-        """Add a layer to model
+        """Add a dense layer to gurobipy model
 
         Parameters
         ---------
@@ -75,7 +75,7 @@ class BaseNNConstr(AbstractPredictorConstr):
             Output variables
         """
         layer = DenseLayer(
-            self._model,
+            self._gp_model,
             activation_vars,
             input_vars,
             layer_coefs,
@@ -87,19 +87,19 @@ class BaseNNConstr(AbstractPredictorConstr):
         return layer
 
     def add_activation_layer(self, input_vars, activation, activation_vars=None, **kwargs):
-        """Add a layer to model
+        """Add an activation layer to gurobipy model
 
         Parameters
         ---------
 
         input_vars:  mvar_array_like
-            Decision variables used as input for predictor in model.
+            Decision variables used as input for predictor in gurobipy model.
         activation:
             Activation function
         activation_vars: mvar_array_like, optional
             Output variables
         """
-        layer = ActivationLayer(self._model, activation_vars, input_vars, activation, **kwargs)
+        layer = ActivationLayer(self._gp_model, activation_vars, input_vars, activation, **kwargs)
         self._layers.append(layer)
         return layer
 
