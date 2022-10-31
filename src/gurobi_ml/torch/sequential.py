@@ -23,6 +23,39 @@ from ..exceptions import NoModel, NoSolution
 from ..modeling.neuralnet import BaseNNConstr
 
 
+def add_sequential_constr(grbmodel, sequential_model, input_vars, output_vars=None, **kwargs):
+    """Use a `sequential_model` to predict the value of `output_vars` using `input_vars` in `grbmodel`
+
+    Parameters
+    ----------
+    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+        The gurobipy model where the predictor should be inserted.
+    sequential_model: :external+torch:py:class:`torch.nn.Sequential`
+        The sequential model to insert as predictor.
+    input_vars: mvar_array_like
+        Decision variables used as input for predictor in model.
+    output_vars: mvar_array_like, optional
+        Decision variables used as output for predictor in model.
+
+    Returns
+    -------
+    SequentialConstr
+        Object containing information about what was added to model to insert the
+        predictor in it
+
+    Raises
+    ------
+    NoModel
+        If the translation for some of the Pytorch model structure
+        (layer or activation) is not implemented.
+
+    Note
+    ----
+    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    """
+    return torch.SequentialConstr(grbmodel, sequential_model, input_vars, output_vars, **kwargs)
+
+
 class SequentialConstr(BaseNNConstr):
     """Transform a pytorch Sequential Neural Network to Gurobi constraint with
     input and output as matrices of variables."""
@@ -96,36 +129,3 @@ class SequentialConstr(BaseNNConstr):
             t_out = self.predictor.forward(t_in)
             return t_out.detach().numpy() - self.output.X
         raise NoSolution()
-
-
-def add_sequential_constr(grbmodel, sequential_model, input_vars, output_vars=None, **kwargs):
-    """Use a `sequential_model` to predict the value of `output_vars` using `input_vars` in `grbmodel`
-
-    Parameters
-    ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-        The gurobipy model where the predictor should be inserted.
-    sequential_model: :external+torch:py:class:`torch.nn.Sequential`
-        The sequential model to insert as predictor.
-    input_vars: mvar_array_like
-        Decision variables used as input for predictor in model.
-    output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in model.
-
-    Returns
-    -------
-    SequentialConstr
-        Object containing information about what was added to model to insert the
-        predictor in it
-
-    Raises
-    ------
-    NoModel
-        If the translation for some of the Pytorch model structure
-        (layer or activation) is not implemented.
-
-    Note
-    ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
-    """
-    return SequentialConstr(grbmodel, sequential_model, input_vars, output_vars, **kwargs)
