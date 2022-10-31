@@ -13,7 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for inserting a :external+torch:py:class:`torch.nn.Sequential` model into a gurobipy model
+""" Module for embeding a :external+torch:py:class:`torch.nn.Sequential` model into a
+:gurobipy:`model`.
 """
 
 import torch
@@ -24,24 +25,32 @@ from ..modeling.neuralnet import BaseNNConstr
 
 
 def add_sequential_constr(gp_model, sequential_model, input_vars, output_vars=None, **kwargs):
-    """Use a `sequential_model` to predict the value of `output_vars` using `input_vars` in `gp_model`
+    """Embed sequential_model into gp_model
+
+    Predict the values of output_vars using input_vars
+
 
     Parameters
     ----------
-    gp_model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-        The gurobipy model where the predictor should be inserted.
+    gp_model: :gurobipy:`model`
+        The gurobipy model where the sequential model should be inserted.
     sequential_model: :external+torch:py:class:`torch.nn.Sequential`
         The sequential model to insert as predictor.
-    input_vars: mvar_array_like
-        Decision variables used as input for predictor in model.
-    output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in model.
+    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+        Decision variables used as input for logistic regression in model.
+    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+        Decision variables used as output for logistic regression in model.
 
     Returns
     -------
     SequentialConstr
         Object containing information about what was added to model to insert the
         predictor in it
+
+    Warning
+    -------
+    Only :external+torch:py:class:`torch.nn.Linear` layers and
+    :external+torch:py:class:`torch.nn.ReLU` layers are supported.
 
     Raises
     ------

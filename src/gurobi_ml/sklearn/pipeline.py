@@ -14,7 +14,7 @@
 # ==============================================================================
 
 """ Module for embedding a :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
-into a gurobipy model
+into a :gurobipy:`model`.
 """
 
 
@@ -24,8 +24,45 @@ from .predictors_list import sklearn_predictors, sklearn_transformers, user_pred
 from .skgetter import SKgetter
 
 
+def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwargs):
+    """Embed pipeline into gp_model
+
+    Predict the values of output_vars using input_vars
+
+    Parameters
+    ----------
+    gp_model: :gurobipy:`model`
+        The gurobipy model where the predictor should be inserted.
+    pipeline: :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
+        The pipeline to insert as predictor.
+    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+        Decision variables used as input for regression in model.
+    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+        Decision variables used as output for regression in model.
+
+    Returns
+    -------
+    PipelineConstr
+        Object containing information about what was added to gp_model to embed the
+        predictor into it
+
+    Raises
+    ------
+    NoModel
+        If the translation to Gurobi of one of the elements in the pipeline
+        is not implemented or recognized.
+
+    Note
+    ----
+    |VariablesDimensionsWarn|
+    """
+    return PipelineConstr(gp_model, pipeline, input_vars, output_vars, **kwargs)
+
+
 class PipelineConstr(SKgetter, AbstractPredictorConstr):
-    """Stores the model changes to gurobipy model for embedding an instance of :external+sklearn:py:class:`sklearn.pipeline.Pipeline`"""
+    """Class to model trained :external+sklearn:py:class:`sklearn.pipeline.Pipeline` with gurobipy
+
+    Stores the changes to :gurobipy:`model` when embedding an instance into it."""
 
     def __init__(self, gp_model, pipeline, input_vars, output_vars=None, **kwargs):
         self._steps = []
@@ -101,36 +138,3 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
     def __len__(self):
         """Get number of pipeline steps"""
         return self._steps.__len__()
-
-
-def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwargs):
-    """Use a `pipeline` to predict the value of `output_vars` using `input_vars` in `gp_model`
-
-    Parameters
-    ----------
-    gp_model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-        The gurobipy model where the predictor should be inserted.
-    pipeline: :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
-        The pipeline to insert as predictor.
-    input_vars: mvar_array_like
-        Decision variables used as input for predictor in model.
-    output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in model.
-
-    Returns
-    -------
-    PipelineConstr
-        Object containing information about what was added to model to insert the
-        predictor in it
-
-    Raises
-    ------
-    NoModel
-        If the translation to Gurobi of one of the elements in the pipeline
-        is not implemented or recognized.
-
-    Note
-    ----
-    |VariablesDimensionsWarn|
-    """
-    return PipelineConstr(gp_model, pipeline, input_vars, output_vars, **kwargs)

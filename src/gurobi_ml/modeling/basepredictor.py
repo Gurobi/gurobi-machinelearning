@@ -183,6 +183,11 @@ class AbstractPredictorConstr(SubModel):
         """
         assert False, "Not implemented"
 
+    @staticmethod
+    def _indexed_name(index, name):
+        index = f"{index}".replace(" ", "")
+        return f"{name}[{index}]"
+
     @property
     def output(self):
         """Returns the output variables of embedded predictor"""

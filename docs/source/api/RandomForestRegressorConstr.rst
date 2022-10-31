@@ -1,7 +1,10 @@
-RandomForestRegressorConstr
-===========================
+Random Forest Regressor
+=======================
 
-.. autofunction:: gurobi_ml.sklearn.add_random_forest_regressor_constr
+.. automodule:: gurobi_ml.sklearn.random_forest_regressor
 
-.. autoclass:: gurobi_ml.sklearn.decisiontrees.RandomForestRegressorConstr
-    :members:
+    .. autofunction:: gurobi_ml.sklearn.random_forest_regressor.add_random_forest_regressor_constr
+
+    .. autoclass:: gurobi_ml.sklearn.random_forest_regressor.RandomForestRegressorConstr
+        :show-inheritance:
+        :members:

@@ -19,11 +19,6 @@ import numpy as np
 from gurobipy import GRB
 
 
-def _name(index, name):
-    index = f"{index}".replace(" ", "")
-    return f"{name}[{index}]"
-
-
 class Identity:
     """Class to apply identity activation on a neural network layer
 
@@ -101,5 +96,5 @@ class ReLU:
                     mixing[index],
                 ],
                 constant=0.0,
-                name=_name(index, "relu"),
+                name=layer._indexed_name(index, "relu"),
             )

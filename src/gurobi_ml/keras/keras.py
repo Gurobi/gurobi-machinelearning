@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for inserting a Keras model into a gurobipy model
+""" Module for embedding a Keras model into a :gurobipy:`model`
 """
 
 
@@ -21,6 +21,48 @@ from tensorflow import keras
 
 from ..exceptions import NoModel, NoSolution
 from ..modeling.neuralnet import BaseNNConstr
+
+
+def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwargs):
+    """Embed keras_model into gp_model
+
+    Predict the values of output_vars using input_vars
+
+    Parameters
+    ----------
+    gp_model: :gurobipy:`model`
+        The gurobipy model where the predictor should be inserted.
+    keras_model: `keras.Model <https://keras.io/api/models/model/>`
+        The keras model to insert as predictor.
+    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+        Decision variables used as input for Keras model in gp_model.
+    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+        Decision variables used as output for Keras model in gp_model.
+
+    Returns
+    -------
+    KerasNetworkConstr
+        Object containing information about what was added to gp_model to embed the
+        predictor into it
+
+
+    Warning
+    -------
+    Onle `Dense <https://keras.io/api/layers/core_layers/dense/>`_ (possibly
+      with `relu` activation), and `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ with
+      default settings are supported.
+
+    Raises
+    ------
+    NoModel
+        If the translation for some of the Keras model structure
+        (layer or activation) is not implemented.
+
+    Note
+    ----
+    |VariablesDimensionsWarn|
+    """
+    return KerasNetworkConstr(gp_model, keras_model, input_vars, output_vars, **kwargs)
 
 
 class KerasNetworkConstr(BaseNNConstr):
@@ -102,36 +144,3 @@ class KerasNetworkConstr(BaseNNConstr):
         if self._has_solution():
             return self.predictor.predict(self.input.X) - self.output.X
         raise NoSolution()
-
-
-def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwargs):
-    """Use `keras_model` to predict the value of `output_vars` using `input_vars` in `gp_model`
-
-    Parameters
-    ----------
-    gp_model: :gurobipy:`model`
-        The gurobipy model where the predictor should be inserted.
-    keras_model: `keras.Model <https://keras.io/api/models/model/>`
-        The keras model to insert as predictor.
-    input_vars: mvar_array_like
-        Decision variables used as input for predictor in gp_model.
-    output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in gp_model.
-
-    Returns
-    -------
-    KerasNetworkConstr
-        Object containing information about what was added to gp_model to insert the
-        predictor in it
-
-    Raises
-    ------
-    NoModel
-        If the translation for some of the Keras model structure
-        (layer or activation) is not implemented.
-
-    Note
-    ----
-    |VariablesDimensionsWarn|
-    """
-    return KerasNetworkConstr(gp_model, keras_model, input_vars, output_vars, **kwargs)

@@ -50,6 +50,7 @@ dep_versions = {
 
 VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
 
+
 rst_epilog = f"""
 .. |GurobiVersion| replace:: {dep_versions["gurobipy"]}
 .. |NumpyVersion| replace:: {dep_versions["numpy"]}

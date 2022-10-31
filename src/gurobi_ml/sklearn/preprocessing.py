@@ -23,62 +23,63 @@ from ..modeling import AbstractPredictorConstr, _default_name
 
 
 def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **kwargs):
-    """Use `polynomial_features` to predict the value of `output_vars` using `input_vars` in `gp_model`
+    """Embed polymonial_features into gp_model
+
+    Note that this function creates the output variables from
+    the input variables.
+
+    Warning
+    -------
+    Only polynomial features of degree 2 are supported.
 
     Parameters
     ----------
-    gp_model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-        The gurobipy model where the predictor should be inserted.
+    gp_model: :gurobipy:`model`
+        The gurobipy model where polynomial features should be inserted.
     polynomial_features: :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures`
         The polynomial features to insert as predictor.
-    input_vars: mvar_array_like
-        Decision variables used as input for predictor in model.
-    output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in model.
+    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+        Decision variables used as input for polynomial features in model.
 
     Returns
     -------
     sklearn.preprocessing.PolynomialFeaturesConstr
-        Object containing information about what was added to model to insert the
-        predictor in it
+        Object containing information about what was added to gp_model to insert the
+        polynomial_features in it
 
-    Note
-    ----
-    |VariablesDimensionsWarn|
     """
     return PolynomialFeaturesConstr(gp_model, polynomial_features, input_vars, **kwargs)
 
 
 def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
-    """Use a `standard_scaler` to predict the value of `output_vars` using `input_vars` in `gp_model`
+    """Embed standard_scaler into gp_model
+
+    Note that this function creates the output variables from
+    the input variables.
 
     Parameters
     ----------
-    gp_model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-        The gurobipy model where the predictor should be inserted.
+    gp_model: :gurobipy:`model`
+        The gurobipy model where the standard scaler should be inserted.
     standard_scaler: :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler`
         The standard scaler to insert as predictor.
-    input_vars: mvar_array_like
-        Decision variables used as input for predictor in model.
-    output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in model.
+    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+        Decision variables used as input for standard scaler in model.
 
     Returns
     -------
     sklearn.preprocessing.StandardScalerConstr
-        Object containing information about what was added to model to insert the
-        predictor in it
+        Object containing information about what was added to gp_model to insert the
+        standard_scaler in it
 
-    Note
-    ----
-    |VariablesDimensionsWarn|
     """
     return StandardScalerConstr(gp_model, standard_scaler, input_vars, **kwargs)
 
 
 class StandardScalerConstr(AbstractPredictorConstr):
-    """Class to use a StandardScale to create scaled version of
-    some Gurobi variables."""
+    """Class to model trained :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler` with gurobipy
+
+    Stores the changes to :gurobipy:`model` when embedding an instance into it."""
 
     def __init__(self, gp_model, scaler, input_vars, **kwargs):
         self.scaler = scaler
@@ -108,7 +109,7 @@ class StandardScalerConstr(AbstractPredictorConstr):
 
 
 class PolynomialFeaturesConstr(AbstractPredictorConstr):
-    """Class to use a PolynomialFeatures to create transforms of
+    """Class to model trained :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures` with gurobipy
     some Gurobi variables."""
 
     def __init__(self, gp_model, polytrans, input_vars, **kwargs):
