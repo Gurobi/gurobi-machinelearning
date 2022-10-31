@@ -50,7 +50,13 @@ class BaseNNConstr(AbstractPredictorConstr):
         return self._layers.__iter__()
 
     def add_dense_layer(
-        self, input_vars, layer_coefs, layer_intercept, activation, activation_vars=None, **kwargs
+        self,
+        input_vars,
+        layer_coefs,
+        layer_intercept,
+        activation,
+        activation_vars=None,
+        **kwargs,
     ):
         """Add a layer to model
 

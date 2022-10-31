@@ -208,7 +208,11 @@ After solving the model, we check the error in the estimate of the Gurobi
 solution.
 
 ```{code-cell} ipython3
-print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error()))))
+print(
+    "Error in approximating the regression {:.6}".format(
+        np.max(np.abs(pred_constr.get_error()))
+    )
+)
 ```
 
 Finally, we look at the solution and the objective value found.

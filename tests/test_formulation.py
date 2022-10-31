@@ -211,7 +211,12 @@ class TestFixedRegressionModel(unittest.TestCase):
         for regressor in cases:
             onecase = cases.get_case(regressor)
             self.do_one_case(
-                onecase, X, 5, "all", output_type="classification", pwl_attributes={"FuncPieces": 5}
+                onecase,
+                X,
+                5,
+                "all",
+                output_type="classification",
+                pwl_attributes={"FuncPieces": 5},
             )
 
     def test_circle(self):

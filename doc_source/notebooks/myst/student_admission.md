@@ -104,7 +104,9 @@ The features we use for the regression are `"merit"` (scholarship), `"SAT"` and
 ```{code-cell} ipython3
 # Base URL for retrieving data
 janos_data_url = "https://raw.githubusercontent.com/INFORMSJoC/2020.1023/master/data/"
-historical_data = pd.read_csv(janos_data_url + "college_student_enroll-s1-1.csv", index_col=0)
+historical_data = pd.read_csv(
+    janos_data_url + "college_student_enroll-s1-1.csv", index_col=0
+)
 
 # classify our features between the ones that are fixed and the ones that will be
 # part of the optimization problem
@@ -187,7 +189,9 @@ function to recover the index of this column in our `MVar` matrix.
 # Start with classical part of the model
 m = gp.Model()
 
-feature_vars = m.addMVar(feat_lb.shape, lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name="feats")
+feature_vars = m.addMVar(
+    feat_lb.shape, lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name="feats"
+)
 y = m.addMVar(nstudents, name="y")
 
 x = feature_vars[:, feat_lb.columns.get_indexer(["merit"])][:, 0]
@@ -211,7 +215,9 @@ for each student.
 With the `print_stats` function we display what was added to the model.
 
 ```{code-cell} ipython3
-pred_constr = add_predictor_constr(m, pipe, feature_vars, y, output_type="probability_1")
+pred_constr = add_predictor_constr(
+    m, pipe, feature_vars, y, output_type="probability_1"
+)
 
 pred_constr.print_stats()
 ```
@@ -230,7 +236,11 @@ the regression.
 We print the error. Here we need to use `get_error_proba`.
 
 ```{code-cell} ipython3
-print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error()))))
+print(
+    "Error in approximating the regression {:.6}".format(
+        np.max(np.abs(pred_constr.get_error()))
+    )
+)
 ```
 
 The error we get might be considered too large, but we can use Gurobi parameters
@@ -268,7 +278,11 @@ m.optimize()
 We can see that the error has been reduced.
 
 ```{code-cell} ipython3
-print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error()))))
+print(
+    "Error in approximating the regression {:.6}".format(
+        np.max(np.abs(pred_constr.get_error()))
+    )
+)
 ```
 
 Copyright © 2022 Gurobi Optimization, LLC

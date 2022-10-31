@@ -26,7 +26,13 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
     """
 
     def __init__(
-        self, grbmodel, predictor, input_vars, output_vars=None, clean_predictor=False, **kwargs
+        self,
+        grbmodel,
+        predictor,
+        input_vars,
+        output_vars=None,
+        clean_predictor=False,
+        **kwargs,
     ):
         SKgetter.__init__(self, predictor, **kwargs)
         BaseNNConstr.__init__(
@@ -46,7 +52,8 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         if neuralnet.activation not in self.actdict:
             print(self.actdict)
             raise NoModel(
-                neuralnet, f"No implementation for activation function {neuralnet.activation}"
+                neuralnet,
+                f"No implementation for activation function {neuralnet.activation}",
             )
         activation = self.actdict[neuralnet.activation]
 
@@ -63,7 +70,12 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
                 output = self._output
 
             layer = self.add_dense_layer(
-                input_vars, layer_coefs, layer_intercept, activation, output, name=f"layer{i}"
+                input_vars,
+                layer_coefs,
+                layer_intercept,
+                activation,
+                output,
+                name=f"layer{i}",
             )
             input_vars = layer._output  # pylint: disable=W0212
             self._model.update()

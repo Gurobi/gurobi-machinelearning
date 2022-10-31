@@ -113,8 +113,12 @@ Now, load the data and store into a Pandas dataframe.
 
 ```{code-cell}
 data_url = "https://raw.githubusercontent.com/Gurobi/modeling-examples/master/price_optimization/"
-avocado = pd.read_csv(data_url + "HABdata_2019_2022.csv")  # dataset downloaded directly from HAB
-avocado_old = pd.read_csv(data_url + "kaggledata_till2018.csv")  # dataset downloaded from Kaggle
+avocado = pd.read_csv(
+    data_url + "HABdata_2019_2022.csv"
+)  # dataset downloaded directly from HAB
+avocado_old = pd.read_csv(
+    data_url + "kaggledata_till2018.csv"
+)  # dataset downloaded from Kaggle
 avocado = pd.concat([avocado, avocado_old])
 avocado
 ```
@@ -225,7 +229,10 @@ not).
 ```{code-cell}
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(15, 5))
 sns.heatmap(
-    df_Total_US[["units_sold", "price", "year", "peak"]].corr(), annot=True, center=0, ax=axes
+    df_Total_US[["units_sold", "price", "year", "peak"]].corr(),
+    annot=True,
+    center=0,
+    ax=axes,
 )
 
 axes.set_title("Correlations for conventional avocados")
@@ -320,7 +327,9 @@ training and $20\%$ testing data and learn the weights using `Scikit-learn`.
 from sklearn.model_selection import train_test_split
 
 # Split the data for training and testing
-X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.8, random_state=1)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, train_size=0.8, random_state=1
+)
 ```
 
 Finally, create the regression model and train it.
@@ -482,7 +491,12 @@ Display the dataframe to make sure it is correct
 
 ```{code-cell}
 feat_lb = pd.DataFrame(
-    data={"price": a_min, "year_index": year - 2015, "peak": peak_or_not, "region": regions}
+    data={
+        "price": a_min,
+        "year_index": year - 2015,
+        "peak": peak_or_not,
+        "region": regions,
+    }
 )
 feat_lb
 ```
@@ -517,7 +531,12 @@ which is now `a_max`
 
 ```{code-cell}
 feat_ub = pd.DataFrame(
-    data={"price": a_max, "year_index": year - 2015, "peak": peak_or_not, "region": regions}
+    data={
+        "price": a_max,
+        "year_index": year - 2015,
+        "peak": peak_or_not,
+        "region": regions,
+    }
 )
 
 feat_ub = pd.DataFrame(
@@ -551,11 +570,15 @@ use a mask built using the transformed feature names.
 
 ```{code-cell}
 x = m.addMVar(R, name="x", lb=b_min, ub=b_max)  # quantity supplied to each region
-s = m.addMVar(R, name="s", lb=0)  # predicted amount of sales in each region for the given price
+s = m.addMVar(
+    R, name="s", lb=0
+)  # predicted amount of sales in each region for the given price
 w = m.addMVar(R, name="w", lb=0)  # excess wasteage in each region
 
 # Add variables for the regression
-feats = m.addMVar(feat_lb.shape, lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name="reg_features")
+feats = m.addMVar(
+    feat_lb.shape, lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name="reg_features"
+)
 d = m.addMVar(R, lb=-gp.GRB.INFINITY, name="demand")
 
 # Get the price variables from the features of the regression
@@ -714,7 +737,9 @@ plt.xlim(1, 2.2)
 ax.set_xlabel("Price per avocado ($)")
 ax.set_ylabel("Number of avocados sold (millions)")
 plt.show()
-print("The circles represent sales quantity and the cross markers represent the wasted quantity.")
+print(
+    "The circles represent sales quantity and the cross markers represent the wasted quantity."
+)
 ```
 
 We have shown how to model the price and supply optimization problem with Gurobi
