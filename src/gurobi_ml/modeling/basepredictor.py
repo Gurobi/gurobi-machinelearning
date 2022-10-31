@@ -64,36 +64,29 @@ def validate_gpvars(gpvars, isinput):
 
 
 class AbstractPredictorConstr(SubModel):
-    """Base class to store sub-model added by add_predictor_constr
+    """Base class to store sub-model added by :py:func:`gurobi_ml.add_predictor_constr`
 
     This class is the base class to store everything that is added to
-    a Gurobi model when adding a trained predictor to it. Depending on
+    a Gurobi model when embedding a trained predictor into it. Depending on
     the type of the predictor, a class derived from it will be returned
-    by add_predictor_constr.
+    by :py:func:`gurobi_ml.add_predictor_constr`.
 
-    Parameters
-    ----------
-    model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-        The gurobipy model where the predictor should be inserted.
-    input_vars: mvar_array_like
-        Decision variables used as input.
-    output_vars: mvar_array_like, optional
-        Decision variables used as output.
+    Warning
+    -------
+
+    Users should usually never construct objects of this class and it's inherited
+    classes. They are returned by the :py:func:`gurobi_ml.add_predictor_constr` and other
+    functions.
+
     """
 
-    doc_in_out_fmt = """
-    Note
-    ----
-    See: py: func: `add_predictor_constr < gurobi_ml.add_predictor_constr >` for acceptable values for input_vars and output_vars
-    """
-
-    def __init__(self, grbmodel, input_vars, output_vars=None, **kwargs):
+    def __init__(self, gp_model, input_vars, output_vars=None, **kwargs):
         self._input = validate_gpvars(input_vars, True)
         if output_vars is not None:
             self._output = validate_gpvars(output_vars, False)
         else:
             self._output = None
-        SubModel.__init__(self, grbmodel, **kwargs)
+        SubModel.__init__(self, gp_model, **kwargs)
 
     def _validate(self):
         """Validate input and output variables (check shapes, reshape if needed)."""
@@ -156,8 +149,10 @@ class AbstractPredictorConstr(SubModel):
             n_outputs = self.n_outputs_
         except AttributeError:
             return
-        rval = self._model.addMVar((input_vars.shape[0], n_outputs), lb=-gp.GRB.INFINITY, name=name)
-        self._model.update()
+        rval = self._gp_model.addMVar(
+            (input_vars.shape[0], n_outputs), lb=-gp.GRB.INFINITY, name=name
+        )
+        self._gp_model.update()
         self._output = rval
 
     def _has_solution(self):
@@ -187,6 +182,11 @@ class AbstractPredictorConstr(SubModel):
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         assert False, "Not implemented"
+
+    @staticmethod
+    def _indexed_name(index, name):
+        index = f"{index}".replace(" ", "")
+        return f"{name}[{index}]"
 
     @property
     def output(self):

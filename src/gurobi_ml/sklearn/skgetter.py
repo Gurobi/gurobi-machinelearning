@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
+""" Implements some utility tools for all scikit-learn objects """
 import warnings
 
 from sklearn.utils.validation import check_is_fitted
@@ -21,14 +22,15 @@ from ..exceptions import NoSolution
 
 
 class SKgetter:
-    """Base class for all sklearn convertors
+    """Utility class for sklearn convertors
 
-    Class used to implement some common functionalities
+    Implement some common functionalities: check predictor is fitted, output dimension, get error
 
     Attributes
     ----------
     predictor
         Scikit-Learn predictor embedded into Gurobi model.
+
     """
 
     def __init__(self, predictor, output_type="regular", **kwargs):

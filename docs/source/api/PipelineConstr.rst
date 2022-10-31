@@ -1,7 +1,10 @@
 Pipeline
 ========
 
-.. autofunction:: gurobi_ml.sklearn.add_pipeline_constr
+.. automodule:: gurobi_ml.sklearn.pipeline
 
-.. autoclass:: gurobi_ml.sklearn.PipelineConstr
+.. autofunction:: gurobi_ml.sklearn.pipeline.add_pipeline_constr
+
+.. autoclass:: gurobi_ml.sklearn.pipeline.PipelineConstr
+    :show-inheritance:
     :members:

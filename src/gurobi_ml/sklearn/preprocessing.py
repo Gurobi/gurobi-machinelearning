@@ -22,17 +22,72 @@ from ..exceptions import NoModel
 from ..modeling import AbstractPredictorConstr, _default_name
 
 
-class StandardScalerConstr(AbstractPredictorConstr):
-    """Class to use a StandardScale to create scaled version of
-    some Gurobi variables."""
+def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **kwargs):
+    """Embed polymonial_features into gp_model
 
-    def __init__(self, grbmodel, scaler, input_vars, **kwargs):
+    Note that this function creates the output variables from
+    the input variables.
+
+    Warning
+    -------
+    Only polynomial features of degree 2 are supported.
+
+    Parameters
+    ----------
+    gp_model: :gurobipy:`model`
+        The gurobipy model where polynomial features should be inserted.
+    polynomial_features: :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures`
+        The polynomial features to insert as predictor.
+    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+        Decision variables used as input for polynomial features in model.
+
+    Returns
+    -------
+    sklearn.preprocessing.PolynomialFeaturesConstr
+        Object containing information about what was added to gp_model to insert the
+        polynomial_features in it
+
+    """
+    return PolynomialFeaturesConstr(gp_model, polynomial_features, input_vars, **kwargs)
+
+
+def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
+    """Embed standard_scaler into gp_model
+
+    Note that this function creates the output variables from
+    the input variables.
+
+    Parameters
+    ----------
+    gp_model: :gurobipy:`model`
+        The gurobipy model where the standard scaler should be inserted.
+    standard_scaler: :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler`
+        The standard scaler to insert as predictor.
+    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+        Decision variables used as input for standard scaler in model.
+
+    Returns
+    -------
+    sklearn.preprocessing.StandardScalerConstr
+        Object containing information about what was added to gp_model to insert the
+        standard_scaler in it
+
+    """
+    return StandardScalerConstr(gp_model, standard_scaler, input_vars, **kwargs)
+
+
+class StandardScalerConstr(AbstractPredictorConstr):
+    """Class to model trained :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler` with gurobipy
+
+    Stores the changes to :gurobipy:`model` when embedding an instance into it."""
+
+    def __init__(self, gp_model, scaler, input_vars, **kwargs):
         self.scaler = scaler
-        super().__init__(grbmodel, input_vars, default_name=_default_name(scaler), **kwargs)
+        super().__init__(gp_model, input_vars, default_name=_default_name(scaler), **kwargs)
 
     def _create_output_vars(self, input_vars, **kwargs):
-        rval = self._model.addMVar(input_vars.shape, name="scaledx")
-        self._model.update()
+        rval = self._gp_model.addMVar(input_vars.shape, name="scaledx")
+        self._gp_model.update()
         self._output = rval
 
     def _mip_model(self):
@@ -46,7 +101,7 @@ class StandardScalerConstr(AbstractPredictorConstr):
 
         output.LB = (_input.LB - mean) / scale
         output.UB = (_input.UB - mean) / scale
-        self._model.addConstrs(
+        self._gp_model.addConstrs(
             (_input[:, i] - output[:, i] * scale[i] == mean[i] for i in range(nfeat)),
             name="s",
         )
@@ -54,19 +109,19 @@ class StandardScalerConstr(AbstractPredictorConstr):
 
 
 class PolynomialFeaturesConstr(AbstractPredictorConstr):
-    """Class to use a PolynomialFeatures to create transforms of
+    """Class to model trained :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures` with gurobipy
     some Gurobi variables."""
 
-    def __init__(self, grbmodel, polytrans, input_vars, **kwargs):
+    def __init__(self, gp_model, polytrans, input_vars, **kwargs):
         if polytrans.degree > 2:
             raise NoModel(polytrans, "Can only handle polynomials of degree < 2")
         self.polytrans = polytrans
-        super().__init__(grbmodel, input_vars, default_name=_default_name(polytrans), **kwargs)
+        super().__init__(gp_model, input_vars, default_name=_default_name(polytrans), **kwargs)
 
     def _create_output_vars(self, input_vars, **kwargs):
         out_shape = (input_vars.shape[0], self.polytrans.n_output_features_)
-        rval = self._model.addMVar(out_shape, name="polyx", lb=-gp.GRB.INFINITY)
-        self._model.update()
+        rval = self._gp_model.addMVar(out_shape, name="polyx", lb=-gp.GRB.INFINITY)
+        self._gp_model.update()
         self._output = rval
 
     def _mip_model(self):
@@ -89,58 +144,4 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
                         qexpr *= feat.item()
                     elif power[j] == 1:
                         qexpr *= feat.item()
-                self.model.addConstr(output[k, i] == qexpr, name=f"polyfeat[{k},{i}]")
-
-
-def add_polynomial_features_constr(grbmodel, polynomial_features, input_vars, **kwargs):
-    """Use `polynomial_features` to predict the value of `output_vars` using `input_vars` in `grbmodel`
-
-    Parameters
-    ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-        The gurobipy model where the predictor should be inserted.
-    polynomial_features: :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures`
-        The polynomial features to insert as predictor.
-    input_vars: mvar_array_like
-        Decision variables used as input for predictor in model.
-    output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in model.
-
-    Returns
-    -------
-    PolynomialFeaturesConstr
-        Object containing information about what was added to model to insert the
-        predictor in it
-
-    Note
-    ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
-    """
-    return PolynomialFeaturesConstr(grbmodel, polynomial_features, input_vars, **kwargs)
-
-
-def add_standard_scaler_constr(grbmodel, standard_scaler, input_vars, **kwargs):
-    """Use a `standard_scaler` to predict the value of `output_vars` using `input_vars` in `grbmodel`
-
-    Parameters
-    ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-        The gurobipy model where the predictor should be inserted.
-    standard_scaler: :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler`
-        The standard scaler to insert as predictor.
-    input_vars: mvar_array_like
-        Decision variables used as input for predictor in model.
-    output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in model.
-
-    Returns
-    -------
-    StandardScalerConstr
-        Object containing information about what was added to model to insert the
-        predictor in it
-
-    Note
-    ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
-    """
-    return StandardScalerConstr(grbmodel, standard_scaler, input_vars, **kwargs)
+                self.gp_model.addConstr(output[k, i] == qexpr, name=f"polyfeat[{k},{i}]")

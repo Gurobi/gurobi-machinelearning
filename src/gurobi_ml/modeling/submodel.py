@@ -94,14 +94,14 @@ class SubModel:
 
     def __init__(
         self,
-        grbmodel,
+        gp_model,
         *args,
         model_function=None,
         default_name=None,
         name=None,
         **kwargs,
     ):
-        self._model = None
+        self._gp_model = None
         self._objects = {}
         self._firstvar = None
         self._lastvar = None
@@ -120,19 +120,19 @@ class SubModel:
         else:
             self._default_name = type(self).__name__
 
-        before = self._open(grbmodel)
-        self._objects = self._build_submodel(grbmodel, *args, **kwargs)
+        before = self._open(gp_model)
+        self._objects = self._build_submodel(gp_model, *args, **kwargs)
         if self._objects is None:
             self._objects = {}
         self._close(before, name)
 
-    def _build_submodel(self, grbmodel, *args, **kwargs):
+    def _build_submodel(self, gp_model, *args, **kwargs):
         """Method to be overridden for generating the model in a sub-class.
 
         When using SubModel to wrap a modeling function in a SubModel, the default
         implementation of this method simply calls the modeling function.
         """
-        return self._model_function(grbmodel, *args, **kwargs)
+        return self._model_function(gp_model, *args, **kwargs)
 
     class _ModelingData:
         """Class for recording modeling data in a gurobipy.Model object"""
@@ -155,61 +155,63 @@ class SubModel:
 
         Parameters
         ----------
-        model: gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>
+        gp_model: gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>
             A gurobipy model
 
         Attributes
         ----------
         numvars: int
-            Number of variables in `model`.
+            Number of variables in `gp_model`.
         numconstrs: int
-            Number of constraints in `model`.
+            Number of constraints in `gp_model`.
         numsos: int
-            Number of SOS constraints in `model`
+            Number of SOS constraints in `gp_model`
         numqconstrs: int
-            Number of quadratic constraints in `model`
+            Number of quadratic constraints in `gp_model`
         numgenconstrs: int
-            Number of general constraints in `model`
+            Number of general constraints in `gp_model`
         """
 
-        def __init__(self, model):
-            model.update()
-            self.numvars = model.numVars
-            self.numconstrs = model.numConstrs
-            self.numsos = model.numSOS
-            self.numqconstrs = model.numQConstrs
-            self.numgenconstrs = model.numGenConstrs
+        def __init__(self, gp_model):
+            gp_model.update()
+            self.numvars = gp_model.numVars
+            self.numconstrs = gp_model.numConstrs
+            self.numsos = gp_model.numSOS
+            self.numqconstrs = gp_model.numQConstrs
+            self.numgenconstrs = gp_model.numGenConstrs
 
-    def _record(self, model, before):
+    def _record(self, gp_model, before):
         """Record added modeling objects compared to status before."""
-        model.update()
+        gp_model.update()
         # range of variables
-        if model.numvars > before.numvars:
-            self._firstvar = model.getVars()[before.numvars]
-            self._lastvar = model.getVars()[model.numvars - 1]
+        if gp_model.numvars > before.numvars:
+            self._firstvar = gp_model.getVars()[before.numvars]
+            self._lastvar = gp_model.getVars()[gp_model.numvars - 1]
         else:
             self._firstvar = None
             self._lastvar = None
         # range of constraints
-        if model.numconstrs > before.numconstrs:
-            self._firstconstr = model.getConstrs()[before.numconstrs]
-            self._lastconstr = model.getConstrs()[model.numconstrs - 1]
+        if gp_model.numconstrs > before.numconstrs:
+            self._firstconstr = gp_model.getConstrs()[before.numconstrs]
+            self._lastconstr = gp_model.getConstrs()[gp_model.numconstrs - 1]
         else:
             self._firstconstr = None
             self._lastconstr = None
         # range of Q constraints
-        if model.numqconstrs > before.numqconstrs:
-            self._qconstrs = model.getQConstrs()[before.numqconstrs : model.numqconstrs]
+        if gp_model.numqconstrs > before.numqconstrs:
+            self._qconstrs = gp_model.getQConstrs()[before.numqconstrs : gp_model.numqconstrs]
         else:
             self._qconstrs = []
         # range of GenConstrs
-        if model.numgenconstrs > before.numgenconstrs:
-            self._genconstrs = model.getGenConstrs()[before.numgenconstrs : model.numgenconstrs]
+        if gp_model.numgenconstrs > before.numgenconstrs:
+            self._genconstrs = gp_model.getGenConstrs()[
+                before.numgenconstrs : gp_model.numgenconstrs
+            ]
         else:
             self._genconstrs = []
         # range of SOS
-        if model.numsos > before.numsos:
-            self._sos = model.getSOSs()[before.numsos : model.numsos]
+        if gp_model.numsos > before.numsos:
+            self._sos = gp_model.getSOSs()[before.numsos : gp_model.numsos]
         else:
             self._sos = []
 
@@ -217,14 +219,14 @@ class SubModel:
     def vars(self):
         """Return the list of variables in the submodel."""
         if self._firstvar:
-            return self._model.getVars()[self._firstvar.index : self._lastvar.index + 1]
+            return self._gp_model.getVars()[self._firstvar.index : self._lastvar.index + 1]
         return []
 
     @property
     def constrs(self):
         """Return the list of linear constraints in the submodel."""
         if self._firstconstr:
-            return self._model.getConstrs()[self._firstconstr.index : self._lastconstr.index + 1]
+            return self._gp_model.getConstrs()[self._firstconstr.index : self._lastconstr.index + 1]
         return []
 
     @property
@@ -242,16 +244,16 @@ class SubModel:
         """Return the list of SOS constraints in the submodel."""
         return self._sos
 
-    def _open(self, model):
+    def _open(self, gp_model):
         """Start registering modeling object that are added to the gurobipy.Model"""
-        self._model = model
+        self._gp_model = gp_model
         try:
-            modeling_data = model._modeling_data
+            modeling_data = gp_model._modeling_data
         except AttributeError:
             modeling_data = SubModel._ModelingData()
-        model._modeling_data = modeling_data
+        gp_model._modeling_data = modeling_data
 
-        return (self._modelstats(model), model._modeling_data.pop_name_handler())
+        return (self._modelstats(gp_model), gp_model._modeling_data.pop_name_handler())
 
     def _close(self, before, name):
         """Finalize addition of modeling objects to the gurobipy.Model object.
@@ -275,41 +277,41 @@ class SubModel:
                 self.name[name] = num + 1
                 return f"{name}{num}"
 
-        def prefix_names(model, objs, attr, name):
+        def prefix_names(gp_model, objs, attr, name):
             """Prefix all modeling object names with name"""
             if len(objs) == 0:
                 return
-            object_names = model.getAttr(attr, objs)
+            object_names = gp_model.getAttr(attr, objs)
             new_names = [f"{name}.{obj_name}" for obj_name in object_names]
-            model.setAttr(attr, objs, new_names)
+            gp_model.setAttr(attr, objs, new_names)
 
         # re-install name handler
-        self._model._modeling_data.push_name_handler(before[1])
+        self._gp_model._modeling_data.push_name_handler(before[1])
 
         # record all newly added modeling objects
-        self._record(self._model, before[0])
+        self._record(self._gp_model, before[0])
 
         # prefix names of newly created modeling objects
         if name != "":
             if name is None:
-                name_handler = self._model._modeling_data.name_handler
+                name_handler = self._gp_model._modeling_data.name_handler
                 if name_handler is None:
                     name_handler = NameHandler()
-                    self._model._modeling_data.push_name_handler(name_handler)
+                    self._gp_model._modeling_data.push_name_handler(name_handler)
                 name = name_handler.get_name(self)
             self._name = name
-            prefix_names(self._model, self.vars, "VarName", name)
-            prefix_names(self._model, self.constrs, "ConstrName", name)
-            prefix_names(self._model, self.qconstrs, "QCName", name)
-            prefix_names(self._model, self.genconstrs, "GenConstrName", name)
+            prefix_names(self._gp_model, self.vars, "VarName", name)
+            prefix_names(self._gp_model, self.constrs, "ConstrName", name)
+            prefix_names(self._gp_model, self.qconstrs, "QCName", name)
+            prefix_names(self._gp_model, self.genconstrs, "GenConstrName", name)
             # SOS can't have a name! :-O
-            # prefix_names(self._model, self.sos, "SOSName", name)
+            # prefix_names(self._gp_model, self.sos, "SOSName", name)
 
     def print_stats(self, file=None):
         """Print statistics about submodel
 
         This functions prints detailed statistics on the variables
-        and constraints that where added to the model using this object.
+        and constraints that where added to the gp_model using this object.
 
         Usually derived class reimplement this function to provide more
         details about the structure of the additions (type of ML model,
@@ -336,9 +338,9 @@ class SubModel:
             print(f"{sosconstr} SOS constraints", file=file)
 
     @property
-    def model(self):
-        """Access model the submodel is a part of"""
-        return self._model
+    def gp_model(self):
+        """Access gurobipy model the submodel is a part of"""
+        return self._gp_model
 
     @property
     def default_name(self):
@@ -349,16 +351,16 @@ class SubModel:
 
     def remove(self):
         """Remove the submodel from the model"""
-        if self._model:
-            self._model.remove(self.vars)
-            self._model.remove(self.constrs)
-            self._model.remove(self.qconstrs)
-            self._model.remove(self.genconstrs)
-            self._model.remove(self.sos)
+        if self._gp_model:
+            self._gp_model.remove(self.vars)
+            self._gp_model.remove(self.constrs)
+            self._gp_model.remove(self.qconstrs)
+            self._gp_model.remove(self.genconstrs)
+            self._gp_model.remove(self.sos)
             if self._first_callback:
-                beg = self._model.getCallbackIndex(self._first_callback)
-                end = self._model.getCallbackIndex(self._last_callback)
-                self._model.removeCallbacks(beg, end)
+                beg = self._gp_model.getCallbackIndex(self._first_callback)
+                end = self._gp_model.getCallbackIndex(self._last_callback)
+                self._gp_model.removeCallbacks(beg, end)
 
             self._firstvar = None
             self._lastvar = None
@@ -369,5 +371,5 @@ class SubModel:
             self._sos = []
             self._first_callback = None
             self._last_callback = None
-            self._model = None
+            self._gp_model = None
             self._objects = None

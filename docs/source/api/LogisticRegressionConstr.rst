@@ -1,7 +1,10 @@
 Logistic Regression
 ===================
 
-.. autofunction:: gurobi_ml.sklearn.add_logistic_regression_constr
+.. automodule:: gurobi_ml.sklearn.logistic_regression
 
-.. autoclass:: gurobi_ml.sklearn.LogisticRegressionConstr
+.. autofunction:: gurobi_ml.sklearn.logistic_regression.add_logistic_regression_constr
+
+.. autoclass:: gurobi_ml.sklearn.logistic_regression.LogisticRegressionConstr
+    :show-inheritance:
     :members:

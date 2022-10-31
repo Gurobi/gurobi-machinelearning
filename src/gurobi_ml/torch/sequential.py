@@ -13,7 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for inserting a :external+torch:py:class:`torch.nn.Sequential` model into a gurobipy model
+""" Module for embeding a :external+torch:py:class:`torch.nn.Sequential` model into a
+:gurobipy:`model`.
 """
 
 import torch
@@ -23,11 +24,52 @@ from ..exceptions import NoModel, NoSolution
 from ..modeling.neuralnet import BaseNNConstr
 
 
+def add_sequential_constr(gp_model, sequential_model, input_vars, output_vars=None, **kwargs):
+    """Embed sequential_model into gp_model
+
+    Predict the values of output_vars using input_vars
+
+
+    Parameters
+    ----------
+    gp_model: :gurobipy:`model`
+        The gurobipy model where the sequential model should be inserted.
+    sequential_model: :external+torch:py:class:`torch.nn.Sequential`
+        The sequential model to insert as predictor.
+    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+        Decision variables used as input for logistic regression in model.
+    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+        Decision variables used as output for logistic regression in model.
+
+    Returns
+    -------
+    SequentialConstr
+        Object containing information about what was added to model to insert the
+        predictor in it
+
+    Warning
+    -------
+    Only :external+torch:py:class:`torch.nn.Linear` layers and
+    :external+torch:py:class:`torch.nn.ReLU` layers are supported.
+
+    Raises
+    ------
+    NoModel
+        If the translation for some of the Pytorch model structure
+        (layer or activation) is not implemented.
+
+    Note
+    ----
+    |VariablesDimensionsWarn|
+    """
+    return SequentialConstr(gp_model, sequential_model, input_vars, output_vars, **kwargs)
+
+
 class SequentialConstr(BaseNNConstr):
     """Transform a pytorch Sequential Neural Network to Gurobi constraint with
     input and output as matrices of variables."""
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, **kwargs):
+    def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         linear = None
         for step in predictor:
             if isinstance(step, nn.ReLU):
@@ -37,7 +79,7 @@ class SequentialConstr(BaseNNConstr):
             else:
                 raise NoModel(predictor, f"Unsupported layer {type(step).__name__}")
         super().__init__(
-            grbmodel, predictor, input_vars, output_vars, default_name="torchsequential"
+            gp_model, predictor, input_vars, output_vars, default_name="torchsequential"
         )
 
     def _mip_model(self):
@@ -96,36 +138,3 @@ class SequentialConstr(BaseNNConstr):
             t_out = self.predictor.forward(t_in)
             return t_out.detach().numpy() - self.output.X
         raise NoSolution()
-
-
-def add_sequential_constr(grbmodel, sequential_model, input_vars, output_vars=None, **kwargs):
-    """Use a `sequential_model` to predict the value of `output_vars` using `input_vars` in `grbmodel`
-
-    Parameters
-    ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-        The gurobipy model where the predictor should be inserted.
-    sequential_model: :external+torch:py:class:`torch.nn.Sequential`
-        The sequential model to insert as predictor.
-    input_vars: mvar_array_like
-        Decision variables used as input for predictor in model.
-    output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in model.
-
-    Returns
-    -------
-    SequentialConstr
-        Object containing information about what was added to model to insert the
-        predictor in it
-
-    Raises
-    ------
-    NoModel
-        If the translation for some of the Pytorch model structure
-        (layer or activation) is not implemented.
-
-    Note
-    ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
-    """
-    return SequentialConstr(grbmodel, sequential_model, input_vars, output_vars, **kwargs)

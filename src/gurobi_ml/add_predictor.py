@@ -21,31 +21,31 @@ from .registered_predictors import registered_predictors
 from .sklearn import add_pipeline_constr, sklearn_transformers
 
 
-def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwargs):
-    """Use `predictor` to predict the value of `output_vars` using `input_vars` in `model`
+def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kwargs):
+    """Use `predictor` to predict the value of `output_vars` using `input_vars` in `gp_model`
 
     Parameters
     ----------
-    model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+    gp_model: :gurobipy:`model`
             The gurobipy model where the predictor should be inserted.
     predictor:
         The predictor to insert.
     input_vars: mvar_array_like
-        Decision variables used as input for predictor in model.
+        Decision variables used as input for predictor in gp_model.
     output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in model.
+        Decision variables used as output for predictor in gp_model.
 
     Returns
     -------
     AbstractPredictorConstr
-        Object containing information about what was added to model to insert the
+        Object containing information about what was added to gp_model to insert the
         predictor in it
 
     Note
     ----
     The parameters `input_vars` and `output_vars` can be either
 
-     * Gurobipy matrix variables `gp.MVar <https://www.gurobi.com/documentation/9.5/refman/py_mvar.html>`_
+     * Gurobipy matrix variables :gurobipy:`mvar`
      * Lists of variables
      * Dictionaries of variables
 
@@ -83,4 +83,4 @@ def add_predictor_constr(model, predictor, input_vars, output_vars=None, **kwarg
             convertor = convertors[type(predictor).__name__]
         except KeyError:
             raise NotRegistered(type(predictor).__name__)
-    return convertor(model, predictor, input_vars, output_vars, **kwargs)
+    return convertor(gp_model, predictor, input_vars, output_vars, **kwargs)
