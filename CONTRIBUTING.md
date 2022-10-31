@@ -26,8 +26,8 @@ issue.
 Before submitting a pull request:
 - install the [pre-commit](https://pre-commit.com) package to enable the automatic
   running of the pre-commit hooks in the `.pre-commit-configuration.yaml` file,
-- make sure all tests pass by running `pytest` in the root folder of the `gurobi-machinelearning`.
-- add other relevant checks for your changes toGurobi Machine Learning.
+- make sure all tests pass by running `tox` in the root folder of the `gurobi-machinelearning`.
+- add any other relevant checks for your changes to Gurobi Machine Learning.
 
 After a pull request is submitted, the tests will be run automatically, and the status
 will appear on the pull request page. If the tests failed, there is a link which can be
