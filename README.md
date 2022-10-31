@@ -3,6 +3,7 @@
 ![Python versions](https://img.shields.io/badge/python-3.9%20|%203.10-blue)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI](https://img.shields.io/pypi/v/gurobipy)](https://pypi.org/project/gurobipy)
+[![Gurobi-forum](https://img.shields.io/badge/Help-Gurobi--Forum-red)](https://support.gurobi.com/hc/en-us/community/topics)
 
 ![Gurobi](docs/source/_static/image8.png)
 
