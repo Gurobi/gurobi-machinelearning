@@ -4,6 +4,11 @@
 [![PyPI](https://img.shields.io/pypi/v/gurobipy)](https://pypi.org/project/gurobipy)
 
 ![Gurobi](doc_source/source/_static/image8.png)
+
+
+> **⚠ Warning**
+> ```This code is in a pre-release state. It may not be fully functional and breaking changes can occur without notice.```
+
 # Gurobi Machine Learning
 
 Gurobi Machine Learning is a python package to insert trained predictors into a [`gurobipy`](https://pypi.org/project/gurobipy/) model.

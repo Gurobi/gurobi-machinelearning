@@ -1,6 +1,12 @@
 Supported Regression models
 ===========================
 
+.. warning::
+
+   This code is in a pre-release state. It may not be fully functional and breaking changes
+   can occur without notice.
+
+
 The package currently support various `scikit-learn
 <https://scikit-learn.org/stable/>`_ objects. It also has limited support for
 `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_. Only
