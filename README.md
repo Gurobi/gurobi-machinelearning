@@ -11,34 +11,23 @@
 
 # Gurobi Machine Learning
 
-Gurobi Machine Learning is a python package to insert trained predictors into a [`gurobipy`](https://pypi.org/project/gurobipy/) model.
+Gurobi Machine Learning is an [open-source](https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com/en/latest/meta-license.html) python package to embed trained regression models in a [`gurobipy`](https://pypi.org/project/gurobipy/) model to be solved with the Gurobi solver. 
 
-The goal of the package is to:
-  1. Simplify the process of importing a trained machine learning model built with a popular ML package into an optimization model.
-  1. Improve algorithmic performance to enable the optimization model to explore a sizable space of solutions that satisfy the variable relationships captured in the ML model.
-  1. Make it easier for optimization models to mix explicit and implicit constraints.
+The package currently supports various [scikit-learn](https://scikit-learn.org/stable/) objects. It has limited support for the [Keras](https://keras.io/) API of [TensorFlow](https://www.tensorflow.org/) and [PyTorch](https://pytorch.org/). Only neural networks with ReLU activation can be used with these two packages.
 
-The package currently supports the following regression models:
- - [Scikit-learn](https://scikit-learn.org/)
-    - Regression models
-      - Linear regression
-      - Logistic regression
-      - Neural-network regression (`MLPRegressor`)
-      - Decision tree
-      - Gradient boosting tree
-      - Random Forest
-    - Transformers
-      - Standard Scaler
-      - Polynomial Features (degree 2)
- - [Keras](https://keras.io/)
-   - Dense layers
-   - ReLU layers
- - [PyTorch](https://pytorch.org/) (only `torch.nn.Sequential` objects)
-   - Dense layers
-   - ReLU layers
+# Documentation
 
-Our documentation contains more detailed information on the
-[supported models](https://gurobi-machinelearning.readthedocs.io/en/stable/).
+The latest user manual is available on [readthedocs](https://gurobi-machinelearning.readthedocs.io/en/stable/).
+
+# Contact us
+
+For questions related to using Gurobi Machine Learning please use [Gurobi's Forum](https://support.gurobi.com/hc/en-us/community/topics).
+
+For reporting bugs, issues and feature request please
+[open an issue](https://github.com/Gurobi/gurobi-machinelearning/issues).
+
+If you encounter issues with Gurobi or ``gurobipy`` please contact
+[Gurobi Support](https://support.gurobi.com/hc/en-us)
 
 # Installation
 
@@ -70,6 +59,7 @@ Please note that `gurobipy` is commercial software and requires a license. When 
 
 # Getting a Gurobi License
 Alternatively to the bundled limited license, there are licenses that can handle models of all sizes.
+
 As a student or staff member of an academic institution you qualify for a free, full product license.
 For more information, see:
 
@@ -122,3 +112,4 @@ tests with a full Gurobi license.
 ## Submitting a Pull Request
 Before opening a Pull Request, have a look at the full [Contributing page](CONTRIBUTING.md) to make sure your code
 complies with our guidelines.
+
