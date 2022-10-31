@@ -39,13 +39,25 @@ class BaseNNConstr(AbstractPredictorConstr):
 
         default_name = kwargs.pop("default_name", _default_name(predictor))
         super().__init__(
-            grbmodel=grbmodel, input_vars=input_vars, output_vars=output_vars, default_name=default_name, **kwargs
+            grbmodel=grbmodel,
+            input_vars=input_vars,
+            output_vars=output_vars,
+            default_name=default_name,
+            **kwargs,
         )
 
     def __iter__(self):
         return self._layers.__iter__()
 
-    def add_dense_layer(self, input_vars, layer_coefs, layer_intercept, activation, activation_vars=None, **kwargs):
+    def add_dense_layer(
+        self,
+        input_vars,
+        layer_coefs,
+        layer_intercept,
+        activation,
+        activation_vars=None,
+        **kwargs,
+    ):
         """Add a layer to model
 
         Parameters
@@ -62,7 +74,15 @@ class BaseNNConstr(AbstractPredictorConstr):
         activation_vars: None, optional
             Output variables
         """
-        layer = DenseLayer(self._model, activation_vars, input_vars, layer_coefs, layer_intercept, activation, **kwargs)
+        layer = DenseLayer(
+            self._model,
+            activation_vars,
+            input_vars,
+            layer_coefs,
+            layer_intercept,
+            activation,
+            **kwargs,
+        )
         self._layers.append(layer)
         return layer
 

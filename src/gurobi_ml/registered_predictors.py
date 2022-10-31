@@ -48,7 +48,11 @@ def keras_convertors():
             add_keras_constr as add_keras_constr,  # pylint: disable=import-outside-toplevel
         )
 
-        return {keras.Sequential: add_keras_constr, Functional: add_keras_constr, Model: add_keras_constr}
+        return {
+            keras.Sequential: add_keras_constr,
+            Functional: add_keras_constr,
+            Model: add_keras_constr,
+        }
     return {}
 
 

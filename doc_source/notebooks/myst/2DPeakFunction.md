@@ -108,8 +108,7 @@ y = peak2d(x1, x2)
 
 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 # Plot the surface.
-surf = ax.plot_surface(x1, x2, y, cmap=cm.coolwarm,
-                       linewidth=0.01, antialiased=False)
+surf = ax.plot_surface(x1, x2, y, cmap=cm.coolwarm, linewidth=0.01, antialiased=False)
 # Add a color bar which maps values to colors.
 fig.colorbar(surf, shrink=0.5, aspect=5)
 
@@ -131,7 +130,7 @@ neural-network regressor. We do a relatively small neural-network.
 
 ```{code-cell} ipython3
 # Run our regression
-layers = [30]*2
+layers = [30] * 2
 regression = MLPRegressor(hidden_layer_sizes=layers, activation="relu")
 pipe = make_pipeline(PolynomialFeatures(), regression)
 pipe.fit(X=X, y=y)
@@ -209,15 +208,23 @@ After solving the model, we check the error in the estimate of the Gurobi
 solution.
 
 ```{code-cell} ipython3
-print("Error in approximating the regression {:.6}".format(np.max(np.abs(pred_constr.get_error()))))
+print(
+    "Error in approximating the regression {:.6}".format(
+        np.max(np.abs(pred_constr.get_error()))
+    )
+)
 ```
 
 Finally, we look at the solution and the objective value found.
 
 ```{code-cell} ipython3
-print(f"solution point of the approximated problem ({x[0].X:.4}, {x[1].X:.4}), " +
-        f"objective value {m.ObjVal}.")
-print(f"Function value at the solution point {peak2d(x[0].X, x[1].X)} error {abs(peak2d(x[0].X, x[1].X) - m.ObjVal)}.")
+print(
+    f"solution point of the approximated problem ({x[0].X:.4}, {x[1].X:.4}), "
+    + f"objective value {m.ObjVal}."
+)
+print(
+    f"Function value at the solution point {peak2d(x[0].X, x[1].X)} error {abs(peak2d(x[0].X, x[1].X) - m.ObjVal)}."
+)
 ```
 
 The difference between the function and the approximation at the computed

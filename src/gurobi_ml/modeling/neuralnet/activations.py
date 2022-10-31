@@ -85,7 +85,9 @@ class ReLU:
         output = layer.output
         if hasattr(layer, "coefs"):
             if not hasattr(layer, "mixing"):
-                mixing = layer.model.addMVar(output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix")
+                mixing = layer.model.addMVar(
+                    output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix"
+                )
                 layer.mixing = mixing
             layer.model.update()
 
