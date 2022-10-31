@@ -113,8 +113,8 @@ Now, load the data and store into a Pandas dataframe.
 
 ```{code-cell}
 data_url = "https://raw.githubusercontent.com/Gurobi/modeling-examples/master/price_optimization/"
-avocado = pd.read_csv(data_url + "HABdata_2019_2022.csv") # dataset downloaded directly from HAB
-avocado_old = pd.read_csv(data_url + "kaggledata_till2018.csv") # dataset downloaded from Kaggle
+avocado = pd.read_csv(data_url + "HABdata_2019_2022.csv")  # dataset downloaded directly from HAB
+avocado_old = pd.read_csv(data_url + "kaggledata_till2018.csv")  # dataset downloaded from Kaggle
 avocado = pd.concat([avocado, avocado_old])
 avocado
 ```
@@ -130,26 +130,31 @@ months.
 
 ```{code-cell}
 # Add the index for each year from 2015 through 2022
-avocado['date'] = pd.to_datetime(avocado['date'])
-avocado['year'] = pd.DatetimeIndex(avocado['date']).year
-avocado['year_index'] = avocado['year'] - 2015
-avocado = avocado.sort_values(by='date')
+avocado["date"] = pd.to_datetime(avocado["date"])
+avocado["year"] = pd.DatetimeIndex(avocado["date"]).year
+avocado["year_index"] = avocado["year"] - 2015
+avocado = avocado.sort_values(by="date")
 
 # Define the peak season
-avocado['month'] = pd.DatetimeIndex(avocado['date']).month
-peak_months = range(2,8)        # <--------- Set the months for the "peak season"
-def peak_season(row):
-    return 1 if int(row['month']) in peak_months else 0
+avocado["month"] = pd.DatetimeIndex(avocado["date"]).month
+peak_months = range(2, 8)  # <--------- Set the months for the "peak season"
 
-avocado['peak'] = avocado.apply(lambda row: peak_season(row), axis=1)
+
+def peak_season(row):
+    return 1 if int(row["month"]) in peak_months else 0
+
+
+avocado["peak"] = avocado.apply(lambda row: peak_season(row), axis=1)
 
 # Scale the number of avocados to millions
-avocado['units_sold'] = avocado['units_sold']/1000000
+avocado["units_sold"] = avocado["units_sold"] / 1000000
 
 # Select only conventional avocados
-avocado = avocado[avocado['type'] == 'Conventional']
+avocado = avocado[avocado["type"] == "Conventional"]
 
-avocado = avocado[['date','units_sold','price','region','year','month','year_index','peak']].reset_index(drop = True)
+avocado = avocado[
+    ["date", "units_sold", "price", "region", "year", "month", "year_index", "peak"]
+].reset_index(drop=True)
 
 avocado
 ```
@@ -160,7 +165,7 @@ Now, we will infer sales trends in time and seasonality. For simplicity, let's
 proceed with data from the United States as a whole.
 
 ```{code-cell}
-df_Total_US = avocado[avocado['region']=='Total_US']
+df_Total_US = avocado[avocado["region"] == "Total_US"]
 ```
 
 ### Sales Over the Years
@@ -168,11 +173,11 @@ df_Total_US = avocado[avocado['region']=='Total_US']
 ```{code-cell}
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10, 5))
 
-mean = df_Total_US.groupby('year')['units_sold'].mean()
-std  = df_Total_US.groupby('year')['units_sold'].std()
-axes.errorbar(mean.index, mean, xerr=0.5, yerr=2*std, linestyle='')
-axes.set_ylabel('Units Sold (millions)')
-axes.set_xlabel('Year')
+mean = df_Total_US.groupby("year")["units_sold"].mean()
+std = df_Total_US.groupby("year")["units_sold"].std()
+axes.errorbar(mean.index, mean, xerr=0.5, yerr=2 * std, linestyle="")
+axes.set_ylabel("Units Sold (millions)")
+axes.set_xlabel("Year")
 
 fig.tight_layout()
 ```
@@ -192,18 +197,18 @@ We will now see the sales trends within a year.
 ```{code-cell}
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10, 5))
 
-mean = df_Total_US.groupby('month')['units_sold'].mean()
-std  = df_Total_US.groupby('month')['units_sold'].std()
+mean = df_Total_US.groupby("month")["units_sold"].mean()
+std = df_Total_US.groupby("month")["units_sold"].std()
 
-axes.errorbar(mean.index, mean, xerr=0.5, yerr=2*std, linestyle='')
-axes.set_ylabel('Units Sold (millions)')
-axes.set_xlabel('Month')
+axes.errorbar(mean.index, mean, xerr=0.5, yerr=2 * std, linestyle="")
+axes.set_ylabel("Units Sold (millions)")
+axes.set_xlabel("Month")
 
 fig.tight_layout()
 
-plt.xlabel('Month')
-axes.set_xticks(range(1,13))
-plt.ylabel('Units sold (millions)')
+plt.xlabel("Month")
+axes.set_xticks(range(1, 13))
+plt.ylabel("Units sold (millions)")
 plt.show()
 ```
 
@@ -219,9 +224,11 @@ not).
 
 ```{code-cell}
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(15, 5))
-sns.heatmap(df_Total_US[['units_sold', 'price', 'year', 'peak']].corr(),annot=True, center=0,ax=axes)
+sns.heatmap(
+    df_Total_US[["units_sold", "price", "year", "peak"]].corr(), annot=True, center=0, ax=axes
+)
 
-axes.set_title('Correlations for conventional avocados')
+axes.set_title("Correlations for conventional avocados")
 plt.show()
 ```
 
@@ -239,19 +246,28 @@ determine the number of avocados that we want to supply to each region.
 ```{code-cell}
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10, 5))
 
-regions = ['Great_Lakes','Midsouth','Northeast','Northern_New_England','SouthCentral','Southeast','West','Plains']
+regions = [
+    "Great_Lakes",
+    "Midsouth",
+    "Northeast",
+    "Northern_New_England",
+    "SouthCentral",
+    "Southeast",
+    "West",
+    "Plains",
+]
 df = avocado[avocado.region.isin(regions)]
 
-mean = df.groupby('region')['units_sold'].mean()
-std  = df.groupby('region')['units_sold'].std()
+mean = df.groupby("region")["units_sold"].mean()
+std = df.groupby("region")["units_sold"].std()
 
-axes.errorbar(range(len(mean)), mean, xerr=0.5, yerr=2*std, linestyle='')
+axes.errorbar(range(len(mean)), mean, xerr=0.5, yerr=2 * std, linestyle="")
 
 fig.tight_layout()
 
-plt.xlabel('Region')
-plt.xticks(range(len(mean)), pd.DataFrame(mean)['units_sold'].index,rotation=20)
-plt.ylabel('Units sold (millions)')
+plt.xlabel("Region")
+plt.xticks(range(len(mean)), pd.DataFrame(mean)["units_sold"].index, rotation=20)
+plt.ylabel("Units sold (millions)")
 plt.show()
 ```
 
@@ -287,12 +303,14 @@ units_sold.
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import make_column_transformer
 
-feat_transform = make_column_transformer((OneHotEncoder(drop="first"), ['region']),
-                                          ('passthrough', ['year_index', 'price', 'peak']),
-                                         verbose_feature_names_out=False)
+feat_transform = make_column_transformer(
+    (OneHotEncoder(drop="first"), ["region"]),
+    ("passthrough", ["year_index", "price", "peak"]),
+    verbose_feature_names_out=False,
+)
 
 X = feat_transform.fit_transform(df)
-y = df['units_sold']
+y = df["units_sold"]
 ```
 
 To validate the regression model, we will randomly split the dataset into $80\%$
@@ -300,6 +318,7 @@ training and $20\%$ testing data and learn the weights using `Scikit-learn`.
 
 ```{code-cell}
 from sklearn.model_selection import train_test_split
+
 # Split the data for training and testing
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.8, random_state=1)
 ```
@@ -398,32 +417,40 @@ from gurobipy import GRB
 m = gp.Model("Avocado_Price_Allocation")
 
 # Sets and parameters
-R = len(regions)   # set of all regions
+R = len(regions)  # set of all regions
 
 B = 30  # total amount ot avocado supply
 
-peak_or_not = 1 # 1 if it is the peak season; 1 if isn't
+peak_or_not = 1  # 1 if it is the peak season; 1 if isn't
 year = 2022
 
-c_waste = 0.1 # the cost ($) of wasting an avocado
+c_waste = 0.1  # the cost ($) of wasting an avocado
 # the cost of transporting an avocado
-c_transport = pd.Series({'Great_Lakes': .3,
-                         'Midsouth':.1,
-                         'Northeast':.4,
-                         'Northern_New_England':.5,
-                         'SouthCentral':.3,
-                         'Southeast':.2,
-                         'West':.2,
-                         'Plains':.2})
+c_transport = pd.Series(
+    {
+        "Great_Lakes": 0.3,
+        "Midsouth": 0.1,
+        "Northeast": 0.4,
+        "Northern_New_England": 0.5,
+        "SouthCentral": 0.3,
+        "Southeast": 0.2,
+        "West": 0.2,
+        "Plains": 0.2,
+    }
+)
 
 c_transport = c_transport.loc[regions]
 # the cost of transporting an avocado
 
 # Get the lower and upper bounds from the dataset for the price and the number of products to be stocked
-a_min = 0 # minimum avocado price in each region
-a_max = 2 # maximum avocado price in each region
-b_min = df.groupby('region')['units_sold'].min().loc[regions] # minimum number of avocados allocated to each region
-b_max = df.groupby('region')['units_sold'].max().loc[regions] # maximum number of avocados allocated to each region
+a_min = 0  # minimum avocado price in each region
+a_max = 2  # maximum avocado price in each region
+b_min = (
+    df.groupby("region")["units_sold"].min().loc[regions]
+)  # minimum number of avocados allocated to each region
+b_max = (
+    df.groupby("region")["units_sold"].max().loc[regions]
+)  # maximum number of avocados allocated to each region
 ```
 
 ### Compute bounds for feature variables
@@ -454,10 +481,9 @@ columns corresponding to the features:
 Display the dataframe to make sure it is correct
 
 ```{code-cell}
-feat_lb = pd.DataFrame(data = {'price': a_min,
-                               'year_index': year - 2015,
-                               'peak': peak_or_not,
-                               'region': regions})
+feat_lb = pd.DataFrame(
+    data={"price": a_min, "year_index": year - 2015, "peak": peak_or_not, "region": regions}
+)
 feat_lb
 ```
 
@@ -475,9 +501,10 @@ name) and display it (note that it's not necessary to put the results in a
 dataframe, but it's good for checking how it looks):
 
 ```{code-cell}
-feat_lb = pd.DataFrame(data=feat_transform.transform(feat_lb),
-                       columns=feat_transform.get_feature_names_out(),
-                       )
+feat_lb = pd.DataFrame(
+    data=feat_transform.transform(feat_lb),
+    columns=feat_transform.get_feature_names_out(),
+)
 feat_lb
 ```
 
@@ -489,14 +516,14 @@ difference between the lower and upper bounds is the value for the price column
 which is now `a_max`
 
 ```{code-cell}
-feat_ub = pd.DataFrame(data = {'price': a_max,
-                               'year_index': year - 2015,
-                               'peak': peak_or_not,
-                               'region': regions})
+feat_ub = pd.DataFrame(
+    data={"price": a_max, "year_index": year - 2015, "peak": peak_or_not, "region": regions}
+)
 
-feat_ub = pd.DataFrame(data=feat_transform.transform(feat_ub),
-                       columns=feat_transform.get_feature_names_out(),
-                       )
+feat_ub = pd.DataFrame(
+    data=feat_transform.transform(feat_ub),
+    columns=feat_transform.get_feature_names_out(),
+)
 feat_ub
 ```
 
@@ -523,17 +550,17 @@ The price variable $p$, needs to be extracted from the `feat_vars`. To do so we
 use a mask built using the transformed feature names.
 
 ```{code-cell}
-x = m.addMVar(R,name="x",lb=b_min,ub=b_max)  # quantity supplied to each region
-s = m.addMVar(R,name="s",lb=0)   # predicted amount of sales in each region for the given price
-w = m.addMVar(R,name="w",lb=0)   # excess wasteage in each region
+x = m.addMVar(R, name="x", lb=b_min, ub=b_max)  # quantity supplied to each region
+s = m.addMVar(R, name="s", lb=0)  # predicted amount of sales in each region for the given price
+w = m.addMVar(R, name="w", lb=0)  # excess wasteage in each region
 
 # Add variables for the regression
-feats = m.addMVar(feat_lb.shape, lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name='reg_features')
-d = m.addMVar(R, lb=-gp.GRB.INFINITY, name='demand')
+feats = m.addMVar(feat_lb.shape, lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name="reg_features")
+d = m.addMVar(R, lb=-gp.GRB.INFINITY, name="demand")
 
 # Get the price variables from the features of the regression
 # Compute the mask that will give us the column
-price_index = feat_transform.get_feature_names_out() == 'price'
+price_index = feat_transform.get_feature_names_out() == "price"
 # Apply the mask, not that it will return a 2d object and we reshape it to 1d.
 p = feats[:, price_index].reshape(-1)
 m.update()
@@ -558,7 +585,7 @@ c^r_{transport} * x_r)& \end{align}
 Let us now add the objective function to the model.
 
 ```{code-cell}
-m.setObjective(p@s - c_waste * w.sum()- c_transport.to_numpy() @ x)
+m.setObjective(p @ s - c_waste * w.sum() - c_transport.to_numpy() @ x)
 m.ModelSense = GRB.MAXIMIZE
 ```
 
@@ -658,15 +685,15 @@ analyze the optimal solution by storing it in a Pandas dataframe.
 
 ```{code-cell}
 solution = pd.DataFrame()
-solution['Region'] = regions
-solution['Price'] = p.X
-solution['Allocated'] = x.X.round(4)
-solution['Sold'] = s.X.round(4)
-solution['Wasted'] = w.X.round(4)
-solution['Pred_demand'] = d.X.round(4)
+solution["Region"] = regions
+solution["Price"] = p.X
+solution["Allocated"] = x.X.round(4)
+solution["Sold"] = s.X.round(4)
+solution["Wasted"] = w.X.round(4)
+solution["Pred_demand"] = d.X.round(4)
 
 opt_revenue = m.ObjVal
-print("\n The optimal net revenue: $%f million"%opt_revenue)
+print("\n The optimal net revenue: $%f million" % opt_revenue)
 solution
 ```
 
@@ -674,16 +701,18 @@ Let us now visualize a scatter plot between the price and the number of avocados
 sold (in millions) for the eight regions.
 
 ```{code-cell}
-fig, ax = plt.subplots(1,1)
-plot_sol = sns.scatterplot(data=solution,x='Price',y='Sold',hue='Region',s=100)
-plot_waste = sns.scatterplot(data=solution,x='Price',y='Wasted',marker='x',hue='Region',s=100,legend = False)
+fig, ax = plt.subplots(1, 1)
+plot_sol = sns.scatterplot(data=solution, x="Price", y="Sold", hue="Region", s=100)
+plot_waste = sns.scatterplot(
+    data=solution, x="Price", y="Wasted", marker="x", hue="Region", s=100, legend=False
+)
 
-plot_sol.legend(loc='center left', bbox_to_anchor=(1.25, 0.5), ncol=1)
-plot_waste.legend(loc='center left', bbox_to_anchor=(1.25, 0.5), ncol=1)
+plot_sol.legend(loc="center left", bbox_to_anchor=(1.25, 0.5), ncol=1)
+plot_waste.legend(loc="center left", bbox_to_anchor=(1.25, 0.5), ncol=1)
 plt.ylim(0, 5)
 plt.xlim(1, 2.2)
-ax.set_xlabel('Price per avocado ($)')
-ax.set_ylabel('Number of avocados sold (millions)')
+ax.set_xlabel("Price per avocado ($)")
+ax.set_ylabel("Number of avocados sold (millions)")
 plt.show()
 print("The circles represent sales quantity and the cross markers represent the wasted quantity.")
 ```

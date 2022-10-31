@@ -103,8 +103,8 @@ The features we use for the regression are `"merit"` (scholarship), `"SAT"` and
 
 ```{code-cell} ipython3
 # Base URL for retrieving data
-janos_data_url = 'https://raw.githubusercontent.com/INFORMSJoC/2020.1023/master/data/'
-historical_data = pd.read_csv(janos_data_url + 'college_student_enroll-s1-1.csv', index_col=0)
+janos_data_url = "https://raw.githubusercontent.com/INFORMSJoC/2020.1023/master/data/"
+historical_data = pd.read_csv(janos_data_url + "college_student_enroll-s1-1.csv", index_col=0)
 
 # classify our features between the ones that are fixed and the ones that will be
 # part of the optimization problem
@@ -133,7 +133,7 @@ we randomly pick 250 students from it.
 
 ```{code-cell} ipython3
 # Retrieve new data used to build the optimization problem
-studentsdata = pd.read_csv(janos_data_url + 'college_applications6000.csv', index_col=0)
+studentsdata = pd.read_csv(janos_data_url + "college_applications6000.csv", index_col=0)
 
 nstudents = 250
 
@@ -190,7 +190,7 @@ m = gp.Model()
 feature_vars = m.addMVar(feat_lb.shape, lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name="feats")
 y = m.addMVar(nstudents, name="y")
 
-x = feature_vars[:, feat_lb.columns.get_indexer(['merit'])][:, 0]
+x = feature_vars[:, feat_lb.columns.get_indexer(["merit"])][:, 0]
 ```
 
 We add the objective and the budget constraint:
@@ -252,8 +252,15 @@ new one that does a tighter approximation and resolve the model.
 ```{code-cell} ipython3
 pred_constr.remove()
 
-pwl_attributes={"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 1e-4, "FuncPieceRatio": -1.0}
-pred_constr = add_predictor_constr(m, pipe, feature_vars, y, output_type="probability_1", pwl_attributes=pwl_attributes)
+pwl_attributes = {
+    "FuncPieces": -1,
+    "FuncPieceLength": 0.01,
+    "FuncPieceError": 1e-4,
+    "FuncPieceRatio": -1.0,
+}
+pred_constr = add_predictor_constr(
+    m, pipe, feature_vars, y, output_type="probability_1", pwl_attributes=pwl_attributes
+)
 
 m.optimize()
 ```
