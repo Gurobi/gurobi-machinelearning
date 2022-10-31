@@ -97,7 +97,9 @@ class DenseLayer(AbstractNNLayer):
         super().__init__(grbmodel, output_vars, input_vars, activation_function, **kwargs)
 
     def _create_output_vars(self, input_vars):
-        rval = self._model.addMVar((input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act")
+        rval = self._model.addMVar(
+            (input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act"
+        )
         self._model.update()
         self._output = rval
 

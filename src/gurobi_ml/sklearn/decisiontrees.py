@@ -24,7 +24,14 @@ from .skgetter import SKgetter
 
 
 def add_decision_tree_regressor_constr(
-    grbmodel, decision_tree_regressor, input_vars, output_vars=None, epsilon=0.0, scale=1.0, float_type=np.float32, **kwargs
+    grbmodel,
+    decision_tree_regressor,
+    input_vars,
+    output_vars=None,
+    epsilon=0.0,
+    scale=1.0,
+    float_type=np.float32,
+    **kwargs
 ):
     """Use a `decision_tree_regressor` to predict the value of `output_vars` using `input_vars` in `grbmodel`
 
@@ -62,11 +69,20 @@ def add_decision_tree_regressor_constr(
     this point.
     """
     return DecisionTreeRegressorConstr(
-        grbmodel, decision_tree_regressor, input_vars, output_vars, epsilon, scale, float_type, **kwargs
+        grbmodel,
+        decision_tree_regressor,
+        input_vars,
+        output_vars,
+        epsilon,
+        scale,
+        float_type,
+        **kwargs
     )
 
 
-def add_gradient_boosting_regressor_constr(grbmodel, gradient_boosting_regressor, input_vars, output_vars=None, **kwargs):
+def add_gradient_boosting_regressor_constr(
+    grbmodel, gradient_boosting_regressor, input_vars, output_vars=None, **kwargs
+):
     """Use a `gradient_boosting_regressor` to predict the value of `output_vars` using `input_vars` in `grbmodel`
 
     Parameters
@@ -90,10 +106,14 @@ def add_gradient_boosting_regressor_constr(grbmodel, gradient_boosting_regressor
     ----
     See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
     """
-    return GradientBoostingRegressorConstr(grbmodel, gradient_boosting_regressor, input_vars, output_vars, **kwargs)
+    return GradientBoostingRegressorConstr(
+        grbmodel, gradient_boosting_regressor, input_vars, output_vars, **kwargs
+    )
 
 
-def add_random_forest_regressor_constr(grbmodel, random_forest_regressor, input_vars, output_vars=None, **kwargs):
+def add_random_forest_regressor_constr(
+    grbmodel, random_forest_regressor, input_vars, output_vars=None, **kwargs
+):
     """Use a `random_forest_regressor` to predict the value of `output_vars` using `input_vars` in `grbmodel`
 
     Parameters
@@ -118,14 +138,24 @@ def add_random_forest_regressor_constr(grbmodel, random_forest_regressor, input_
     See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
 
     """
-    return RandomForestRegressorConstr(grbmodel, random_forest_regressor, input_vars, output_vars, **kwargs)
+    return RandomForestRegressorConstr(
+        grbmodel, random_forest_regressor, input_vars, output_vars, **kwargs
+    )
 
 
 class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model a trained decision tree in a Gurobi model"""
 
     def __init__(
-        self, grbmodel, predictor, input_vars, output_vars=None, epsilon=0.0, scale=1.0, float_type=np.float32, **kwargs
+        self,
+        grbmodel,
+        predictor,
+        input_vars,
+        output_vars=None,
+        epsilon=0.0,
+        scale=1.0,
+        float_type=np.float32,
+        **kwargs
     ):
         self.n_outputs_ = predictor.n_outputs_
         self.epsilon = epsilon
@@ -152,8 +182,13 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         leafs = tree.children_left < 0
         model.addConstr(nodes[:, notleafs] >= nodes[:, tree.children_left[notleafs]])
         model.addConstr(nodes[:, notleafs] >= nodes[:, tree.children_right[notleafs]])
-        model.addConstr(nodes[:, notleafs] <= nodes[:, tree.children_right[notleafs]] + nodes[:, tree.children_left[notleafs]])
-        model.addConstr(nodes[:, tree.children_right[notleafs]] + nodes[:, tree.children_left[notleafs]] <= 1)
+        model.addConstr(
+            nodes[:, notleafs]
+            <= nodes[:, tree.children_right[notleafs]] + nodes[:, tree.children_left[notleafs]]
+        )
+        model.addConstr(
+            nodes[:, tree.children_right[notleafs]] + nodes[:, tree.children_left[notleafs]] <= 1
+        )
 
         # Node splitting
         for node in range(tree.capacity):
@@ -165,7 +200,8 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
             if left >= 0:
                 # Intermediate node
                 model.addConstrs(
-                    (nodes[k, left].item() == 1) >> (scale * _input[k, tree.feature[node]] <= scale * threshold)
+                    (nodes[k, left].item() == 1)
+                    >> (scale * _input[k, tree.feature[node]] <= scale * threshold)
                     for k in range(nex)
                 )
                 model.addConstrs(
@@ -213,13 +249,19 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         outdim = output.shape[1]
         assert outdim == 1, "Output dimension of gradient boosting regressor should be 1"
 
-        treevars = model.addMVar((nex, predictor.n_estimators_, 1), lb=-GRB.INFINITY, name="estimator")
+        treevars = model.addMVar(
+            (nex, predictor.n_estimators_, 1), lb=-GRB.INFINITY, name="estimator"
+        )
         constant = predictor.init_.constant_
 
         estimators = []
         for i in range(predictor.n_estimators_):
             tree = predictor.estimators_[i]
-            estimators.append(DecisionTreeRegressorConstr(model, tree[0], _input, treevars[:, i, :], default_name="gbt_tree"))
+            estimators.append(
+                DecisionTreeRegressorConstr(
+                    model, tree[0], _input, treevars[:, i, :], default_name="gbt_tree"
+                )
+            )
         self.estimators_ = estimators
 
         model.addConstr(output == predictor.learning_rate * treevars.sum(axis=1) + constant[0][0])
@@ -247,12 +289,18 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         output = self._output
         nex = _input.shape[0]
 
-        treevars = model.addMVar((nex, predictor.n_estimators, self.n_outputs_), lb=-GRB.INFINITY, name="estimator")
+        treevars = model.addMVar(
+            (nex, predictor.n_estimators, self.n_outputs_), lb=-GRB.INFINITY, name="estimator"
+        )
 
         estimators = []
         for i in range(predictor.n_estimators):
             tree = predictor.estimators_[i]
-            estimators.append(DecisionTreeRegressorConstr(model, tree, _input, treevars[:, i, :], default_name="rf_tree"))
+            estimators.append(
+                DecisionTreeRegressorConstr(
+                    model, tree, _input, treevars[:, i, :], default_name="rf_tree"
+                )
+            )
         self.estimators_ = estimators
 
         model.addConstr(predictor.n_estimators * output == treevars.sum(axis=1))

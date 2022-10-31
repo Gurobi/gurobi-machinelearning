@@ -43,7 +43,8 @@ extensions = [
 ]
 
 dep_versions = {
-    x.split("==")[0]: x.split("==")[1] for x in (Path().resolve().parent.parent / "requirements.tox.txt").read_text().split()
+    x.split("==")[0]: x.split("==")[1]
+    for x in (Path().resolve().parent.parent / "requirements.tox.txt").read_text().split()
 }
 rst_epilog = f"""
 .. |GurobiVersion| replace:: {dep_versions["gurobipy"]}

@@ -127,7 +127,12 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         See `Gurobi's User Manual <https://www.gurobi.com/documentation/9.1/refman/general_constraint_attribu.html>`_
         for the meaning of the attributes.
         """
-        return {"FuncPieces": -1, "FuncPieceLength": 0.01, "FuncPieceError": 0.01, "FuncPieceRatio": -1.0}
+        return {
+            "FuncPieces": -1,
+            "FuncPieceLength": 0.01,
+            "FuncPieceError": 0.01,
+            "FuncPieceRatio": -1.0,
+        }
 
     def _mip_model(self):
         """Add the prediction constraints to Gurobi"""
@@ -267,5 +272,12 @@ def add_logistic_regression_constr(
     See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
     """
     return LogisticRegressionConstr(
-        model, logistic_regression, input_vars, output_vars, output_type, epsilon, pwl_attributes=pwl_attributes, **kwargs
+        model,
+        logistic_regression,
+        input_vars,
+        output_vars,
+        output_type,
+        epsilon,
+        pwl_attributes=pwl_attributes,
+        **kwargs,
     )

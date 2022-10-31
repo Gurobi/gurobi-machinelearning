@@ -71,7 +71,9 @@ class Cases:
 
         if len(transformers):
             self.all_test += [
-                make_pipeline(init_predictor(trans), init_predictor(reg)) for trans in transformers for reg in regressors
+                make_pipeline(init_predictor(trans), init_predictor(reg))
+                for trans in transformers
+                for reg in regressors
             ]
         else:
             self.all_test += [make_pipeline(init_predictor(reg)) for reg in regressors]
@@ -116,7 +118,12 @@ class DiabetesCases(Cases):
                         nonconvex = True
                         break
 
-            rval = {"predictor": predictor, "input_shape": X.shape, "output_shape": y.shape, "nonconvex": nonconvex}
+            rval = {
+                "predictor": predictor,
+                "input_shape": X.shape,
+                "output_shape": y.shape,
+                "nonconvex": nonconvex,
+            }
 
             dump(rval, os.path.join(self.basedir, filename))
 
@@ -149,7 +156,12 @@ class IrisCases(Cases):
                         nonconvex = True
                         break
 
-            rval = {"predictor": predictor, "input_shape": X.shape, "output_shape": y.shape, "nonconvex": nonconvex}
+            rval = {
+                "predictor": predictor,
+                "input_shape": X.shape,
+                "output_shape": y.shape,
+                "nonconvex": nonconvex,
+            }
 
             dump(rval, os.path.join(self.basedir, filename))
 

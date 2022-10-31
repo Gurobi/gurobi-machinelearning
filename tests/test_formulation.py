@@ -52,7 +52,9 @@ class TestFixedRegressionModel(unittest.TestCase):
                     linear = ["Lasso", "Ridge"]
                     if predictor_name in linear:
                         predictor_name = "LinearRegression"
-                    self.assertEqual(predictor_name, type(pred_constr[i]).__name__[: -len("Constr")])
+                    self.assertEqual(
+                        predictor_name, type(pred_constr[i]).__name__[: -len("Constr")]
+                    )
             with self.assertRaises(NoSolution):
                 pred_constr.get_error()
             with open(os.devnull, "w") as outnull:
@@ -93,7 +95,9 @@ class TestFixedRegressionModel(unittest.TestCase):
         for exampleno in range(X.shape[0]):
             with super().subTest(regressor=regressor, exampleno=exampleno):
                 print("Test {}".format(exampleno))
-                self.fixed_model(regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"])
+                self.fixed_model(
+                    regressor, X[exampleno, :].astype(np.float32), onecase["nonconvex"]
+                )
 
     def do_one_case(self, one_case, X, n_sample, combine, **kwargs):
         choice = self.rng.integers(X.shape[0], size=n_sample)
@@ -110,7 +114,9 @@ class TestFixedRegressionModel(unittest.TestCase):
             assert examples.shape == even_rows.shape
 
         predictor = one_case["predictor"]
-        with super().subTest(regressor=predictor, exampleno=choice, n_sample=n_sample, combine=combine):
+        with super().subTest(
+            regressor=predictor, exampleno=choice, n_sample=n_sample, combine=combine
+        ):
             if VERBOSE:
                 print(f"Doing {predictor} with example {choice}")
             self.fixed_model(predictor, examples, one_case["nonconvex"], **kwargs)
@@ -204,7 +210,9 @@ class TestFixedRegressionModel(unittest.TestCase):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", output_type="classification", pwl_attributes={"FuncPieces": 5})
+            self.do_one_case(
+                onecase, X, 5, "all", output_type="classification", pwl_attributes={"FuncPieces": 5}
+            )
 
     def test_circle(self):
         cases = base_cases.CircleCase()
