@@ -5,7 +5,10 @@ name: build and test
 
 on:
   push:
-    branches: [main, clean-history]
+    branches:
+      - main
+      # Release branches
+      - "[0-9]+.[0-9]+.X"
 
 permissions:
   contents: read
