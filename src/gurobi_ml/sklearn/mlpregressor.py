@@ -27,7 +27,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
 
     def __init__(
         self,
-        grbmodel,
+        gp_model,
         predictor,
         input_vars,
         output_vars=None,
@@ -37,7 +37,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         SKgetter.__init__(self, predictor, **kwargs)
         BaseNNConstr.__init__(
             self,
-            grbmodel,
+            gp_model,
             predictor,
             input_vars,
             output_vars,
@@ -78,18 +78,18 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
                 name=f"layer{i}",
             )
             input_vars = layer._output  # pylint: disable=W0212
-            self._model.update()
+            self._gp_model.update()
         assert (
             self._output is not None
         )  # Should never happen since sklearn object defines n_ouputs_
 
 
-def add_mlp_regressor_constr(grbmodel, mlpregressor, input_vars, output_vars=None, **kwargs):
-    """Use a `decision_tree_regressor` to predict the value of `output_vars` using `input_vars` in `grbmodel`
+def add_mlp_regressor_constr(gp_model, mlpregressor, input_vars, output_vars=None, **kwargs):
+    """Use a `decision_tree_regressor` to predict the value of `output_vars` using `input_vars` in `gp_model`
 
     Parameters
     ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+    gp_model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
         The gurobipy model where the predictor should be inserted.
     mlpregressor: :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor`
         The multi-layer perceptron regressor to insert as predictor.
@@ -112,6 +112,6 @@ def add_mlp_regressor_constr(grbmodel, mlpregressor, input_vars, output_vars=Non
 
     Note
     ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    |VariablesDimensionsWarn|
     """
-    return MLPRegressorConstr(grbmodel, mlpregressor, input_vars, output_vars, **kwargs)
+    return MLPRegressorConstr(gp_model, mlpregressor, input_vars, output_vars, **kwargs)

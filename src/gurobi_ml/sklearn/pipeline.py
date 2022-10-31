@@ -13,28 +13,29 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for inserting an :external+sklearn:py:class:`sklearn.pipeline.Pipeline` into a gurobipy model
+""" Module for embedding a :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
+into a gurobipy model
 """
 
 
 from ..exceptions import NoModel
-from ..modeling import AbstractPredictorConstr
+from ..modeling.basepredictor import AbstractPredictorConstr
 from .predictors_list import sklearn_predictors, sklearn_transformers, user_predictors
 from .skgetter import SKgetter
 
 
 class PipelineConstr(SKgetter, AbstractPredictorConstr):
-    """Use a scikit-learn pipeline to build constraints in Gurobi model."""
+    """Stores the model changes to gurobipy model for embedding an instance of :external+sklearn:py:class:`sklearn.pipeline.Pipeline`"""
 
-    def __init__(self, grbmodel, pipeline, input_vars, output_vars=None, **kwargs):
+    def __init__(self, gp_model, pipeline, input_vars, output_vars=None, **kwargs):
         self._steps = []
         self._kwargs = kwargs
         SKgetter.__init__(self, pipeline, **kwargs)
-        AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
 
     def _mip_model(self):
         pipeline = self.predictor
-        model = self._model
+        gp_model = self._gp_model
         input_vars = self._input
         output_vars = self._output
         steps = self._steps
@@ -43,7 +44,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
             transformers[key.lower()] = item
         for name, obj in pipeline.steps[:-1]:
             try:
-                steps.append(transformers[name](model, obj, input_vars, **self._kwargs))
+                steps.append(transformers[name](gp_model, obj, input_vars, **self._kwargs))
             except KeyError:
                 raise NoModel(pipeline, f"I don't know how to deal with that object: {name}")
             input_vars = steps[-1].output
@@ -56,7 +57,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
                 key = key.__name__
             predictors[key.lower()] = item
         try:
-            steps.append(predictors[name](model, obj, input_vars, output_vars, **self._kwargs))
+            steps.append(predictors[name](gp_model, obj, input_vars, output_vars, **self._kwargs))
         except KeyError:
             raise NoModel(pipeline, f"I don't know how to deal with that object: {name}")
         if self._output is None:
@@ -102,12 +103,12 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         return self._steps.__len__()
 
 
-def add_pipeline_constr(grbmodel, pipeline, input_vars, output_vars=None, **kwargs):
-    """Use a `pipeline` to predict the value of `output_vars` using `input_vars` in `grbmodel`
+def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwargs):
+    """Use a `pipeline` to predict the value of `output_vars` using `input_vars` in `gp_model`
 
     Parameters
     ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+    gp_model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
         The gurobipy model where the predictor should be inserted.
     pipeline: :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
         The pipeline to insert as predictor.
@@ -130,6 +131,6 @@ def add_pipeline_constr(grbmodel, pipeline, input_vars, output_vars=None, **kwar
 
     Note
     ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    |VariablesDimensionsWarn|
     """
-    return PipelineConstr(grbmodel, pipeline, input_vars, output_vars, **kwargs)
+    return PipelineConstr(gp_model, pipeline, input_vars, output_vars, **kwargs)

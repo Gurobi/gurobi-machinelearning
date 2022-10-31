@@ -24,7 +24,7 @@ from .skgetter import SKgetter
 
 
 def add_decision_tree_regressor_constr(
-    grbmodel,
+    gp_model,
     decision_tree_regressor,
     input_vars,
     output_vars=None,
@@ -33,11 +33,11 @@ def add_decision_tree_regressor_constr(
     float_type=np.float32,
     **kwargs
 ):
-    """Use a `decision_tree_regressor` to predict the value of `output_vars` using `input_vars` in `grbmodel`
+    """Use a `decision_tree_regressor` to predict the value of `output_vars` using `input_vars` in `gp_model`
 
     Parameters
     ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+    gp_model: :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
     decision_tree_regressor: :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
         The decision tree regressor to insert as predictor.
@@ -58,9 +58,10 @@ def add_decision_tree_regressor_constr(
         Object containing information about what was added to model to insert the
         predictor in it
 
+
     Note
     ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    |VariablesDimensionsWarn|
 
     Warning
     -------
@@ -69,7 +70,7 @@ def add_decision_tree_regressor_constr(
     this point.
     """
     return DecisionTreeRegressorConstr(
-        grbmodel,
+        gp_model,
         decision_tree_regressor,
         input_vars,
         output_vars,
@@ -81,17 +82,17 @@ def add_decision_tree_regressor_constr(
 
 
 def add_gradient_boosting_regressor_constr(
-    grbmodel, gradient_boosting_regressor, input_vars, output_vars=None, **kwargs
+    gp_model, gradient_boosting_regressor, input_vars, output_vars=None, **kwargs
 ):
-    """Use a `gradient_boosting_regressor` to predict the value of `output_vars` using `input_vars` in `grbmodel`
+    """Use a `gradient_boosting_regressor` to predict the value of `output_vars` using `input_vars` in `gp_model`
 
     Parameters
     ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
-              The gurobipy model where the predictor should be inserted.
+    gp_model: :gurobipy:`model`
+        The gurobipy model where the predictor should be inserted.
     gradient_boosting_regressor: :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
         The gradient boosting regressor to insert as predictor.
-    input_vars: mvar_array_like
+    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for predictor in model.
     output_vars: mvar_array_like, optional
         Decision variables used as output for predictor in model.
@@ -104,21 +105,21 @@ def add_gradient_boosting_regressor_constr(
 
     Note
     ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    |VariablesDimensionsWarn|
     """
     return GradientBoostingRegressorConstr(
-        grbmodel, gradient_boosting_regressor, input_vars, output_vars, **kwargs
+        gp_model, gradient_boosting_regressor, input_vars, output_vars, **kwargs
     )
 
 
 def add_random_forest_regressor_constr(
-    grbmodel, random_forest_regressor, input_vars, output_vars=None, **kwargs
+    gp_model, random_forest_regressor, input_vars, output_vars=None, **kwargs
 ):
-    """Use a `random_forest_regressor` to predict the value of `output_vars` using `input_vars` in `grbmodel`
+    """Use a `random_forest_regressor` to predict the value of `output_vars` using `input_vars` in `gp_model`
 
     Parameters
     ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+    gp_model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
               The gurobipy model where the predictor should be inserted.
     random_forest_regressor: :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor`
         The random forest regressor to insert as predictor.
@@ -135,11 +136,11 @@ def add_random_forest_regressor_constr(
 
     Note
     ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    |VariablesDimensionsWarn|
 
     """
     return RandomForestRegressorConstr(
-        grbmodel, random_forest_regressor, input_vars, output_vars, **kwargs
+        gp_model, random_forest_regressor, input_vars, output_vars, **kwargs
     )
 
 
@@ -148,7 +149,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
 
     def __init__(
         self,
-        grbmodel,
+        gp_model,
         predictor,
         input_vars,
         output_vars=None,
@@ -162,11 +163,11 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         self.scale = scale
         self.float_type = float_type
         SKgetter.__init__(self, predictor)
-        AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
 
     def _mip_model(self):
         tree = self.predictor.tree_
-        model = self._model
+        model = self._gp_model
 
         _input = self._input
         output = self._output
@@ -227,11 +228,11 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
 class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model a trained gradient boosting tree in a Gurobi model"""
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
+    def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.n_outputs_ = 1
         self.estimators_ = []
         SKgetter.__init__(self, predictor)
-        AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
 
     def _mip_model(self):
         """Predict output variables y from input variables X using the
@@ -239,7 +240,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         Both X and y should be array or list of variables of conforming dimensions.
         """
-        model = self._model
+        model = self._gp_model
         predictor = self.predictor
 
         _input = self._input
@@ -270,11 +271,11 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
 class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model a trained random forest regressor in a Gurobi model"""
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars, **kwargs):
+    def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.n_outputs_ = predictor.n_outputs_
         self.estimators_ = []
         SKgetter.__init__(self, predictor)
-        AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
 
     def _mip_model(self):
         """Predict output variables y from input variables X using the
@@ -282,7 +283,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         Both X and y should be array or list of variables of conforming dimensions.
         """
-        model = self._model
+        model = self._gp_model
         predictor = self.predictor
 
         _input = self._input

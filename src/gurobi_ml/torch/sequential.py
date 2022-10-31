@@ -23,12 +23,12 @@ from ..exceptions import NoModel, NoSolution
 from ..modeling.neuralnet import BaseNNConstr
 
 
-def add_sequential_constr(grbmodel, sequential_model, input_vars, output_vars=None, **kwargs):
-    """Use a `sequential_model` to predict the value of `output_vars` using `input_vars` in `grbmodel`
+def add_sequential_constr(gp_model, sequential_model, input_vars, output_vars=None, **kwargs):
+    """Use a `sequential_model` to predict the value of `output_vars` using `input_vars` in `gp_model`
 
     Parameters
     ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+    gp_model: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
         The gurobipy model where the predictor should be inserted.
     sequential_model: :external+torch:py:class:`torch.nn.Sequential`
         The sequential model to insert as predictor.
@@ -51,16 +51,16 @@ def add_sequential_constr(grbmodel, sequential_model, input_vars, output_vars=No
 
     Note
     ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    |VariablesDimensionsWarn|
     """
-    return torch.SequentialConstr(grbmodel, sequential_model, input_vars, output_vars, **kwargs)
+    return SequentialConstr(gp_model, sequential_model, input_vars, output_vars, **kwargs)
 
 
 class SequentialConstr(BaseNNConstr):
     """Transform a pytorch Sequential Neural Network to Gurobi constraint with
     input and output as matrices of variables."""
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, **kwargs):
+    def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         linear = None
         for step in predictor:
             if isinstance(step, nn.ReLU):
@@ -70,7 +70,7 @@ class SequentialConstr(BaseNNConstr):
             else:
                 raise NoModel(predictor, f"Unsupported layer {type(step).__name__}")
         super().__init__(
-            grbmodel, predictor, input_vars, output_vars, default_name="torchsequential"
+            gp_model, predictor, input_vars, output_vars, default_name="torchsequential"
         )
 
     def _mip_model(self):

@@ -193,7 +193,7 @@ For this reason, we change manually the last layer activation before adding the
 network to the Gurobi model.
 
 Also, we use the function
-[add_mlp_regressor_constr](../api/MlpRegressorConstr.rst#gurobi_ml.sklearn.add_mlp_regressor_constr)
+[add_mlp_regressor_constr](../api/MlpRegressorConstr.rst#gurobi_ml.sklearn.mlp_regressor.add_mlp_regressor_constr)
 directly. The network being actually for classification (i.e. of type
 `MLPClassifier`) the
 [add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr)

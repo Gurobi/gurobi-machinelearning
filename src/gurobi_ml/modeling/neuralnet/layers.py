@@ -25,14 +25,14 @@ class AbstractNNLayer(AbstractPredictorConstr):
 
     def __init__(
         self,
-        grbmodel,
+        gp_model,
         output_vars,
         input_vars,
         activation_function,
         **kwargs,
     ):
         self.activation = activation_function
-        AbstractPredictorConstr.__init__(self, grbmodel, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
 
     def print_stats(self, file=None):
         """Print statistics about submodel created
@@ -48,34 +48,34 @@ class AbstractNNLayer(AbstractPredictorConstr):
 
 
 class ActivationLayer(AbstractNNLayer):
-    """Class to build one layer of a neural network"""
+    """Class to build one activation layer of a neural network"""
 
     def __init__(
         self,
-        grbmodel,
+        gp_model,
         output_vars,
         input_vars,
         activation_function,
         **kwargs,
     ):
         self.zvar = None
-        super().__init__(grbmodel, output_vars, input_vars, activation_function, **kwargs)
+        super().__init__(gp_model, output_vars, input_vars, activation_function, **kwargs)
 
     def _create_output_vars(self, input_vars):
-        rval = self._model.addMVar(input_vars.shape, lb=-gp.GRB.INFINITY, name="act")
-        self._model.update()
+        rval = self._gp_model.addMVar(input_vars.shape, lb=-gp.GRB.INFINITY, name="act")
+        self._gp_model.update()
         self._output = rval
 
     def _mip_model(self, activation=None):
         """Add the layer to model"""
-        model = self._model
+        model = self.gp_model
         model.update()
         if activation is None:
             activation = self.activation
 
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
-        self._model.update()
+        self._gp_model.update()
 
 
 class DenseLayer(AbstractNNLayer):
@@ -83,7 +83,7 @@ class DenseLayer(AbstractNNLayer):
 
     def __init__(
         self,
-        grbmodel,
+        gp_model,
         output_vars,
         input_vars,
         layer_coefs,
@@ -94,22 +94,22 @@ class DenseLayer(AbstractNNLayer):
         self.coefs = layer_coefs
         self.intercept = layer_intercept
         self.zvar = None
-        super().__init__(grbmodel, output_vars, input_vars, activation_function, **kwargs)
+        super().__init__(gp_model, output_vars, input_vars, activation_function, **kwargs)
 
     def _create_output_vars(self, input_vars):
-        rval = self._model.addMVar(
+        rval = self._gp_model.addMVar(
             (input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act"
         )
-        self._model.update()
+        self._gp_model.update()
         self._output = rval
 
     def _mip_model(self, activation=None):
         """Add the layer to model"""
-        model = self._model
+        model = self.gp_model
         model.update()
         if activation is None:
             activation = self.activation
 
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
-        self._model.update()
+        self._gp_model.update()

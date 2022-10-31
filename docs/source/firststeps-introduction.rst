@@ -22,8 +22,7 @@ feasible solution, the output variables values are the values predicted by the
 ML model from the input variables values.
 
 Gurobi Machine Learning is an :doc:`open-source <meta-license>` Python package to embed *trained
-regression* models [#]_ in a `gurobipy model
-<https://www.gurobi.com/documentation/current/refman/py_model.html>`_ to be
+regression* models [#]_ in a :gurobipy:`model` to be
 solved with the `Gurobi <https://www.gurobi.com>`_ solver.
 
 The aim of the package is to:
@@ -104,14 +103,13 @@ Usage
 -----
 
 The main function provided by the package is
-:py:func:`gurobi_ml.add_predictor_constr`. It takes as arguments: a `gurobipy
-model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_, a
+:py:func:`gurobi_ml.add_predictor_constr`. It takes as arguments: a :gurobipy:`model`, a
 :doc:`supported regression model <mlm-supported>`, input `Gurobi variables
 <https://www.gurobi.com/documentation/current/refman/variables.html>`_ and
 output `Gurobi variables
 <https://www.gurobi.com/documentation/current/refman/variables.html>`_.
 
-By invoking the function, the gurobipy model is augmented with variables and
+By invoking the function, the :gurobipy:`model` is augmented with variables and
 constraints so that, in a solution, the values of the output variables are
 predicted by the regression model from the values of the input variables. More
 formally, if we denote by :math:`g` the prediction function of the regression
@@ -122,7 +120,7 @@ The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`
 returns a modeling object derived from the class
 :py:class:`AbstractPredictorConstr
 <gurobi_ml.modeling.AbstractPredictorConstr>`. That object keeps track of all
-the variables and constraints that have been added to the gurobipy model to
+the variables and constraints that have been added to the gurobipy:`model` to
 establish the relationship between input and output variables of the regression.
 
 The modeling object can perform a few tasks:
@@ -143,7 +141,7 @@ The modeling object can perform a few tasks:
 The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` is
 a shorthand that should add the correct model for any supported regression
 model, but individual functions for each regression model are also available.
-For the list of frameworks and regression models supported and the corresponding
+For the list of frameworks and regression models supported, and the corresponding
 functions please refer to the :doc:`mlm-supported` section.
 
 For some regression models, additional optional parameters can be set to tune

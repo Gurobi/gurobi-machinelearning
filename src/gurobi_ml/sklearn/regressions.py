@@ -43,7 +43,7 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
 
     def __init__(
         self,
-        grbmodel,
+        gp_model,
         predictor,
         input_vars,
         output_vars=None,
@@ -54,7 +54,7 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
         SKgetter.__init__(self, predictor, output_type, **kwargs)
         AbstractPredictorConstr.__init__(
             self,
-            grbmodel,
+            gp_model,
             input_vars,
             output_vars,
             **kwargs,
@@ -64,7 +64,7 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
         """Add the prediction constraints to Gurobi"""
         coefs = self.predictor.coef_.reshape(-1, 1)
         intercept = self.predictor.intercept_
-        self.model.addConstr(self.output == self.input @ coefs + intercept, name="linreg")
+        self.gp_model.addConstr(self.output == self.input @ coefs + intercept, name="linreg")
 
     def print_stats(self, file=None):
         """Print statistics about submodel created"""
@@ -76,10 +76,10 @@ class LinearRegressionConstr(BaseSKlearnRegressionConstr):
     takes another Gurobi matrix variable as input.
     """
 
-    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, **kwargs):
+    def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         BaseSKlearnRegressionConstr.__init__(
             self,
-            grbmodel,
+            gp_model,
             predictor,
             input_vars,
             output_vars,
@@ -99,7 +99,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
 
     def __init__(
         self,
-        grbmodel,
+        gp_model,
         predictor,
         input_vars,
         output_vars=None,
@@ -120,7 +120,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
 
         BaseSKlearnRegressionConstr.__init__(
             self,
-            grbmodel,
+            gp_model,
             predictor,
             input_vars,
             output_vars,
@@ -152,8 +152,8 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             # For classification we need an extra binary variable
             self._create_output_vars(self._input, name="log_result")
             log_result = self._output
-            self.model.addConstr(outputvars >= log_result - 0.5 + self.epsilon)
-            self.model.addConstr(outputvars <= log_result + 0.5)
+            self.gp_model.addConstr(outputvars >= log_result - 0.5 + self.epsilon)
+            self.gp_model.addConstr(outputvars <= log_result + 0.5)
             outputvars.VType = gp.GRB.BINARY
             outputvars.LB = 0.0
             outputvars.UB = 1.0
@@ -162,25 +162,27 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
 
         self._output = outputvars
         for index in np.ndindex(outputvars.shape):
-            gc = self.model.addGenConstrLogistic(
+            gc = self.gp_model.addGenConstrLogistic(
                 affinevars[index],
                 log_result[index],
                 name=_name(index, "logistic"),
             )
-        numgc = self.model.NumGenConstrs
-        self.model.update()
-        for gc in self.model.getGenConstrs()[numgc:]:
+        numgc = self.gp_model.NumGenConstrs
+        self.gp_model.update()
+        for gc in self.gp_model.getGenConstrs()[numgc:]:
             for attr, val in self.attributes.items():
                 gc.setAttr(attr, val)
-        self.model.update()
+        self.gp_model.update()
 
 
-def add_linear_regression_constr(model, linear_regression, input_vars, output_vars=None, **kwargs):
+def add_linear_regression_constr(
+    gp_model, linear_regression, input_vars, output_vars=None, **kwargs
+):
     """Use `linear_regression` to predict the value of `output_vars` using `input_vars` in `model`
 
     Parameters
     ----------
-    model: `gp.Model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_
+    gp_model: :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
     linear_regression: : external+sklearn: py: class: `sklearn.linear_model.LinearRegression`
      The linear regression to insert. It can be of any of the following types:
@@ -200,13 +202,13 @@ def add_linear_regression_constr(model, linear_regression, input_vars, output_va
 
     Note
     ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    |VariablesDimensionsWarn|
     """
-    return LinearRegressionConstr(model, linear_regression, input_vars, output_vars, **kwargs)
+    return LinearRegressionConstr(gp_model, linear_regression, input_vars, output_vars, **kwargs)
 
 
 def add_logistic_regression_constr(
-    model,
+    gp_model,
     logistic_regression,
     input_vars,
     output_vars=None,
@@ -220,7 +222,7 @@ def add_logistic_regression_constr(
     Parameters
     ----------
 
-    model: `gp.Model <https://www.gurobi.com/documentation/current/refman/py_model.html>`_
+    gp_model: :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
 
     logistic_regression: :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
@@ -277,10 +279,10 @@ def add_logistic_regression_constr(
 
     Note
     ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    |VariablesDimensionsWarn|
     """
     return LogisticRegressionConstr(
-        model,
+        gp_model,
         logistic_regression,
         input_vars,
         output_vars,

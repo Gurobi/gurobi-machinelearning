@@ -12,13 +12,13 @@ from gurobi_ml.exceptions import NoSolution, ParameterError
 class TestAddRemove(unittest.TestCase):
     """Test Adding and Removing submodels and check counts."""
 
-    def check_counts(self, model, reg2gurobi, numvars):
+    def check_counts(self, gp_model, pred_constr, numvars):
         """Assert counts are ok"""
-        self.assertEqual(model.NumVars, numvars + len(reg2gurobi.vars))
-        self.assertEqual(model.NumSOS, len(reg2gurobi.sos))
-        self.assertEqual(model.NumConstrs, len(reg2gurobi.constrs))
-        self.assertEqual(model.NumQConstrs, len(reg2gurobi.qconstrs))
-        self.assertEqual(model.NumGenConstrs, len(reg2gurobi.genconstrs))
+        self.assertEqual(gp_model.NumVars, numvars + len(pred_constr.vars))
+        self.assertEqual(gp_model.NumSOS, len(pred_constr.sos))
+        self.assertEqual(gp_model.NumConstrs, len(pred_constr.constrs))
+        self.assertEqual(gp_model.NumQConstrs, len(pred_constr.qconstrs))
+        self.assertEqual(gp_model.NumGenConstrs, len(pred_constr.genconstrs))
 
     @staticmethod
     def truncate_shapes(input_shape, output_shape, maxexamples=5):
@@ -36,77 +36,77 @@ class TestAddRemove(unittest.TestCase):
     def add_remove(self, predictor, input_shape, output_shape, nonconvex):
         """Add and remove the predictor to model"""
         input_shape, output_shape = self.truncate_shapes(input_shape, output_shape)
-        with gp.Model() as model:
-            x = model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
-            y = model.addMVar(output_shape, lb=-gp.GRB.INFINITY)
-            model.update()
-            numvars = model.numvars
+        with gp.Model() as gp_model:
+            x = gp_model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
+            y = gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY)
+            gp_model.update()
+            numvars = gp_model.numvars
 
-            model.Params.OutputFlag = 0
-            pred2grb = add_predictor_constr(model, predictor, x, y)
+            gp_model.Params.OutputFlag = 0
+            pred_constr = add_predictor_constr(gp_model, predictor, x, y)
 
-            self.check_counts(model, pred2grb, numvars)
+            self.check_counts(gp_model, pred_constr, numvars)
 
             with self.assertRaises(NoSolution):
-                pred2grb.get_error()
+                pred_constr.get_error()
 
-            pred2grb.remove()
-            model.update()
-            self.check_counts(model, pred2grb, numvars)
-            self.assertEqual(model.NumConstrs, 0)
-            self.assertEqual(model.NumGenConstrs, 0)
-            self.assertEqual(model.NumQConstrs, 0)
-            self.assertEqual(model.NumVars, numvars)
+            pred_constr.remove()
+            gp_model.update()
+            self.check_counts(gp_model, pred_constr, numvars)
+            self.assertEqual(gp_model.NumConstrs, 0)
+            self.assertEqual(gp_model.NumGenConstrs, 0)
+            self.assertEqual(gp_model.NumQConstrs, 0)
+            self.assertEqual(gp_model.NumVars, numvars)
 
     def add_remove_wrong_input(self, predictor, input_shape, output_shape, nonconvex):
         """Add and remove the predictor to model"""
         input_shape, output_shape = self.truncate_shapes(input_shape, output_shape)
         a, b = input_shape
         assert b > 1
-        with gp.Model() as model:
+        with gp.Model() as gp_model:
             # Create a variable with wrong shape
             input_shape = a + 1, b + 1
-            x = model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
-            y = model.addMVar(output_shape, lb=-gp.GRB.INFINITY)
-            model.update()
-            numvars = model.numvars
+            x = gp_model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
+            y = gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY)
+            gp_model.update()
+            gp_model.numvars
 
-            model.Params.OutputFlag = 0
+            gp_model.Params.OutputFlag = 0
             # All of these should fail
             with self.assertRaises(ParameterError):
                 # Both dimensions too big
-                add_predictor_constr(model, predictor, x, y)
+                add_predictor_constr(gp_model, predictor, x, y)
 
     def add_remove_no_output(self, predictor, input_shape, output_shape, nonconvex):
         """Add and remove the predictor to model"""
         input_shape, output_shape = self.truncate_shapes(input_shape, output_shape)
-        with gp.Model() as model:
-            x = model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
-            model.update()
-            numvars = model.numvars
+        with gp.Model() as gp_model:
+            x = gp_model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
+            gp_model.update()
+            numvars = gp_model.numvars
 
-            model.Params.OutputFlag = 0
-            pred2grb = add_predictor_constr(model, predictor, x)
+            gp_model.Params.OutputFlag = 0
+            pred_constr = add_predictor_constr(gp_model, predictor, x)
 
             with self.assertRaises(NoSolution):
-                pred2grb.get_error()
+                pred_constr.get_error()
 
-            self.assertEqual(pred2grb.output.shape[0], output_shape[0])
+            self.assertEqual(pred_constr.output.shape[0], output_shape[0])
 
-            self.check_counts(model, pred2grb, numvars)
+            self.check_counts(gp_model, pred_constr, numvars)
 
-            pred2grb.remove()
-            model.update()
-            self.check_counts(model, pred2grb, numvars)
-            self.assertEqual(model.NumConstrs, 0)
-            self.assertEqual(model.NumGenConstrs, 0)
-            self.assertEqual(model.NumQConstrs, 0)
-            self.assertEqual(model.NumVars, numvars)
+            pred_constr.remove()
+            gp_model.update()
+            self.check_counts(gp_model, pred_constr, numvars)
+            self.assertEqual(gp_model.NumConstrs, 0)
+            self.assertEqual(gp_model.NumGenConstrs, 0)
+            self.assertEqual(gp_model.NumQConstrs, 0)
+            self.assertEqual(gp_model.NumVars, numvars)
 
     def add_remove_list_input(self, predictor, input_shape, output_shape, nonconvex):
         """Add and remove the predictor to model"""
         input_shape, output_shape = self.truncate_shapes(input_shape, output_shape)
-        with gp.Model() as model:
+        with gp.Model() as gp_model:
             assert len(input_shape) == 2
             nexamples = input_shape[0]
             if len(output_shape) == 2:
@@ -115,27 +115,27 @@ class TestAddRemove(unittest.TestCase):
             else:
                 assert len(output_shape) == 1
                 output_dim = 1
-            pred2grb = list()
-            numvars = model.numvars
+            pred_constrs = list()
+            numvars = gp_model.numvars
             for k in range(nexamples):
-                varsbefore = model.numvars
-                x = model.addVars(input_shape[1], lb=-gp.GRB.INFINITY)
-                y = model.addVars(output_dim, lb=-gp.GRB.INFINITY)
-                model.update()
-                numvars += model.numvars - varsbefore
+                varsbefore = gp_model.numvars
+                x = gp_model.addVars(input_shape[1], lb=-gp.GRB.INFINITY)
+                y = gp_model.addVars(output_dim, lb=-gp.GRB.INFINITY)
+                gp_model.update()
+                numvars += gp_model.numvars - varsbefore
 
-                pred2grb.append(add_predictor_constr(model, predictor, x, y))
+                pred_constrs.append(add_predictor_constr(gp_model, predictor, x, y))
 
-            for p2g in pred2grb:
+            for p2g in pred_constrs:
                 with self.assertRaises(NoSolution):
                     p2g.get_error()
 
                 p2g.remove()
-            model.update()
-            self.assertEqual(model.NumConstrs, 0)
-            self.assertEqual(model.NumGenConstrs, 0)
-            self.assertEqual(model.NumQConstrs, 0)
-            self.assertEqual(model.NumVars, numvars)
+            gp_model.update()
+            self.assertEqual(gp_model.NumConstrs, 0)
+            self.assertEqual(gp_model.NumGenConstrs, 0)
+            self.assertEqual(gp_model.NumQConstrs, 0)
+            self.assertEqual(gp_model.NumVars, numvars)
 
     def test_diabetes_with_outputvar(self):
         """Test adding and removing a predictor for diabetes

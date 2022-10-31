@@ -18,7 +18,7 @@ High level function and modeling objects
 Specific functions and modeling for each supported ML object:
 
 .. toctree::
-  :maxdepth: 1
+  :maxdepth: 2
 
   sklearn
   api/KerasConstr

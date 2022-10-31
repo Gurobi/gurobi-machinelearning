@@ -24,7 +24,7 @@ from ..modeling.neuralnet import BaseNNConstr
 
 
 class KerasNetworkConstr(BaseNNConstr):
-    def __init__(self, grbmodel, predictor, input_vars, output_vars=None, **kwargs):
+    def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         assert predictor.built
         for step in predictor.layers:
             if isinstance(step, keras.layers.Dense):
@@ -44,7 +44,7 @@ class KerasNetworkConstr(BaseNNConstr):
             else:
                 raise NoModel(predictor, f"Unsupported network layer {type(step).__name__}")
 
-        super().__init__(grbmodel, predictor, input_vars, output_vars, **kwargs)
+        super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
     def _mip_model(self):
         network = self.predictor
@@ -97,31 +97,31 @@ class KerasNetworkConstr(BaseNNConstr):
         Raises
         ------
         NoSolution
-            If the Gurobi model has no solution (either was not optimized or is infeasible).
+            If the gurobipy model has no solution (either was not optimized or is infeasible).
         """
         if self._has_solution():
             return self.predictor.predict(self.input.X) - self.output.X
         raise NoSolution()
 
 
-def add_keras_constr(grbmodel, keras_model, input_vars, output_vars=None, **kwargs):
-    """Use `keras_model` to predict the value of `output_vars` using `input_vars` in `grbmodel`
+def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwargs):
+    """Use `keras_model` to predict the value of `output_vars` using `input_vars` in `gp_model`
 
     Parameters
     ----------
-    grbmodel: `gp.Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>`_
+    gp_model: :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
     keras_model: `keras.Model <https://keras.io/api/models/model/>`
         The keras model to insert as predictor.
     input_vars: mvar_array_like
-        Decision variables used as input for predictor in model.
+        Decision variables used as input for predictor in gp_model.
     output_vars: mvar_array_like, optional
-        Decision variables used as output for predictor in model.
+        Decision variables used as output for predictor in gp_model.
 
     Returns
     -------
     KerasNetworkConstr
-        Object containing information about what was added to model to insert the
+        Object containing information about what was added to gp_model to insert the
         predictor in it
 
     Raises
@@ -132,6 +132,6 @@ def add_keras_constr(grbmodel, keras_model, input_vars, output_vars=None, **kwar
 
     Note
     ----
-    See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars
+    |VariablesDimensionsWarn|
     """
-    return KerasNetworkConstr(grbmodel, keras_model, input_vars, output_vars, **kwargs)
+    return KerasNetworkConstr(gp_model, keras_model, input_vars, output_vars, **kwargs)

@@ -15,3 +15,11 @@ Functions and modeling object for Scikit-learn regression models
   api/PolynomialFeaturesConstr
   api/RandomForestRegressorConstr
   api/StandardScalerConstr
+
+
+Utility
+
+.. toctree::
+  :maxdepth: 1
+
+  api/SKGetter

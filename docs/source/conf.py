@@ -31,6 +31,7 @@ html_logo = "_static/gurobi-logo-title.png"
 extensions = [
     "sphinx.ext.duration",
     "sphinx.ext.autodoc",
+    "sphinx.ext.extlinks",
     "sphinx_rtd_theme",
     "sphinx_copybutton",
     "sphinx.ext.mathjax",
@@ -46,6 +47,9 @@ dep_versions = {
     x.split("==")[0]: x.split("==")[1]
     for x in (Path().resolve().parent.parent / "requirements.tox.txt").read_text().split()
 }
+
+VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
+
 rst_epilog = f"""
 .. |GurobiVersion| replace:: {dep_versions["gurobipy"]}
 .. |NumpyVersion| replace:: {dep_versions["numpy"]}
@@ -54,6 +58,9 @@ rst_epilog = f"""
 .. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}
 .. |TensorflowVersion| replace:: {dep_versions["tensorflow"]}
 """
+
+rst_prolog = f"""
+.. |VariablesDimensionsWarn| replace:: {VARS_SHAPE}"""
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -91,3 +98,9 @@ nbsphinx_custom_formats = {
 }
 nbsphinx_allow_errors = False
 bibtex_bibfiles = ["refs.bib"]
+
+extlinks_detect_hardcoded_links = True
+extlinks = {
+    "issue": ("https://github.com/Gurobi/gurobi-machinelearning/issues/%s", "issue %s"),
+    "gurobipy": ("https://www.gurobi.com/documentation/current/refman/py_%s.html", "gurobipy %s"),
+}

@@ -50,7 +50,7 @@ class Identity:
             Layer to which activation is applied.
         """
         output = layer.output
-        layer.model.addConstr(output == layer.input @ layer.coefs + layer.intercept)
+        layer.gp_model.addConstr(output == layer.input @ layer.coefs + layer.intercept)
 
 
 class ReLU:
@@ -85,17 +85,17 @@ class ReLU:
         output = layer.output
         if hasattr(layer, "coefs"):
             if not hasattr(layer, "mixing"):
-                mixing = layer.model.addMVar(
+                mixing = layer.gp_model.addMVar(
                     output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix"
                 )
                 layer.mixing = mixing
-            layer.model.update()
+            layer.gp_model.update()
 
-            layer.model.addConstr(layer.mixing == layer.input @ layer.coefs + layer.intercept)
+            layer.gp_model.addConstr(layer.mixing == layer.input @ layer.coefs + layer.intercept)
         else:
             mixing = layer._input
         for index in np.ndindex(output.shape):
-            layer.model.addGenConstrMax(
+            layer.gp_model.addGenConstrMax(
                 output[index],
                 [
                     mixing[index],
