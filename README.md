@@ -5,10 +5,14 @@
 [![PyPI](https://img.shields.io/pypi/v/gurobipy)](https://pypi.org/project/gurobipy)
 [![Gurobi-forum](https://img.shields.io/badge/Help-Gurobi--Forum-red)](https://support.gurobi.com/hc/en-us/community/topics)
 
-![Gurobi](docs/source/_static/image8.png)
-
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/gurobi-logo-title.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/image8.png">
+  <img alt="Gurobi" src="docs/source/_static/image8.png">
+</picture>
 
 > **⚠ Warning**
+> 
 > ```This code is in a pre-release state. It may not be fully functional and breaking changes can occur without notice.```
 
 # Gurobi Machine Learning
