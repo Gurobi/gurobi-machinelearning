@@ -85,7 +85,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         output = self._output
         nex = _input.shape[0]
 
-        treevars = model.addMVar(
+        tree_vars = model.addMVar(
             (nex, predictor.n_estimators, self.n_outputs_),
             lb=-GRB.INFINITY,
             name="estimator",
@@ -96,9 +96,9 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
             tree = predictor.estimators_[i]
             estimators.append(
                 add_decision_tree_regressor_constr(
-                    model, tree, _input, treevars[:, i, :], default_name="rf_tree"
+                    model, tree, _input, tree_vars[:, i, :], default_name="rf_tree"
                 )
             )
         self.estimators_ = estimators
 
-        model.addConstr(predictor.n_estimators * output == treevars.sum(axis=1))
+        model.addConstr(predictor.n_estimators * output == tree_vars.sum(axis=1))

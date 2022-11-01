@@ -30,7 +30,7 @@ def _default_name(predictor):
     return type(predictor).__name__.lower()
 
 
-def validate_gpvars(gpvars, isinput):
+def validate_gp_vars(gp_vars, is_input):
     """Put variables into appropriate form (matrix of variable).
 
     Parameters
@@ -46,20 +46,20 @@ def validate_gpvars(gpvars, isinput):
     mvar_array_like
         Decision variables with correctly adjusted shape.
     """
-    if isinstance(gpvars, gp.MVar):
-        if gpvars.ndim == 1 and isinput:
-            return gpvars.reshape(1, -1)
-        if gpvars.ndim in (1, 2):
-            return gpvars
+    if isinstance(gp_vars, gp.MVar):
+        if gp_vars.ndim == 1 and is_input:
+            return gp_vars.reshape(1, -1)
+        if gp_vars.ndim in (1, 2):
+            return gp_vars
         raise ParameterError("Variables should be an MVar of dimension 1 or 2")
-    if isinstance(gpvars, dict):
-        gpvars = gpvars.values()
-    if isinstance(gpvars, list):
-        if isinput:
-            return gp.MVar.fromlist(gpvars).reshape(1, -1)
-        return gp.MVar.fromlist(gpvars)
-    if isinstance(gpvars, gp.Var):
-        return gp.MVar.fromlist([gpvars]).reshape(1, 1)
+    if isinstance(gp_vars, dict):
+        gp_vars = gp_vars.values()
+    if isinstance(gp_vars, list):
+        if is_input:
+            return gp.MVar.fromlist(gp_vars).reshape(1, -1)
+        return gp.MVar.fromlist(gp_vars)
+    if isinstance(gp_vars, gp.Var):
+        return gp.MVar.fromlist([gp_vars]).reshape(1, 1)
     raise ParameterError("Could not validate variables")
 
 
@@ -81,9 +81,9 @@ class AbstractPredictorConstr(SubModel):
     """
 
     def __init__(self, gp_model, input_vars, output_vars=None, **kwargs):
-        self._input = validate_gpvars(input_vars, True)
+        self._input = validate_gp_vars(input_vars, True)
         if output_vars is not None:
-            self._output = validate_gpvars(output_vars, False)
+            self._output = validate_gp_vars(output_vars, False)
         else:
             self._output = None
         SubModel.__init__(self, gp_model, **kwargs)
@@ -115,7 +115,7 @@ class AbstractPredictorConstr(SubModel):
         if self._output is not None:
             self._validate()
         else:
-            self._input = validate_gpvars(self._input, True)
+            self._input = validate_gp_vars(self._input, True)
         self._mip_model()
         assert self._output is not None
         return self

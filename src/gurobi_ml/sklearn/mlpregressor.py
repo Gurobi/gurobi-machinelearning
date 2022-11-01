@@ -84,25 +84,25 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
 
     def _mip_model(self):
         """Add the prediction constraints to Gurobi"""
-        neuralnet = self.predictor
-        if neuralnet.activation not in self.actdict:
-            print(self.actdict)
+        neural_net = self.predictor
+        if neural_net.activation not in self.act_dict:
+            print(self.act_dict)
             raise NoModel(
-                neuralnet,
-                f"No implementation for activation function {neuralnet.activation}",
+                neural_net,
+                f"No implementation for activation function {neural_net.activation}",
             )
-        activation = self.actdict[neuralnet.activation]
+        activation = self.act_dict[neural_net.activation]
 
         input_vars = self._input
         output = None
 
-        for i in range(neuralnet.n_layers_ - 1):
-            layer_coefs = neuralnet.coefs_[i]
-            layer_intercept = neuralnet.intercepts_[i]
+        for i in range(neural_net.n_layers_ - 1):
+            layer_coefs = neural_net.coefs_[i]
+            layer_intercept = neural_net.intercepts_[i]
 
             # For last layer change activation
-            if i == neuralnet.n_layers_ - 2:
-                activation = self.actdict[neuralnet.out_activation_]
+            if i == neural_net.n_layers_ - 2:
+                activation = self.act_dict[neural_net.out_activation_]
                 output = self._output
 
             layer = self.add_dense_layer(

@@ -94,7 +94,7 @@ class SequentialConstr(BaseNNConstr):
             if isinstance(step, nn.ReLU):
                 layer = self.add_activation_layer(
                     _input,
-                    self.actdict["relu"],
+                    self.act_dict["relu"],
                     output,
                     name=f"{i}",
                 )
@@ -109,7 +109,7 @@ class SequentialConstr(BaseNNConstr):
                     _input,
                     layer_weight,
                     layer_bias,
-                    self.actdict["identity"],
+                    self.act_dict["identity"],
                     output,
                     name=f"{i}",
                 )
