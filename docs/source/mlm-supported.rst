@@ -1,12 +1,6 @@
 Supported Regression models
 ===========================
 
-.. warning::
-
-   This code is in a pre-release state. It may not be fully functional and breaking changes
-   can occur without notice.
-
-
 The package currently support various `scikit-learn
 <https://scikit-learn.org/stable/>`_ objects. It also has limited support for
 `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_. Only
@@ -33,32 +27,33 @@ to insert it in a Gurobi model.
    * - Ordinary Least Square
      - :external:py:class:`LinearRegression
        <sklearn.linear_model.LinearRegression>`
-     - :py:func:`add_linear_regression_constr
-       <gurobi_ml.sklearn.add_linear_regression_constr>`
+     - :py:mod:`add_linear_regression_constr
+       <gurobi_ml.sklearn.linear_regression>`
    * - Logistic regression [#]_
      - :external:py:class:`LogisticRegression
        <sklearn.linear_model.LogisticRegression>`
-     - :py:func:`add_logistic_regression_constr
-       <gurobi_ml.sklearn.add_logistic_regression_constr>`
+     - :py:mod:`add_logistic_regression_constr
+       <gurobi_ml.sklearn.logistic_regression>`
    * - Neural-network [#]_
-     - :external:py:class:`MLPRegressor <sklearn.neural_network.MLPRegressor>`
-     - :py:func:`add_mlp_regressor_constr
-       <gurobi_ml.sklearn.add_mlp_regressor_constr>`
+     - :external:py:class:`MLPRegressor
+       <sklearn.neural_network.MLPRegressor>`
+     - :py:mod:`add_mlp_regressor_constr
+       <gurobi_ml.sklearn.mlpregressor>`
    * - Decision tree
      - :external:py:class:`DecisionTreeRegressor
        <sklearn.tree.DecisionTreeRegressor>`
-     - :py:func:`add_decision_tree_regressor_constr
-       <gurobi_ml.sklearn.add_decision_tree_regressor_constr>`
+     - :py:mod:`add_decision_tree_regressor_constr
+       <gurobi_ml.sklearn.decision_tree_regressor>`
    * - Gradient boosting
      - :external:py:class:`GradientBoostingRegressor
        <sklearn.ensemble.GradientBoostingRegressor>`
-     - :py:func:`add_gradient_boosting_regressor_constr
-       <gurobi_ml.sklearn.add_gradient_boosting_regressor_constr>`
+     - :py:mod:`add_gradient_boosting_regressor_constr
+       <gurobi_ml.sklearn.gradient_boosting_regressor>`
    * - Random Forest
      - :external:py:class:`RandomForestRegressor
        <sklearn.ensemble.RandomForestRegressor>`
-     - :py:func:`add_random_forest_regressor_constr
-       <gurobi_ml.sklearn.add_random_forest_regressor_constr>`
+     - :py:mod:`add_random_forest_regressor_constr
+       <gurobi_ml.sklearn.random_forest_regressor>`
 
 
 .. list-table:: Transformers in :external+sklearn:std:doc:`scikit-learn <user_guide>`
@@ -71,14 +66,16 @@ to insert it in a Gurobi model.
    * - StandardScaler
      - :external:py:class:`StandardScaler
        <sklearn.preprocessing.StandardScaler>`
-     - :py:func:`gurobi_ml.sklearn.add_standard_scaler_constr`
+     - :py:mod:`add_standard_scaler_constr
+       <gurobi_ml.sklearn.preprocessing.add_standard_scaler_constr>`
    * - Pipeline
      - :external:py:class:`Pipeline <sklearn.pipeline.Pipeline>`
-     - :py:func:`gurobi_ml.sklearn.add_pipeline_constr`
+     - :py:mod:`add_pipeline_constr <gurobi_ml.sklearn.pipeline>`
    * - PolynomialFeatures
      - :external:py:class:`PolynomialFeatures
        <sklearn.preprocessing.PolynomialFeatures>` [#]_
-     - :py:func:`gurobi_ml.sklearn.add_polynomial_features_constr`
+     - :py:mod:`add_polynomial_features_constr
+       <gurobi_ml.sklearn.preprocessing.add_polynomial_features_constr>`
 
 Keras
 -----

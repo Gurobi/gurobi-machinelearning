@@ -13,11 +13,6 @@ Gurobi Machine Learning
 |
 |
 
-.. warning::
-
-   This code is in a pre-release state. It may not be fully functional and breaking changes
-   can occur without notice.
-
 
 A Python package to help use *trained* regression models in
 mathematical optimization models. The package supports a variety of regression models

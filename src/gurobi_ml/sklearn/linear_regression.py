@@ -35,9 +35,9 @@ def add_linear_regression_constr(
         The gurobipy model where the predictor should be inserted.
     linear_regression: : external+sklearn: py: class: `sklearn.linear_model.LinearRegression`
      The linear regression to insert. It can be of any of the following types:
-         * :external+sklearn:py: class: `sklearn.linear_model.LinearRegression`
-         * :external+sklearn:py: class: `sklearn.linear_model.Ridge`
-         * :external+sklearn:py: class: `sklearn.linear_model.Lasso`
+         * :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
+         * :external+sklearn:py:class:`sklearn.linear_model.Ridge`
+         * :external+sklearn:py:class:`sklearn.linear_model.Lasso`
      input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
          Decision variables used as input for random forest in model.
      output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional

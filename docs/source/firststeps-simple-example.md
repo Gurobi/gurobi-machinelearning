@@ -12,14 +12,6 @@ kernelspec:
   name: python3
 ---
 
-<div class="alert alert-warning">
-warning
-
-This code is in a pre-release state. It may not be fully functional and breaking changes
-can occur without notice.
-
-</div>
-
 Usage Example
 =============
 
