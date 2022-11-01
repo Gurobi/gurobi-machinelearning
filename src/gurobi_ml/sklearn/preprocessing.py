@@ -23,7 +23,7 @@ from ..modeling import AbstractPredictorConstr, _default_name
 
 
 def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **kwargs):
-    """Embed polymonial_features into gp_model
+    """Embed polynomial_features into gp_model
 
     Note that this function creates the output variables from
     the input variables.
@@ -112,14 +112,16 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
     """Class to model trained :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures` with gurobipy
     some Gurobi variables."""
 
-    def __init__(self, gp_model, polytrans, input_vars, **kwargs):
-        if polytrans.degree > 2:
-            raise NoModel(polytrans, "Can only handle polynomials of degree < 2")
-        self.polytrans = polytrans
-        super().__init__(gp_model, input_vars, default_name=_default_name(polytrans), **kwargs)
+    def __init__(self, gp_model, polynomial_features, input_vars, **kwargs):
+        if polynomial_features.degree > 2:
+            raise NoModel(polynomial_features, "Can only handle polynomials of degree < 2")
+        self.polynomial_features = polynomial_features
+        super().__init__(
+            gp_model, input_vars, default_name=_default_name(polynomial_features), **kwargs
+        )
 
     def _create_output_vars(self, input_vars, **kwargs):
-        out_shape = (input_vars.shape[0], self.polytrans.n_output_features_)
+        out_shape = (input_vars.shape[0], self.polynomial_features.n_output_features_)
         rval = self._gp_model.addMVar(out_shape, name="polyx", lb=-gp.GRB.INFINITY)
         self._gp_model.update()
         self._output = rval
@@ -129,19 +131,19 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
         _input = self._input
         output = self._output
 
-        nexamples, nfeat = _input.shape
-        powers = self.polytrans.powers_
-        assert powers.shape[0] == self.polytrans.n_output_features_
-        assert powers.shape[1] == nfeat
+        n_examples, n_feat = _input.shape
+        powers = self.polynomial_features.powers_
+        assert powers.shape[0] == self.polynomial_features.n_output_features_
+        assert powers.shape[1] == n_feat
 
-        for k in range(nexamples):
+        for k in range(n_examples):
             for i, power in enumerate(powers):
-                qexpr = gp.QuadExpr()
-                qexpr += 1.0
+                q_expr = gp.QuadExpr()
+                q_expr += 1.0
                 for j, feat in enumerate(_input[k, :]):
                     if power[j] == 2:
-                        qexpr *= feat.item()
-                        qexpr *= feat.item()
+                        q_expr *= feat.item()
+                        q_expr *= feat.item()
                     elif power[j] == 1:
-                        qexpr *= feat.item()
-                self.gp_model.addConstr(output[k, i] == qexpr, name=f"polyfeat[{k},{i}]")
+                        q_expr *= feat.item()
+                self.gp_model.addConstr(output[k, i] == q_expr, name=f"polyfeat[{k},{i}]")

@@ -58,10 +58,8 @@ rst_epilog = f"""
 .. |TorchVersion| replace:: {dep_versions["torch"]}
 .. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}
 .. |TensorflowVersion| replace:: {dep_versions["tensorflow"]}
+.. |VariablesDimensionsWarn| replace:: {VARS_SHAPE}
 """
-
-rst_prolog = f"""
-.. |VariablesDimensionsWarn| replace:: {VARS_SHAPE}"""
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -105,3 +103,9 @@ extlinks = {
     "issue": ("https://github.com/Gurobi/gurobi-machinelearning/issues/%s", "issue %s"),
     "gurobipy": ("https://www.gurobi.com/documentation/current/refman/py_%s.html", "gurobipy %s"),
 }
+
+rst_prolog = """.. warning::
+
+   This code is in a pre-release state. It may not be fully functional and breaking changes
+   can occur without notice.
+"""

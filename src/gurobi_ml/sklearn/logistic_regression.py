@@ -53,7 +53,7 @@ def add_logistic_regression_constr(
     output_type: {'classification', 'probability_1'}, default='classification'
         If the option chosen is 'classification' the output is the class label
         of either 0 or 1 given by the logistic regression.
-        If the option 'probability_1' is chosen the output is the probabilty of the class 1.
+        If the option 'probability_1' is chosen the output is the probability of the class 1.
 
     epsilon: float, default=0.0
         When the `output_type` is 'classification', this tolerance can be set
@@ -91,7 +91,7 @@ def add_logistic_regression_constr(
         If the logistic regression is not a binary label regression
 
     ParameterError
-        If the value of outut_type is set to a non-comforming value (see above).
+        If the value of output_type is set to a non-conforming value (see above).
 
     Note
     ----
@@ -184,9 +184,9 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
                 log_result[index],
                 name=self._indexed_name(index, "logistic"),
             )
-        numgc = self.gp_model.NumGenConstrs
+        num_gc = self.gp_model.NumGenConstrs
         self.gp_model.update()
-        for gc in self.gp_model.getGenConstrs()[numgc:]:
+        for gc in self.gp_model.getGenConstrs()[num_gc:]:
             for attr, val in self.attributes.items():
                 gc.setAttr(attr, val)
         self.gp_model.update()

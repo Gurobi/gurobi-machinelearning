@@ -92,17 +92,17 @@ class KerasNetworkConstr(BaseNNConstr):
         network = self.predictor
         _input = self._input
         output = None
-        numlayers = len(network.layers)
+        num_layers = len(network.layers)
 
         for i, step in enumerate(network.layers):
-            if i == numlayers - 1:
+            if i == num_layers - 1:
                 output = self._output
             if isinstance(step, keras.layers.InputLayer):
                 pass
             elif isinstance(step, keras.layers.ReLU):
                 layer = self.add_activation_layer(
                     _input,
-                    self.actdict["relu"],
+                    self.act_dict["relu"],
                     output,
                     name=f"{i}",
                 )
@@ -117,7 +117,7 @@ class KerasNetworkConstr(BaseNNConstr):
                     _input,
                     weights,
                     bias,
-                    self.actdict[activation],
+                    self.act_dict[activation],
                     output,
                     name=f"{i}",
                 )

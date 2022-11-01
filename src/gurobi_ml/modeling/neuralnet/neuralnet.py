@@ -26,13 +26,13 @@ class BaseNNConstr(AbstractPredictorConstr):
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.predictor = predictor
-        self.actdict = {
+        self.act_dict = {
             "relu": ReLU(),
             "identity": Identity(),
         }
         try:
             for activation, activation_model in kwargs["activation_models"].items():
-                self.actdict[activation] = activation_model
+                self.act_dict[activation] = activation_model
         except KeyError:
             pass
         self._layers = []
