@@ -104,7 +104,7 @@ The function returns a [modeling object](api/AbstractPredictorConstr.rst#gurobi_
 pred_constr = add_predictor_constr(m, nn, input_vars, output_vars)
 ```
 
-The member function [print_stats](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.print_stats) of the modeling object outputs the details of the regression model that was added to the Gurobi.
+The method [print_stats](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.print_stats) of the modeling object outputs the details of the regression model that was added to the Gurobi.
 
 ```{code-cell}
 pred_constr.print_stats()
@@ -118,7 +118,7 @@ m.setObjective(output_vars@output_vars, gp.GRB.MINIMIZE)
 m.optimize()
 ```
 
-The function [get_error](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.get_error) is useful to check that the solution computed by Gurobi is correct with respect to the regression model we use.
+The method [get_error](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.get_error) is useful to check that the solution computed by Gurobi is correct with respect to the regression model we use.
 
 Let $(\bar X, \bar y)$ be the values of the input and output variables in the computed solution. The function returns $g(\bar X) - y$ using the original regression (in this case the `scikit-learn`) object.
 
@@ -138,7 +138,7 @@ output_vars.X
 y_examples
 ```
 
-Finally, we can remove `pred_constr` with the function [remove](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.remove).
+Finally, we can remove `pred_constr` with the method [remove](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.remove).
 
 ```{code-cell}
 pred_constr.remove()
