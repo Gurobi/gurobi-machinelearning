@@ -305,4 +305,6 @@ print(
 )
 ```
 
++++ {"nbsphinx": "hidden"}
+
 Copyright © 2022 Gurobi Optimization, LLC

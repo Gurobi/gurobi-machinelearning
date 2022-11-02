@@ -253,6 +253,6 @@ actual global minimum. Depending on the use case this might be deemed
 acceptable. Of course, training a larger network should result in a better
 approximation.
 
-+++
++++ {"nbsphinx": "hidden"}
 
-Copyright © 2020 Gurobi Optimization, LLC
+Copyright © 2022 Gurobi Optimization, LLC
