@@ -7,7 +7,7 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.14.1
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: Python 3.9.12 64-bit
   language: python
   name: python3
 ---
@@ -229,8 +229,8 @@ solution.
 
 ```{code-cell} ipython3
 print(
-    "Error in approximating the regression {:.6}".format(
-        np.max(np.abs(pred_constr.get_error()))
+    "Maximum error in approximating the regression {:.6}".format(
+        np.max(pred_constr.get_error())
     )
 )
 ```

@@ -17,6 +17,7 @@
 :gurobipy:`model`.
 """
 
+import numpy as np
 import torch
 from torch import nn
 
@@ -122,11 +123,10 @@ class SequentialConstr(BaseNNConstr):
 
         Returns
         -------
-        float
+        error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.output`
             Assuming that we have a solution for the input and output variables
-            `x, y`. Returns the difference between `predict(x)` and
-            `y`, where predict is the corresponding function for the Scikit-Learn
-            object we are modeling.
+            `x, y`. Returns the absolute value of the differences between `predictor.predict(x)` and
+            `y`. Where predictor is the Pytorch model this object is modeling.
 
         Raises
         ------
@@ -136,5 +136,5 @@ class SequentialConstr(BaseNNConstr):
         if self._has_solution():
             t_in = torch.from_numpy(self.input.X).float()
             t_out = self.predictor.forward(t_in)
-            return t_out.detach().numpy() - self.output.X
+            return np.abs(t_out.detach().numpy() - self.output.X)
         raise NoSolution()

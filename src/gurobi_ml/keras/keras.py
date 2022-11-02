@@ -16,7 +16,7 @@
 """ Module for embedding a Keras model into a :gurobipy:`model`
 """
 
-
+import numpy as np
 from tensorflow import keras
 
 from ..exceptions import NoModel, NoSolution
@@ -130,11 +130,10 @@ class KerasNetworkConstr(BaseNNConstr):
 
         Returns
         -------
-        float
+        error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.output`
             Assuming that we have a solution for the input and output variables
-            `x, y`. Returns the difference between `predict(x)` and
-            `y`, where predict is the corresponding function for the Scikit-Learn
-            object we are modeling.
+            `x, y`. Returns the absolute value of the differences between `predictor.forward(x)` and
+            `y`. Where predictor is the Keras model this object is modeling.
 
         Raises
         ------
@@ -142,5 +141,5 @@ class KerasNetworkConstr(BaseNNConstr):
             If the gurobipy model has no solution (either was not optimized or is infeasible).
         """
         if self._has_solution():
-            return self.predictor.predict(self.input.X) - self.output.X
+            return np.abs(self.predictor.predict(self.input.X) - self.output.X)
         raise NoSolution()
