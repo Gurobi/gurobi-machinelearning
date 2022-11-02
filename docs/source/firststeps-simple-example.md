@@ -21,9 +21,12 @@ The example is entirely abstract. Its aim is only to illustrate the basic functi
 package in the most simple way. For some more realistic applications, please refer to the notebooks.
 
 Before proceeding to the example itself, we need to import a number of packages.
-Here, we will use `scikit-learn` to train regression models. We generate random data for the
-regression using the :external+sklearn:py:func:`sklearn.datasets.make_regression`. For the regression model, we use a neural network :external:py:class:`sklearn.neural_network.MLPRegressor`, import the corresponding
-objects.
+Here, we will use Scikit-learn to train regression models. We generate random
+data for the regression using the
+[make_regression](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_regression.html)
+function. For the regression model, we use a [multi-layer perceptron
+regressor](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html)
+neural network. We import the corresponding objects.
 
 ```{code-cell}
 from sklearn.datasets import make_regression
@@ -31,8 +34,10 @@ from sklearn.metrics import mean_squared_error
 from sklearn.neural_network import MLPRegressor
 ```
 
-Certainly, we also need `gurobipy` to build an optimization model and from the `gurobi_ml` package we need the [add_predictor_constr](api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr)
-function. We will also need `numpy`.
+Certainly, we need gurobipy to build an optimization model and from the
+gurobi_ml package we need the
+[add_predictor_constr](api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr)
+function. We also need numpy.
 
 ```{code-cell}
 import numpy as np
@@ -55,10 +60,14 @@ nn = MLPRegressor([20]*2, max_iter=10000, random_state=1)
 nn.fit(X, y)
 ```
 
-We now turn to the optimization model. In the spirit of adversarial machine learning examples, we use some training examples.
-We pick $n$ training examples randomly. For each of the examples, we want to find an input that is in a small neighborhood of it that leads to the output that is closer to $0$ with the regression.
+We now turn to the optimization model. In the spirit of adversarial machine
+learning examples, we use some training examples. We pick $n$ training examples
+randomly. For each of the examples, we want to find an input that is in a small
+neighborhood of it that leads to the output that is closer to $0$ with the
+regression.
 
-Denoting by $X^E$ our set of examples and by $g$ the prediction function of our regression model, our optimization problem reads:
+Denoting by $X^E$ our set of examples and by $g$ the prediction function of our
+regression model, our optimization problem reads:
 
 $$
 \begin{aligned}
@@ -69,9 +78,12 @@ $$
 \end{aligned}
 $$
 
-where $X$ is a matrix of variables of dimension $n \times 10$ (the number of examples we consider and number of features in the regression respectively), $y$ is a vector of free (unbounded) variables and $\delta$ a small positive constant.
+where $X$ is a matrix of variables of dimension $n \times 10$ (the number of
+examples we consider and number of features in the regression respectively), $y$
+is a vector of free (unbounded) variables and $\delta$ a small positive
+constant.
 
-First, let's pick randomly 2 training examples using `numpy`, and create our `gurobipy` model.
+First, let's pick randomly 2 training examples using numpy, and create our gurobipy model.
 
 ```{code-cell}
 n = 2
@@ -82,29 +94,41 @@ y_examples = y[index]
 m = gp.Model()
 ```
 
-Our only decision variables in this case, are the five inputs and outputs for the regression. We use `gurobipy.MVar` matrix variables that are most convenient in this case.
+Our only decision variables in this case, are the five inputs and outputs for
+the regression. We use `gurobipy.MVar` matrix variables that are most convenient
+in this case.
 
-The input variables have the same shape as `X_examples`. Their lower bound is `X_examples - delta` and their upper bound `X_examples + delta`.
+The input variables have the same shape as `X_examples`. Their lower bound is
+`X_examples - delta` and their upper bound `X_examples + delta`.
 
-The output variables have the shape of `y_examples` and are unbounded. By default, in Gurobi variables are non-negative, we therefore need to set an infinite lower bound.
+The output variables have the shape of `y_examples` and are unbounded. By
+default, in Gurobi variables are non-negative, we therefore need to set an
+infinite lower bound.
 
 ```{code-cell}
 input_vars = m.addMVar(X_examples.shape, lb=X_examples-0.2, ub=X_examples+0.2)
 output_vars = m.addMVar(y_examples.shape, lb=-gp.GRB.INFINITY)
 ```
 
-The constraints linking `input_vars` and `output_vars` can now be added with the function
+The constraints linking `input_vars` and `output_vars` can now be added with the
+function
 [add_predictor_constr](api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr).
 
-Note that because of the shape of the variables this will add the 5 different constraints.
+Note that because of the shape of the variables this will add the 5 different
+constraints.
 
-The function returns a [modeling object](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr) that we can use later on.
+The function returns a [modeling
+object](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr)
+that we can use later on.
 
 ```{code-cell}
 pred_constr = add_predictor_constr(m, nn, input_vars, output_vars)
 ```
 
-The method [print_stats](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.print_stats) of the modeling object outputs the details of the regression model that was added to the Gurobi.
+The method
+[print_stats](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.print_stats)
+of the modeling object outputs the details of the regression model that was
+added to the Gurobi.
 
 ```{code-cell}
 pred_constr.print_stats()
@@ -118,9 +142,14 @@ m.setObjective(output_vars@output_vars, gp.GRB.MINIMIZE)
 m.optimize()
 ```
 
-The method [get_error](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.get_error) is useful to check that the solution computed by Gurobi is correct with respect to the regression model we use.
+The method
+[get_error](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.get_error)
+is useful to check that the solution computed by Gurobi is correct with respect
+to the regression model we use.
 
-Let $(\bar X, \bar y)$ be the values of the input and output variables in the computed solution. The function returns $g(\bar X) - y$ using the original regression (in this case the `scikit-learn`) object.
+Let $(\bar X, \bar y)$ be the values of the input and output variables in the
+computed solution. The function returns $g(\bar X) - y$ using the original
+regression object.
 
 Normally, all values should be small and below Gurobi's tolerances.
 
