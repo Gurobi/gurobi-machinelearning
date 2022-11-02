@@ -1,6 +1,6 @@
 [project]
 name = "gurobi-machinelearning"
-version = "1.0.0a1"
+dynamic = ["version"]
 description = "package to insert ML models in Gurobi"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -29,7 +29,9 @@ repository = "https://github.com/Gurobi/gurobi-machinelearning"
 documentation = "https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com"
 "bug tracker" = "https://github.com/Gurobi/gurobi-machinelearning/issues"
 
+[tool.setuptools.dynamic]
+version = {attr = "gurobi_ml._version.__version__"}
 
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
