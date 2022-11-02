@@ -48,7 +48,8 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
 
     Warning
     -------
-    Onle `Dense <https://keras.io/api/layers/core_layers/dense/>`_ (possibly
+
+      Only `Dense <https://keras.io/api/layers/core_layers/dense/>`_ (possibly
       with `relu` activation), and `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ with
       default settings are supported.
 

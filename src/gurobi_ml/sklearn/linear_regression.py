@@ -33,7 +33,7 @@ def add_linear_regression_constr(
     ----------
     gp_model: :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    linear_regression: : external+sklearn: py: class: `sklearn.linear_model.LinearRegression`
+    linear_regression: :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
      The linear regression to insert. It can be of any of the following types:
          * :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
          * :external+sklearn:py:class:`sklearn.linear_model.Ridge`

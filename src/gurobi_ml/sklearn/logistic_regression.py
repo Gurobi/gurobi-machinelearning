@@ -69,6 +69,7 @@ def add_logistic_regression_constr(
         also make the model infeasible if the problem is very constrained:
         the open interval *(0.5, 0.5 + epsilon)* is excluded from the feasible set of the optimization
         problem.
+
     pwl_attributes: dict, optional
         Dictionary for non-default attributes for Gurobi to build the piecewise linear
         approximation of the logistic function.

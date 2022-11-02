@@ -18,7 +18,8 @@ Usage Example
 In this page, we provide a simple example of using the Gurobi Machine Learning package.
 
 The example is entirely abstract. Its aim is only to illustrate the basic functionalities of the
-package in the most simple way. For some more realistic applications, please refer to the notebooks.
+package in the most simple way. For some more realistic applications, please refer to the notebooks
+in the :doc:`mlm-examples` section.
 
 Before proceeding to the example itself, we need to import a number of packages.
 Here, we will use Scikit-learn to train regression models. We generate random
@@ -157,7 +158,7 @@ Normally, all values should be small and below Gurobi's tolerances.
 pred_constr.get_error()
 ```
 
-We can look at the computed values for the output variables and compare them with the original targets values.
+We can look at the computed values for the output variables and compare them with the original target values.
 
 ```{code-cell}
 output_vars.X

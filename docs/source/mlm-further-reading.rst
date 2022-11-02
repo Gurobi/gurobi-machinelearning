@@ -2,12 +2,12 @@ Further Reading
 ===============
 
 The approach of embedding machine learning models in optimization models has
-received sustained attention in recent year with several publications and
+received sustained attention in recent years with several publications and
 published research software packages. Here, we make an informal annotated
 bibliography of the works in which we have been interested when developing the
 package. We don't claim to be exhaustive.
 
-The JANOS framework was proposed in :cite:t:`JANOS` with an associated `python
+The JANOS framework was proposed in :cite:t:`JANOS` with an associated `Python
 package <https://github.com/INFORMSJoC/2020.1023>`_. The package works with
 various Scikit-learn models and solves optimization problems with Gurobi. The
 :doc:`mlm-examples/student_admission` example was proposed in that paper.
@@ -24,7 +24,7 @@ interesting applications: palatable diet, cancer treatment. They also propose
 original algorithmic approaches to ensure credible predictions and avoid extrapolations.
 
 Finally, among research software packages, OMLT (:cite:t:`ceccon2022omlt`) is a
-python package that supports a variety of neural network structures (dense
+Python package that supports a variety of neural network structures (dense
 layers, convolutional layers, pooling layers) and gradient boosting trees. It is
 hooked with the `ONNX <https://onnx.ai/>`_ open format. It is actively developed
 and evolving. It is in particular aimed at studying alternative formulations for
