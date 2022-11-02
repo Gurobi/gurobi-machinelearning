@@ -58,9 +58,9 @@ def predictor_as_string(predictor):
 class Cases:
     """Base class to have cases for testing"""
 
-    def __init__(self, excluded=None, regressors=None, transformers=None):
+    def __init__(self, dataset, excluded=None, regressors=None, transformers=None):
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
-        version = None
+        self.dataset = dataset
 
         if regressors is None:
             regressors = [r for r in sklearn_predictors().keys() if r not in excluded]
@@ -77,13 +77,18 @@ class Cases:
             ]
         else:
             self.all_test += [make_pipeline(init_predictor(reg)) for reg in regressors]
-        with open(os.path.join(self.basedir, "sklearn_version")) as filein:
-            version = filein.read().strip()
+        sklearn_version_file = f"{dataset}_sklearn_version"
+
+        try:
+            with open(os.path.join(self.basedir, sklearn_version_file)) as file_in:
+                version = file_in.read().strip()
+        except FileNotFoundError:
+            version = None
         if version != sklearn_version:
-            print("Scikit learn version changed. Regenerate predictors")
+            print(f"Scikit learn version changed. Regenerate predictors for {dataset}")
             self.build_predictors()
-            with open(os.path.join(self.basedir, "sklearn_version"), "w") as fileout:
-                print(sklearn_version, file=fileout)
+            with open(os.path.join(self.basedir, sklearn_version_file), "w") as file_out:
+                print(sklearn_version, file=file_out)
 
     def __iter__(self):
         return self.all_test.__iter__()
@@ -99,8 +104,7 @@ class DiabetesCases(Cases):
 
     def __init__(self):
         excluded = ["LogisticRegression"]
-        self.dataset = "diabetes"
-        super().__init__(excluded=excluded)
+        super().__init__("diabetes", excluded=excluded)
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):
@@ -111,18 +115,18 @@ class DiabetesCases(Cases):
         for predictor in self:
             predictor.fit(X, y)
             filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
-            nonconvex = False
+            non_convex = False
             if isinstance(predictor, Pipeline):
                 for element in predictor:
                     if isinstance(element, PolynomialFeatures):
-                        nonconvex = True
+                        non_convex = True
                         break
 
             rval = {
                 "predictor": predictor,
                 "input_shape": X.shape,
                 "output_shape": y.shape,
-                "nonconvex": nonconvex,
+                "nonconvex": non_convex,
             }
 
             dump(rval, os.path.join(self.basedir, filename))
@@ -132,8 +136,7 @@ class IrisCases(Cases):
     """Base class to have cases for testing regression models on iris set"""
 
     def __init__(self):
-        self.dataset = "iris"
-        super().__init__(regressors=["LogisticRegression"])
+        super().__init__("iris", regressors=["LogisticRegression"])
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):
@@ -149,18 +152,18 @@ class IrisCases(Cases):
         for predictor in self:
             predictor.fit(X, y)
             filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
-            nonconvex = False
+            non_convex = False
             if isinstance(predictor, Pipeline):
                 for element in predictor:
                     if isinstance(element, PolynomialFeatures):
-                        nonconvex = True
+                        non_convex = True
                         break
 
             rval = {
                 "predictor": predictor,
                 "input_shape": X.shape,
                 "output_shape": y.shape,
-                "nonconvex": nonconvex,
+                "nonconvex": non_convex,
             }
 
             dump(rval, os.path.join(self.basedir, filename))
@@ -168,8 +171,7 @@ class IrisCases(Cases):
 
 class CircleCase(Cases):
     def __init__(self):
-        self.dataset = "circle"
-        super().__init__(regressors=["DecisionTreeRegressor", "RandomForestRegressor"])
+        super().__init__("circle", regressors=["DecisionTreeRegressor", "RandomForestRegressor"])
         self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):
@@ -183,18 +185,18 @@ class CircleCase(Cases):
         for predictor in self:
             predictor.fit(X, y)
             filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
-            nonconvex = False
+            non_convex = False
             if isinstance(predictor, Pipeline):
                 for element in predictor:
                     if isinstance(element, PolynomialFeatures):
-                        nonconvex = True
+                        non_convex = True
                         break
 
             rval = {
                 "predictor": predictor,
                 "input_shape": X.shape,
                 "output_shape": y.shape,
-                "nonconvex": nonconvex,
+                "nonconvex": non_convex,
                 "data": X,
                 "target": y,
             }
@@ -204,8 +206,8 @@ class CircleCase(Cases):
 
 class MNISTCase(Cases):
     def __init__(self):
-        self.dataset = "mnist"
         super().__init__(
+            "mnist",
             regressors=[
                 "MLPClassifier",
             ],
@@ -223,18 +225,18 @@ class MNISTCase(Cases):
         for predictor in self:
             predictor.fit(X, y)
             filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
-            nonconvex = False
+            non_convex = False
             if isinstance(predictor, Pipeline):
                 for element in predictor:
                     if isinstance(element, PolynomialFeatures):
-                        nonconvex = True
+                        non_convex = True
                         break
 
             rval = {
                 "predictor": predictor,
                 "input_shape": X.shape,
                 "output_shape": y.shape,
-                "nonconvex": nonconvex,
+                "nonconvex": non_convex,
                 "data": X[:100, :],
                 "target": y[:100],
             }
