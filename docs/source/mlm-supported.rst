@@ -67,7 +67,7 @@ to insert it in a Gurobi model.
      - :external:py:class:`StandardScaler
        <sklearn.preprocessing.StandardScaler>`
      - :py:mod:`add_standard_scaler_constr
-       <gurobi_ml.sklearn.preprocessing.add_standard_scaler_constr>`
+       <gurobi_ml.sklearn.add_standard_scaler_constr>`
    * - Pipeline
      - :external:py:class:`Pipeline <sklearn.pipeline.Pipeline>`
      - :py:mod:`add_pipeline_constr <gurobi_ml.sklearn.pipeline>`
@@ -75,7 +75,7 @@ to insert it in a Gurobi model.
      - :external:py:class:`PolynomialFeatures [#]_
        <sklearn.preprocessing.PolynomialFeatures>`
      - :py:mod:`add_polynomial_features_constr
-       <gurobi_ml.sklearn.preprocessing.add_polynomial_features_constr>`
+       <gurobi_ml.sklearn.add_polynomial_features_constr>`
 
 Keras
 -----
