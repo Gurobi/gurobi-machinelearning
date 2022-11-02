@@ -17,7 +17,30 @@
 """
 import sys
 
-from .sklearn.predictors_list import sklearn_predictors, user_predictors
+
+def sklearn_convertors():
+    if "sklearn" in sys.modules:
+        from .sklearn import add_pipeline_constr
+        from .sklearn.predictors_list import sklearn_predictors, sklearn_transformers
+
+        return (
+            sklearn_predictors()
+            | sklearn_transformers()
+            | {
+                "Pipeline": add_pipeline_constr,
+            }
+        )
+    else:
+        return {}
+
+
+def user_predictors():
+    if "sklearn" in sys.modules:
+        from .register_predictor import user_predictors as rval
+
+        return rval()
+    else:
+        return {}
 
 
 def pytorch_convertors():
@@ -59,7 +82,7 @@ def keras_convertors():
 def registered_predictors():
     """Return the list of registered predictors"""
     convertors = {}
-    convertors |= sklearn_predictors()
+    convertors |= sklearn_convertors()
     convertors |= pytorch_convertors()
     convertors |= keras_convertors()
     convertors |= user_predictors()
