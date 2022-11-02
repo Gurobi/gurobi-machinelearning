@@ -23,7 +23,7 @@ The package currently supports various [scikit-learn](https://scikit-learn.org/s
 
 # Documentation
 
-The latest user manual is available on [readthedocs](https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com/en/v1.0.0a0/).
+The latest user manual is available on [readthedocs](https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com/en/stable/).
 
 # Contact us
 
