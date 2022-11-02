@@ -257,8 +257,8 @@ We print the error. Here we need to use `get_error_proba`.
 
 ```{code-cell} ipython3
 print(
-    "Error in approximating the regression {:.6}".format(
-        np.max(np.abs(pred_constr.get_error()))
+    "Maximum error in approximating the regression {:.6}".format(
+        np.max(pred_constr.get_error())
     )
 )
 ```
@@ -299,8 +299,8 @@ We can see that the error has been reduced.
 
 ```{code-cell} ipython3
 print(
-    "Error in approximating the regression {:.6}".format(
-        np.max(np.abs(pred_constr.get_error()))
+    "Maximum error in approximating the regression {:.6}".format(
+        np.max(pred_constr.get_error())
     )
 )
 ```

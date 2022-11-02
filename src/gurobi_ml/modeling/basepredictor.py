@@ -168,13 +168,15 @@ class AbstractPredictorConstr(SubModel):
     def get_error(self):
         """Returns error in Gurobi's solution with respect to prediction from input
 
+        Note that this function is implemented in child classes.
+
         Returns
         -------
-        float
+        error: ndarray of same shape as :py:attr:`output`
             Assuming that we have a solution for the input and output variables
-            `x, y`. Returns the difference between `predict(x)` and
-            `y`, where predict is the corresponding function for the Scikit-Learn
-            object we are modeling.
+            `x, y`. Returns the absolute value of the differences between `predict(x)` and
+            `y`, where `predict` is the prediction function for the object we are modeling
+            (`predict` for Scikit-Learn and Keras, `forward` for Pytorch).
 
         Raises
         ------
