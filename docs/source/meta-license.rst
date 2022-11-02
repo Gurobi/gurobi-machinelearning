@@ -5,8 +5,8 @@ Gurobi Machine Learning is distributed under the `Apache License 2.0 <https://ww
 
 Note that Gurobi itself is a commercial software and requires a license. When
 installed via pip or conda, gurobipy ships with a `limited size license
-<https://pypi.org/project/gurobipy/>`_ which can only solve models of limited
-size. All the examples given in this documentation can be solved using
+<https://pypi.org/project/gurobipy/>`_.
+All the examples given in this documentation can be solved using
 this license.
 
 If you are a student or staff member of an academic institution you qualify for
