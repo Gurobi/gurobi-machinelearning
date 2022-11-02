@@ -275,4 +275,6 @@ plt.show()
 print(f"Solution is classified as {nn.predict(x.X)}")
 ```
 
++++ {"nbsphinx": "hidden"}
+
 Copyright © 2022 Gurobi Optimization, LLC

@@ -122,14 +122,14 @@ The modeling object can perform a few tasks:
    * Everything it created (i.e. variables and constraints to establish the
      relationship between input and output) can be removed with the
      :py:meth:`remove <gurobi_ml.modeling.AbstractPredictorConstr.remove>`
-     member function.
+     method.
    * It can print a summary of what it added with the :py:meth:`print_stats
-     <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` member function.
+     <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` method.
    * Once Gurobi computed a solution to the optimization problem, it can compute
      the difference between what the regression model predicts from the input
      values and the values of the output variables in Gurobi's solution with the
      :py:meth:`get_error
-     <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` member function.
+     <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` method.
 
 
 The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` is

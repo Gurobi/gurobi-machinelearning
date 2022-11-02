@@ -25,8 +25,8 @@ dependencies = [
 ]
 
 [project.urls]
-homepage = "https://github.com/Gurobi/gurobi-machinelearning"
 repository = "https://github.com/Gurobi/gurobi-machinelearning"
+documentation = "https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com"
 "bug tracker" = "https://github.com/Gurobi/gurobi-machinelearning/issues"
 
 
