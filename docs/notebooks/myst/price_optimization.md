@@ -768,6 +768,6 @@ notebook](https://github.com/Gurobi/modeling-examples/tree/master/price_optimiza
 more analysis of the solutions this model can give is done interactively. Be
 sure to take look at it.
 
-+++
++++ {"nbsphinx": "hidden"}
 
 Copyright © 2022 Gurobi Optimization, LLC
