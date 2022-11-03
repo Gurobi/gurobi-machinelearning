@@ -17,6 +17,8 @@
 """
 import sys
 
+from .register_predictor import user_predictors
+
 
 def sklearn_convertors():
     if "sklearn" in sys.modules:
@@ -30,15 +32,6 @@ def sklearn_convertors():
                 "Pipeline": add_pipeline_constr,
             }
         )
-    else:
-        return {}
-
-
-def user_predictors():
-    if "sklearn" in sys.modules:
-        from .register_predictor import user_predictors as rval
-
-        return rval()
     else:
         return {}
 
