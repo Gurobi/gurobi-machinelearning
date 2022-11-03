@@ -33,8 +33,8 @@ jobs:
         path: dist/*
         if-no-files-found: error
 
-  upload_pypi:
-    name: Upload to PyPI
+  upload_conda:
+    name: Upload to Conda staging
     runs-on: ubuntu-latest
     needs: build_wheel
     if: github.event_name == 'push'
