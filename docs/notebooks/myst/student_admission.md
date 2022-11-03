@@ -42,7 +42,7 @@ This model was developed in the context of the development of
 [Janos](https://github.com/INFORMSJoC/2020.1023), a toolkit similar to Gurobi
 Machine Learning to integrate ML models and Mathematical Optimization.
 
-This example, we illustrate in particular how to use the logistic regression and
+This example illustrates in particular how to use the logistic regression and
 tune the piecewise-linear approximation of the logistic function.
 
 We also show how to deal with fixed features in the optimization model using
@@ -257,8 +257,8 @@ We print the error. Here we need to use `get_error_proba`.
 
 ```{code-cell} ipython3
 print(
-    "Error in approximating the regression {:.6}".format(
-        np.max(np.abs(pred_constr.get_error()))
+    "Maximum error in approximating the regression {:.6}".format(
+        np.max(pred_constr.get_error())
     )
 )
 ```
@@ -299,8 +299,8 @@ We can see that the error has been reduced.
 
 ```{code-cell} ipython3
 print(
-    "Error in approximating the regression {:.6}".format(
-        np.max(np.abs(pred_constr.get_error()))
+    "Maximum error in approximating the regression {:.6}".format(
+        np.max(pred_constr.get_error())
     )
 )
 ```

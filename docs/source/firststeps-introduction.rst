@@ -63,7 +63,7 @@ We encourage to install the package via pip (or add it to your
   The package has been tested with and is supported for Python 3.9 and Python
   3.10.
 
-  Table table-versions_ lists the version of the relevant packages that are
+  The following table lists the version of the relevant packages that are
   tested and supported in the current version (|version|).
 
   .. _table-versions:
@@ -108,13 +108,13 @@ constraints so that, in a solution, the values of the output variables are
 predicted by the regression model from the values of the input variables. More
 formally, if we denote by :math:`g` the prediction function of the regression
 model, by :math:`x` the input variables and by :math:`y` the output variables,
-:math:`y = g(x)` in any solution.
+then :math:`y = g(x)` in any solution.
 
 The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`
 returns a modeling object derived from the class
 :py:class:`AbstractPredictorConstr
 <gurobi_ml.modeling.AbstractPredictorConstr>`. That object keeps track of all
-the variables and constraints that have been added to the gurobipy:`model` to
+the variables and constraints that have been added to the :gurobipy:`model` to
 establish the relationship between input and output variables of the regression.
 
 The modeling object can perform a few tasks:

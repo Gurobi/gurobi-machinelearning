@@ -17,19 +17,35 @@
 """
 import sys
 
-from .sklearn.predictors_list import sklearn_predictors, user_predictors
+from .register_predictor import user_predictors
+
+
+def sklearn_convertors():
+    if "sklearn" in sys.modules:
+        from .sklearn import add_pipeline_constr
+        from .sklearn.predictors_list import sklearn_predictors, sklearn_transformers
+
+        return (
+            sklearn_predictors()
+            | sklearn_transformers()
+            | {
+                "Pipeline": add_pipeline_constr,
+            }
+        )
+    else:
+        return {}
 
 
 def pytorch_convertors():
     """Collect known PyTorch objects that can be embedded and the conversion class"""
     if "torch" in sys.modules:
-        from torch import nn as pytorchnn  # pylint: disable=import-outside-toplevel
+        import torch  # pylint: disable=import-outside-toplevel
 
         from .torch import (
             add_sequential_constr as add_torch_sequential_constr,  # pylint: disable=import-outside-toplevel
         )
 
-        return {pytorchnn.Sequential: add_torch_sequential_constr}
+        return {torch.nn.Sequential: add_torch_sequential_constr}
     return {}
 
 
@@ -59,7 +75,7 @@ def keras_convertors():
 def registered_predictors():
     """Return the list of registered predictors"""
     convertors = {}
-    convertors |= sklearn_predictors()
+    convertors |= sklearn_convertors()
     convertors |= pytorch_convertors()
     convertors |= keras_convertors()
     convertors |= user_predictors()

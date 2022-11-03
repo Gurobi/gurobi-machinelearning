@@ -14,7 +14,7 @@ listed in the table :ref:`table-versions`.
 Scikit-learn
 ------------
 The following tables list the name of the models supported, the name of the
-corresponding object in the python framework, and the function that can be used
+corresponding object in the Python framework, and the function that can be used
 to insert it in a Gurobi model.
 
 .. list-table:: Supported regression models of :external+sklearn:std:doc:`scikit-learn <user_guide>`
@@ -67,20 +67,20 @@ to insert it in a Gurobi model.
      - :external:py:class:`StandardScaler
        <sklearn.preprocessing.StandardScaler>`
      - :py:mod:`add_standard_scaler_constr
-       <gurobi_ml.sklearn.preprocessing.add_standard_scaler_constr>`
+       <gurobi_ml.sklearn.add_standard_scaler_constr>`
    * - Pipeline
      - :external:py:class:`Pipeline <sklearn.pipeline.Pipeline>`
      - :py:mod:`add_pipeline_constr <gurobi_ml.sklearn.pipeline>`
    * - PolynomialFeatures
-     - :external:py:class:`PolynomialFeatures
-       <sklearn.preprocessing.PolynomialFeatures>` [#]_
+     - :external:py:class:`PolynomialFeatures [#]_
+       <sklearn.preprocessing.PolynomialFeatures>`
      - :py:mod:`add_polynomial_features_constr
-       <gurobi_ml.sklearn.preprocessing.add_polynomial_features_constr>`
+       <gurobi_ml.sklearn.add_polynomial_features_constr>`
 
 Keras
 -----
 
-`Keras <https://keras.io/>`_ neural networks generated either using the
+`Keras <https://keras.io/>`_ neural networks are generated either using the
 `functional API <https://keras.io/guides/functional_api/>`_, `subclassing model
 <https://keras.io/guides/making_new_layers_and_models_via_subclassing/>`_ or the
 `Sequential <https://keras.io/api/models/sequential/>`_ class.

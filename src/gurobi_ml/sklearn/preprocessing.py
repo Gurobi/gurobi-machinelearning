@@ -109,8 +109,7 @@ class StandardScalerConstr(AbstractPredictorConstr):
 
 
 class PolynomialFeaturesConstr(AbstractPredictorConstr):
-    """Class to model trained :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures` with gurobipy
-    some Gurobi variables."""
+    """Class to model trained :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures` with gurobipy"""
 
     def __init__(self, gp_model, polynomial_features, input_vars, **kwargs):
         if polynomial_features.degree > 2:

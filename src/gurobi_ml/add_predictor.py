@@ -18,7 +18,6 @@
 
 from .exceptions import NotRegistered
 from .registered_predictors import registered_predictors
-from .sklearn import add_pipeline_constr, sklearn_transformers
 
 
 def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kwargs):
@@ -55,7 +54,7 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
     They should have dimensions that conforms with the input/output of the predictor.
     We denote by `n_features` the dimension of the input of the predictor and by `n_output` the dimension of the output.
 
-    If they are lists or a dictionaries `input_vars` should have length `n_features` and `output_vars`
+    If they are lists or dictionaries, `input_vars` should have length `n_features` and `output_vars`
     should have length `n_output`.
 
     If they are matrix variables, `input_vars` and `output_vars` can be either of shape `(n_features)` and
@@ -64,10 +63,6 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
     variables (e.g. a prediction is made for every time period in a planning horizon).
     """
     convertors = registered_predictors()
-    convertors |= sklearn_transformers()
-    convertors |= {
-        "Pipeline": add_pipeline_constr,
-    }
     try:
         convertor = convertors[type(predictor)]
     except KeyError:

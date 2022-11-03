@@ -16,6 +16,7 @@
 """ Implements some utility tools for all scikit-learn objects """
 import warnings
 
+import numpy as np
 from sklearn.utils.validation import check_is_fitted
 
 from ..exceptions import NoSolution
@@ -47,11 +48,10 @@ class SKgetter:
 
         Returns
         -------
-        float
+        error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.output`
             Assuming that we have a solution for the input and output variables
-            `x, y`. Returns the difference between `predict(x)` and
-            `y`, where predict is the corresponding function for the Scikit-Learn
-            object we are modeling.
+            `x, y`. Returns the absolute value of the differences between `predictor.predict(x)` and
+            `y`. Where predictor is the regression this object is modeling.
 
         Raises
         ------
@@ -73,5 +73,5 @@ class SKgetter:
                     predicted = self.predictor.predict(self.input.X)
             if len(predicted.shape) == 1:
                 predicted = predicted.reshape(-1, 1)
-            return predicted - self.output.X
+            return np.abs(predicted - self.output.X)
         raise NoSolution()

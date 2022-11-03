@@ -153,7 +153,7 @@ neural network we want to compute and a `y` variables for the output of the
 neural network. Those variables should have respectively the shape of the
 example we picked and the shape of the return value of `predict_proba`.
 
-We also need additional variables to model the $l1$-norm constraint. Namely, for
+We also need additional variables to model the $l1-$norm constraint. Namely, for
 each pixel in the image, we need to model the absolute difference between $x$
 and $\bar x$. We will detail the model below. For now, we create the necessary
 variables that are another matrix of variables of same shape as `x`.
@@ -243,13 +243,13 @@ solution. Instead, we need to either:
    - find a feasible solution with a positive objective cost (i.e. a
      counter-example), or
    - prove that there is no solution of positive cost (i.e. no counter-example
-     in the neighborhood).
+     in the neighborhood exists).
 
  We can use Gurobi parameters to limit the optimization to answer those
  questions: setting
  [BestObjStop](https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop)
  to 0.0 will stop the optimizer if a counter-example is found, setting
- [BestBdStop](https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestObjStop)
+ [BestBdStop](https://www.gurobi.com/documentation/current/refman/bestobjstop.html#parameter:BestBdStop)
  to 0.0 will stop the optimization if the optimizer has shown there is no
  counter-example.
 

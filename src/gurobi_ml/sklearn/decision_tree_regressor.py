@@ -68,7 +68,7 @@ def add_decision_tree_regressor_constr(
 
     Warning
     -------
-    Although decision trees with multiple output are tested they were never used in
+    Although decision trees with multiple outputs are tested they were never used in
     a non-trivial optimization model. It should be used with care at this point.
     """
     return DecisionTreeRegressorConstr(

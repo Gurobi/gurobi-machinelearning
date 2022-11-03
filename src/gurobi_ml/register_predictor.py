@@ -13,8 +13,22 @@
 # limitations under the License.
 # ==============================================================================
 
-# read version from installed package
+USER_PREDICTORS = {}
 
-from ._version import __version__
-from .add_predictor import add_predictor_constr
-from .register_predictor import register_predictor_constr
+
+def register_predictor_constr(predictor, predictor_constr):
+    """Register a new predictor that can be added using use_predictor_constr
+
+    Parameters
+    ----------
+    predictor:
+        Class of the predictor
+    predictor_constr:
+        Class implementing the MIP model that embeds a trained object of
+        class predictor in a gurobi Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>
+    """
+    USER_PREDICTORS[predictor] = predictor_constr
+
+
+def user_predictors():
+    return USER_PREDICTORS

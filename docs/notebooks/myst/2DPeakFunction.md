@@ -7,7 +7,7 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.14.1
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: Python 3.9.12 64-bit
   language: python
   name: python3
 ---
@@ -35,7 +35,7 @@ can occur without notice.
 # Surrogate Models
 
 Some industrial applications require modeling complex processes that can result
-either in highly non-linear functions or functions defined by a simulation
+either in highly nonlinear functions or functions defined by a simulation
 process. In those contexts, optimization solvers often struggle. The reason may
 be that relaxations of the nonlinear functions are not good enough to make the
 solver prove an acceptable bound in a reasonable amount of time. Another issue
@@ -47,7 +47,7 @@ MIP technology to solve the constructed approximation (see e.g. <cite
 data-cite="Henao_Maravelias_2011">[Heneao Maravelias
 2011](https://doi.org/https://doi.org/10.1002/aic.12341)</cite>, <cite
 data-cite="Schweidtmann_2022"> [Schweitdmann et.al.
-2022](https://arxiv.org/abs/2207.12722)</cite>). This use of neural network can
+2022](https://arxiv.org/abs/2207.12722)</cite>). This use of neural networks can
 be motivated by their ability to provide a universal approximation (see e.g.
 <cite data-cite="Lu_Pu_2017">[Lu et.al.
 2017](https://proceedings.neurips.cc/paper/2017/file/32cbf687880eb1674a07bf717761dd3a-Paper.pdf)</cite>).
@@ -72,7 +72,7 @@ $$ \begin{aligned} f(x) = & 3 \cdot (1-x_1)^2 \cdot \exp(-x_1^2 - (x_2+1)^2) -
          & \frac{1}{3} \cdot \exp(-(x_1+1)^2 - x_2^2).
 \end{aligned} $$
 
-In this example, we want to find the minimum of $f$ over the interval $[-2, 2]$:
+In this example, we want to find the minimum of $f$ over the interval $[-2, 2]^2$:
 
 $$ y = \min \{f(x) : x \in [-2,2]^2\}. $$
 
@@ -89,7 +89,7 @@ First import the necessary packages. Before applying the neural network, we do a
 preprocessing to extract polynomial features of degree 2. Hopefully this will
 help us to approximate the smooth function. Besides, `gurobipy`, `numpy` and the
 appropriate `sklearn` objects, we also use `matplotlib` to plot the function,
-and it's approximation.
+and its approximation.
 
 ```{code-cell} ipython3
 import gurobipy as gp
@@ -229,8 +229,8 @@ solution.
 
 ```{code-cell} ipython3
 print(
-    "Error in approximating the regression {:.6}".format(
-        np.max(np.abs(pred_constr.get_error()))
+    "Maximum error in approximating the regression {:.6}".format(
+        np.max(pred_constr.get_error())
     )
 )
 ```

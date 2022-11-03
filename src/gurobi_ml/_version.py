@@ -13,8 +13,22 @@
 # limitations under the License.
 # ==============================================================================
 
-# read version from installed package
+from importlib import metadata
 
-from ._version import __version__
-from .add_predictor import add_predictor_constr
-from .register_predictor import register_predictor_constr
+try:
+    __version__ = metadata.version("gurobi_machinelearning")
+except metadata.PackageNotFoundError:
+    __version__ = "dev"
+
+GIT_HASH = "$Format:%H$"
+
+
+def get_versions():
+    # Downloaded package with inserted git hash.
+    if "Format" not in GIT_HASH:
+        git_hash = f"-{GIT_HASH}"
+    # No inserted git hash, the repo is probably cloned.
+    else:
+        git_hash = ""
+
+    return {"short": __version__, "long": f"{__version__}{git_hash}"}

@@ -3,10 +3,11 @@ import random
 import unittest
 
 import gurobipy as gp
-from base_cases import DiabetesCases, IrisCases
 
 from gurobi_ml import add_predictor_constr
 from gurobi_ml.exceptions import NoSolution, ParameterError
+
+from .sklearn_cases import DiabetesCases, IrisCases
 
 
 class TestAddRemove(unittest.TestCase):
