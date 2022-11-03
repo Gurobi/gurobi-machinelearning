@@ -54,6 +54,7 @@ VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_cons
 rst_epilog = f"""
 .. |GurobiVersion| replace:: {dep_versions["gurobipy"]}
 .. |NumpyVersion| replace:: {dep_versions["numpy"]}
+.. |ScipyVersion| replace:: {dep_versions["scipy"]}
 .. |PandasVersion| replace:: {dep_versions["pandas"]}
 .. |TorchVersion| replace:: {dep_versions["torch"]}
 .. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}

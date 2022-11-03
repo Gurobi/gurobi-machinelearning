@@ -43,6 +43,7 @@ If you encounter issues with Gurobi or ``gurobipy`` please contact
 - Python >= 3.9
 - [`numpy`](https://pypi.org/project/numpy/) >= 1.22.0
 - [`gurobipy`](https://pypi.org/project/gurobipy/) >= 10.0
+- [`scipy`](https://pypi.org/project/scipy/) >= 1.9.3
 
 The current version supports the following ML package versions:
 - [`torch`](https://pypi.org/project/torch/1.12.1/) == 1.12.1
@@ -58,7 +59,7 @@ The easiest way to install `gurobi-machinelearning` is using `pip` in a virtual 
 ```shell
 (.venv) pip install gurobi-machinelearning
 ```
-This will also install the `numpy` and `gurobipy` dependencies.
+This will also install the `numpy`, `scipy` and `gurobipy` dependencies.
 
 Please note that `gurobipy` is commercial software and requires a license. When installed via pip or conda,
 `gurobipy` ships with a free license which is only for testing and can only solve models of limited size.
