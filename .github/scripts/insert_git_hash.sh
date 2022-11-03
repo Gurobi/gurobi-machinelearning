@@ -9,4 +9,4 @@ GIT_HASH=$(git rev-parse --verify HEAD)
 SEARCH_STRING='$Format:%H$'
 SEARCH_ESCAPED=$(sed 's/[^^]/[&]/g; s/\^/\\^/g' <<<"$SEARCH_STRING") # escape it.
 
-sed "s/$SEARCH_ESCAPED/$GIT_HASH/" "$VERSION_PY"
+sed -i "s/$SEARCH_ESCAPED/$GIT_HASH/" "$VERSION_PY"
