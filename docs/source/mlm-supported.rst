@@ -71,8 +71,8 @@ to insert it in a Gurobi model.
    * - Pipeline
      - :external:py:class:`Pipeline <sklearn.pipeline.Pipeline>`
      - :py:mod:`add_pipeline_constr <gurobi_ml.sklearn.pipeline>`
-   * - PolynomialFeatures
-     - :external:py:class:`PolynomialFeatures [#]_
+   * - PolynomialFeatures [#]_
+     - :external:py:class:`PolynomialFeatures
        <sklearn.preprocessing.PolynomialFeatures>`
      - :py:mod:`add_polynomial_features_constr
        <gurobi_ml.sklearn.add_polynomial_features_constr>`
