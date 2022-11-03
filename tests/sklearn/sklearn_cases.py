@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 from joblib import dump, load
 from sklearn import __version__ as sklearn_version
 from sklearn import datasets
@@ -58,7 +59,7 @@ class Cases:
     """Base class to have cases for testing"""
 
     def __init__(self, dataset, excluded=None, regressors=None, transformers=None):
-        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
+        self.basedir = os.path.join(os.path.dirname(__file__), "..", "predictors")
         self.dataset = dataset
 
         if regressors is None:
@@ -104,7 +105,6 @@ class DiabetesCases(Cases):
     def __init__(self):
         excluded = ["LogisticRegression"]
         super().__init__("diabetes", excluded=excluded)
-        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):
         data = datasets.load_diabetes()
@@ -126,6 +126,115 @@ class DiabetesCases(Cases):
                 "input_shape": X.shape,
                 "output_shape": y.shape,
                 "nonconvex": non_convex,
+            }
+
+            dump(rval, os.path.join(self.basedir, filename))
+
+
+class IrisCases(Cases):
+    """Base class to have cases for testing regression models on iris set"""
+
+    def __init__(self):
+        super().__init__("iris", regressors=["LogisticRegression"])
+
+    def build_predictors(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        y = data.target
+
+        # Make it a simple classification
+        X = X[y != 2]
+        y = y[y != 2]
+
+        for predictor in self:
+            predictor.fit(X, y)
+            filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
+            non_convex = False
+            if isinstance(predictor, Pipeline):
+                for element in predictor:
+                    if isinstance(element, PolynomialFeatures):
+                        non_convex = True
+                        break
+
+            rval = {
+                "predictor": predictor,
+                "input_shape": X.shape,
+                "output_shape": y.shape,
+                "nonconvex": non_convex,
+            }
+
+            dump(rval, os.path.join(self.basedir, filename))
+
+
+class CircleCase(Cases):
+    def __init__(self):
+        super().__init__("circle", regressors=["DecisionTreeRegressor", "RandomForestRegressor"])
+
+    def build_predictors(self):
+        # Inspired bu Scikit-learn example
+        # Create a dataset drawing a circle (don't put noise at it's not
+        # really relevant here)
+        rng = np.random.RandomState(1)
+        X = np.sort(200 * rng.rand(100, 1) - 100, axis=0)
+        y = np.array([np.pi * np.sin(X).ravel(), np.pi * np.cos(X).ravel()]).T
+
+        for predictor in self:
+            predictor.fit(X, y)
+            filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
+            non_convex = False
+            if isinstance(predictor, Pipeline):
+                for element in predictor:
+                    if isinstance(element, PolynomialFeatures):
+                        non_convex = True
+                        break
+
+            rval = {
+                "predictor": predictor,
+                "input_shape": X.shape,
+                "output_shape": y.shape,
+                "nonconvex": non_convex,
+                "data": X,
+                "target": y,
+            }
+
+            dump(rval, os.path.join(self.basedir, filename))
+
+
+class MNISTCase(Cases):
+    def __init__(self):
+        super().__init__(
+            "mnist",
+            regressors=[
+                "MLPClassifier",
+            ],
+            transformers=[],
+        )
+
+    def build_predictors(self):
+        mnist = datasets.fetch_openml("mnist_784")
+        X, y = mnist.data, mnist.target
+
+        X = X.to_numpy()
+        y = y.to_numpy()
+        X /= 255.0  # scaling
+        for predictor in self:
+            predictor.fit(X, y)
+            filename = f"{self.dataset}_{predictor_as_string(predictor)}.joblib"
+            non_convex = False
+            if isinstance(predictor, Pipeline):
+                for element in predictor:
+                    if isinstance(element, PolynomialFeatures):
+                        non_convex = True
+                        break
+
+            rval = {
+                "predictor": predictor,
+                "input_shape": X.shape,
+                "output_shape": y.shape,
+                "nonconvex": non_convex,
+                "data": X[:100, :],
+                "target": y[:100],
             }
 
             dump(rval, os.path.join(self.basedir, filename))
