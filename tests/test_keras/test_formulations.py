@@ -1,7 +1,7 @@
 import os
 
 import tensorflow as tf
-from sklearn import datasets
+from joblib import load
 
 from ..fixed_formulation import FixedRegressionModel
 
@@ -12,26 +12,23 @@ class TestKerasModel(FixedRegressionModel):
     """Test that if we fix the input of the predictor the feasible solution from
     Gurobi is identical to what the predict function would return."""
 
+    basedir = os.path.join(os.path.dirname(__file__), "..", "predictors")
+
     def additional_test(self, predictor, pred_constr):
-        # No addtional test
+        # No additional test
         pass
 
     def test_diabetes_keras(self):
-        data = datasets.load_diabetes()
+        X = load(os.path.join(self.basedir, "examples_diabetes.joblib"))
 
-        X = data["data"]
-
-        filename = os.path.join(os.path.dirname(__file__), "..", "predictors", "diabetes_keras")
-        print(filename)
+        filename = os.path.join(self.basedir, "diabetes_keras")
         regressor = tf.keras.models.load_model(filename)
         onecase = {"predictor": regressor, "nonconvex": 0}
         self.do_one_case(onecase, X, 5, "all")
         self.do_one_case(onecase, X, 6, "pairs")
 
     def test_diabetes_keras_alt(self):
-        data = datasets.load_diabetes()
-
-        X = data["data"]
+        X = load(os.path.join(self.basedir, "examples_diabetes.joblib"))
 
         filename = os.path.join(os.path.dirname(__file__), "..", "predictors", "diabetes_keras_v2")
         print(filename)
