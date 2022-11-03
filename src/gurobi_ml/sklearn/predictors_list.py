@@ -21,22 +21,6 @@ from .mlpregressor import add_mlp_regressor_constr
 from .preprocessing import add_polynomial_features_constr, add_standard_scaler_constr
 from .random_forest_regressor import add_random_forest_regressor_constr
 
-USER_PREDICTORS = {}
-
-
-def register_predictor_constr(predictor, predictor_constr):
-    """Register a new predictor that can be added using use_predictor_constr
-
-    Parameters
-    ----------
-    predictor:
-        Class of the predictor
-    predictor_constr:
-        Class implementing the MIP model that embeds a trained object of
-        class predictor in a gurobi Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>
-    """
-    USER_PREDICTORS[predictor] = predictor_constr
-
 
 def sklearn_transformers():
     return {
@@ -56,7 +40,3 @@ def sklearn_predictors():
         "RandomForestRegressor": add_random_forest_regressor_constr,
         "MLPRegressor": add_mlp_regressor_constr,
     }
-
-
-def user_predictors():
-    return USER_PREDICTORS

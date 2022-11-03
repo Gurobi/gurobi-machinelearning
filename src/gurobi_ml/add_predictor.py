@@ -18,7 +18,6 @@
 
 from .exceptions import NotRegistered
 from .registered_predictors import registered_predictors
-from .sklearn import add_pipeline_constr, sklearn_transformers
 
 
 def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kwargs):
@@ -64,10 +63,6 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
     variables (e.g. a prediction is made for every time period in a planning horizon).
     """
     convertors = registered_predictors()
-    convertors |= sklearn_transformers()
-    convertors |= {
-        "Pipeline": add_pipeline_constr,
-    }
     try:
         convertor = convertors[type(predictor)]
     except KeyError:

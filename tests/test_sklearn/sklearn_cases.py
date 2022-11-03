@@ -59,7 +59,7 @@ class Cases:
     """Base class to have cases for testing"""
 
     def __init__(self, dataset, excluded=None, regressors=None, transformers=None):
-        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
+        self.basedir = os.path.join(os.path.dirname(__file__), "..", "predictors")
         self.dataset = dataset
 
         if regressors is None:
@@ -105,7 +105,6 @@ class DiabetesCases(Cases):
     def __init__(self):
         excluded = ["LogisticRegression"]
         super().__init__("diabetes", excluded=excluded)
-        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):
         data = datasets.load_diabetes()
@@ -137,7 +136,6 @@ class IrisCases(Cases):
 
     def __init__(self):
         super().__init__("iris", regressors=["LogisticRegression"])
-        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):
         data = datasets.load_iris()
@@ -172,7 +170,6 @@ class IrisCases(Cases):
 class CircleCase(Cases):
     def __init__(self):
         super().__init__("circle", regressors=["DecisionTreeRegressor", "RandomForestRegressor"])
-        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):
         # Inspired bu Scikit-learn example
@@ -213,7 +210,6 @@ class MNISTCase(Cases):
             ],
             transformers=[],
         )
-        self.basedir = os.path.join(os.path.dirname(__file__), "predictors")
 
     def build_predictors(self):
         mnist = datasets.fetch_openml("mnist_784")
