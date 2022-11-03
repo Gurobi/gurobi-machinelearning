@@ -54,7 +54,7 @@ We encourage to install the package via pip (or add it to your
 
 .. note::
 
-  If not already installed, this should install the ``gurobipy`` and ``numpy``
+  If not already installed, this should install the ``gurobipy``, ``numpy`` and ``scipy```
   packages.
 
 
@@ -79,6 +79,8 @@ We encourage to install the package via pip (or add it to your
        - |GurobiVersion|
      * - ``numpy``
        - |NumpyVersion|
+     * - ``scipy``
+       - |ScipyVersion|
      * - ``pandas``
        - |PandasVersion|
      * - ``torch``
