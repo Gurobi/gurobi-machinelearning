@@ -13,7 +13,13 @@
 # limitations under the License.
 # ==============================================================================
 
-VERSION = "1.0.0a2"
+from importlib import metadata
+
+try:
+    __version__ = metadata.version("gurobi_machinelearning")
+except metadata.PackageNotFoundError:
+    __version__ = "dev"
+
 GIT_HASH = "$Format:%H$"
 
 
@@ -25,7 +31,4 @@ def get_versions():
     else:
         git_hash = ""
 
-    return {"short": VERSION, "long": f"{VERSION}{git_hash}"}
-
-
-__version__ = VERSION
+    return {"short": __version__, "long": f"{__version__}{git_hash}"}
