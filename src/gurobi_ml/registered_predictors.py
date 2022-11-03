@@ -46,13 +46,13 @@ def user_predictors():
 def pytorch_convertors():
     """Collect known PyTorch objects that can be embedded and the conversion class"""
     if "torch" in sys.modules:
-        from torch import nn as pytorchnn  # pylint: disable=import-outside-toplevel
+        import torch  # pylint: disable=import-outside-toplevel
 
         from .torch import (
             add_sequential_constr as add_torch_sequential_constr,  # pylint: disable=import-outside-toplevel
         )
 
-        return {pytorchnn.Sequential: add_torch_sequential_constr}
+        return {torch.nn.Sequential: add_torch_sequential_constr}
     return {}
 
 
