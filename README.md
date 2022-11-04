@@ -2,14 +2,11 @@
 [![build wheel](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/build_wheel.yml/badge.svg)](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/build_wheel.yml)
 ![Python versions](https://img.shields.io/badge/python-3.9%20|%203.10-blue)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![PyPI](https://img.shields.io/pypi/v/gurobipy)](https://pypi.org/project/gurobipy)
+[![PyPI](https://img.shields.io/pypi/v/gurobi-machinelearning)](https://pypi.org/project/gurobi-machinelearning)
 [![Gurobi-forum](https://img.shields.io/badge/Help-Gurobi--Forum-red)](https://support.gurobi.com/hc/en-us/community/topics)
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/gurobi-logo-title.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/image8.png">
-  <img alt="Gurobi" src="docs/source/_static/image8.png">
-</picture>
+![Gurobi](docs/source/_static/image8.png)
+
 
 > **⚠ Warning**
 >
