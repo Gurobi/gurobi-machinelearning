@@ -120,12 +120,14 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         super().print_stats(file=file)
         print(file=file)
         print(f"Pipeline has {len(self._steps)} steps:", file=file)
-        for step in self:
-            print(step, end=" ", file=file)
         print(file=file)
-        print(file=file)
+
+        header = f"{'Layer':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':>12} {'Q. Constrs':>12} {'Gen. Constr.':>12}"
+        print("-" * len(header), file=file)
+        print(header, file=file)
+        print("=" * len(header), file=file)
         for step in self:
-            step.print_stats(file)
+            step.print_stats(abbrev=True, file=file)
             print(file=file)
 
     def __getitem__(self, key):

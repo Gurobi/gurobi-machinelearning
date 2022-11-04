@@ -87,17 +87,16 @@ class SequentialConstr(BaseNNConstr):
         network = self.predictor
         _input = self._input
         output = None
-        numlayers = len(network)
+        num_layers = len(network)
 
         for i, step in enumerate(network):
-            if i == numlayers - 1:
+            if i == num_layers - 1:
                 output = self._output
             if isinstance(step, nn.ReLU):
                 layer = self.add_activation_layer(
                     _input,
                     self.act_dict["relu"],
                     output,
-                    name=f"{i}",
                 )
                 _input = layer.output
             elif isinstance(step, nn.Linear):
@@ -112,7 +111,7 @@ class SequentialConstr(BaseNNConstr):
                     layer_bias,
                     self.act_dict["identity"],
                     output,
-                    name=f"{i}",
+                    default_name="Linear",
                 )
                 _input = layer.output
         if self._output is None:

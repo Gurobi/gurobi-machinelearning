@@ -101,12 +101,7 @@ class KerasNetworkConstr(BaseNNConstr):
             if isinstance(step, keras.layers.InputLayer):
                 pass
             elif isinstance(step, keras.layers.ReLU):
-                layer = self.add_activation_layer(
-                    _input,
-                    self.act_dict["relu"],
-                    output,
-                    name=f"{i}",
-                )
+                layer = self.add_activation_layer(_input, self.act_dict["relu"], output)
                 _input = layer.output
             else:
                 config = step.get_config()
@@ -115,12 +110,7 @@ class KerasNetworkConstr(BaseNNConstr):
                     activation = "identity"
                 weights, bias = step.get_weights()
                 layer = self.add_dense_layer(
-                    _input,
-                    weights,
-                    bias,
-                    self.act_dict[activation],
-                    output,
-                    name=f"{i}",
+                    _input, weights, bias, self.act_dict[activation], output
                 )
                 _input = layer.output
         if self._output is None:

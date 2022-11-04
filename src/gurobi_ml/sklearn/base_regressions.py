@@ -56,7 +56,3 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
         coefs = self.predictor.coef_.reshape(-1, 1)
         intercept = self.predictor.intercept_
         self.gp_model.addConstr(self.output == self.input @ coefs + intercept, name="linreg")
-
-    def print_stats(self, file=None):
-        """Print statistics about submodel created"""
-        super().print_stats(file)
