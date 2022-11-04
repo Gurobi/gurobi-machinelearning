@@ -94,9 +94,7 @@ class SequentialConstr(BaseNNConstr):
                 output = self._output
             if isinstance(step, nn.ReLU):
                 layer = self.add_activation_layer(
-                    _input,
-                    self.act_dict["relu"],
-                    output,
+                    _input, self.act_dict["relu"], output, default_name="ReLU"
                 )
                 _input = layer.output
             elif isinstance(step, nn.Linear):

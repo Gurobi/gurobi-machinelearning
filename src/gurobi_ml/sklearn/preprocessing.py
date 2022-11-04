@@ -84,11 +84,11 @@ class StandardScalerConstr(AbstractPredictorConstr):
     def __init__(self, gp_model, scaler, input_vars, **kwargs):
         self.scaler = scaler
         if "default_name" not in kwargs:
-            kwargs["default_name"] = "stdscaler"
+            kwargs["default_name"] = "std_scaler"
         super().__init__(gp_model, input_vars, **kwargs)
 
     def _create_output_vars(self, input_vars, **kwargs):
-        rval = self._gp_model.addMVar(input_vars.shape, name="scaledx")
+        rval = self._gp_model.addMVar(input_vars.shape, name="scaled")
         self._gp_model.update()
         self._output = rval
 

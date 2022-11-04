@@ -68,6 +68,8 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
     def __init__(self, gp_model, pipeline, input_vars, output_vars=None, **kwargs):
         self._steps = []
         self._kwargs = kwargs
+        if "default_name" not in kwargs:
+            kwargs["default_name"] = "pipe"
         SKgetter.__init__(self, pipeline, **kwargs)
         AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
 
