@@ -30,7 +30,7 @@ for this example.
 
 For this problem, we are given a trained neural network and one well classified
 example $\bar x$. Our goal is to construct another example $x$ _close to_ $\bar
-x$ that is classified with another label.
+x$ that is classified with a different label.
 
 For the hand digit recognition problem, the input is a grayscale image of $28
 \times 28$ ($=784$) pixels and the output is a vector of length 10 (each entry
