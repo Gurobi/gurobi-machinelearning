@@ -120,7 +120,7 @@ class AbstractPredictorConstr(SubModel):
         assert self._output is not None
         return self
 
-    def print_stats(self, file=None):
+    def print_stats(self, abbrev=False, file=None):
         """Print statistics on model additions stored by this class
 
         This function prints detailed statistics on the variables
@@ -136,9 +136,16 @@ class AbstractPredictorConstr(SubModel):
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.
         """
-        super().print_stats(file)
-        print(f"Input has shape {self.input.shape}", file=file)
-        print(f"Output has shape {self.output.shape}", file=file)
+
+        if abbrev:
+            print(
+                f"{self._name:13} {self.output.shape.__str__():>14} {len(self.vars):>12} {len(self.constrs):>12} {len(self.qconstrs):>12} {len(self.genconstrs):>12}",
+                file=file,
+            )
+        else:
+            super().print_stats(file)
+            print(f"Input has shape {self.input.shape}", file=file)
+            print(f"Output has shape {self.output.shape}", file=file)
 
     def _mip_model(self):
         """Defined in derived class the mip_model for the predictor"""

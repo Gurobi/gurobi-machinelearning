@@ -103,7 +103,7 @@ class BaseNNConstr(AbstractPredictorConstr):
         self._layers.append(layer)
         return layer
 
-    def print_stats(self, file=None):
+    def print_stats(self, abbrev=False, file=None):
         """Print statistics about submodel created
 
         Parameters
@@ -112,10 +112,16 @@ class BaseNNConstr(AbstractPredictorConstr):
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.
         """
-        name = self._name
-        super().print_stats(file)
+        super().print_stats(abbrev, file)
+        if abbrev:
+            return
         print(file=file)
-        print(f"{name} has {len(self._layers)} layers:", file=file)
+
+        header = f"{'Layer':13} {'Activation':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':>12} {'Gen. Constr.':>12}"
+        print("-" * len(header), file=file)
+        print(header, file=file)
+        print("=" * len(header), file=file)
         for layer in self:
-            layer.print_stats(file)
+            layer.print_stats(file=file)
             print(file=file)
+        print("=" * len(header), file=file)

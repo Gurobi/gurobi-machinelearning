@@ -68,6 +68,8 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.n_outputs_ = 1
         self.estimators_ = []
+        if "default_name" not in kwargs:
+            kwargs["default_name"] = "gb_reg"
         SKgetter.__init__(self, predictor)
         AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
 
