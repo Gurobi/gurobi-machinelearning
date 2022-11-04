@@ -19,7 +19,7 @@ Guobi model"""
 import gurobipy as gp
 
 from ..exceptions import NoModel
-from ..modeling import AbstractPredictorConstr, _default_name
+from ..modeling import AbstractPredictorConstr
 
 
 def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **kwargs):
@@ -83,10 +83,12 @@ class StandardScalerConstr(AbstractPredictorConstr):
 
     def __init__(self, gp_model, scaler, input_vars, **kwargs):
         self.scaler = scaler
-        super().__init__(gp_model, input_vars, default_name=_default_name(scaler), **kwargs)
+        if "default_name" not in kwargs:
+            kwargs["default_name"] = "std_scaler"
+        super().__init__(gp_model, input_vars, **kwargs)
 
     def _create_output_vars(self, input_vars, **kwargs):
-        rval = self._gp_model.addMVar(input_vars.shape, name="scaledx")
+        rval = self._gp_model.addMVar(input_vars.shape, name="scaled")
         self._gp_model.update()
         self._output = rval
 
@@ -115,9 +117,9 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
         if polynomial_features.degree > 2:
             raise NoModel(polynomial_features, "Can only handle polynomials of degree < 2")
         self.polynomial_features = polynomial_features
-        super().__init__(
-            gp_model, input_vars, default_name=_default_name(polynomial_features), **kwargs
-        )
+        if "default_name" not in kwargs:
+            kwargs["default_name"] = "poly_feat"
+        super().__init__(gp_model, input_vars, **kwargs)
 
     def _create_output_vars(self, input_vars, **kwargs):
         out_shape = (input_vars.shape[0], self.polynomial_features.n_output_features_)
