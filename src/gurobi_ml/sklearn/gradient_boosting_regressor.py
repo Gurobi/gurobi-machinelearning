@@ -106,3 +106,30 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         self.estimators_ = estimators
 
         model.addConstr(output == predictor.learning_rate * treevars.sum(axis=1) + constant[0][0])
+
+    def print_stats(self, file=None):
+        """Print statistics on model additions stored by this class
+
+        This function prints detailed statistics on the variables
+        and constraints that where added to the model.
+
+        Includes a summary of the estimators that it contains.
+
+        Arguments
+        ---------
+
+        file: None, optional
+            Text stream to which output should be redirected. By default sys.stdout.
+        """
+        super().print_stats(file=file)
+        print(file=file)
+
+        header = f"{'Estimator':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
+        print("-" * len(header), file=file)
+        print(header, file=file)
+        print(f"{' '*41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)
+        print("=" * len(header), file=file)
+        for estimator in self.estimators_:
+            estimator.print_stats(abbrev=True, file=file)
+            print(file=file)
+        print("-" * len(header), file=file)

@@ -110,9 +110,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         This function prints detailed statistics on the variables
         and constraints that where added to the model.
 
-        Usually derived classes reimplement this function to provide more
-        details about the structure of the additions (type of ML model,
-        layers if it's a neural network,...)
+        The pipeline version includes a summary of the steps that it contains.
 
         Arguments
         ---------
