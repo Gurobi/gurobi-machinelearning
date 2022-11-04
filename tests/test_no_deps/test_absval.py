@@ -1,5 +1,4 @@
 import unittest
-import warnings
 
 import gurobipy as gp
 import numpy as np
@@ -84,7 +83,6 @@ def abs_model(X, y, nn, inf_bound, registered):
         if nn:
             if registered:
                 add_predictor_constr(model, nn, diff, abs_diff)
-                pass
             else:
                 MyNNConstr(model, nn, diff, abs_diff)
         else:

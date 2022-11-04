@@ -43,10 +43,21 @@ extensions = [
     "sphinx_design",
 ]
 
-dep_versions = {
-    x.split("==")[0]: x.split("==")[1]
-    for x in (Path().resolve().parent.parent / "requirements.tox.txt").read_text().split()
-}
+
+def get_versions(file: Path, acc=None):
+    if acc is None:
+        acc = dict()
+    new_dict = {x.split("==")[0]: x.split("==")[1] for x in file.read_text().split()}
+    return {**new_dict, **acc}
+
+
+dep_versions = get_versions(Path().resolve().parent.parent / "requirements.tox.txt")
+
+tests_dir = Path().resolve().parent.parent / "tests"
+dep_versions = get_versions(tests_dir / "test_keras" / "requirements.keras.txt", dep_versions)
+dep_versions = get_versions(tests_dir / "test_pytorch" / "requirements.pytorch.txt", dep_versions)
+dep_versions = get_versions(tests_dir / "test_sklearn" / "requirements.sklearn.txt", dep_versions)
+
 
 VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
 
