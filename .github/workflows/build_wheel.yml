@@ -18,8 +18,8 @@ jobs:
     name: Build wheel
     runs-on: ubuntu-latest
     steps:
-    - name: Using the following ref
-      run: echo "${{ github.event.push.ref }}"
+    - name: Using ref ${{ github.ref_name }}
+      run: echo "${{ github.ref_name }}"
     - uses: actions/checkout@v3
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
@@ -41,7 +41,7 @@ jobs:
     name: Upload to Conda staging
     runs-on: ubuntu-latest
     needs: build_wheel
-    if: github.event_name == 'push' && (contains(github.event.push.ref, 'tags') || github.ref_name == 'main')
+    if: github.event_name == 'push' && (contains(github.ref_name, 'tags') || github.ref_name == 'main')
     steps:
     - uses: actions/checkout@v3
     - name: Download artifacts
