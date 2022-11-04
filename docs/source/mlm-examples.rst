@@ -17,6 +17,11 @@ a Gurobi model.
 In :doc:`mlm-examples/price_optimization`, we use a linear regression with categorical
 features and show how it can be embedded in a Gurobi model [#]_.
 
+All examples can be run as notebooks on mybinder.org
+
+.. image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/gh/Gurobi/gurobi-machinelearning/1.0.x?labpath=docs%2Fnotebooks%2Fipynb
+
 .. toctree::
    :maxdepth: 1
    :hidden:

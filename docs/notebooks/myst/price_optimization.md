@@ -12,18 +12,6 @@ kernelspec:
   name: python3
 ---
 
-+++ {"nbsphinx": "hidden"}
-
-<div class="alert alert-warning">
-warning
-
-The ipynb version of this notebook should not be manually edited.
-If you want to make modification please modify the .md version
-
-</div>
-
-+++
-
 <div class="alert alert-warning">
 warning
 
@@ -106,7 +94,7 @@ several years' worth of market prices and sales of avocados.
 
 We will now load the following packages for analyzing and visualizing the data.
 
-```{code-cell}
+```{code-cell} ipython3
 import pandas as pd
 import warnings
 
@@ -131,7 +119,7 @@ East, West and Plains.
 
 Now, load the data and store into a Pandas dataframe.
 
-```{code-cell}
+```{code-cell} ipython3
 data_url = "https://raw.githubusercontent.com/Gurobi/modeling-examples/master/price_optimization/"
 avocado = pd.read_csv(
     data_url + "HABdata_2019_2022.csv"
@@ -152,7 +140,7 @@ define the peak season to be the months of February through July. These months
 are set based on visual inspection of the trends, but you can try setting other
 months.
 
-```{code-cell}
+```{code-cell} ipython3
 # Add the index for each year from 2015 through 2022
 avocado["date"] = pd.to_datetime(avocado["date"])
 avocado["year"] = pd.DatetimeIndex(avocado["date"]).year
@@ -188,13 +176,13 @@ avocado
 Now, we will infer sales trends in time and seasonality. For simplicity, let's
 proceed with data from the United States as a whole.
 
-```{code-cell}
+```{code-cell} ipython3
 df_Total_US = avocado[avocado["region"] == "Total_US"]
 ```
 
 ### Sales Over the Years
 
-```{code-cell}
+```{code-cell} ipython3
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10, 5))
 
 mean = df_Total_US.groupby("year")["units_sold"].mean()
@@ -218,7 +206,7 @@ price.](https://abc7news.com/avocado-shortage-season-prices/5389855/)
 
 We will now see the sales trends within a year.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10, 5))
 
 mean = df_Total_US.groupby("month")["units_sold"].mean()
@@ -246,7 +234,7 @@ Now, we will see how the variables are correlated with each other. The end goal
 is to predict sales given the price of an avocado, year and seasonality (peak or
 not).
 
-```{code-cell}
+```{code-cell} ipython3
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(15, 5))
 sns.heatmap(
     df_Total_US[["units_sold", "price", "year", "peak"]].corr(),
@@ -270,7 +258,7 @@ being a peak season.
 Finally, we will see how the sales differ among the different regions. This will
 determine the number of avocados that we want to supply to each region.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10, 5))
 
 regions = [
@@ -326,7 +314,7 @@ should be unchanged.
 Furthermore, we store in X the transformed data and in y the target value
 units_sold.
 
-```{code-cell}
+```{code-cell} ipython3
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import make_column_transformer
 
@@ -343,7 +331,7 @@ y = df["units_sold"]
 To validate the regression model, we will randomly split the dataset into $80\%$
 training and $20\%$ testing data and learn the weights using `Scikit-learn`.
 
-```{code-cell}
+```{code-cell} ipython3
 from sklearn.model_selection import train_test_split
 
 # Split the data for training and testing
@@ -354,7 +342,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 Finally, create the regression model and train it.
 
-```{code-cell}
+```{code-cell} ipython3
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
@@ -369,7 +357,7 @@ print(f"The R^2 value in the test set is {r2_score(y_test, y_pred)}")
 We can observe a good $R^2$ value in the test set. We will now train the fit the
 weights to the full dataset.
 
-```{code-cell}
+```{code-cell} ipython3
 lin_reg.fit(X, y)
 
 y_pred_full = lin_reg.predict(X)
@@ -439,7 +427,7 @@ data stored in pandas to make sure of that.
 
 </div>
 
-```{code-cell}
+```{code-cell} ipython3
 import gurobipy as gp
 from gurobipy import GRB
 
@@ -509,7 +497,7 @@ columns corresponding to the features:
 
 Display the dataframe to make sure it is correct
 
-```{code-cell}
+```{code-cell} ipython3
 feat_lb = pd.DataFrame(
     data={
         "price": a_min,
@@ -534,7 +522,7 @@ We put the results in a dataframe (using `get_feature_names_out` for the columns
 name) and display it (note that it's not necessary to put the results in a
 dataframe, but it's good for checking how it looks):
 
-```{code-cell}
+```{code-cell} ipython3
 feat_lb = pd.DataFrame(
     data=feat_transform.transform(feat_lb),
     columns=feat_transform.get_feature_names_out(),
@@ -549,7 +537,7 @@ We repeat the operations for the upper bounds. In this example, the only
 difference between the lower and upper bounds is the value for the price column
 which is now `a_max`
 
-```{code-cell}
+```{code-cell} ipython3
 feat_ub = pd.DataFrame(
     data={
         "price": a_max,
@@ -588,7 +576,7 @@ dataframes that we computed above. The second one has shape `(R,)`.
 The price variable $p$, needs to be extracted from the `feat_vars`. To do so we
 use a mask built using the transformed feature names.
 
-```{code-cell}
+```{code-cell} ipython3
 x = m.addMVar(R, name="x", lb=b_min, ub=b_max)  # quantity supplied to each region
 s = m.addMVar(
     R, name="s", lb=0
@@ -627,7 +615,7 @@ c^r_{transport} * x_r)& \end{align}
 
 Let us now add the objective function to the model.
 
-```{code-cell}
+```{code-cell} ipython3
 m.setObjective(p @ s - c_waste * w.sum() - c_transport.to_numpy() @ x)
 m.ModelSense = GRB.MAXIMIZE
 ```
@@ -642,7 +630,7 @@ expressed as follows.
 
 The following code adds this constraint to the model.
 
-```{code-cell}
+```{code-cell} ipython3
 m.addConstr(x.sum() == B)
 m.update()
 ```
@@ -669,7 +657,7 @@ the sales are equal to the minimum of supply and predicted demand.
 
 Let us now add these constraints to the model.
 
-```{code-cell}
+```{code-cell} ipython3
 m.addConstr(s <= x)
 m.addConstr(s <= d)
 m.update()
@@ -685,7 +673,7 @@ mathematically for each region $r$.
 
 We can add these constraints to the model.
 
-```{code-cell}
+```{code-cell} ipython3
 m.addConstr(w == x - s)
 m.update()
 ```
@@ -696,7 +684,7 @@ Using the variables we created above, we just need to call
 [add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr)
 to insert the constraints linking the features and the demand.
 
-```{code-cell}
+```{code-cell} ipython3
 from gurobi_ml import add_predictor_constr
 
 pred_constr = add_predictor_constr(m, lin_reg, feats, d)
@@ -718,7 +706,7 @@ the [Gurobi NonConvex
 parameter](https://www.gurobi.com/documentation/9.5/refman/nonconvex.html) to be
 $2$.
 
-```{code-cell}
+```{code-cell} ipython3
 m.Params.NonConvex = 2
 m.optimize()
 ```
@@ -726,7 +714,7 @@ m.optimize()
 The solver solved the optimization problem in less than a second. Let us now
 analyze the optimal solution by storing it in a Pandas dataframe.
 
-```{code-cell}
+```{code-cell} ipython3
 solution = pd.DataFrame()
 solution["Region"] = regions
 solution["Price"] = p.X
@@ -743,7 +731,7 @@ solution
 Let us now visualize a scatter plot between the price and the number of avocados
 sold (in millions) for the eight regions.
 
-```{code-cell}
+```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1)
 plot_sol = sns.scatterplot(data=solution, x="Price", y="Sold", hue="Region", s=100)
 plot_waste = sns.scatterplot(

@@ -7,22 +7,10 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.14.1
 kernelspec:
-  display_name: Python 3.9.12 64-bit
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
-
-+++ {"nbsphinx": "hidden"}
-
-<div class="alert alert-warning">
-warning
-
-The ipynb version of this notebook should not be manually edited.
-If you want to make modification please modify the .md version
-
-</div>
-
-+++
 
 <div class="alert alert-warning">
 warning
