@@ -3,11 +3,16 @@
 ![Python versions](https://img.shields.io/badge/python-3.9%20|%203.10-blue)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI](https://img.shields.io/pypi/v/gurobipy)](https://pypi.org/project/gurobipy)
+[![Gurobi-forum](https://img.shields.io/badge/Help-Gurobi--Forum-red)](https://support.gurobi.com/hc/en-us/community/topics)
 
-![Gurobi](docs/source/_static/image8.png)
-
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/gurobi-logo-title.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/image8.png">
+  <img alt="Gurobi" src="docs/source/_static/image8.png">
+</picture>
 
 > **⚠ Warning**
+>
 > ```This code is in a pre-release state. It may not be fully functional and breaking changes can occur without notice.```
 
 # Gurobi Machine Learning
@@ -18,7 +23,7 @@ The package currently supports various [scikit-learn](https://scikit-learn.org/s
 
 # Documentation
 
-The latest user manual is available on [readthedocs](https://gurobi-machinelearning.readthedocs.io/en/stable/).
+The latest user manual is available on [readthedocs](https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com/).
 
 # Contact us
 

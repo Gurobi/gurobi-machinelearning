@@ -1,6 +1,6 @@
 # Contributing to Gurobi Machine Learning
 
-Welcome to Gurobi Gurobi Machine Learning!
+Welcome to Gurobi Machine Learning!
 
 We value your experience in using Gurobi Machine Learning and would like to encourage you to
 contribute directly to this project.
