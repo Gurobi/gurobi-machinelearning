@@ -107,7 +107,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         model.addConstr(predictor.n_estimators * output == tree_vars.sum(axis=1))
 
-    def print_stats(self, file=None):
+    def print_stats(self, abbrev=False, file=None):
         """Print statistics on model additions stored by this class
 
         This function prints detailed statistics on the variables
@@ -122,6 +122,8 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
             Text stream to which output should be redirected. By default sys.stdout.
         """
         super().print_stats(file=file)
+        if abbrev:
+            return False
         print(file=file)
 
         header = f"{'Estimator':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
