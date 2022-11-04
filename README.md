@@ -5,11 +5,8 @@
 [![PyPI](https://img.shields.io/pypi/v/gurobi-machinelearning)](https://pypi.org/project/gurobi-machinelearning)
 [![Gurobi-forum](https://img.shields.io/badge/Help-Gurobi--Forum-red)](https://support.gurobi.com/hc/en-us/community/topics)
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/gurobi-logo-title.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/image8.png">
-  <img alt="Gurobi" src="docs/source/_static/image8.png">
-</picture>
+![Gurobi](docs/source/_static/image8.png)
+
 
 > **⚠ Warning**
 >
