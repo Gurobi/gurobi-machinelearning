@@ -68,10 +68,11 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.n_outputs_ = 1
         self.estimators_ = []
-        if "default_name" not in kwargs:
-            kwargs["default_name"] = "gb_reg"
+        self.kwargs = kwargs
         SKgetter.__init__(self, predictor)
-        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(
+            self, gp_model, input_vars, output_vars, default_name="gbtree_reg", **kwargs
+        )
 
     def _mip_model(self):
         """Predict output variables y from input variables X using the
@@ -99,7 +100,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
             tree = predictor.estimators_[i]
             estimators.append(
                 add_decision_tree_regressor_constr(
-                    model, tree[0], _input, treevars[:, i, :], default_name="gbt_tree"
+                    model, tree[0], _input, treevars[:, i, :], **self.kwargs
                 )
             )
         self.estimators_ = estimators

@@ -44,7 +44,7 @@ class AbstractNNLayer(AbstractPredictorConstr):
           Text stream to which output should be redirected. By default sys.stdout.
         """
         print(
-            f"{self._name:13} {_default_name(self.activation):13} {self.output.shape.__str__():>14} {len(self.vars):>12} {len(self.constrs):>12} {len(self.genconstrs):>12}",
+            f"{self._name:12} {_default_name(self.activation):12} {self.output.shape.__str__():>12} {len(self.vars):>10} {len(self.constrs):>10} {len(self.qconstrs):>10} {len(self.genconstrs):>10}",
             file=file,
         )
 
@@ -61,9 +61,15 @@ class ActivationLayer(AbstractNNLayer):
         **kwargs,
     ):
         self.zvar = None
-        if "default_name" not in kwargs:
-            kwargs["default_name"] = "Activation"
-        super().__init__(gp_model, output_vars, input_vars, activation_function, **kwargs)
+        default_name = kwargs.pop("default_name", "activation")
+        super().__init__(
+            gp_model,
+            output_vars,
+            input_vars,
+            activation_function,
+            default_name=default_name,
+            **kwargs,
+        )
 
     def _create_output_vars(self, input_vars):
         rval = self._gp_model.addMVar(input_vars.shape, lb=-gp.GRB.INFINITY, name="act")
@@ -98,9 +104,15 @@ class DenseLayer(AbstractNNLayer):
         self.coefs = layer_coefs
         self.intercept = layer_intercept
         self.zvar = None
-        if "default_name" not in kwargs:
-            kwargs["default_name"] = "Dense"
-        super().__init__(gp_model, output_vars, input_vars, activation_function, **kwargs)
+        default_name = kwargs.pop("default_name", "dense")
+        super().__init__(
+            gp_model,
+            output_vars,
+            input_vars,
+            activation_function,
+            default_name=default_name,
+            **kwargs,
+        )
 
     def _create_output_vars(self, input_vars):
         rval = self._gp_model.addMVar(
