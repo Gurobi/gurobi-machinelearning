@@ -123,7 +123,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         """
         super().print_stats(file=file)
         if abbrev:
-            return False
+            return
         print(file=file)
 
         header = f"{'Estimator':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
