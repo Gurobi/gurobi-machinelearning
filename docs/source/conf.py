@@ -51,12 +51,11 @@ def get_versions(file: Path, acc=None):
     return {**new_dict, **acc}
 
 
-dep_versions = get_versions(Path().resolve().parent.parent / "requirements.tox.txt")
-
-tests_dir = Path().resolve().parent.parent / "tests"
-dep_versions = get_versions(tests_dir / "test_keras" / "requirements.keras.txt", dep_versions)
-dep_versions = get_versions(tests_dir / "test_pytorch" / "requirements.pytorch.txt", dep_versions)
-dep_versions = get_versions(tests_dir / "test_sklearn" / "requirements.sklearn.txt", dep_versions)
+root_path = Path().resolve().parent.parent
+dep_versions = get_versions(root_path / "requirements.tox.txt")
+dep_versions = get_versions(root_path / "requirements.keras.txt", dep_versions)
+dep_versions = get_versions(root_path / "requirements.pytorch.txt", dep_versions)
+dep_versions = get_versions(root_path / "requirements.sklearn.txt", dep_versions)
 
 
 VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
