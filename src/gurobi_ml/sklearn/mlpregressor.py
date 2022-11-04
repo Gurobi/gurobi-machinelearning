@@ -111,7 +111,6 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
                 layer_intercept,
                 activation,
                 output,
-                name=f"layer{i}",
             )
             input_vars = layer._output  # pylint: disable=W0212
             self._gp_model.update()

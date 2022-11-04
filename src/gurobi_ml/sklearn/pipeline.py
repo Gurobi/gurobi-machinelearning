@@ -68,10 +68,11 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
     def __init__(self, gp_model, pipeline, input_vars, output_vars=None, **kwargs):
         self._steps = []
         self._kwargs = kwargs
-        if "default_name" not in kwargs:
-            kwargs["default_name"] = "pipe"
+        default_name = "pipe"
         SKgetter.__init__(self, pipeline, **kwargs)
-        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(
+            self, gp_model, input_vars, output_vars, default_name=default_name, **kwargs
+        )
 
     def _mip_model(self):
         pipeline = self.predictor
@@ -109,9 +110,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         This function prints detailed statistics on the variables
         and constraints that where added to the model.
 
-        Usually derived classes reimplement this function to provide more
-        details about the structure of the additions (type of ML model,
-        layers if it's a neural network,...)
+        The pipeline version includes a summary of the steps that it contains.
 
         Arguments
         ---------
@@ -124,13 +123,15 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         print(f"Pipeline has {len(self._steps)} steps:", file=file)
         print(file=file)
 
-        header = f"{'Layer':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':>12} {'Q. Constrs':>12} {'Gen. Constr.':>12}"
+        header = f"{'Step':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
         print("-" * len(header), file=file)
         print(header, file=file)
+        print(f"{' '*41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)
         print("=" * len(header), file=file)
         for step in self:
             step.print_stats(abbrev=True, file=file)
             print(file=file)
+        print("-" * len(header), file=file)
 
     def __getitem__(self, key):
         """Get an item from the pipeline steps"""

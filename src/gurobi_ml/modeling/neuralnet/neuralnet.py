@@ -117,11 +117,12 @@ class BaseNNConstr(AbstractPredictorConstr):
             return
         print(file=file)
 
-        header = f"{'Layer':13} {'Activation':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':>12} {'Gen. Constr.':>12}"
+        header = f"{'Layer':12} {'Activation':12} {'Output Shape':>12} {'Variables':>10} {'Constraints':^38}"
         print("-" * len(header), file=file)
         print(header, file=file)
+        print(f"{' '*50} {'Linear':>10} {'Quadratic':>10} {'General':>10}", file=file)
         print("=" * len(header), file=file)
         for layer in self:
             layer.print_stats(file=file)
             print(file=file)
-        print("=" * len(header), file=file)
+        print("-" * len(header), file=file)

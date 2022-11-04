@@ -62,14 +62,13 @@ class LinearRegressionConstr(BaseSKlearnRegressionConstr):
     Stores the changes to :gurobipy:`model` when embedding an instance into it."""
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
-        if "default_name" not in kwargs:
-            kwargs["default_name"] = "lin_reg"
         BaseSKlearnRegressionConstr.__init__(
             self,
             gp_model,
             predictor,
             input_vars,
             output_vars,
+            default_name="lin_reg",
             **kwargs,
         )
 

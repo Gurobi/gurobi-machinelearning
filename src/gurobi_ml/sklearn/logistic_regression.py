@@ -135,8 +135,6 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         if output_type not in ("classification", "probability_1"):
             raise ParameterError("output_type should be either 'classification' or 'probability_1'")
         self.epsilon = epsilon
-        if "default_name" not in kwargs:
-            kwargs["default_name"] = "log_reg"
 
         BaseSKlearnRegressionConstr.__init__(
             self,
@@ -145,6 +143,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             input_vars,
             output_vars,
             output_type,
+            default_name="log_reg",
             **kwargs,
         )
 
