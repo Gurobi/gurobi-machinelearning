@@ -119,8 +119,6 @@ fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 surf = ax.plot_surface(x1, x2, y, cmap=cm.coolwarm, linewidth=0.01, antialiased=False)
 # Add a color bar which maps values to colors.
 fig.colorbar(surf, shrink=0.5, aspect=5)
-
-plt.show()
 ```
 
 ## Approximate the function
@@ -171,8 +169,6 @@ surf = ax.plot_surface(
 )
 # Add a color bar which maps values to colors.
 fig.colorbar(surf, shrink=0.5, aspect=5)
-
-plt.show()
 ```
 
 Visually, the approximation looks close enough to the original function.
