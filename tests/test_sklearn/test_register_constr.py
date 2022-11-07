@@ -21,7 +21,7 @@ class DummyPredictor(AbstractPredictorConstr):
     def __init__(self, model, predictor, input_vars, output_vars, **kwargs):
         super().__init__(model, input_vars, output_vars, **kwargs)
 
-    def _mip_model(self, *args, **kwargs):
+    def _mip_model(self, **kwargs):
         raise DummyPredictorError()
 
 

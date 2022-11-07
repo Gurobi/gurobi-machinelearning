@@ -31,7 +31,7 @@ class MyNNConstr(BaseNNConstr):
             **kwargs,
         )
 
-    def _mip_model(self):
+    def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi"""
         neural_net = self.predictor
         n_layers = neural_net["n_layers"]

@@ -135,7 +135,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         if output_type not in ("classification", "probability_1"):
             raise ParameterError("output_type should be either 'classification' or 'probability_1'")
         self.epsilon = epsilon
-
+        self._default_name = "log_reg"
         BaseSKlearnRegressionConstr.__init__(
             self,
             gp_model,
@@ -143,7 +143,6 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             input_vars,
             output_vars,
             output_type,
-            default_name="log_reg",
             **kwargs,
         )
 
@@ -161,7 +160,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             "FuncPieceRatio": -1.0,
         }
 
-    def _mip_model(self):
+    def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi"""
         outputvars = self._output
         self._create_output_vars(self._input, name="affine_trans")

@@ -37,12 +37,11 @@ class BaseNNConstr(AbstractPredictorConstr):
             pass
         self._layers = []
 
-        default_name = kwargs.pop("default_name", _default_name(predictor))
+        self._default_name = _default_name(predictor)
         super().__init__(
             gp_model=gp_model,
             input_vars=input_vars,
             output_vars=output_vars,
-            default_name=default_name,
             **kwargs,
         )
 
