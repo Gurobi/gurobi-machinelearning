@@ -19,7 +19,7 @@ In this page, we provide a simple example of using the Gurobi Machine Learning p
 
 The example is entirely abstract. Its aim is only to illustrate the basic functionalities of the
 package in the most simple way. For some more realistic applications, please refer to the notebooks
-in the :doc:`mlm-examples` section.
+in the [examples](mlm-examples.rst) section.
 
 Before proceeding to the example itself, we need to import a number of packages.
 Here, we will use Scikit-learn to train regression models. We generate random
