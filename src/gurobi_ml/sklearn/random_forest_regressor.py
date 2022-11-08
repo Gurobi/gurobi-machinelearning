@@ -69,14 +69,11 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.n_outputs_ = predictor.n_outputs_
         self.estimators_ = []
-        default_name = "rand_forest_reg"
-        self.kwargs = kwargs
+        self._default_name = "rand_forest_reg"
         SKgetter.__init__(self, predictor)
-        AbstractPredictorConstr.__init__(
-            self, gp_model, input_vars, output_vars, default_name=default_name, **kwargs
-        )
+        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
 
-    def _mip_model(self):
+    def _mip_model(self, **kwargs):
         """Predict output variables y from input variables X using the
         decision tree.
 
@@ -100,7 +97,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
             tree = predictor.estimators_[i]
             estimators.append(
                 add_decision_tree_regressor_constr(
-                    model, tree, _input, tree_vars[:, i, :], **self.kwargs
+                    model, tree, _input, tree_vars[:, i, :], **kwargs
                 )
             )
         self.estimators_ = estimators

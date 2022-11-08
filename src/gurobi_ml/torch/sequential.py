@@ -79,11 +79,9 @@ class SequentialConstr(BaseNNConstr):
                 pass
             else:
                 raise NoModel(predictor, f"Unsupported layer {type(step).__name__}")
-        super().__init__(
-            gp_model, predictor, input_vars, output_vars, default_name="torchsequential"
-        )
+        super().__init__(gp_model, predictor, input_vars, output_vars)
 
-    def _mip_model(self):
+    def _mip_model(self, **kwargs):
         network = self.predictor
         _input = self._input
         output = None
@@ -94,7 +92,7 @@ class SequentialConstr(BaseNNConstr):
                 output = self._output
             if isinstance(step, nn.ReLU):
                 layer = self.add_activation_layer(
-                    _input, self.act_dict["relu"], output, default_name="ReLU"
+                    _input, self.act_dict["relu"], output, name="relu"
                 )
                 _input = layer.output
             elif isinstance(step, nn.Linear):
@@ -109,7 +107,7 @@ class SequentialConstr(BaseNNConstr):
                     layer_bias,
                     self.act_dict["identity"],
                     output,
-                    default_name="Linear",
+                    name="linear",
                 )
                 _input = layer.output
         if self._output is None:

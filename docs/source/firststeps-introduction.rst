@@ -54,7 +54,7 @@ We encourage to install the package via pip (or add it to your
 
 .. note::
 
-  If not already installed, this should install the ``gurobipy``, ``numpy`` and ``scipy```
+  If not already installed, this should install the :pypi:`gurobipy`, :pypi:`numpy` and :pypi:`scipy`
   packages.
 
 
@@ -75,24 +75,24 @@ We encourage to install the package via pip (or add it to your
 
      * - Package
        - Version
-     * - ``gurobipy``
+     * - :pypi:`gurobipy`
        - |GurobiVersion|
-     * - ``numpy``
+     * - :pypi:`numpy`
        - |NumpyVersion|
-     * - ``scipy``
+     * - :pypi:`scipy`
        - |ScipyVersion|
-     * - ``pandas``
+     * - :pypi:`pandas`
        - |PandasVersion|
-     * - ``torch``
+     * - :pypi:`torch`
        - |TorchVersion|
-     * - ``scikit-learn``
+     * - :pypi:`scikit-learn`
        - |SklearnVersion|
-     * - ``tensorflow``
+     * - :pypi:`tensorflow`
        - |TensorflowVersion|
 
   Installing any of the machine learning packages is only required if the
   predictor you want to insert uses them (i.e. to insert a Keras based predictor
-  you need to have ``tensorflow`` installed).
+  you need to have :pypi:`tensorflow` installed).
 
 
 Usage

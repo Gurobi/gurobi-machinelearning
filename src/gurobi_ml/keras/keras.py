@@ -89,7 +89,7 @@ class KerasNetworkConstr(BaseNNConstr):
 
         super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
-    def _mip_model(self):
+    def _mip_model(self, **kwargs):
         network = self.predictor
         _input = self._input
         output = None
@@ -102,7 +102,7 @@ class KerasNetworkConstr(BaseNNConstr):
                 pass
             elif isinstance(step, keras.layers.ReLU):
                 layer = self.add_activation_layer(
-                    _input, self.act_dict["relu"], output, default_name="ReLU"
+                    _input, self.act_dict["relu"], output, name="relu"
                 )
                 _input = layer.output
             else:
@@ -112,7 +112,7 @@ class KerasNetworkConstr(BaseNNConstr):
                     activation = "identity"
                 weights, bias = step.get_weights()
                 layer = self.add_dense_layer(
-                    _input, weights, bias, self.act_dict[activation], output, default_name="Dense"
+                    _input, weights, bias, self.act_dict[activation], output, name="dense"
                 )
                 _input = layer.output
         if self._output is None:

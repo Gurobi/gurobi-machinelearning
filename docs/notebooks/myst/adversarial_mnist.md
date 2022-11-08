@@ -107,7 +107,6 @@ exampleno = 26
 example = X[exampleno : exampleno + 1, :]
 
 plt.imshow(example.reshape((28, 28)), cmap="gray")
-plt.show()
 
 print(f"Predicted label {nn.predict(example)}")
 ```
@@ -252,9 +251,7 @@ wrong label is found. We finish this notebook by plotting the counter example
 and printing how it is classified by the neural network.
 
 ```{code-cell} ipython3
-pixels = x.X.reshape((28, 28))
-plt.imshow(pixels, cmap="gray")
-plt.show()
+plt.imshow(x.X.reshape((28, 28)), cmap="gray")
 
 print(f"Solution is classified as {nn.predict(x.X)}")
 ```

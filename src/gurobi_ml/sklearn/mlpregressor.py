@@ -82,7 +82,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         )
         assert predictor.out_activation_ in ("identity", "relu")
 
-    def _mip_model(self):
+    def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi"""
         neural_net = self.predictor
         if neural_net.activation not in self.act_dict:

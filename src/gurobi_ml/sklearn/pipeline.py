@@ -67,14 +67,11 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
 
     def __init__(self, gp_model, pipeline, input_vars, output_vars=None, **kwargs):
         self._steps = []
-        self._kwargs = kwargs
-        default_name = "pipe"
+        self._default_name = "pipe"
         SKgetter.__init__(self, pipeline, **kwargs)
-        AbstractPredictorConstr.__init__(
-            self, gp_model, input_vars, output_vars, default_name=default_name, **kwargs
-        )
+        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
 
-    def _mip_model(self):
+    def _mip_model(self, **kwargs):
         pipeline = self.predictor
         gp_model = self._gp_model
         input_vars = self._input
@@ -85,7 +82,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
             transformers[key.lower()] = item
         for name, obj in pipeline.steps[:-1]:
             try:
-                steps.append(transformers[name](gp_model, obj, input_vars, **self._kwargs))
+                steps.append(transformers[name](gp_model, obj, input_vars, **kwargs))
             except KeyError:
                 raise NoModel(pipeline, f"I don't know how to deal with that object: {name}")
             input_vars = steps[-1].output
@@ -98,7 +95,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
                 key = key.__name__
             predictors[key.lower()] = item
         try:
-            steps.append(predictors[name](gp_model, obj, input_vars, output_vars, **self._kwargs))
+            steps.append(predictors[name](gp_model, obj, input_vars, output_vars, **kwargs))
         except KeyError:
             raise NoModel(pipeline, f"I don't know how to deal with that object: {name}")
         if self._output is None:

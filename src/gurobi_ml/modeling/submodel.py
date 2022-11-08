@@ -75,7 +75,7 @@ class SubModel:
     of a submodel.  This name will be used to prefix the names of all the
     modeling objects that are being created during submodel construction. If
     no name is provided an automatic name is generated from a default name.
-    The default name can be specified with the default_name parameter (mostly
+    The default may be already specified as an attribute (mostly
     useful with sub-classing); if not, it is derived from the class name of
     your derived class, or the name of your model construction function.
     The only exception is the empty string name='' which is not used as a
@@ -97,7 +97,6 @@ class SubModel:
         gp_model,
         *args,
         model_function=None,
-        default_name=None,
         name=None,
         **kwargs,
     ):
@@ -115,9 +114,7 @@ class SubModel:
         self._name = None
         self._model_function = model_function
 
-        if default_name is not None:
-            self._default_name = default_name
-        else:
+        if not hasattr(self, "_default_name"):
             self._default_name = type(self).__name__
 
         before = self._open(gp_model)

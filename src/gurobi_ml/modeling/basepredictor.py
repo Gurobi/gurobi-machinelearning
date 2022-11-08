@@ -116,7 +116,7 @@ class AbstractPredictorConstr(SubModel):
             self._validate()
         else:
             self._input = validate_gp_vars(self._input, True)
-        self._mip_model()
+        self._mip_model(**kwargs)
         assert self._output is not None
         return self
 
@@ -146,9 +146,6 @@ class AbstractPredictorConstr(SubModel):
             super().print_stats(file)
             print(f"Input has shape {self.input.shape}", file=file)
             print(f"Output has shape {self.output.shape}", file=file)
-
-    def _mip_model(self):
-        """Defined in derived class the mip_model for the predictor"""
 
     def _create_output_vars(self, input_vars, name="output"):
         """May be defined in derived class to create the output variables of predictor"""

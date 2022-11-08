@@ -61,13 +61,12 @@ class ActivationLayer(AbstractNNLayer):
         **kwargs,
     ):
         self.zvar = None
-        default_name = kwargs.pop("default_name", "activation")
+        self._default_name = "activation"
         super().__init__(
             gp_model,
             output_vars,
             input_vars,
             activation_function,
-            default_name=default_name,
             **kwargs,
         )
 
@@ -76,11 +75,13 @@ class ActivationLayer(AbstractNNLayer):
         self._gp_model.update()
         self._output = rval
 
-    def _mip_model(self, activation=None):
+    def _mip_model(self, **kwargs):
         """Add the layer to model"""
         model = self.gp_model
         model.update()
-        if activation is None:
+        if "activation" in kwargs:
+            activation = kwargs["activation"]
+        else:
             activation = self.activation
 
         # Do the mip model for the activation in the layer
@@ -104,13 +105,12 @@ class DenseLayer(AbstractNNLayer):
         self.coefs = layer_coefs
         self.intercept = layer_intercept
         self.zvar = None
-        default_name = kwargs.pop("default_name", "dense")
+        self._default_name = "dense"
         super().__init__(
             gp_model,
             output_vars,
             input_vars,
             activation_function,
-            default_name=default_name,
             **kwargs,
         )
 
@@ -121,11 +121,13 @@ class DenseLayer(AbstractNNLayer):
         self._gp_model.update()
         self._output = rval
 
-    def _mip_model(self, activation=None):
+    def _mip_model(self, **kwargs):
         """Add the layer to model"""
         model = self.gp_model
         model.update()
-        if activation is None:
+        if "activation" in kwargs:
+            activation = kwargs["activation"]
+        else:
             activation = self.activation
 
         # Do the mip model for the activation in the layer
