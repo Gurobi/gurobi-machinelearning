@@ -169,26 +169,6 @@ class AbstractPredictorConstr(SubModel):
             pass
         return False
 
-    def get_error(self):
-        """Returns error in Gurobi's solution with respect to prediction from input
-
-        Note that this function is implemented in child classes.
-
-        Returns
-        -------
-        error: ndarray of same shape as :py:attr:`output`
-            Assuming that we have a solution for the input and output variables
-            `x, y`. Returns the absolute value of the differences between `predict(x)` and
-            `y`, where `predict` is the prediction function for the object we are modeling
-            (`predict` for Scikit-Learn and Keras, `forward` for Pytorch).
-
-        Raises
-        ------
-        NoSolution
-            If the Gurobi model has no solution (either was not optimized or is infeasible).
-        """
-        assert False, "Not implemented"
-
     @staticmethod
     def _indexed_name(index, name):
         index = f"{index}".replace(" ", "")
