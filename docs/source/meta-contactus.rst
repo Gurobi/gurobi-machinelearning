@@ -2,7 +2,7 @@ Contact Us
 ==========
 
 For questions related to using Gurobi Machine Learning please use
-`Gurobi's Forum <https://support.gurobi.com/hc/en-us/community/topics>`_.
+`Gurobi's Forum <https://support.gurobi.com/hc/en-us/community/topics/10373864542609-GitHub-Projects>`_.
 
 For reporting bugs, issues and feature request please
 `open an issue <https://github.com/Gurobi/gurobi-machinelearning/issues>`_.
