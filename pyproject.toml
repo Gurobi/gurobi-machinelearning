@@ -21,7 +21,7 @@ classifiers = [
 
 dependencies = [
   "numpy >= 1.22.0",
-  "gurobipy >= 10.0.0b1",
+  "gurobipy >= 10.0.0",
   "scipy >= 1.9.3"
 ]
 
