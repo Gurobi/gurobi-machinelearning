@@ -115,9 +115,3 @@ extlinks = {
     "gurobipy": ("https://www.gurobi.com/documentation/current/refman/py_%s.html", "gurobipy %s"),
     "pypi": ("https://pypi.org/project/%s/", "%s"),
 }
-
-rst_prolog = """.. warning::
-
-   This code is in a pre-release state. It may not be fully functional and breaking changes
-   can occur without notice.
-"""

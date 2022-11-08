@@ -9,10 +9,6 @@
 ![Gurobi](https://raw.githubusercontent.com/Gurobi/gurobi-machinelearning/main/docs/source/_static/image8.png)
 
 
-> **⚠ Warning**
->
-> ```This code is in a pre-release state. It may not be fully functional and breaking changes can occur without notice.```
-
 # Gurobi Machine Learning
 
 Gurobi Machine Learning is an [open-source](https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com/en/latest/meta-license.html) python package to embed trained regression models in a [`gurobipy`](https://pypi.org/project/gurobipy/) model to be solved with the Gurobi solver.
