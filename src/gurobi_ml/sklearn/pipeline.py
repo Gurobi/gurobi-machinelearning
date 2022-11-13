@@ -82,7 +82,9 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         for transformer in pipeline[:-1]:
             convertor = get_convertor(transformer, transformers)
             if convertor is None:
-                raise NoModel(self.predictor, f"I don't know how to deal with that object: {name}")
+                raise NoModel(
+                    self.predictor, f"I don't know how to deal with that object: {transformer}"
+                )
             steps.append(convertor(gp_model, transformer, input_vars, **kwargs))
             input_vars = steps[-1].output
 
@@ -90,7 +92,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         predictors = sklearn_predictors() | user_predictors()
         convertor = get_convertor(predictor, predictors)
         if convertor is None:
-            raise NoModel(self.predictor, f"I don't know how to deal with that object: {name}")
+            raise NoModel(self.predictor, f"I don't know how to deal with that object: {predictor}")
         steps.append(convertor(gp_model, predictor, input_vars, output_vars, **kwargs))
         if self._output is None:
             self._output = steps[-1].output

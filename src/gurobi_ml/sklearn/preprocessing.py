@@ -17,8 +17,10 @@
 Guobi model"""
 
 import gurobipy as gp
+import numpy as np
+from sklearn.utils.validation import check_is_fitted
 
-from ..exceptions import NoModel
+from ..exceptions import NoModel, NoSolution
 from ..modeling import AbstractPredictorConstr
 
 
@@ -76,15 +78,43 @@ def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
     return StandardScalerConstr(gp_model, standard_scaler, input_vars, **kwargs)
 
 
-class StandardScalerConstr(AbstractPredictorConstr):
+class SKtransformer(AbstractPredictorConstr):
+    def __init__(self, gp_model, transformer, input_vars, **kwargs):
+        self.transformer = transformer
+        check_is_fitted(transformer)
+        super().__init__(gp_model, input_vars, **kwargs)
+
+    def get_error(self):
+        """Returns error in Gurobi's solution with respect to prediction from input
+
+        Returns
+        -------
+        error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.output`
+            Assuming that we have a solution for the input and output variables
+            `x, y`. Returns the absolute value of the differences between `predictor.predict(x)` and
+            `y`. Where predictor is the regression this object is modeling.
+
+        Raises
+        ------
+        NoSolution
+            If the Gurobi model has no solution (either was not optimized or is infeasible).
+        """
+        if self._has_solution():
+            transformed = self.transformer.transform(self.input.X)
+            if len(transformed.shape) == 1:
+                transformed = transformed.reshape(-1, 1)
+            return np.abs(transformed - self.output.X)
+        raise NoSolution()
+
+
+class StandardScalerConstr(SKtransformer):
     """Class to model trained :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler` with gurobipy
 
     Stores the changes to :gurobipy:`model` when embedding an instance into it."""
 
     def __init__(self, gp_model, scaler, input_vars, **kwargs):
-        self.scaler = scaler
         self._default_name = "std_scaler"
-        super().__init__(gp_model, input_vars, **kwargs)
+        super().__init__(gp_model, scaler, input_vars, **kwargs)
 
     def _create_output_vars(self, input_vars, **kwargs):
         rval = self._gp_model.addMVar(input_vars.shape, name="scaled")
@@ -97,8 +127,8 @@ class StandardScalerConstr(AbstractPredictorConstr):
         output = self._output
 
         nfeat = _input.shape[1]
-        scale = self.scaler.scale_
-        mean = self.scaler.mean_
+        scale = self.transformer.scale_
+        mean = self.transformer.mean_
 
         output.LB = (_input.LB - mean) / scale
         output.UB = (_input.UB - mean) / scale
@@ -109,18 +139,17 @@ class StandardScalerConstr(AbstractPredictorConstr):
         return self
 
 
-class PolynomialFeaturesConstr(AbstractPredictorConstr):
+class PolynomialFeaturesConstr(SKtransformer):
     """Class to model trained :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures` with gurobipy"""
 
     def __init__(self, gp_model, polynomial_features, input_vars, **kwargs):
         if polynomial_features.degree > 2:
             raise NoModel(polynomial_features, "Can only handle polynomials of degree < 2")
-        self.polynomial_features = polynomial_features
         self._default_name = "poly_feat"
-        super().__init__(gp_model, input_vars, **kwargs)
+        super().__init__(gp_model, polynomial_features, input_vars, **kwargs)
 
     def _create_output_vars(self, input_vars, **kwargs):
-        out_shape = (input_vars.shape[0], self.polynomial_features.n_output_features_)
+        out_shape = (input_vars.shape[0], self.transformer.n_output_features_)
         rval = self._gp_model.addMVar(out_shape, name="polyx", lb=-gp.GRB.INFINITY)
         self._gp_model.update()
         self._output = rval
@@ -131,8 +160,8 @@ class PolynomialFeaturesConstr(AbstractPredictorConstr):
         output = self._output
 
         n_examples, n_feat = _input.shape
-        powers = self.polynomial_features.powers_
-        assert powers.shape[0] == self.polynomial_features.n_output_features_
+        powers = self.transformer.powers_
+        assert powers.shape[0] == self.transformer.n_output_features_
         assert powers.shape[1] == n_feat
 
         for k in range(n_examples):

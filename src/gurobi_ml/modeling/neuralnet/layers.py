@@ -34,6 +34,9 @@ class AbstractNNLayer(AbstractPredictorConstr):
         self.activation = activation_function
         AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
 
+    def get_error(self):
+        assert False
+
     def print_stats(self, file=None):
         """Print statistics about submodel created
 

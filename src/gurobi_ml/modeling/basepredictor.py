@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
+from abc import ABC, abstractmethod
+
 import gurobipy as gp
 
 from ..exceptions import ParameterError
@@ -63,7 +65,7 @@ def validate_gp_vars(gp_vars, is_input):
     raise ParameterError("Could not validate variables")
 
 
-class AbstractPredictorConstr(SubModel):
+class AbstractPredictorConstr(ABC, SubModel):
     """Base class to store sub-model added by :py:func:`gurobi_ml.add_predictor_constr`
 
     This class is the base class to store everything that is added to
@@ -169,6 +171,27 @@ class AbstractPredictorConstr(SubModel):
         except gp.GurobiError:
             pass
         return False
+
+    @abstractmethod
+    def get_error(self):
+        """Returns error in Gurobi's solution with respect to prediction from input
+        Returns
+        -------
+        error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.output`
+            Assuming that we have a solution for the input and output variables
+            `x, y`. Returns the absolute value of the differences between `predictor.predict(x)` and
+            `y`. Where predictor is the Pytorch model this object is modeling.
+        Raises
+        ------
+        NoSolution
+            If the Gurobi model has no solution (either was not optimized or is infeasible).
+        """
+        ...
+
+    @abstractmethod
+    def _mip_model(self, **kwargs):
+        """Makes MIP model for the predictor the sub-class implements"""
+        ...
 
     @staticmethod
     def _indexed_name(index, name):
