@@ -139,7 +139,8 @@ class AbstractPredictorConstr(SubModel):
 
         if abbrev:
             print(
-                f"{self._name:13} {self.output.shape.__str__():>14} {len(self.vars):>12} {len(self.constrs):>12} {len(self.qconstrs):>12} {len(self.genconstrs):>12}",
+                f"{self._name:13} {self.output.shape.__str__():>14} {len(self.vars):>12} "
+                + f"{len(self.constrs):>12} {len(self.qconstrs):>12} {len(self.genconstrs):>12}",
                 file=file,
             )
         else:
@@ -162,8 +163,8 @@ class AbstractPredictorConstr(SubModel):
     def _has_solution(self):
         """Returns true if we have a solution"""
         try:
-            v = self._input.X
-            v = self._output.X
+            self._input.X
+            self._output.X
             return True
         except gp.GurobiError:
             pass

@@ -71,7 +71,6 @@ class SequentialConstr(BaseNNConstr):
     input and output as matrices of variables."""
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
-        linear = None
         for step in predictor:
             if isinstance(step, nn.ReLU):
                 pass

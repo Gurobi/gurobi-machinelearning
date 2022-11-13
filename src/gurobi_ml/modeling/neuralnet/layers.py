@@ -44,7 +44,9 @@ class AbstractNNLayer(AbstractPredictorConstr):
           Text stream to which output should be redirected. By default sys.stdout.
         """
         print(
-            f"{self._name:12} {_default_name(self.activation):12} {self.output.shape.__str__():>12} {len(self.vars):>10} {len(self.constrs):>10} {len(self.qconstrs):>10} {len(self.genconstrs):>10}",
+            f"{self._name:12} {_default_name(self.activation):12} "
+            + f"{self.output.shape.__str__():>12} {len(self.vars):>10} "
+            + f"{len(self.constrs):>10} {len(self.qconstrs):>10} {len(self.genconstrs):>10}",
             file=file,
         )
 

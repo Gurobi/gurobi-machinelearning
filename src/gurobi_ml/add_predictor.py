@@ -63,16 +63,18 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
     variables (e.g. a prediction is made for every time period in a planning horizon).
     """
     convertors = registered_predictors()
+    convertor = None
     try:
         convertor = convertors[type(predictor)]
     except KeyError:
-        convertor = None
-    for parent in type(predictor).mro():
-        try:
-            convertor = convertors[parent]
-            break
-        except KeyError:
-            pass
+        pass
+    if convertor is None:
+        for parent in type(predictor).mro():
+            try:
+                convertor = convertors[parent]
+                break
+            except KeyError:
+                pass
     if convertor is None:
         try:
             convertor = convertors[type(predictor).__name__]
