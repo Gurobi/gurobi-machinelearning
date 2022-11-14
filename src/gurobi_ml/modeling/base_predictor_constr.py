@@ -175,9 +175,10 @@ class AbstractPredictorConstr(ABC, SubModel):
     @abstractmethod
     def get_error(self):
         """Returns error in Gurobi's solution with respect to prediction from input
+
         Returns
         -------
-        error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.output`
+        error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.output`
             Assuming that we have a solution for the input and output variables
             `x, y`. Returns the absolute value of the differences between `predictor.predict(x)` and
             `y`. Where predictor is the Pytorch model this object is modeling.
