@@ -17,7 +17,7 @@
 
 import gurobipy as gp
 
-from ..basepredictor import AbstractPredictorConstr, _default_name
+from ..base_predictor_constr import AbstractPredictorConstr, _default_name
 
 
 class AbstractNNLayer(AbstractPredictorConstr):

@@ -85,20 +85,6 @@ class SKtransformer(AbstractPredictorConstr):
         super().__init__(gp_model, input_vars, **kwargs)
 
     def get_error(self):
-        """Returns error in Gurobi's solution with respect to prediction from input
-
-        Returns
-        -------
-        error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.output`
-            Assuming that we have a solution for the input and output variables
-            `x, y`. Returns the absolute value of the differences between `predictor.predict(x)` and
-            `y`. Where predictor is the regression this object is modeling.
-
-        Raises
-        ------
-        NoSolution
-            If the Gurobi model has no solution (either was not optimized or is infeasible).
-        """
         if self._has_solution():
             transformed = self.transformer.transform(self.input.X)
             if len(transformed.shape) == 1:

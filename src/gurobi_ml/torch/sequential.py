@@ -113,20 +113,6 @@ class SequentialConstr(BaseNNConstr):
             self._output = layer.output
 
     def get_error(self):
-        """Returns error in Gurobi's solution with respect to prediction from input
-
-        Returns
-        -------
-        error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.output`
-            Assuming that we have a solution for the input and output variables
-            `x, y`. Returns the absolute value of the differences between `predictor.predict(x)` and
-            `y`. Where predictor is the Pytorch model this object is modeling.
-
-        Raises
-        ------
-        NoSolution
-            If the Gurobi model has no solution (either was not optimized or is infeasible).
-        """
         if self._has_solution():
             t_in = torch.from_numpy(self.input.X).float()
             t_out = self.predictor.forward(t_in)

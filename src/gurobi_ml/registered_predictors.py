@@ -17,13 +17,19 @@
 """
 import sys
 
-from .register_predictor import user_predictors
+from .register_user_predictor import user_predictors
 
 
 def sklearn_convertors():
+    """Collect convertors for Scikit-learn objects"""
     if "sklearn" in sys.modules:
-        from .sklearn import add_pipeline_constr
-        from .sklearn.predictors_list import sklearn_predictors, sklearn_transformers
+        from .sklearn import (  # pylint: disable=import-outside-toplevel
+            add_pipeline_constr,
+        )
+        from .sklearn.predictors_list import (  # pylint: disable=import-outside-toplevel
+            sklearn_predictors,
+            sklearn_transformers,
+        )
 
         return (
             sklearn_predictors()
@@ -32,8 +38,7 @@ def sklearn_convertors():
                 "Pipeline": add_pipeline_constr,
             }
         )
-    else:
-        return {}
+    return {}
 
 
 def pytorch_convertors():
@@ -41,28 +46,26 @@ def pytorch_convertors():
     if "torch" in sys.modules:
         import torch  # pylint: disable=import-outside-toplevel
 
-        from .torch import (
-            add_sequential_constr as add_torch_sequential_constr,  # pylint: disable=import-outside-toplevel
+        from .torch import (  # pylint: disable=import-outside-toplevel
+            add_sequential_constr,
         )
 
-        return {torch.nn.Sequential: add_torch_sequential_constr}
+        return {torch.nn.Sequential: add_sequential_constr}
     return {}
 
 
 def keras_convertors():
     """Collect known Keras objects that can be embedded and the conversion class"""
     if "tensorflow" in sys.modules:
-        from keras.engine.functional import (
-            Functional,  # pylint: disable=import-outside-toplevel
+        from keras.engine.functional import (  # pylint: disable=import-outside-toplevel
+            Functional,
         )
-        from keras.engine.training import (
-            Model,  # pylint: disable=import-outside-toplevel
+        from keras.engine.training import (  # pylint: disable=import-outside-toplevel
+            Model,
         )
         from tensorflow import keras  # pylint: disable=import-outside-toplevel
 
-        from .keras import (
-            add_keras_constr as add_keras_constr,  # pylint: disable=import-outside-toplevel
-        )
+        from .keras import add_keras_constr  # pylint: disable=import-outside-toplevel
 
         return {
             keras.Sequential: add_keras_constr,

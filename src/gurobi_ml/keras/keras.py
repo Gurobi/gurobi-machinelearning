@@ -119,20 +119,6 @@ class KerasNetworkConstr(BaseNNConstr):
             self._output = layer.output
 
     def get_error(self):
-        """Returns error in Gurobi's solution with respect to prediction from input
-
-        Returns
-        -------
-        error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.output`
-            Assuming that we have a solution for the input and output variables
-            `x, y`. Returns the absolute value of the differences between `predictor.forward(x)` and
-            `y`. Where predictor is the Keras model this object is modeling.
-
-        Raises
-        ------
-        NoSolution
-            If the gurobipy model has no solution (either was not optimized or is infeasible).
-        """
         if self._has_solution():
             return np.abs(self.predictor.predict(self.input.X) - self.output.X)
         raise NoSolution()
