@@ -119,7 +119,7 @@ Note that because of the shape of the variables this will add the 5 different
 constraints.
 
 The function returns a [modeling
-object](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr)
+object](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr)
 that we can use later on.
 
 ```{code-cell}
@@ -127,7 +127,7 @@ pred_constr = add_predictor_constr(m, nn, input_vars, output_vars)
 ```
 
 The method
-[print_stats](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.print_stats)
+[print_stats](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.print_stats)
 of the modeling object outputs the details of the regression model that was
 added to the Gurobi.
 
@@ -144,7 +144,7 @@ m.optimize()
 ```
 
 The method
-[get_error](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.get_error)
+[get_error](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.get_error)
 is useful to check that the solution computed by Gurobi is correct with respect
 to the regression model we use.
 
@@ -168,7 +168,7 @@ output_vars.X
 y_examples
 ```
 
-Finally, we can remove `pred_constr` with the method [remove](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.basepredictor.AbstractPredictorConstr.remove).
+Finally, we can remove `pred_constr` with the method [remove](api/AbstractPredictorConstr.rst#gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.remove).
 
 ```{code-cell}
 pred_constr.remove()

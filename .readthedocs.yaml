@@ -5,6 +5,8 @@ build:
   tools:
     python: "3.9"
 
+formats: all
+
 sphinx:
   configuration: docs/source/conf.py
 

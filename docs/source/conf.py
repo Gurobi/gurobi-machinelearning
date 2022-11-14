@@ -32,6 +32,7 @@ extensions = [
     "sphinx.ext.duration",
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
+    "sphinx.ext.imgconverter",
     "sphinx_rtd_theme",
     "sphinx_copybutton",
     "sphinx.ext.mathjax",
