@@ -13,4 +13,4 @@
 # limitations under the License.
 # ==============================================================================
 
-from .neuralnet import BaseNNConstr
+from .neural_net import BaseNNConstr

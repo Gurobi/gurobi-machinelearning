@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
+""" To get version and git hash of built package """
 from importlib import metadata
 
 try:
@@ -24,6 +25,7 @@ GIT_HASH = "$Format:%H$"
 
 
 def get_versions():
+    """Get package version"""
     # Downloaded package with inserted git hash.
     if "Format" not in GIT_HASH:
         git_hash = f"-{GIT_HASH}"

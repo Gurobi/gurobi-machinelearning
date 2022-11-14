@@ -19,8 +19,9 @@ into a :gurobipy:`model`.
 
 
 from ..exceptions import NoModel
-from ..modeling.basepredictor import AbstractPredictorConstr
-from ..register_predictor import user_predictors
+from ..modeling.base_predictor_constr import AbstractPredictorConstr
+from ..modeling.get_convertor import get_convertor
+from ..register_user_predictor import user_predictors
 from .predictors_list import sklearn_predictors, sklearn_transformers
 from .skgetter import SKgetter
 
@@ -77,27 +78,22 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         input_vars = self._input
         output_vars = self._output
         steps = self._steps
-        transformers = {}
-        for key, item in sklearn_transformers().items():
-            transformers[key.lower()] = item
-        for name, obj in pipeline.steps[:-1]:
-            try:
-                steps.append(transformers[name](gp_model, obj, input_vars, **kwargs))
-            except KeyError:
-                raise NoModel(pipeline, f"I don't know how to deal with that object: {name}")
+        transformers = sklearn_transformers()
+        for transformer in pipeline[:-1]:
+            convertor = get_convertor(transformer, transformers)
+            if convertor is None:
+                raise NoModel(
+                    self.predictor, f"I don't know how to deal with that object: {transformer}"
+                )
+            steps.append(convertor(gp_model, transformer, input_vars, **kwargs))
             input_vars = steps[-1].output
-        name, obj = pipeline.steps[-1]
-        predictors = {}
-        for key, item in sklearn_predictors().items():
-            predictors[key.lower()] = item
-        for key, item in user_predictors().items():
-            if not isinstance(key, str):
-                key = key.__name__
-            predictors[key.lower()] = item
-        try:
-            steps.append(predictors[name](gp_model, obj, input_vars, output_vars, **kwargs))
-        except KeyError:
-            raise NoModel(pipeline, f"I don't know how to deal with that object: {name}")
+
+        predictor = pipeline[-1]
+        predictors = sklearn_predictors() | user_predictors()
+        convertor = get_convertor(predictor, predictors)
+        if convertor is None:
+            raise NoModel(self.predictor, f"I don't know how to deal with that object: {predictor}")
+        steps.append(convertor(gp_model, predictor, input_vars, output_vars, **kwargs))
         if self._output is None:
             self._output = steps[-1].output
 

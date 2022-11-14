@@ -16,7 +16,7 @@
 """Bases classes for modeling neural network layers"""
 
 
-from ..basepredictor import AbstractPredictorConstr, _default_name
+from ..base_predictor_constr import AbstractPredictorConstr, _default_name
 from .activations import Identity, ReLU
 from .layers import ActivationLayer, DenseLayer
 
@@ -116,7 +116,8 @@ class BaseNNConstr(AbstractPredictorConstr):
             return
         print(file=file)
 
-        header = f"{'Layer':12} {'Activation':12} {'Output Shape':>12} {'Variables':>10} {'Constraints':^38}"
+        header = f"{'Layer':12} {'Activation':12} {'Output Shape':>12} {'Variables':>10} "
+        header += f"{'Constraints':^38}"
         print("-" * len(header), file=file)
         print(header, file=file)
         print(f"{' '*50} {'Linear':>10} {'Quadratic':>10} {'General':>10}", file=file)

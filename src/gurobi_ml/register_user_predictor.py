@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
+
+""" Module for user to register a predictor for the function add_predictor_constr"""
 USER_PREDICTORS = {}
 
 
@@ -31,4 +33,5 @@ def register_predictor_constr(predictor, predictor_constr):
 
 
 def user_predictors():
+    """Returns dictionary of user defined predictors"""
     return USER_PREDICTORS
