@@ -17,7 +17,7 @@
 
 import gurobipy as gp
 
-from ..basepredictor import AbstractPredictorConstr, _default_name
+from ..base_predictor_constr import AbstractPredictorConstr, _default_name
 
 
 class AbstractNNLayer(AbstractPredictorConstr):
@@ -34,6 +34,9 @@ class AbstractNNLayer(AbstractPredictorConstr):
         self.activation = activation_function
         AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
 
+    def get_error(self):
+        assert False
+
     def print_stats(self, file=None):
         """Print statistics about submodel created
 
@@ -44,7 +47,9 @@ class AbstractNNLayer(AbstractPredictorConstr):
           Text stream to which output should be redirected. By default sys.stdout.
         """
         print(
-            f"{self._name:12} {_default_name(self.activation):12} {self.output.shape.__str__():>12} {len(self.vars):>10} {len(self.constrs):>10} {len(self.qconstrs):>10} {len(self.genconstrs):>10}",
+            f"{self._name:12} {_default_name(self.activation):12} "
+            + f"{self.output.shape.__str__():>12} {len(self.vars):>10} "
+            + f"{len(self.constrs):>10} {len(self.qconstrs):>10} {len(self.genconstrs):>10}",
             file=file,
         )
 

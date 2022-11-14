@@ -24,6 +24,9 @@ class DummyPredictor(AbstractPredictorConstr):
     def _mip_model(self, **kwargs):
         raise DummyPredictorError()
 
+    def get_error(self):
+        pass
+
 
 class TestDummyConstr(unittest.TestCase):
     def test_register_predictor(self):
