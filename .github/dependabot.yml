@@ -11,5 +11,6 @@ updates:
       interval: "weekly"
   - package-ecosystem: "pip"
     directory: "/"
+    target-branch: "1.0.x"
     schedule:
       interval: "daily"
