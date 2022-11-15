@@ -4,7 +4,7 @@
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI](https://img.shields.io/pypi/v/gurobi-machinelearning)](https://pypi.org/project/gurobi-machinelearning)
 [![ReadTheDocs](https://readthedocs.com/projects/gurobi-optimization-gurobi-machine-learning/badge/?version=stable)](https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com)
-[![Gurobi-forum](https://img.shields.io/badge/Help-Gurobi--Forum-red)](https://support.gurobi.com/hc/en-us/community/topics)
+[![Gurobi-forum](https://img.shields.io/badge/Help-Gurobi--Forum-red)](https://support.gurobi.com/hc/en-us/community/topics/10373864542609-GitHub-Projects)
 
 [![Gurobi](https://raw.githubusercontent.com/Gurobi/gurobi-machinelearning/main/docs/source/_static/image8.png)](https://www.gurobi.com)
 
