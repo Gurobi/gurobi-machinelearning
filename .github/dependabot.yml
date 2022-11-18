@@ -13,4 +13,4 @@ updates:
     directory: "/"
     target-branch: "1.0.x"
     schedule:
-      interval: "daily"
+      interval: "weekly"
