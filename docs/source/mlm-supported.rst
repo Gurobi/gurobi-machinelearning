@@ -112,7 +112,7 @@ Currently, only two types of layers are supported:
 
 .. rubric:: Footnotes
 
-.. [#] Only binary classification
+.. [#] Only binary classification. The logsitic function is approximated by a piecewise linear function.
 .. [#] Only networks with `"relu"` activation for hidden layers and `'identity'`
     for the output layer.
 .. [#] Only polynomial features of degree 2.

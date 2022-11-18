@@ -36,7 +36,13 @@ def add_logistic_regression_constr(
 ):
     """Embed logistic_regression into gp_model
 
-    Predict the values of output_vars using input_vars
+    Predict the values of output_vars using input_vars.
+
+    Note that the model uses a piecewise linear approximation of the logistic function.
+    The quality of the approximation can be controlled with the parameter pwl_attributes.
+    By default, it is parametrized so that the maximal error of the approximation is `1e-2`.
+
+
 
     Parameters
     ----------
