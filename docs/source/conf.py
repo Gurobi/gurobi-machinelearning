@@ -119,3 +119,11 @@ extlinks = {
 
 # -- Options for LaTeX output -----------------------------------------------------
 latex_logo = "_static/gurobi.png"
+
+latex_elements = {
+    "preamble": r"""
+    \newcommand\sphinxbackoftitlepage{%
+Copyright(c), 2022, Gurobi Optimization, LLC. All Rights Reserved.
+}
+    """,
+}
