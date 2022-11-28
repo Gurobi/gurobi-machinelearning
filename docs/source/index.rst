@@ -12,7 +12,9 @@ Gurobi Machine Learning
 
 |
 |
+.. raw:: latex
 
+        \section*{Gurobi Machine Learning}
 
 A Python package to help use *trained* regression models in
 mathematical optimization models. The package supports a variety of regression models

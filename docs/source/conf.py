@@ -116,3 +116,6 @@ extlinks = {
     "gurobipy": ("https://www.gurobi.com/documentation/current/refman/py_%s.html", "gurobipy %s"),
     "pypi": ("https://pypi.org/project/%s/", "%s"),
 }
+
+# -- Options for LaTeX output -----------------------------------------------------
+latex_logo = "_static/gurobi.png"
