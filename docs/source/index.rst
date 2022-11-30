@@ -12,6 +12,7 @@ Gurobi Machine Learning
 
 |
 |
+
 .. raw:: latex
 
         \section*{Gurobi Machine Learning}
