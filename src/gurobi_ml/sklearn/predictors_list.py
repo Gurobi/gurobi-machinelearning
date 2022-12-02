@@ -18,6 +18,7 @@ from .gradient_boosting_regressor import add_gradient_boosting_regressor_constr
 from .linear_regression import add_linear_regression_constr
 from .logistic_regression import add_logistic_regression_constr
 from .mlpregressor import add_mlp_regressor_constr
+from .pls_regression import add_pls_regression_constr
 from .preprocessing import add_polynomial_features_constr, add_standard_scaler_constr
 from .random_forest_regressor import add_random_forest_regressor_constr
 
@@ -39,4 +40,5 @@ def sklearn_predictors():
         "GradientBoostingRegressor": add_gradient_boosting_regressor_constr,
         "RandomForestRegressor": add_random_forest_regressor_constr,
         "MLPRegressor": add_mlp_regressor_constr,
+        "PLSRegression": add_pls_regression_constr,
     }
