@@ -41,4 +41,5 @@ def sklearn_predictors():
         "RandomForestRegressor": add_random_forest_regressor_constr,
         "MLPRegressor": add_mlp_regressor_constr,
         "PLSRegression": add_pls_regression_constr,
+        "PLSCanonical": add_pls_regression_constr,
     }

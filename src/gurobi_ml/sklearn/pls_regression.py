@@ -30,6 +30,7 @@ def add_pls_regression_constr(gp_model, pls_regression, input_vars, output_vars=
     pls_regression: :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
      The linear regression to insert. It can be of any of the following types:
          * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression`
+         * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSCanonical`
      input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
          Decision variables used as input for random forest in model.
      output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
