@@ -35,7 +35,7 @@ def add_gradient_boosting_regressor_constr(
     ----------
     gp_model: :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    gradient_boosting_regressor: :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor`
+    gradient_boosting_regressor: :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
         The gradient boosting regressor to insert as predictor.
     input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for gradient boosting regressor in model.
