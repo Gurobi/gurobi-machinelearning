@@ -92,6 +92,11 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 import gurobipy as gp
+
+import sys
+sys.path.append('../../../src')
+%load_ext autoreload
+%autoreload 2
 from gurobi_ml import add_predictor_constr
 ```
 
@@ -189,12 +194,12 @@ function to recover the index of this column in our `MVar` matrix.
 # Start with classical part of the model
 m = gp.Model()
 
-feature_vars = m.addMVar(
-    feat_lb.shape, lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name="feats"
+merit = m.addMVar(
+    feat_lb.shape[0], lb=0, ub=2.5, name="merit"
 )
 y = m.addMVar(nstudents, name="y")
 
-x = feature_vars[:, feat_lb.columns.get_indexer(["merit"])][:, 0]
+x = merit
 ```
 
 We add the objective and the budget constraint:
@@ -215,8 +220,16 @@ for each student.
 With the `print_stats` function we display what was added to the model.
 
 ```{code-cell} ipython3
+# Build an MLinExpr corresponding to the input layer
+assert features[0] == "merit"
+mle = gp.MLinExpr.zeros((nstudents, 3))
+mle[:, 0] = x
+mle[:, 1:] = studentsdata[features[1:]].to_numpy()
+```
+
+```{code-cell} ipython3
 pred_constr = add_predictor_constr(
-    m, pipe, feature_vars, y, output_type="probability_1"
+    m, pipe, mle, y, output_type="probability_1"
 )
 
 pred_constr.print_stats()

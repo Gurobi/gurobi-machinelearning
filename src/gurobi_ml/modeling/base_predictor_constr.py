@@ -48,6 +48,10 @@ def validate_gp_vars(gp_vars, is_input):
     mvar_array_like
         Decision variables with correctly adjusted shape.
     """
+    if isinstance(gp_vars, gp.MLinExpr) and is_input:
+        if is_input and gp_vars.ndim == 2:
+            return gp_vars
+        raise ParameterError("If input variables are an MLinExpr they should be of dimension 2")
     if isinstance(gp_vars, gp.MVar):
         if gp_vars.ndim == 1 and is_input:
             return gp_vars.reshape(1, -1)

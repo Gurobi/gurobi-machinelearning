@@ -104,6 +104,7 @@ class StandardScalerConstr(SKtransformer):
 
     def _create_output_vars(self, input_vars, **kwargs):
         rval = self._gp_model.addMVar(input_vars.shape, name="scaled")
+        rval.LB = -gp.GRB.INFINITY
         self._gp_model.update()
         self._output = rval
 
@@ -116,8 +117,6 @@ class StandardScalerConstr(SKtransformer):
         scale = self.transformer.scale_
         mean = self.transformer.mean_
 
-        output.LB = (_input.LB - mean) / scale
-        output.UB = (_input.UB - mean) / scale
         self._gp_model.addConstrs(
             (_input[:, i] - output[:, i] * scale[i] == mean[i] for i in range(nfeat)),
             name="s",
