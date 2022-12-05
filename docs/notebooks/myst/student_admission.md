@@ -159,19 +159,8 @@ m = gp.Model()
 ```
 
 ```{code-cell} ipython3
-# Augment student data with merit bounds
-studentsdata.loc[:, "merit_lb"] = 0
-studentsdata.loc[:, "merit_ub"] = 2.5
-#studentsdata = studentsdata.loc[:, (features, slice(None))]
-```
-
-```{code-cell} ipython3
-studentsdata
-```
-
-```{code-cell} ipython3
 # Add variable for merit
-studentsdata = studentsdata.gppd.add_vars(m, lb='merit_lb', ub='merit_ub', name='merit')
+studentsdata = studentsdata.gppd.add_vars(m, lb=0.0, ub=2.5, name='merit')
 # Keep only features
 studentsdata = studentsdata.loc[:, features]
 ```
