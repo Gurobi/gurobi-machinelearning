@@ -4,6 +4,7 @@ import numpy as np
 from joblib import dump, load
 from sklearn import __version__ as sklearn_version
 from sklearn import datasets
+from sklearn.cross_decomposition import PLSCanonical, PLSRegression  # noqa
 from sklearn.ensemble import GradientBoostingRegressor  # noqa
 from sklearn.ensemble import RandomForestRegressor  # noqa
 from sklearn.linear_model import LogisticRegression  # noqa
