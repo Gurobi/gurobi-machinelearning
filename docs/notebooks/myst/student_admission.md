@@ -88,6 +88,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -98,6 +99,10 @@ sys.path.append('../../../src')
 %load_ext autoreload
 %autoreload 2
 from gurobi_ml import add_predictor_constr
+```
+
+```{code-cell} ipython3
+import gurobipy_pandas as gppd
 ```
 
 We now retrieve the historical data used to build the regression from Janos
@@ -127,7 +132,7 @@ regression. We build it using the `make_pipeline` from `scikit-learn`.
 ```{code-cell} ipython3
 # Run our regression
 regression = LogisticRegression(random_state=1)
-pipe = make_pipeline(StandardScaler(), LogisticRegression(random_state=1))
+pipe = make_pipeline(regression)
 pipe.fit(X=historical_data.loc[:, features], y=historical_data.loc[:, target])
 ```
 
@@ -148,38 +153,27 @@ nstudents = 250
 studentsdata = studentsdata.sample(nstudents)
 ```
 
-A non-trivial part of the model is the decision variables that we need for using
-Gurobi Machine Learning.
-
-In the mathematical formulation above, we only had two vectors of variables `x`
-and `y`. Then each student had associated its score $SAT_i$ and $GPA_i$ that
-were fixed parameters in the optimization. For the Gurobi model, we need to
-create a matrix of variables that also includes the values of $SAT$ and $GPA$ of
-each student. We will fix those variables by giving them the same lower bound
-and upper bound.
-
-Therefore, we need to build 2 matrices of variables, one for each set of bounds,
-and we need to make sure that they are in the same order as the regression model
-would expect.
-
-To do so, we use `pandas` data frames to construct those lower and upper bounds.
-
-To construct the lower bounds, we first make a copy of `studentsdata` and then
-add the `"merit"` column with a value of $0$. We then do the same for the upper
-bound, except that the value for `"merit"`is $2.5$.
+```{code-cell} ipython3
+# Start with classical part of the model
+m = gp.Model()
+```
 
 ```{code-cell} ipython3
-# Construct lower bounds data frame
-feat_lb = studentsdata.copy()
-feat_lb.loc[:, "merit"] = 0
+# Augment student data with merit bounds
+studentsdata.loc[:, "merit_lb"] = 0
+studentsdata.loc[:, "merit_ub"] = 2.5
+#studentsdata = studentsdata.loc[:, (features, slice(None))]
+```
 
-# Construct upper bounds data frame
-feat_ub = studentsdata.copy()
-feat_ub.loc[:, "merit"] = 2.5
+```{code-cell} ipython3
+studentsdata
+```
 
-# Make sure the columns are ordered in the same way as for the regression model.
-feat_lb = feat_lb[features]
-feat_ub = feat_ub[features]
+```{code-cell} ipython3
+# Add variable for merit
+studentsdata = studentsdata.gppd.add_vars(m, lb='merit_lb', ub='merit_ub', name='merit')
+# Keep only features
+studentsdata = studentsdata.loc[:, features]
 ```
 
 We can now create the variables for our model: `feature_vars` is initialized
@@ -191,15 +185,9 @@ the column corresponding to merit. With `pandas`, we can use the `get_indexer`
 function to recover the index of this column in our `MVar` matrix.
 
 ```{code-cell} ipython3
-# Start with classical part of the model
-m = gp.Model()
-
-merit = m.addMVar(
-    feat_lb.shape[0], lb=0, ub=2.5, name="merit"
-)
 y = m.addMVar(nstudents, name="y")
 
-x = merit
+x = studentsdata.loc[:, "merit"]
 ```
 
 We add the objective and the budget constraint:
@@ -220,16 +208,22 @@ for each student.
 With the `print_stats` function we display what was added to the model.
 
 ```{code-cell} ipython3
-# Build an MLinExpr corresponding to the input layer
-assert features[0] == "merit"
-mle = gp.MLinExpr.zeros((nstudents, 3))
-mle[:, 0] = x
-mle[:, 1:] = studentsdata[features[1:]].to_numpy()
+# Function to convert the dataframe into an mlinexpr
+def to_mlin_expr(df):
+    df = df.to_numpy()
+    rval = gp.MLinExpr.zeros(df.shape)
+    for i, a in enumerate(df.T):
+        try:
+            v = gp.MVar.fromlist(a)
+            rval[:, i] = v
+        except AttributeError:
+            rval[:, i] = a
+    return rval
 ```
 
 ```{code-cell} ipython3
 pred_constr = add_predictor_constr(
-    m, pipe, mle, y, output_type="probability_1"
+    m, pipe, to_mlin_expr(studentsdata), y, output_type="probability_1"
 )
 
 pred_constr.print_stats()
@@ -282,7 +276,7 @@ pwl_attributes = {
     "FuncPieceRatio": -1.0,
 }
 pred_constr = add_predictor_constr(
-    m, pipe, feature_vars, y, output_type="probability_1", pwl_attributes=pwl_attributes
+    m, pipe, linframe.mexpr, y, output_type="probability_1", pwl_attributes=pwl_attributes
 )
 
 m.optimize()
@@ -296,6 +290,36 @@ print(
         np.max(pred_constr.get_error())
     )
 )
+```
+
+```{code-cell} ipython3
+# Useless stuff
+class MLinFrame:
+    def __init__(self):
+        self._data = {}
+        self._mexpr = None
+
+    def from_df(self, gp_model, df):
+        seen = set()
+        names = [n for n in df.columns.get_level_values(0) if n not in seen and seen.add(n) is None]
+        mexpr = gp.MLinExpr.zeros((df.shape[0], len(names)))
+        for i, label in enumerate(names):
+            mask = feats.columns.get_loc_level(label)
+            columns = df.loc[:, mask]
+            if columns.shape[1] == 1:
+                mexpr[:, i] = columns.iloc[:, 0]
+            else:
+                toadd = gp.MVar.fromlist(gppd.add_vars(gp_model, df.index, lb=columns.iloc[:,0], ub=columns.iloc[:,1]).to_list())
+                mexpr[:, i] = toadd
+                self._data[label] = toadd
+        self._mexpr = mexpr
+
+    @property
+    def mexpr(self):
+        return self._mexpr
+
+    def __getitem__(self, key):
+        return self._data[key]
 ```
 
 +++ {"nbsphinx": "hidden"}
