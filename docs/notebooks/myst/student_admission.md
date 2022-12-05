@@ -136,12 +136,21 @@ pipe = make_pipeline(regression)
 pipe.fit(X=historical_data.loc[:, features], y=historical_data.loc[:, target])
 ```
 
+```{code-cell} ipython3
+pipe.feature_names_in_
+```
+
 ### Optimization Model
 
 We now turn to building the mathematical optimization model for Gurobi.
 
 First, retrieve the data for the new students. We won't use all the data there,
 we randomly pick 250 students from it.
+
+```{code-cell} ipython3
+# Start with classical part of the model
+m = gp.Model()
+```
 
 ```{code-cell} ipython3
 # Retrieve new data used to build the optimization problem
@@ -151,11 +160,6 @@ nstudents = 250
 
 # Select randomly nstudents in the data
 studentsdata = studentsdata.sample(nstudents)
-```
-
-```{code-cell} ipython3
-# Start with classical part of the model
-m = gp.Model()
 ```
 
 ```{code-cell} ipython3
@@ -198,21 +202,27 @@ With the `print_stats` function we display what was added to the model.
 
 ```{code-cell} ipython3
 # Function to convert the dataframe into an mlinexpr
-def to_mlin_expr(df):
+def to_mlinexpr(df):
     df = df.to_numpy()
     rval = gp.MLinExpr.zeros(df.shape)
     for i, a in enumerate(df.T):
+
         try:
             v = gp.MVar.fromlist(a)
             rval[:, i] = v
+            continue
         except AttributeError:
-            rval[:, i] = a
+            pass
+        try:
+            rval[:, i] = a.astype(np.float64)
+        except TypeError:
+            raise TypeError("Dataframe can't be converted to a linear expression")
     return rval
 ```
 
 ```{code-cell} ipython3
 pred_constr = add_predictor_constr(
-    m, pipe, to_mlin_expr(studentsdata), y, output_type="probability_1"
+    m, pipe, to_mlinexpr(studentsdata), y, output_type="probability_1"
 )
 
 pred_constr.print_stats()
@@ -265,7 +275,7 @@ pwl_attributes = {
     "FuncPieceRatio": -1.0,
 }
 pred_constr = add_predictor_constr(
-    m, pipe, linframe.mexpr, y, output_type="probability_1", pwl_attributes=pwl_attributes
+    m, pipe, to_mlinexpr(studentsdata), y, output_type="probability_1", pwl_attributes=pwl_attributes
 )
 
 m.optimize()
@@ -279,36 +289,6 @@ print(
         np.max(pred_constr.get_error())
     )
 )
-```
-
-```{code-cell} ipython3
-# Useless stuff
-class MLinFrame:
-    def __init__(self):
-        self._data = {}
-        self._mexpr = None
-
-    def from_df(self, gp_model, df):
-        seen = set()
-        names = [n for n in df.columns.get_level_values(0) if n not in seen and seen.add(n) is None]
-        mexpr = gp.MLinExpr.zeros((df.shape[0], len(names)))
-        for i, label in enumerate(names):
-            mask = feats.columns.get_loc_level(label)
-            columns = df.loc[:, mask]
-            if columns.shape[1] == 1:
-                mexpr[:, i] = columns.iloc[:, 0]
-            else:
-                toadd = gp.MVar.fromlist(gppd.add_vars(gp_model, df.index, lb=columns.iloc[:,0], ub=columns.iloc[:,1]).to_list())
-                mexpr[:, i] = toadd
-                self._data[label] = toadd
-        self._mexpr = mexpr
-
-    @property
-    def mexpr(self):
-        return self._mexpr
-
-    def __getitem__(self, key):
-        return self._data[key]
 ```
 
 +++ {"nbsphinx": "hidden"}

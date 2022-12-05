@@ -166,10 +166,11 @@ class AbstractPredictorConstr(ABC, SubModel):
         self._gp_model.update()
         self._output = rval
 
+    @property
     def _has_solution(self):
         """Returns true if we have a solution"""
         try:
-            self._input.X
+            self.input_values
             self._output.X
             return True
         except gp.GurobiError:
@@ -207,6 +208,13 @@ class AbstractPredictorConstr(ABC, SubModel):
     def output(self):
         """Returns the output variables of embedded predictor"""
         return self._output
+
+    @property
+    def input_values(self):
+        if isinstance(self._input, gp.MLinExpr):
+            return self.input.getValue()
+        else:
+            return self.input.X
 
     @property
     def input(self):

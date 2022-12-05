@@ -113,8 +113,8 @@ class SequentialConstr(BaseNNConstr):
             self._output = layer.output
 
     def get_error(self):
-        if self._has_solution():
-            t_in = torch.from_numpy(self.input.X).float()
+        if self._has_solution:
+            t_in = torch.from_numpy(self.input_values).float()
             t_out = self.predictor.forward(t_in)
             return np.abs(t_out.detach().numpy() - self.output.X)
         raise NoSolution()
