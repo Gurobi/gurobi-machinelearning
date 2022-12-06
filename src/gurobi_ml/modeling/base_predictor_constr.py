@@ -16,6 +16,8 @@
 from abc import ABC, abstractmethod
 
 import gurobipy as gp
+import numpy as np
+import pandas as pd
 
 from ..exceptions import ParameterError
 from .submodel import SubModel
@@ -30,6 +32,25 @@ def _default_name(predictor):
         Class of the predictor
     """
     return type(predictor).__name__.lower()
+
+
+def to_mlinexpr(df):
+    """Function to convert the dataframe into an mlinexpr"""
+    df = df.to_numpy()
+    rval = gp.MLinExpr.zeros(df.shape)
+    for i, a in enumerate(df.T):
+
+        try:
+            v = gp.MVar.fromlist(a)
+            rval[:, i] = v
+            continue
+        except AttributeError:
+            pass
+        try:
+            rval[:, i] = a.astype(np.float64)
+        except TypeError:
+            raise TypeError("Dataframe can't be converted to a linear expression")
+    return rval
 
 
 def validate_gp_vars(gp_vars, is_input):
@@ -48,6 +69,8 @@ def validate_gp_vars(gp_vars, is_input):
     mvar_array_like
         Decision variables with correctly adjusted shape.
     """
+    if isinstance(gp_vars, pd.DataFrame):
+        gp_vars = to_mlinexpr(gp_vars)
     if isinstance(gp_vars, gp.MLinExpr) and is_input:
         if is_input and gp_vars.ndim == 2:
             return gp_vars
