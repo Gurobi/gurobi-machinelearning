@@ -490,15 +490,16 @@ columns corresponding to the features:
 Display the dataframe to make sure it is correct
 
 ```{code-cell} ipython3
-feat_lb = pd.DataFrame(
+import gurobipy_pandas as gppd
+feats = pd.DataFrame(
     data={
-        "price": a_min,
         "year_index": year - 2015,
         "peak": peak_or_not,
         "region": regions,
     }
 )
-feat_lb
+feats = feats.gppd.add_vars(m, name="price", lb=a_min, ub=a_max)
+feats
 ```
 
 Note that the columns are not in the same order as in the original data. But an
@@ -515,11 +516,10 @@ name) and display it (note that it's not necessary to put the results in a
 dataframe, but it's good for checking how it looks):
 
 ```{code-cell} ipython3
-feat_lb = pd.DataFrame(
-    data=feat_transform.transform(feat_lb),
+feats = pd.DataFrame(
+    data=feat_transform.transform(feats),
     columns=feat_transform.get_feature_names_out(),
 )
-feat_lb
 ```
 
 This is all we needed to do, and we have the correct lower bounds for the
@@ -529,22 +529,7 @@ We repeat the operations for the upper bounds. In this example, the only
 difference between the lower and upper bounds is the value for the price column
 which is now `a_max`
 
-```{code-cell} ipython3
-feat_ub = pd.DataFrame(
-    data={
-        "price": a_max,
-        "year_index": year - 2015,
-        "peak": peak_or_not,
-        "region": regions,
-    }
-)
-
-feat_ub = pd.DataFrame(
-    data=feat_transform.transform(feat_ub),
-    columns=feat_transform.get_feature_names_out(),
-)
-feat_ub
-```
++++
 
 ### Decision Variables
 
@@ -576,16 +561,13 @@ s = m.addMVar(
 w = m.addMVar(R, name="w", lb=0)  # excess wasteage in each region
 
 # Add variables for the regression
-feats = m.addMVar(
-    feat_lb.shape, lb=feat_lb.to_numpy(), ub=feat_ub.to_numpy(), name="reg_features"
-)
 d = m.addMVar(R, lb=-gp.GRB.INFINITY, name="demand")
 
 # Get the price variables from the features of the regression
 # Compute the mask that will give us the column
 price_index = feat_transform.get_feature_names_out() == "price"
 # Apply the mask, not that it will return a 2d object and we reshape it to 1d.
-p = feats[:, price_index].reshape(-1)
+p = gp.MVar.fromlist(feats.loc[:, "price"])
 m.update()
 ```
 
@@ -606,6 +588,10 @@ Using the defined decision variables, the objective can be written as follows.
 c^r_{transport} * x_r)& \end{align}
 
 Let us now add the objective function to the model.
+
+```{code-cell} ipython3
+p
+```
 
 ```{code-cell} ipython3
 m.setObjective(p @ s - c_waste * w.sum() - c_transport.to_numpy() @ x)
@@ -677,6 +663,8 @@ Using the variables we created above, we just need to call
 to insert the constraints linking the features and the demand.
 
 ```{code-cell} ipython3
+import sys
+sys.path.append("../../../src/")
 from gurobi_ml import add_predictor_constr
 
 pred_constr = add_predictor_constr(m, lin_reg, feats, d)

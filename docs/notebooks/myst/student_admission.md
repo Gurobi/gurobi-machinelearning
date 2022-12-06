@@ -136,10 +136,6 @@ pipe = make_pipeline(regression)
 pipe.fit(X=historical_data.loc[:, features], y=historical_data.loc[:, target])
 ```
 
-```{code-cell} ipython3
-pipe.feature_names_in_
-```
-
 ### Optimization Model
 
 We now turn to building the mathematical optimization model for Gurobi.
@@ -201,28 +197,12 @@ for each student.
 With the `print_stats` function we display what was added to the model.
 
 ```{code-cell} ipython3
-# Function to convert the dataframe into an mlinexpr
-def to_mlinexpr(df):
-    df = df.to_numpy()
-    rval = gp.MLinExpr.zeros(df.shape)
-    for i, a in enumerate(df.T):
-
-        try:
-            v = gp.MVar.fromlist(a)
-            rval[:, i] = v
-            continue
-        except AttributeError:
-            pass
-        try:
-            rval[:, i] = a.astype(np.float64)
-        except TypeError:
-            raise TypeError("Dataframe can't be converted to a linear expression")
-    return rval
+isinstance(studentsdata, pd.DataFrame)
 ```
 
 ```{code-cell} ipython3
 pred_constr = add_predictor_constr(
-    m, pipe, to_mlinexpr(studentsdata), y, output_type="probability_1"
+    m, pipe, studentsdata, y, output_type="probability_1"
 )
 
 pred_constr.print_stats()
@@ -275,7 +255,7 @@ pwl_attributes = {
     "FuncPieceRatio": -1.0,
 }
 pred_constr = add_predictor_constr(
-    m, pipe, to_mlinexpr(studentsdata), y, output_type="probability_1", pwl_attributes=pwl_attributes
+    m, pipe, studentsdata, y, output_type="probability_1", pwl_attributes=pwl_attributes
 )
 
 m.optimize()
