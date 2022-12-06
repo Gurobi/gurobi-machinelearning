@@ -116,3 +116,14 @@ extlinks = {
     "gurobipy": ("https://www.gurobi.com/documentation/current/refman/py_%s.html", "gurobipy %s"),
     "pypi": ("https://pypi.org/project/%s/", "%s"),
 }
+
+# -- Options for LaTeX output -----------------------------------------------------
+latex_logo = "_static/gurobi.png"
+
+latex_elements = {
+    "preamble": r"""
+    \newcommand\sphinxbackoftitlepage{%
+Copyright(c), 2022, Gurobi Optimization, LLC. All Rights Reserved.
+}
+    """,
+}
