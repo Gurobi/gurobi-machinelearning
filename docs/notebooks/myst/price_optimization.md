@@ -445,7 +445,7 @@ c_transport = pd.Series(
         "Southeast": 0.2,
         "West": 0.2,
         "Plains": 0.2,
-    }
+    }, name='transport_cost'
 )
 
 c_transport = c_transport.loc[regions]
@@ -454,12 +454,22 @@ c_transport = c_transport.loc[regions]
 # Get the lower and upper bounds from the dataset for the price and the number of products to be stocked
 a_min = 0  # minimum avocado price in each region
 a_max = 2  # maximum avocado price in each region
+
 b_min = (
-    df.groupby("region")["units_sold"].min().loc[regions]
+
 )  # minimum number of avocados allocated to each region
 b_max = (
-    df.groupby("region")["units_sold"].max().loc[regions]
+    df.groupby("region")["units_sold"].max()
 )  # maximum number of avocados allocated to each region
+
+data = pd.concat([c_transport,
+                  df.groupby("region")["units_sold"].min(),
+                  df.groupby("region")["units_sold"].max()], axis=1)
+```
+
+```{code-cell} ipython3
+data.columns = ['transport_cost', 'min_delivery', 'max_delivery']
+data
 ```
 
 ### Compute bounds for feature variables
@@ -496,9 +506,9 @@ feats = pd.DataFrame(
         "year_index": year - 2015,
         "peak": peak_or_not,
         "region": regions,
-    }
+    },
+    index=regions
 )
-feats = feats.gppd.add_vars(m, name="price", lb=a_min, ub=a_max)
 feats
 ```
 
@@ -515,12 +525,7 @@ We put the results in a dataframe (using `get_feature_names_out` for the columns
 name) and display it (note that it's not necessary to put the results in a
 dataframe, but it's good for checking how it looks):
 
-```{code-cell} ipython3
-feats = pd.DataFrame(
-    data=feat_transform.transform(feats),
-    columns=feat_transform.get_feature_names_out(),
-)
-```
++++
 
 This is all we needed to do, and we have the correct lower bounds for the
 regression input variables.
@@ -554,20 +559,13 @@ The price variable $p$, needs to be extracted from the `feat_vars`. To do so we
 use a mask built using the transformed feature names.
 
 ```{code-cell} ipython3
-x = m.addMVar(R, name="x", lb=b_min, ub=b_max)  # quantity supplied to each region
-s = m.addMVar(
-    R, name="s", lb=0
-)  # predicted amount of sales in each region for the given price
-w = m.addMVar(R, name="w", lb=0)  # excess wasteage in each region
+x = gppd.add_vars(m, data, name="x", lb='min_delivery', ub='max_delivery')
+s = gppd.add_vars(m, data, name="s") # predicted amount of sales in each region for the given price).
+w = gppd.add_vars(m, data, name="w") # excess wasteage in each region).
+d = gppd.add_vars(m, data, lb=-gp.GRB.INFINITY, name="demand") # Add variables for the regression
 
-# Add variables for the regression
-d = m.addMVar(R, lb=-gp.GRB.INFINITY, name="demand")
-
-# Get the price variables from the features of the regression
-# Compute the mask that will give us the column
-price_index = feat_transform.get_feature_names_out() == "price"
-# Apply the mask, not that it will return a 2d object and we reshape it to 1d.
-p = gp.MVar.fromlist(feats.loc[:, "price"])
+feats = feats.gppd.add_vars(m, name="price", lb=a_min, ub=a_max)
+p = feats.loc[:, "price"]
 m.update()
 ```
 
@@ -590,11 +588,7 @@ c^r_{transport} * x_r)& \end{align}
 Let us now add the objective function to the model.
 
 ```{code-cell} ipython3
-p
-```
-
-```{code-cell} ipython3
-m.setObjective(p @ s - c_waste * w.sum() - c_transport.to_numpy() @ x)
+m.setObjective((p * s).sum() - c_waste * w.sum() - (c_transport * x).sum())
 m.ModelSense = GRB.MAXIMIZE
 ```
 
@@ -636,8 +630,8 @@ the sales are equal to the minimum of supply and predicted demand.
 Let us now add these constraints to the model.
 
 ```{code-cell} ipython3
-m.addConstr(s <= x)
-m.addConstr(s <= d)
+gppd.add_constrs(m, s, gp.GRB.LESS_EQUAL, x)
+gppd.add_constrs(m, s, gp.GRB.LESS_EQUAL, d)
 m.update()
 ```
 
@@ -652,7 +646,7 @@ mathematically for each region $r$.
 We can add these constraints to the model.
 
 ```{code-cell} ipython3
-m.addConstr(w == x - s)
+gppd.add_constrs(m, w, gp.GRB.EQUAL, x - s)
 m.update()
 ```
 
@@ -663,11 +657,24 @@ Using the variables we created above, we just need to call
 to insert the constraints linking the features and the demand.
 
 ```{code-cell} ipython3
+feats = pd.DataFrame(
+    data=feat_transform.transform(feats),
+    columns=feat_transform.get_feature_names_out(),
+    index=regions
+)
+feats
+```
+
+```{code-cell} ipython3
 import sys
 sys.path.append("../../../src/")
+%load_ext autoreload
+%autoreload 2
 from gurobi_ml import add_predictor_constr
+```
 
-pred_constr = add_predictor_constr(m, lin_reg, feats, d)
+```{code-cell} ipython3
+pred_constr = add_predictor_constr(m, lin_reg, feats, d.to_list())
 
 pred_constr.print_stats()
 ```
@@ -695,13 +702,13 @@ The solver solved the optimization problem in less than a second. Let us now
 analyze the optimal solution by storing it in a Pandas dataframe.
 
 ```{code-cell} ipython3
-solution = pd.DataFrame()
-solution["Region"] = regions
-solution["Price"] = p.X
-solution["Allocated"] = x.X.round(4)
-solution["Sold"] = s.X.round(4)
-solution["Wasted"] = w.X.round(4)
-solution["Pred_demand"] = d.X.round(4)
+solution = pd.DataFrame(index=regions)
+
+solution["Price"] = p.gppd.X.round(4)
+solution["Allocated"] = x.gppd.X.round(4)
+solution["Sold"] = s.gppd.X.round(4)
+solution["Wasted"] = w.gppd.X.round(4)
+solution["Pred_demand"] = d.gppd.X.round(4)
 
 opt_revenue = m.ObjVal
 print("\n The optimal net revenue: $%f million" % opt_revenue)
@@ -713,9 +720,10 @@ sold (in millions) for the eight regions.
 
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1)
-plot_sol = sns.scatterplot(data=solution, x="Price", y="Sold", hue="Region", s=100)
+
+plot_sol = sns.scatterplot(data=solution, x="Price", y="Sold", hue=solution.index, s=100)
 plot_waste = sns.scatterplot(
-    data=solution, x="Price", y="Wasted", marker="x", hue="Region", s=100, legend=False
+    data=solution, x="Price", y="Wasted", marker="x", hue=solution.index, s=100, legend=False
 )
 
 plot_sol.legend(loc="center left", bbox_to_anchor=(1.25, 0.5), ncol=1)
