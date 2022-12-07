@@ -156,6 +156,7 @@ class Cases(ABC):
         if self.saved_training:
             rval["data"] = X[: self.saved_training]
             rval["target"] = X[: self.saved_training]
+        dump(rval, os.path.join(self.basedir, self.predictor_file(predictor)))
         return rval
 
     def build_all_predictors(self):
