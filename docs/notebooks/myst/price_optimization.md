@@ -563,9 +563,7 @@ x = gppd.add_vars(m, data, name="x", lb='min_delivery', ub='max_delivery')
 s = gppd.add_vars(m, data, name="s") # predicted amount of sales in each region for the given price).
 w = gppd.add_vars(m, data, name="w") # excess wasteage in each region).
 d = gppd.add_vars(m, data, lb=-gp.GRB.INFINITY, name="demand") # Add variables for the regression
-
-feats = feats.gppd.add_vars(m, name="price", lb=a_min, ub=a_max)
-p = feats.loc[:, "price"]
+p = gppd.add_vars(m, data, name="price", lb=a_min, ub=a_max)
 m.update()
 ```
 
@@ -658,7 +656,7 @@ to insert the constraints linking the features and the demand.
 
 ```{code-cell} ipython3
 feats = pd.DataFrame(
-    data=feat_transform.transform(feats),
+    data=feat_transform.transform(pd.concat([feats, p], axis=1)),
     columns=feat_transform.get_feature_names_out(),
     index=regions
 )
@@ -704,15 +702,15 @@ analyze the optimal solution by storing it in a Pandas dataframe.
 ```{code-cell} ipython3
 solution = pd.DataFrame(index=regions)
 
-solution["Price"] = p.gppd.X.round(4)
-solution["Allocated"] = x.gppd.X.round(4)
-solution["Sold"] = s.gppd.X.round(4)
-solution["Wasted"] = w.gppd.X.round(4)
-solution["Pred_demand"] = d.gppd.X.round(4)
+solution["Price"] = p.gppd.X
+solution["Allocated"] = x.gppd.X
+solution["Sold"] = s.gppd.X
+solution["Wasted"] = w.gppd.X
+solution["Pred_demand"] = d.gppd.X
 
 opt_revenue = m.ObjVal
 print("\n The optimal net revenue: $%f million" % opt_revenue)
-solution
+solution.round(4)
 ```
 
 Let us now visualize a scatter plot between the price and the number of avocados
