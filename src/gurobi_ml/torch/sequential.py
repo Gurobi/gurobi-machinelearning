@@ -25,7 +25,9 @@ from ..exceptions import NoModel, NoSolution
 from ..modeling.neuralnet import BaseNNConstr
 
 
-def add_sequential_constr(gp_model, sequential_model, input_vars, output_vars=None, **kwargs):
+def add_sequential_constr(
+    gp_model, sequential_model, input_vars, output_vars=None, **kwargs
+):
     """Embed sequential_model into gp_model
 
     Predict the values of output_vars using input_vars
@@ -63,7 +65,9 @@ def add_sequential_constr(gp_model, sequential_model, input_vars, output_vars=No
     ----
     |VariablesDimensionsWarn|
     """
-    return SequentialConstr(gp_model, sequential_model, input_vars, output_vars, **kwargs)
+    return SequentialConstr(
+        gp_model, sequential_model, input_vars, output_vars, **kwargs
+    )
 
 
 class SequentialConstr(BaseNNConstr):

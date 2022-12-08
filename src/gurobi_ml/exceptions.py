@@ -20,7 +20,9 @@ class NotRegistered(Exception):
     """Predictor is not supported by gurobi_ml"""
 
     def __init__(self, predictor):
-        super().__init__(f"Object of type {predictor} is not registered/supported with gurobi_ml")
+        super().__init__(
+            f"Object of type {predictor} is not registered/supported with gurobi_ml"
+        )
 
 
 class NoModel(Exception):

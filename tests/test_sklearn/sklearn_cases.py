@@ -82,7 +82,12 @@ class Cases(ABC):
     """
 
     def __init__(
-        self, dataset, excluded=None, regressors=None, transformers=None, saved_training=0
+        self,
+        dataset,
+        excluded=None,
+        regressors=None,
+        transformers=None,
+        saved_training=0,
     ):
         self.basedir = os.path.join(os.path.dirname(__file__), "..", "predictors")
         self.dataset = dataset
@@ -116,7 +121,9 @@ class Cases(ABC):
         if version != sklearn_version:
             print(f"Scikit learn version changed. Regenerate predictors for {dataset}")
             self.build_all_predictors()
-            with open(os.path.join(self.basedir, sklearn_version_file), "w") as file_out:
+            with open(
+                os.path.join(self.basedir, sklearn_version_file), "w"
+            ) as file_out:
                 print(sklearn_version, file=file_out)
 
     def __iter__(self):
@@ -156,6 +163,7 @@ class Cases(ABC):
         if self.saved_training:
             rval["data"] = X[: self.saved_training]
             rval["target"] = X[: self.saved_training]
+        dump(rval, os.path.join(self.basedir, self.predictor_file(predictor)))
         return rval
 
     def build_all_predictors(self):

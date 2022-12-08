@@ -105,7 +105,9 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         self.float_type = float_type
         self._default_name = "tree_reg"
         SKgetter.__init__(self, predictor)
-        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(
+            self, gp_model, input_vars, output_vars, **kwargs
+        )
 
     def _mip_model(self, **kwargs):
         tree = self.predictor.tree_
@@ -127,10 +129,13 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         model.addConstr(nodes[:, notleafs] >= nodes[:, tree.children_right[notleafs]])
         model.addConstr(
             nodes[:, notleafs]
-            <= nodes[:, tree.children_right[notleafs]] + nodes[:, tree.children_left[notleafs]]
+            <= nodes[:, tree.children_right[notleafs]]
+            + nodes[:, tree.children_left[notleafs]]
         )
         model.addConstr(
-            nodes[:, tree.children_right[notleafs]] + nodes[:, tree.children_left[notleafs]] <= 1
+            nodes[:, tree.children_right[notleafs]]
+            + nodes[:, tree.children_left[notleafs]]
+            <= 1
         )
 
         # Node splitting
@@ -149,13 +154,17 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                 )
                 model.addConstrs(
                     (nodes[k, right].item() == 1)
-                    >> (scale * _input[k, tree.feature[node]] >= scale * threshold + self.epsilon)
+                    >> (
+                        scale * _input[k, tree.feature[node]]
+                        >= scale * threshold + self.epsilon
+                    )
                     for k in range(nex)
                 )
             else:
                 # Leaf node:
                 model.addConstrs(
-                    (nodes[k, node].item() == 1) >> (output[k, i] == tree.value[node][i][0])
+                    (nodes[k, node].item() == 1)
+                    >> (output[k, i] == tree.value[node][i][0])
                     for i in range(self.n_outputs_)
                     for k in range(nex)
                 )

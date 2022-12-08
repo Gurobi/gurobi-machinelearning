@@ -38,7 +38,6 @@ repos:
         language_version: python3.9
         language: python
         types: [python]
-        args: ["--line-length=100"]
 
     - repo: https://github.com/mwouts/jupytext
       rev: v1.14.1
