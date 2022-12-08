@@ -672,7 +672,7 @@ from gurobi_ml import add_predictor_constr
 ```
 
 ```{code-cell} ipython3
-pred_constr = add_predictor_constr(m, lin_reg, feats, d.to_list())
+pred_constr = add_predictor_constr(m, lin_reg, feats, d)
 
 pred_constr.print_stats()
 ```

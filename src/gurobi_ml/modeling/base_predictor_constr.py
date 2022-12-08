@@ -14,6 +14,7 @@
 # ==============================================================================
 
 from abc import ABC, abstractmethod
+from typing import Union
 
 import gurobipy as gp
 import numpy as np
@@ -34,26 +35,42 @@ def _default_name(predictor):
     return type(predictor).__name__.lower()
 
 
-def to_mlinexpr(df):
+def to_mlinexpr(df: Union[pd.DataFrame, pd.Series], is_input: bool):
     """Function to convert the dataframe into an mlinexpr"""
     df = df.to_numpy()
-    rval = gp.MLinExpr.zeros(df.shape)
-    for i, a in enumerate(df.T):
+    if len(df.shape) == 1:
+        if is_input:
+            df = df.reshape(1, -1)
+        else:
+            df = df.reshape(-1, 1)
 
-        try:
-            v = gp.MVar.fromlist(a)
-            rval[:, i] = v
-            continue
-        except AttributeError:
-            pass
-        try:
-            rval[:, i] = a.astype(np.float64)
-        except TypeError:
-            raise TypeError("Dataframe can't be converted to a linear expression")
+    if is_input:
+        # If variable is an input we can convert it to an MLinexp
+        # but it's better to have an MVar so try this first
+        if all(map(lambda i: isinstance(i, gp.Var), df.ravel())):
+            rval = gp.MVar.fromlist(df.to_list())
+            return rval
+
+        rval = gp.MLinExpr.zeros(df.shape)
+        for i, a in enumerate(df.T):
+            try:
+                v = gp.MVar.fromlist(a)
+                rval[:, i] = v
+                continue
+            except AttributeError:
+                pass
+            try:
+                rval[:, i] = a.astype(np.float64)
+            except TypeError:
+                raise TypeError("Dataframe can't be converted to a linear expression")
+    else:
+        if any(map(lambda i: not isinstance(i, gp.Var), df.ravel())):
+            raise TypeError("Dataframe can't be converted to an MVar")
+        rval = gp.MVar.fromlist(df.tolist())
     return rval
 
 
-def validate_gp_vars(gp_vars, is_input):
+def validate_gp_vars(gp_vars: gp.MVar, is_input: bool):
     """Put variables into appropriate form (matrix of variable).
 
     Parameters
@@ -69,12 +86,12 @@ def validate_gp_vars(gp_vars, is_input):
     mvar_array_like
         Decision variables with correctly adjusted shape.
     """
-    if isinstance(gp_vars, pd.DataFrame):
-        gp_vars = to_mlinexpr(gp_vars)
-    if isinstance(gp_vars, gp.MLinExpr) and is_input:
-        if is_input and gp_vars.ndim == 2:
+    if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
+        gp_vars = to_mlinexpr(gp_vars, is_input)
+        return gp_vars
+    if isinstance(gp_vars, gp.MLinExpr):
+        if gp_vars.ndim == 2:
             return gp_vars
-        raise ParameterError("If input variables are an MLinExpr they should be of dimension 2")
     if isinstance(gp_vars, gp.MVar):
         if gp_vars.ndim == 1 and is_input:
             return gp_vars.reshape(1, -1)
@@ -137,7 +154,7 @@ class AbstractPredictorConstr(ABC, SubModel):
         self._input = input_vars
         self._output = output_vars
 
-    def _build_submodel(self, model, *args, **kwargs):
+    def _build_submodel(self, gp_model, *args, **kwargs):
         """Predict output from input using predictor or transformer"""
         if self._output is None:
             self._create_output_vars(self._input)

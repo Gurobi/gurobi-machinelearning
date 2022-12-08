@@ -144,11 +144,6 @@ First, retrieve the data for the new students. We won't use all the data there,
 we randomly pick 250 students from it.
 
 ```{code-cell} ipython3
-# Start with classical part of the model
-m = gp.Model()
-```
-
-```{code-cell} ipython3
 # Retrieve new data used to build the optimization problem
 studentsdata = pd.read_csv(janos_data_url + "college_applications6000.csv", index_col=0)
 
@@ -156,13 +151,6 @@ nstudents = 250
 
 # Select randomly nstudents in the data
 studentsdata = studentsdata.sample(nstudents)
-```
-
-```{code-cell} ipython3
-# Add variable for merit
-studentsdata = studentsdata.gppd.add_vars(m, lb=0.0, ub=2.5, name='merit')
-# Keep only features
-studentsdata = studentsdata.loc[:, features]
 ```
 
 We can now create the variables for our model: `feature_vars` is initialized
@@ -174,7 +162,25 @@ the column corresponding to merit. With `pandas`, we can use the `get_indexer`
 function to recover the index of this column in our `MVar` matrix.
 
 ```{code-cell} ipython3
-y = m.addMVar(nstudents, name="y")
+# Start with classical part of the model
+m = gp.Model()
+```
+
+```{code-cell} ipython3
+a = gp.MVar.fromlist([m.addVar(), gp.Model(), 1.1])
+```
+
+```{code-cell} ipython3
+a = gp.MVar.fromlist([0,1, m.addVar()])
+```
+
+```{code-cell} ipython3
+y = gppd.add_vars(m, studentsdata, name='enroll_probability')
+
+# Add variable for merit
+studentsdata = studentsdata.gppd.add_vars(m, lb=0.0, ub=2.5, name='merit')
+# Keep only features
+studentsdata = studentsdata.loc[:, features]
 
 x = studentsdata.loc[:, "merit"]
 ```
@@ -195,10 +201,6 @@ of the `feature_vars` matrix and `y`, this will insert one regression constraint
 for each student.
 
 With the `print_stats` function we display what was added to the model.
-
-```{code-cell} ipython3
-isinstance(studentsdata, pd.DataFrame)
-```
 
 ```{code-cell} ipython3
 pred_constr = add_predictor_constr(

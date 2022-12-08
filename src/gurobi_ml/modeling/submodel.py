@@ -304,7 +304,7 @@ class SubModel:
             # SOS can't have a name! :-O
             # prefix_names(self._gp_model, self.sos, "SOSName", name)
 
-    def print_stats(self, file=None):
+    def print_stats(self, abbrev=False, file=None):
         """Print statistics about submodel
 
         This functions prints detailed statistics on the variables
@@ -320,6 +320,8 @@ class SubModel:
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.
         """
+        if abbrev:
+            return
         name = self._name
         print(f"Model for {name}:", file=file)
         print(f"{len(self.vars)} variables", file=file)
