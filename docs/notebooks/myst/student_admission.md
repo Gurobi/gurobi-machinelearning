@@ -167,14 +167,6 @@ m = gp.Model()
 ```
 
 ```{code-cell} ipython3
-a = gp.MVar.fromlist([m.addVar(), gp.Model(), 1.1])
-```
-
-```{code-cell} ipython3
-a = gp.MVar.fromlist([0,1, m.addVar()])
-```
-
-```{code-cell} ipython3
 y = gppd.add_vars(m, studentsdata, name='enroll_probability')
 
 # Add variable for merit
