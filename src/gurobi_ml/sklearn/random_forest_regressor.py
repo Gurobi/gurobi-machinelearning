@@ -71,7 +71,9 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         self.estimators_ = []
         self._default_name = "rand_forest_reg"
         SKgetter.__init__(self, predictor)
-        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(
+            self, gp_model, input_vars, output_vars, **kwargs
+        )
 
     def _mip_model(self, **kwargs):
         """Predict output variables y from input variables X using the

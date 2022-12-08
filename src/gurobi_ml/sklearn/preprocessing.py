@@ -130,7 +130,9 @@ class PolynomialFeaturesConstr(SKtransformer):
 
     def __init__(self, gp_model, polynomial_features, input_vars, **kwargs):
         if polynomial_features.degree > 2:
-            raise NoModel(polynomial_features, "Can only handle polynomials of degree < 2")
+            raise NoModel(
+                polynomial_features, "Can only handle polynomials of degree < 2"
+            )
         self._default_name = "poly_feat"
         super().__init__(gp_model, polynomial_features, input_vars, **kwargs)
 
@@ -160,4 +162,6 @@ class PolynomialFeaturesConstr(SKtransformer):
                         q_expr *= feat.item()
                     elif power[j] == 1:
                         q_expr *= feat.item()
-                self.gp_model.addConstr(output[k, i] == q_expr, name=f"polyfeat[{k},{i}]")
+                self.gp_model.addConstr(
+                    output[k, i] == q_expr, name=f"polyfeat[{k},{i}]"
+                )

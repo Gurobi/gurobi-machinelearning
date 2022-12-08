@@ -113,7 +113,10 @@ bibtex_bibfiles = ["refs.bib"]
 extlinks_detect_hardcoded_links = True
 extlinks = {
     "issue": ("https://github.com/Gurobi/gurobi-machinelearning/issues/%s", "issue %s"),
-    "gurobipy": ("https://www.gurobi.com/documentation/current/refman/py_%s.html", "gurobipy %s"),
+    "gurobipy": (
+        "https://www.gurobi.com/documentation/current/refman/py_%s.html",
+        "gurobipy %s",
+    ),
     "pypi": ("https://pypi.org/project/%s/", "%s"),
 }
 

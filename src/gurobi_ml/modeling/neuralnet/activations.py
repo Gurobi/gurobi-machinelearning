@@ -86,7 +86,9 @@ class ReLU:
                 layer.mixing = mixing
             layer.gp_model.update()
 
-            layer.gp_model.addConstr(layer.mixing == layer.input @ layer.coefs + layer.intercept)
+            layer.gp_model.addConstr(
+                layer.mixing == layer.input @ layer.coefs + layer.intercept
+            )
         else:
             mixing = layer._input
         for index in np.ndindex(output.shape):
