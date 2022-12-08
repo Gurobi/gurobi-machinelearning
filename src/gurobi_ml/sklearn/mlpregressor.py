@@ -21,7 +21,9 @@ from ..modeling.neuralnet import BaseNNConstr
 from .skgetter import SKgetter
 
 
-def add_mlp_regressor_constr(gp_model, mlp_regressor, input_vars, output_vars=None, **kwargs):
+def add_mlp_regressor_constr(
+    gp_model, mlp_regressor, input_vars, output_vars=None, **kwargs
+):
     """Embed mlp_regressor into gp_model
 
     Predict the values of output_vars using input_vars
@@ -53,7 +55,9 @@ def add_mlp_regressor_constr(gp_model, mlp_regressor, input_vars, output_vars=No
     ----
     |VariablesDimensionsWarn|
     """
-    return MLPRegressorConstr(gp_model, mlp_regressor, input_vars, output_vars, **kwargs)
+    return MLPRegressorConstr(
+        gp_model, mlp_regressor, input_vars, output_vars, **kwargs
+    )
 
 
 class MLPRegressorConstr(SKgetter, BaseNNConstr):

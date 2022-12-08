@@ -53,7 +53,9 @@ def add_linear_regression_constr(
     ----
     |VariablesDimensionsWarn|
     """
-    return LinearRegressionConstr(gp_model, linear_regression, input_vars, output_vars, **kwargs)
+    return LinearRegressionConstr(
+        gp_model, linear_regression, input_vars, output_vars, **kwargs
+    )
 
 
 class LinearRegressionConstr(BaseSKlearnRegressionConstr):

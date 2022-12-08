@@ -70,7 +70,9 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         self._steps = []
         self._default_name = "pipe"
         SKgetter.__init__(self, pipeline, **kwargs)
-        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(
+            self, gp_model, input_vars, output_vars, **kwargs
+        )
 
     def _mip_model(self, **kwargs):
         pipeline = self.predictor
@@ -83,7 +85,8 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
             convertor = get_convertor(transformer, transformers)
             if convertor is None:
                 raise NoModel(
-                    self.predictor, f"I don't know how to deal with that object: {transformer}"
+                    self.predictor,
+                    f"I don't know how to deal with that object: {transformer}",
                 )
             steps.append(convertor(gp_model, transformer, input_vars, **kwargs))
             input_vars = steps[-1].output
@@ -92,7 +95,10 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         predictors = sklearn_predictors() | user_predictors()
         convertor = get_convertor(predictor, predictors)
         if convertor is None:
-            raise NoModel(self.predictor, f"I don't know how to deal with that object: {predictor}")
+            raise NoModel(
+                self.predictor,
+                f"I don't know how to deal with that object: {predictor}",
+            )
         steps.append(convertor(gp_model, predictor, input_vars, output_vars, **kwargs))
         if self._output is None:
             self._output = steps[-1].output
@@ -116,7 +122,9 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         print(f"Pipeline has {len(self._steps)} steps:", file=file)
         print(file=file)
 
-        header = f"{'Step':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
+        header = (
+            f"{'Step':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
+        )
         print("-" * len(header), file=file)
         print(header, file=file)
         print(f"{' '*41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)

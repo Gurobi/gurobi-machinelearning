@@ -133,13 +133,17 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         **kwargs,
     ):
         if len(predictor.classes_) > 2:
-            raise NoModel(predictor, "Logistic regression only supported for two classes")
+            raise NoModel(
+                predictor, "Logistic regression only supported for two classes"
+            )
         if pwl_attributes is None:
             self.attributes = self.default_pwl_attributes()
         else:
             self.attributes = pwl_attributes
         if output_type not in ("classification", "probability_1"):
-            raise ParameterError("output_type should be either 'classification' or 'probability_1'")
+            raise ParameterError(
+                "output_type should be either 'classification' or 'probability_1'"
+            )
         self.epsilon = epsilon
         self._default_name = "log_reg"
         BaseSKlearnRegressionConstr.__init__(

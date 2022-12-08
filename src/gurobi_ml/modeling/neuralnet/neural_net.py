@@ -85,7 +85,9 @@ class BaseNNConstr(AbstractPredictorConstr):
         self._layers.append(layer)
         return layer
 
-    def add_activation_layer(self, input_vars, activation, activation_vars=None, **kwargs):
+    def add_activation_layer(
+        self, input_vars, activation, activation_vars=None, **kwargs
+    ):
         """Add an activation layer to gurobipy model
 
         Parameters
@@ -98,7 +100,9 @@ class BaseNNConstr(AbstractPredictorConstr):
         activation_vars: mvar_array_like, optional
             Output variables
         """
-        layer = ActivationLayer(self._gp_model, activation_vars, input_vars, activation, **kwargs)
+        layer = ActivationLayer(
+            self._gp_model, activation_vars, input_vars, activation, **kwargs
+        )
         self._layers.append(layer)
         return layer
 
@@ -116,7 +120,9 @@ class BaseNNConstr(AbstractPredictorConstr):
             return
         print(file=file)
 
-        header = f"{'Layer':12} {'Activation':12} {'Output Shape':>12} {'Variables':>10} "
+        header = (
+            f"{'Layer':12} {'Activation':12} {'Output Shape':>12} {'Variables':>10} "
+        )
         header += f"{'Constraints':^38}"
         print("-" * len(header), file=file)
         print(header, file=file)
