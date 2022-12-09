@@ -16,6 +16,8 @@
 """ Module for inserting simple Scikit-Learn PLS regression models into a gurobipy model
 """
 
+import numpy as np
+
 from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 
@@ -80,7 +82,8 @@ class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
         coefs = self.predictor._coef_.T
         intercept = self.predictor.intercept_
         self.gp_model.addConstr(
-            self.output == (self.input - x_mean) / x_std @ coefs + intercept,
+            self.output
+            == self.input @ (coefs / x_std[:, np.newaxis]) - x_mean / x_std @ coefs + intercept,
             name="plsreg",
         )
 
