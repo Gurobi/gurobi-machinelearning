@@ -13,5 +13,5 @@ sphinx-rtd-theme==1.1.1
 nbsphinx==0.8.10
 jupytext==1.14.4
 sphinx_design==0.3.0
-ipykernel==6.17.1
+ipykernel==6.19.2
 .
