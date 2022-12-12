@@ -11,7 +11,7 @@ sphinx-copybutton==0.5.1
 sphinx-pyproject==0.1.0
 sphinx-rtd-theme==1.1.1
 nbsphinx==0.8.10
-jupytext==1.14.1
+jupytext==1.14.4
 sphinx_design==0.3.0
 ipykernel==6.17.1
 .
