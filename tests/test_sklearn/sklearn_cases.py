@@ -115,8 +115,10 @@ class Cases(ABC):
             version = None
         if version != sklearn_version:
             print(f"Scikit learn version changed. Regenerate predictors for {dataset}")
-            self.build_all_predictors()
-            with open(os.path.join(self.basedir, sklearn_version_file), "w") as file_out:
+            self.build_predictors()
+            with open(
+                os.path.join(self.basedir, sklearn_version_file), "w"
+            ) as file_out:
                 print(sklearn_version, file=file_out)
 
     def __iter__(self):
@@ -219,9 +221,7 @@ class CircleCase(Cases):
 
     def __init__(self):
         super().__init__(
-            "circle",
-            regressors=["DecisionTreeRegressor", "RandomForestRegressor"],
-            saved_training=-1,
+            "circle", regressors=["DecisionTreeRegressor", "RandomForestRegressor"]
         )
 
     def load_data(self):

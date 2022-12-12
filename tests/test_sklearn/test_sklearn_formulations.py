@@ -33,7 +33,9 @@ class TestSklearnModel(FixedRegressionModel):
                     predictor_name = "LinearRegression"
                 if predictor_name in ["PLSRegression", "PLSCanonical"]:
                     predictor_name = "PLSRegression"
-                self.assertEqual(predictor_name, type(pred_constr[i]).__name__[: -len("Constr")])
+                self.assertEqual(
+                    predictor_name, type(pred_constr[i]).__name__[: -len("Constr")]
+                )
 
     def test_diabetes_sklearn(self):
         data = datasets.load_diabetes()
@@ -127,7 +129,9 @@ class TestMNIST(unittest.TestCase):
 
             predictor.out_activation_ = "identity"
             register_predictor_constr("MLPClassifier", add_mlp_regressor_constr)
-            pred_constr = add_predictor_constr(gpm, predictor, x, output_type="probability")
+            pred_constr = add_predictor_constr(
+                gpm, predictor, x, output_type="probability"
+            )
 
             y = pred_constr.output
             with self.assertRaises(NoSolution):

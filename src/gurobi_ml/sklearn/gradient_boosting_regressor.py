@@ -70,7 +70,9 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         self.estimators_ = []
         self._default_name = "gbtree_reg"
         SKgetter.__init__(self, predictor)
-        AbstractPredictorConstr.__init__(self, gp_model, input_vars, output_vars, **kwargs)
+        AbstractPredictorConstr.__init__(
+            self, gp_model, input_vars, output_vars, **kwargs
+        )
 
     def _mip_model(self, **kwargs):
         """Predict output variables y from input variables X using the
@@ -86,7 +88,9 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         nex = _input.shape[0]
 
         outdim = output.shape[1]
-        assert outdim == 1, "Output dimension of gradient boosting regressor should be 1"
+        assert (
+            outdim == 1
+        ), "Output dimension of gradient boosting regressor should be 1"
 
         treevars = model.addMVar(
             (nex, predictor.n_estimators_, 1), lb=-GRB.INFINITY, name="estimator"
@@ -103,7 +107,9 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
             )
         self.estimators_ = estimators
 
-        model.addConstr(output == predictor.learning_rate * treevars.sum(axis=1) + constant[0][0])
+        model.addConstr(
+            output == predictor.learning_rate * treevars.sum(axis=1) + constant[0][0]
+        )
 
     def print_stats(self, abbrev=False, file=None):
         """Print statistics on model additions stored by this class

@@ -77,15 +77,21 @@ class KerasNetworkConstr(BaseNNConstr):
                     raise NoModel(predictor, f"Unsupported activation {activation}")
             elif isinstance(step, keras.layers.ReLU):
                 if step.negative_slope != 0.0:
-                    raise NoModel(predictor, "Only handle ReLU layers with negative slope 0.0")
+                    raise NoModel(
+                        predictor, "Only handle ReLU layers with negative slope 0.0"
+                    )
                 if step.threshold != 0.0:
-                    raise NoModel(predictor, "Only handle ReLU layers with threshold of 0.0")
+                    raise NoModel(
+                        predictor, "Only handle ReLU layers with threshold of 0.0"
+                    )
                 if step.max_value is not None and step.max_value < float("inf"):
                     raise NoModel(predictor, "Only handle ReLU layers without maxvalue")
             elif isinstance(step, keras.layers.InputLayer):
                 pass
             else:
-                raise NoModel(predictor, f"Unsupported network layer {type(step).__name__}")
+                raise NoModel(
+                    predictor, f"Unsupported network layer {type(step).__name__}"
+                )
 
         super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
@@ -112,7 +118,12 @@ class KerasNetworkConstr(BaseNNConstr):
                     activation = "identity"
                 weights, bias = step.get_weights()
                 layer = self.add_dense_layer(
-                    _input, weights, bias, self.act_dict[activation], output, name="dense"
+                    _input,
+                    weights,
+                    bias,
+                    self.act_dict[activation],
+                    output,
+                    name="dense",
                 )
                 _input = layer.output
         if self._output is None:

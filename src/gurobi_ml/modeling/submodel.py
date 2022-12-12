@@ -196,7 +196,9 @@ class SubModel:
             self._lastconstr = None
         # range of Q constraints
         if gp_model.numqconstrs > before.numqconstrs:
-            self._qconstrs = gp_model.getQConstrs()[before.numqconstrs : gp_model.numqconstrs]
+            self._qconstrs = gp_model.getQConstrs()[
+                before.numqconstrs : gp_model.numqconstrs
+            ]
         else:
             self._qconstrs = []
         # range of GenConstrs
@@ -216,14 +218,18 @@ class SubModel:
     def vars(self):
         """Return the list of variables in the submodel."""
         if self._firstvar:
-            return self._gp_model.getVars()[self._firstvar.index : self._lastvar.index + 1]
+            return self._gp_model.getVars()[
+                self._firstvar.index : self._lastvar.index + 1
+            ]
         return []
 
     @property
     def constrs(self):
         """Return the list of linear constraints in the submodel."""
         if self._firstconstr:
-            return self._gp_model.getConstrs()[self._firstconstr.index : self._lastconstr.index + 1]
+            return self._gp_model.getConstrs()[
+                self._firstconstr.index : self._lastconstr.index + 1
+            ]
         return []
 
     @property

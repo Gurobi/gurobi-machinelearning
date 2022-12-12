@@ -79,7 +79,9 @@ def abs_model(X, y, nn, inf_bound, registered):
         # Decision variables
         beta = model.addMVar(dim, lb=-bound, ub=bound, name="beta")  # Weights
         diff = model.addMVar((samples, 1), lb=-inf_bound, ub=inf_bound, name="diff")
-        abs_diff = model.addMVar((samples, 1), lb=-inf_bound, ub=inf_bound, name="absdiff")
+        abs_diff = model.addMVar(
+            (samples, 1), lb=-inf_bound, ub=inf_bound, name="absdiff"
+        )
 
         model.addConstr(X @ beta - y == diff[:, 0])
         model.setObjective(abs_diff.sum(), gp.GRB.MINIMIZE)
