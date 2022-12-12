@@ -5,6 +5,7 @@ import numpy as np
 from joblib import dump, load
 from sklearn import __version__ as sklearn_version
 from sklearn import datasets
+from sklearn.cross_decomposition import PLSCanonical, PLSRegression  # noqa
 from sklearn.ensemble import GradientBoostingRegressor  # noqa
 from sklearn.ensemble import RandomForestRegressor  # noqa
 from sklearn.linear_model import LogisticRegression  # noqa
@@ -19,22 +20,16 @@ from sklearn.tree import DecisionTreeRegressor  # noqa
 from gurobi_ml.sklearn import sklearn_predictors, sklearn_transformers
 
 
-def predictor_params(name):
-    if name == "MLPRegressor":
-        return "[20, 20]"
-    if name == "MLPClassifier":
-        return "[50, 50]"
-    if name == "GradientBoostingRegressor":
-        return "n_estimators=10, max_depth=4, max_leaf_nodes=10"
-    if name == "RandomForestRegressor":
-        return "n_estimators=10, max_depth=4, max_leaf_nodes=10"
-    if name == "DecisionTreeRegressor":
-        return "max_leaf_nodes=50"
-    return ""
-
-
 def init_predictor(name):
-    params = predictor_params(name)
+    params = {
+        "MLPRegressor": "[20, 20]",
+        "MLPClassifier": "[50, 50]",
+        "GradientBoostingRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
+        "RandomForestRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
+        "DecisionTreeRegressor": "max_leaf_nodes=50",
+        "PLSRegression": "n_components=1",
+        "PLSCanonical": "n_components=1",
+    }.get(name, "")
     return eval(f"{name}({params})")
 
 
@@ -82,7 +77,12 @@ class Cases(ABC):
     """
 
     def __init__(
-        self, dataset, excluded=None, regressors=None, transformers=None, saved_training=0
+        self,
+        dataset,
+        excluded=None,
+        regressors=None,
+        transformers=None,
+        saved_training=0,
     ):
         self.basedir = os.path.join(os.path.dirname(__file__), "..", "predictors")
         self.dataset = dataset
