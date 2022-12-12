@@ -250,7 +250,7 @@ class MNISTCase(Cases):
         )
 
     def load_data(self):
-        mnist = datasets.fetch_openml("mnist_784")
+        mnist = datasets.fetch_openml("mnist_784", parser="auto")
         X, y = mnist.data, mnist.target
 
         X = X.to_numpy()
