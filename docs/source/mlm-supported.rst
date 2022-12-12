@@ -29,7 +29,11 @@ to insert it in a Gurobi model.
        <sklearn.linear_model.LinearRegression>`
      - :py:mod:`add_linear_regression_constr
        <gurobi_ml.sklearn.linear_regression>`
-   * - Logistic regression [#]_
+   * - Partial Least Square
+     - :external:py:class:`PLSRegression
+       <sklearn.cross_decomposition.PLSRegression>`
+     - :py:mod:`add_pls_regression <gurobi_ml.sklearn.pls_regression>`
+   * - Logistic Regression [#]_
      - :external:py:class:`LogisticRegression
        <sklearn.linear_model.LogisticRegression>`
      - :py:mod:`add_logistic_regression_constr

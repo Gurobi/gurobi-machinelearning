@@ -31,7 +31,7 @@ def add_pls_regression_constr(
     ----------
     gp_model: :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    pls_regression: :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
+    pls_regression: :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression`
      The linear regression to insert. It can be of any of the following types:
          * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression`
          * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSCanonical`
@@ -56,7 +56,7 @@ def add_pls_regression_constr(
 
 
 class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained :external+sklearn:py:class:`sklearn.cross_decompostion.PLSRegression` with gurobipy
+    """Class to model trained :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression` with gurobipy
 
     Stores the changes to :gurobipy:`model` when embedding an instance into it."""
 
