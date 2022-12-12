@@ -216,7 +216,7 @@ class MNISTCase(Cases):
         )
 
     def build_predictors(self):
-        mnist = datasets.fetch_openml("mnist_784")
+        mnist = datasets.fetch_openml("mnist_784", parser="auto")
         X, y = mnist.data, mnist.target
 
         X = X.to_numpy()
