@@ -22,7 +22,9 @@ from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 
 
-def add_pls_regression_constr(gp_model, pls_regression, input_vars, output_vars=None, **kwargs):
+def add_pls_regression_constr(
+    gp_model, pls_regression, input_vars, output_vars=None, **kwargs
+):
     """Embed pls_regression in gp_model to predict the values of output_vars using input_vars
 
     Parameters
@@ -48,7 +50,9 @@ def add_pls_regression_constr(gp_model, pls_regression, input_vars, output_vars=
     ----
     |VariablesDimensionsWarn|
     """
-    return PLSRegressionConstr(gp_model, pls_regression, input_vars, output_vars, **kwargs)
+    return PLSRegressionConstr(
+        gp_model, pls_regression, input_vars, output_vars, **kwargs
+    )
 
 
 class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
@@ -83,7 +87,9 @@ class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
         intercept = self.predictor.intercept_
         self.gp_model.addConstr(
             self.output
-            == self.input @ (coefs / x_std[:, np.newaxis]) - x_mean / x_std @ coefs + intercept,
+            == self.input @ (coefs / x_std[:, np.newaxis])
+            - x_mean / x_std @ coefs
+            + intercept,
             name="plsreg",
         )
 
