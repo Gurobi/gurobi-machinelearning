@@ -14,11 +14,16 @@
 # ==============================================================================
 
 from abc import ABC, abstractmethod
-from typing import Union
 
 import gurobipy as gp
 import numpy as np
-import pandas as pd
+
+try:
+    import pandas as pd
+
+    HAS_PANDAS = True
+except ImportError:
+    HAS_PANDAS = False
 
 from ..exceptions import ParameterError
 from .submodel import SubModel
@@ -35,7 +40,7 @@ def _default_name(predictor):
     return type(predictor).__name__.lower()
 
 
-def to_mlinexpr(df: Union[pd.DataFrame, pd.Series], is_input: bool):
+def to_mlinexpr(df, is_input: bool):
     """Function to convert the dataframe into an mlinexpr"""
     df = df.to_numpy()
     if len(df.shape) == 1:
@@ -86,9 +91,10 @@ def validate_gp_vars(gp_vars: gp.MVar, is_input: bool):
     mvar_array_like
         Decision variables with correctly adjusted shape.
     """
-    if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
-        gp_vars = to_mlinexpr(gp_vars, is_input)
-        return gp_vars
+    if HAS_PANDAS:
+        if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
+            gp_vars = to_mlinexpr(gp_vars, is_input)
+            return gp_vars
     if isinstance(gp_vars, gp.MLinExpr):
         if gp_vars.ndim == 2:
             return gp_vars
