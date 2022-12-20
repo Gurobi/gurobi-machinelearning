@@ -125,8 +125,9 @@ regression. We build it using the `make_pipeline` from `scikit-learn`.
 
 ```{code-cell} ipython3
 # Run our regression
+scaler = StandardScaler()
 regression = LogisticRegression(random_state=1)
-pipe = make_pipeline(regression)
+pipe = make_pipeline(scaler, regression)
 pipe.fit(X=historical_data.loc[:, features], y=historical_data.loc[:, target])
 ```
 
@@ -147,28 +148,31 @@ nstudents = 250
 studentsdata = studentsdata.sample(nstudents)
 ```
 
-We can now create the variables for our model: `feature_vars` is initialized
-using the data frames we just created (be careful that they have to be converted
-to `numpy` arrays).
+We can now create the our model.
 
-For the rest of the model, we want to recover from the `feature_vars` matrix,
-the column corresponding to merit. With `pandas`, we can use the `get_indexer`
-function to recover the index of this column in our `MVar` matrix.
+Since our data is in pandas data frames, we use the package gurobipy-pandas to help create the variables directly using the index of the data frame.
 
 ```{code-cell} ipython3
 # Start with classical part of the model
 m = gp.Model()
-```
 
-```{code-cell} ipython3
+# The y variables are modeling the probability of enrollment of each student. They are indexed by students data
 y = gppd.add_vars(m, studentsdata, name='enroll_probability')
 
-# Add variable for merit
+# We add to studentsdata a column of variables to model the "merit" feature. Those variable are between 0 and 2.5.
+# They are added directly to the data frame using the gppd extension.
 studentsdata = studentsdata.gppd.add_vars(m, lb=0.0, ub=2.5, name='merit')
-# Keep only features
-studentsdata = studentsdata.loc[:, features]
-# Denote by x the (variable) "merit" feature
+
+# We denote by x the (variable) "merit" feature
 x = studentsdata.loc[:, "merit"]
+
+# Make sure that studentsdata contains only the features column and in the right order
+studentsdata = studentsdata.loc[:, features]
+
+m.update()
+
+# Let's look at our features dataframe for the optimization
+studentsdata[:10]
 ```
 
 We add the objective and the budget constraint:
@@ -183,7 +187,7 @@ m.update()
 Finally, we insert the constraints from the regression. In this model we want to
 have use the probability estimate of a student joining the college, so we choose
 the parameter `output_type` to be `"probability_1"`. Note that due to the shapes
-of the `feature_vars` matrix and `y`, this will insert one regression constraint
+of the `studentsdata` data frame and `y`, this will insert one regression constraint
 for each student.
 
 With the `print_stats` function we display what was added to the model.

@@ -455,44 +455,28 @@ c_transport = c_transport.loc[regions]
 a_min = 0  # minimum avocado price in each region
 a_max = 2  # maximum avocado price in each region
 
-b_min = (
-
-)  # minimum number of avocados allocated to each region
-b_max = (
-    df.groupby("region")["units_sold"].max()
-)  # maximum number of avocados allocated to each region
-
 data = pd.concat([c_transport,
-                  df.groupby("region")["units_sold"].min(),
-                  df.groupby("region")["units_sold"].max()], axis=1)
+                  df.groupby("region")["units_sold"].min().rename('min_delivery'),
+                  df.groupby("region")["units_sold"].max().rename('max_delivery')], axis=1)
 ```
 
 ```{code-cell} ipython3
-data.columns = ['transport_cost', 'min_delivery', 'max_delivery']
 data
 ```
 
-### Compute bounds for feature variables
+### Create dataframe for the fixed features of the regression
 
-We now compute bounds for our feature variables. This is a bit involved because
-of the one hot encoding and the categorical variables that can't be used in a
-Gurobi model. We need to create variables in the spaces of the transformed
-features after applying `feat_transform`.
+We now start creating the input of the regression in the optimization models with the features that are fixed.
+The process will be a bit involved because of the one hot encoding and the categorical variables of the regression.
 
-To do so, we will first compute lower and upper bounds in the original features
-space (with categorical variables) in a pandas dataframe. Then we reuse the
-`feat_transfrom` object to transform those in the correct space.
-
-The steps to follow are not complicated, but it is not completely intuitive. We
-detail every step.
+We will use gurobipy-pandas that help to more easily create gurobipy models using pandas data.
 
 +++
 
-First, create a dataframe for the lower bounds. It is indexed by the regions (we
-want to use one regression to predict demand for each region) and has the 4
-columns corresponding to the features:
+First, create a dataframe with the features that are fixed in our optimization problem.
+It is indexed by the regions (we want to use one regression to predict demand for each region) and has the 3
+columns corresponding to the fixed features:
 
-* `price` with the lower bound `a_min`
 * `year_index` with `year - 2015`
 * `peak` with the value of `peak_or_not`
 * `region` that repeat the names of the regions.
@@ -511,30 +495,6 @@ feats = pd.DataFrame(
 )
 feats
 ```
-
-Note that the columns are not in the same order as in the original data. But an
-advantage of using `Scikit-learn`'s `ColumnTransformer` is that it will reorder
-them in its output.
-
-+++
-
-Now we use `feat_transfrom` to transform the dataframe to the space of the
-regression.
-
-We put the results in a dataframe (using `get_feature_names_out` for the columns
-name) and display it (note that it's not necessary to put the results in a
-dataframe, but it's good for checking how it looks):
-
-+++
-
-This is all we needed to do, and we have the correct lower bounds for the
-regression input variables.
-
-We repeat the operations for the upper bounds. In this example, the only
-difference between the lower and upper bounds is the value for the price column
-which is now `a_max`
-
-+++
 
 ### Decision Variables
 
@@ -650,18 +610,31 @@ m.update()
 
 ### Add the constraints to predict demand
 
-Using the variables we created above, we just need to call
-[add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr)
-to insert the constraints linking the features and the demand.
++++
+
+First, we create our full input for the predictor constraint. We merge the `p` variables (stored in a pandas Series) wiht the rest of the fixed features
+
+```{code-cell} ipython3
+feats = pd.concat([feats, p], axis=1)
+
+feats
+```
+
+Now apply the column transformer to the dataframe of features.
+We put the result in a new dataframe to make it more readable.
 
 ```{code-cell} ipython3
 feats = pd.DataFrame(
-    data=feat_transform.transform(pd.concat([feats, p], axis=1)),
+    data=feat_transform.transform(feats),
     columns=feat_transform.get_feature_names_out(),
     index=regions
 )
 feats
 ```
+
+Now, we just need to call
+[add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr)
+to insert the constraints linking the features and the demand.
 
 ```{code-cell} ipython3
 from gurobi_ml import add_predictor_constr
