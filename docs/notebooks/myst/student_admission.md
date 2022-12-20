@@ -94,14 +94,8 @@ from sklearn.preprocessing import StandardScaler
 
 import gurobipy as gp
 
-import sys
-sys.path.append('../../../src')
-%load_ext autoreload
-%autoreload 2
 from gurobi_ml import add_predictor_constr
-```
 
-```{code-cell} ipython3
 import gurobipy_pandas as gppd
 ```
 
@@ -173,7 +167,7 @@ y = gppd.add_vars(m, studentsdata, name='enroll_probability')
 studentsdata = studentsdata.gppd.add_vars(m, lb=0.0, ub=2.5, name='merit')
 # Keep only features
 studentsdata = studentsdata.loc[:, features]
-
+# Denote by x the (variable) "merit" feature
 x = studentsdata.loc[:, "merit"]
 ```
 
@@ -245,7 +239,7 @@ pred_constr.remove()
 pwl_attributes = {
     "FuncPieces": -1,
     "FuncPieceLength": 0.01,
-    "FuncPieceError": 1e-4,
+    "FuncPieceError": 1e-5,
     "FuncPieceRatio": -1.0,
 }
 pred_constr = add_predictor_constr(

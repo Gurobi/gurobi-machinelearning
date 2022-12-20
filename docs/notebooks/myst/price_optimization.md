@@ -664,10 +664,6 @@ feats
 ```
 
 ```{code-cell} ipython3
-import sys
-sys.path.append("../../../src/")
-%load_ext autoreload
-%autoreload 2
 from gurobi_ml import add_predictor_constr
 ```
 

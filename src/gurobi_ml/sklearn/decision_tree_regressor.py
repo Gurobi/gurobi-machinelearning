@@ -20,6 +20,8 @@ into a :gurobipy:`model`.
 import numpy as np
 from gurobipy import GRB
 
+from gurobi_ml.modeling.mvarplusconst import MVarPlusConst
+
 from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 
@@ -116,6 +118,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         _input = self._input
         output = self._output
         outdim = output.shape[1]
+        ismvarplusconst = isinstance(_input, MVarPlusConst)
         assert outdim == self.n_outputs_
         nex = _input.shape[0]
         nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name="node")
@@ -147,19 +150,29 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
             scale = max(abs(1 / threshold), self.scale)
             if left >= 0:
                 # Intermediate node
-                model.addConstrs(
-                    (nodes[k, left].item() == 1)
-                    >> (scale * _input[k, tree.feature[node]] <= scale * threshold)
-                    for k in range(nex)
-                )
-                model.addConstrs(
-                    (nodes[k, right].item() == 1)
-                    >> (
-                        scale * _input[k, tree.feature[node]]
-                        >= scale * threshold + self.epsilon
+                feature = tree.feature[node]
+
+                if ismvarplusconst and feature not in _input.var_index:
+                    # Special case where we have an MVarPlusConst object
+                    # If that feature is a constant we can directly fix it.
+                    value = _input[:, feature]
+                    fixed_left = value <= threshold
+                    nodes[fixed_left, right].UB = 0.0
+                    nodes[~fixed_left, left].UB = 0.0
+                else:
+                    model.addConstrs(
+                        (nodes[k, left].item() == 1)
+                        >> (scale * _input[k, feature] <= scale * threshold)
+                        for k in range(nex)
                     )
-                    for k in range(nex)
-                )
+                    model.addConstrs(
+                        (nodes[k, right].item() == 1)
+                        >> (
+                            scale * _input[k, feature]
+                            >= scale * threshold + self.epsilon
+                        )
+                        for k in range(nex)
+                    )
             else:
                 # Leaf node:
                 model.addConstrs(

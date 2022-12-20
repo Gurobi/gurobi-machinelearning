@@ -16,7 +16,6 @@
 from abc import ABC, abstractmethod
 
 import gurobipy as gp
-import numpy as np
 
 try:
     import pandas as pd
@@ -26,6 +25,7 @@ except ImportError:
     HAS_PANDAS = False
 
 from ..exceptions import ParameterError
+from .mvarplusconst import MVarPlusConst
 from .submodel import SubModel
 
 
@@ -42,37 +42,23 @@ def _default_name(predictor):
 
 def to_mlinexpr(df, is_input: bool):
     """Function to convert the dataframe into an mlinexpr"""
-    df = df.to_numpy()
-    if len(df.shape) == 1:
-        if is_input:
-            df = df.reshape(1, -1)
-        else:
-            df = df.reshape(-1, 1)
-
     if is_input:
         # If variable is an input we can convert it to an MLinexp
         # but it's better to have an MVar so try this first
-        if all(map(lambda i: isinstance(i, gp.Var), df.ravel())):
-            rval = gp.MVar.fromlist(df.to_list())
+        if all(map(lambda i: isinstance(i, gp.Var), df.to_numpy().ravel())):
+            rval = gp.MVar.fromlist(df.to_numpy().to_list())
+            if len(rval.shape) == 1:
+                rval = rval.reshape(1, -1)
             return rval
+        return MVarPlusConst.fromdf(df)
 
-        rval = gp.MLinExpr.zeros(df.shape)
-        for i, a in enumerate(df.T):
-            try:
-                v = gp.MVar.fromlist(a)
-                rval[:, i] = v
-                continue
-            except AttributeError:
-                pass
-            try:
-                rval[:, i] = a.astype(np.float64)
-            except TypeError:
-                raise TypeError("Dataframe can't be converted to a linear expression")
     else:
-        if any(map(lambda i: not isinstance(i, gp.Var), df.ravel())):
+        if any(map(lambda i: not isinstance(i, gp.Var), df.to_numpy().ravel())):
             raise TypeError("Dataframe can't be converted to an MVar")
-        rval = gp.MVar.fromlist(df.tolist())
-    return rval
+        rval = gp.MVar.fromlist(df.to_numpy().tolist())
+        if len(rval.shape) == 1:
+            rval = rval.reshape(-1, 1)
+        return rval
 
 
 def validate_gp_vars(gp_vars: gp.MVar, is_input: bool):
@@ -94,6 +80,8 @@ def validate_gp_vars(gp_vars: gp.MVar, is_input: bool):
     if HAS_PANDAS:
         if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
             gp_vars = to_mlinexpr(gp_vars, is_input)
+            return gp_vars
+        if isinstance(gp_vars, (pd.DataFrame, MVarPlusConst)):
             return gp_vars
     if isinstance(gp_vars, gp.MLinExpr):
         if gp_vars.ndim == 2:
@@ -257,8 +245,10 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     @property
     def input_values(self):
-        if isinstance(self._input, gp.MLinExpr):
+        if isinstance(self._input, (gp.MLinExpr,)):
             return self.input.getValue()
+        elif isinstance(self._input, (MVarPlusConst)):
+            return self.input.get_value()
         else:
             return self.input.X
 
