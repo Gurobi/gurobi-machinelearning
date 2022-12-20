@@ -49,6 +49,6 @@ repos:
       hooks:
         - id: license_embedded
           name: license_embedded
-          entry: python3 .github/hooks/license_embedded.py
+          entry: python .github/hooks/license_embedded.py
           language: system
           files: (src/.*\.py|.*\.ipynb)

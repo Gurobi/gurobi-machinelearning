@@ -29,9 +29,10 @@ class TestSklearnModel(FixedRegressionModel):
             self.assertEqual(len(predictor), len(pred_constr))
             for i in range(len(pred_constr)):
                 predictor_name = type(predictor[i]).__name__
-                linear = ["Lasso", "Ridge"]
-                if predictor_name in linear:
+                if predictor_name in ["Lasso", "Ridge"]:
                     predictor_name = "LinearRegression"
+                if predictor_name in ["PLSRegression", "PLSCanonical"]:
+                    predictor_name = "PLSRegression"
                 self.assertEqual(
                     predictor_name, type(pred_constr[i]).__name__[: -len("Constr")]
                 )

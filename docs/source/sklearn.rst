@@ -12,6 +12,7 @@ Functions and modeling object for Scikit-learn regression models
   api/LogisticRegressionConstr
   api/MlpRegressorConstr
   api/PipelineConstr
+  api/PLSRegressionConstr
   api/PolynomialFeaturesConstr
   api/RandomForestRegressorConstr
   api/StandardScalerConstr

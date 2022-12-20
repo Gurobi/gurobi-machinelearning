@@ -14,9 +14,10 @@ It would be great if you add a minimal reproducible example when reporting a bug
 include reasoning on how the new requested feature improves the code.
 
 ## Submitting changes
-We welcome your contribution in directly tackling some of the issues.
+We welcome external contributions to Gurobi Machine Learning.
+Note that all contributors should accept the Contributor License Agreement (CLA).
 
-We use the GitHub pull request workflow. Once your pull request is ready for review, one
+To contribute code you should use the GitHub pull request workflow. Once your pull request is ready for review, one
 of the core maintainers of Gurobi Machine Learning will review your pull request.
 
 A pull request should contain tests for the changes made to the code behavior, should
@@ -29,9 +30,8 @@ Before submitting a pull request:
 - make sure all tests pass by running `tox` in the root folder of the `gurobi-machinelearning`.
 - add any other relevant checks for your changes to Gurobi Machine Learning.
 
-After a pull request is submitted, the tests will be run automatically, and the status
-will appear on the pull request page. If the tests failed, there is a link which can be
-used to debug the failed tests.
+After a pull request is submitted, tests will be run, and the status
+will appear on the pull request page. If the tests failed, there is a link which can be used to debug the failed tests.
 
 ## Code reviews
 The pull request author should respond to all comments received. If the
@@ -40,6 +40,4 @@ a short message such as "Done" and then resolve the comment. If more discussion 
 needed on a comment, it should remain open until a solution can be figured out.
 
 ## Merging changes
-Explicit approval and passing tests are required before merging. The pull request author
-should always merge via "Squash and Merge" and the remote pull request branch should be
-deleted.
+The core maintainer that reviewed the pull request will merge it after all comments have been addressed and when all tests are passing.
