@@ -308,40 +308,19 @@ units_sold.
 
 ```{code-cell} ipython3
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn.compose import make_column_transformer
 
 feat_transform = make_column_transformer(
     (OneHotEncoder(drop="first"), ["region"]),
-    ("passthrough", ["year_index", "price", "peak"]),
+    (StandardScaler(), ["price", "year_index"]),
+    ("passthrough", ["peak"]),
     verbose_feature_names_out=False,
+    remainder='drop'
 )
 
-X = feat_transform.fit_transform(df)
+X = df
 y = df["units_sold"]
-```
-
-```{code-cell} ipython3
-X = df.loc[:, ["region", "year_index", "price", "peak"]].to_numpy()
-```
-
-```{code-cell} ipython3
-feat_transform = make_column_transformer(
-    (OneHotEncoder(drop="first"), [0]),
-    ("passthrough", [1,2,3]),
-    verbose_feature_names_out=False,
-)
-```
-
-```{code-cell} ipython3
-feat_transform.fit_transform(X)
-```
-
-```{code-cell} ipython3
-feat_transform.n_features_in_
-```
-
-```{code-cell} ipython3
-feat_transform.get_feature_names_out()
 ```
 
 To validate the regression model, we will randomly split the dataset into $80\%$
@@ -360,9 +339,10 @@ Finally, create the regression model and train it.
 
 ```{code-cell} ipython3
 from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import make_pipeline
 from sklearn.metrics import r2_score
 
-lin_reg = LinearRegression()
+lin_reg = make_pipeline(feat_transform, LinearRegression())
 lin_reg.fit(X_train, y_train)
 
 # Get R^2 from test data
@@ -644,25 +624,16 @@ feats = pd.concat([feats, p], axis=1)
 feats
 ```
 
-Now apply the column transformer to the dataframe of features.
-We put the result in a new dataframe to make it more readable.
-
-```{code-cell} ipython3
-feat_transform.transformers
-```
-
-```{code-cell} ipython3
-feats = pd.DataFrame(
-    data=feat_transform.transform(feats),
-    columns=feat_transform.get_feature_names_out(),
-    index=regions
-)
-feats
-```
-
 Now, we just need to call
 [add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr)
 to insert the constraints linking the features and the demand.
+
+```{code-cell} ipython3
+import sys
+sys.path.append('../../../src/')
+%load_ext autoreload
+%autoreload 2
+```
 
 ```{code-cell} ipython3
 from gurobi_ml import add_predictor_constr
@@ -691,6 +662,10 @@ $2$.
 ```{code-cell} ipython3
 m.Params.NonConvex = 2
 m.optimize()
+```
+
+```{code-cell} ipython3
+pred_constr.get_error()
 ```
 
 The solver solved the optimization problem in less than a second. Let us now
