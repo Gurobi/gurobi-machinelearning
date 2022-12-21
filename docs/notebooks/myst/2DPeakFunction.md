@@ -81,6 +81,7 @@ from sklearn import metrics
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
+
 from gurobi_ml import add_predictor_constr
 ```
 

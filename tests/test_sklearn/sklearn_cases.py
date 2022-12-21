@@ -115,7 +115,7 @@ class Cases(ABC):
             version = None
         if version != sklearn_version:
             print(f"Scikit learn version changed. Regenerate predictors for {dataset}")
-            self.build_predictors()
+            self.build_all_predictors()
             with open(
                 os.path.join(self.basedir, sklearn_version_file), "w"
             ) as file_out:

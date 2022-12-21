@@ -138,6 +138,18 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
             print(file=file)
         print("-" * len(header), file=file)
 
+    @property
+    def _has_solution(self):
+        return self[-1]._has_solution
+
+    @property
+    def output(self):
+        return self[-1].output
+
+    @property
+    def input(self):
+        return self[0].input
+
     def __getitem__(self, key):
         """Get an item from the pipeline steps"""
         return self._steps[key]

@@ -73,7 +73,7 @@ class SKgetter:
                     warnings.simplefilter("ignore", category=UserWarning)
                     predicted = self.predictor.predict(X)
             output_values = self.output_values
-            if len(predicted.shape) == 1 and output_values.shape == 2:
+            if len(predicted.shape) == 1 and len(output_values.shape) == 2:
                 predicted = predicted.reshape(-1, 1)
             return np.abs(predicted - output_values)
         raise NoSolution()

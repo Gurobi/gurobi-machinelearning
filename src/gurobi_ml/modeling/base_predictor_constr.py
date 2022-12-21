@@ -291,50 +291,50 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     @property
     def input_values(self):
-        if isinstance(self._input, np.ndarray):
+        if isinstance(self.input, np.ndarray):
             values = np.array(
-                [v.X if isinstance(v, gp.Var) else v for v in self._input.ravel()]
+                [v.X if isinstance(v, gp.Var) else v for v in self.input.ravel()]
             )
-            return values.reshape(self._input.shape)
-        if isinstance(self._input, pd.DataFrame):
+            return values.reshape(self.input.shape)
+        if isinstance(self.input, pd.DataFrame):
             values = np.array(
                 [
                     v.X if isinstance(v, gp.Var) else v
-                    for v in self._input.to_numpy().ravel()
+                    for v in self.input.to_numpy().ravel()
                 ]
             )
-            values = values.reshape(self._input.shape)
+            values = values.reshape(self.input.shape)
             return pd.DataFrame(
-                data=values, index=self._input.index, columns=self._input.columns
+                data=values, index=self.input.index, columns=self.input.columns
             )
         else:
             return self.input.X
 
     @property
     def output_values(self):
-        if isinstance(self._output, np.ndarray):
+        if isinstance(self.output, np.ndarray):
             values = np.array(
-                [v.X if isinstance(v, gp.Var) else v for v in self._output.ravel()]
+                [v.X if isinstance(v, gp.Var) else v for v in self.output.ravel()]
             )
-            return values.reshape(self._output.shape)
-        if isinstance(self._output, pd.DataFrame):
+            return values.reshape(self.output.shape)
+        if isinstance(self.output, pd.DataFrame):
             values = np.array(
                 [
                     v.X if isinstance(v, gp.Var) else v
-                    for v in self._output.to_numpy().ravel()
+                    for v in self.output.to_numpy().ravel()
                 ]
             )
-            values = values.reshape(self._output.shape)
+            values = values.reshape(self.output.shape)
             return pd.DataFrame(
-                data=values, index=self._output.index, columns=self._output.columns
+                data=values, index=self.output.index, columns=self.output.columns
             )
-        if isinstance(self._output, pd.Series):
+        if isinstance(self.output, pd.Series):
             values = np.array(
-                [v.X if isinstance(v, gp.Var) else v for v in self._output.to_numpy()]
+                [v.X if isinstance(v, gp.Var) else v for v in self.output.to_numpy()]
             )
-            return pd.Series(data=values, index=self._output.index)
+            return pd.Series(data=values, index=self.output.index)
         else:
-            return self.input.X
+            return self.output.X
 
     @property
     def input(self):
