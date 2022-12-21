@@ -194,7 +194,7 @@ With the `print_stats` function we display what was added to the model.
 
 ```{code-cell} ipython3
 pred_constr = add_predictor_constr(
-    m, pipe, studentsdata, y, output_type="probability_1"
+    m, pipe, studentsdata.to_numpy(), y.to_numpy(), output_type="probability_1"
 )
 
 pred_constr.print_stats()

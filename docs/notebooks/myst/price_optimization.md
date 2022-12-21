@@ -320,6 +320,30 @@ X = feat_transform.fit_transform(df)
 y = df["units_sold"]
 ```
 
+```{code-cell} ipython3
+X = df.loc[:, ["region", "year_index", "price", "peak"]].to_numpy()
+```
+
+```{code-cell} ipython3
+feat_transform = make_column_transformer(
+    (OneHotEncoder(drop="first"), [0]),
+    ("passthrough", [1,2,3]),
+    verbose_feature_names_out=False,
+)
+```
+
+```{code-cell} ipython3
+feat_transform.fit_transform(X)
+```
+
+```{code-cell} ipython3
+feat_transform.n_features_in_
+```
+
+```{code-cell} ipython3
+feat_transform.get_feature_names_out()
+```
+
 To validate the regression model, we will randomly split the dataset into $80\%$
 training and $20\%$ testing data and learn the weights using `Scikit-learn`.
 
@@ -622,6 +646,10 @@ feats
 
 Now apply the column transformer to the dataframe of features.
 We put the result in a new dataframe to make it more readable.
+
+```{code-cell} ipython3
+feat_transform.transformers
+```
 
 ```{code-cell} ipython3
 feats = pd.DataFrame(
