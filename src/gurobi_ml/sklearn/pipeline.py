@@ -22,8 +22,8 @@ from ..exceptions import NoModel
 from ..modeling.base_predictor_constr import AbstractPredictorConstr
 from ..modeling.get_convertor import get_convertor
 from ..register_user_predictor import user_predictors
-from .predictors_list import sklearn_predictors, sklearn_transformers
-from .preprocessing import add_column_transformer_constr
+from .predictors_list import sklearn_predictors
+from .preprocessing import add_column_transformer_constr, sklearn_transformers
 from .skgetter import SKgetter
 
 

@@ -28,8 +28,8 @@ def sklearn_convertors():
         )
         from .sklearn.predictors_list import (  # pylint: disable=import-outside-toplevel
             sklearn_predictors,
-            sklearn_transformers,
         )
+        from .sklearn.preprocessing import sklearn_transformers
 
         return (
             sklearn_predictors()

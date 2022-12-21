@@ -20,6 +20,10 @@ from .logistic_regression import add_logistic_regression_constr
 from .mlpregressor import add_mlp_regressor_constr
 from .pipeline import add_pipeline_constr
 from .pls_regression import add_pls_regression_constr
-from .predictors_list import sklearn_predictors, sklearn_transformers
-from .preprocessing import add_polynomial_features_constr, add_standard_scaler_constr
+from .predictors_list import sklearn_predictors
+from .preprocessing import (
+    add_polynomial_features_constr,
+    add_standard_scaler_constr,
+    sklearn_transformers,
+)
 from .random_forest_regressor import add_random_forest_regressor_constr
