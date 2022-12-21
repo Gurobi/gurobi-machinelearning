@@ -20,8 +20,6 @@ into a :gurobipy:`model`.
 import numpy as np
 from gurobipy import GRB
 
-from gurobi_ml.modeling.mvarplusconst import MVarPlusConst
-
 from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 
@@ -118,7 +116,6 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         _input = self._input
         output = self._output
         outdim = output.shape[1]
-        ismvarplusconst = isinstance(_input, MVarPlusConst)
         assert outdim == self.n_outputs_
         nex = _input.shape[0]
         nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name="node")
@@ -151,11 +148,14 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
             if left >= 0:
                 # Intermediate node
                 feature = tree.feature[node]
+                feat_var = _input[:, feature]
 
-                if ismvarplusconst and feature not in _input.var_index:
+                fixed_input = (feat_var.UB == feat_var.LB).all()
+
+                if fixed_input:
                     # Special case where we have an MVarPlusConst object
                     # If that feature is a constant we can directly fix it.
-                    value = _input[:, feature]
+                    value = _input[:, feature].LB
                     fixed_left = value <= threshold
                     nodes[fixed_left, right].UB = 0.0
                     nodes[~fixed_left, left].UB = 0.0

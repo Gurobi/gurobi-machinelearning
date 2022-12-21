@@ -16,6 +16,7 @@
 from abc import ABC, abstractmethod
 
 import gurobipy as gp
+import numpy as np
 
 try:
     import pandas as pd
@@ -25,7 +26,6 @@ except ImportError:
     HAS_PANDAS = False
 
 from ..exceptions import ParameterError
-from .mvarplusconst import MVarPlusConst
 from .submodel import SubModel
 
 
@@ -38,69 +38,6 @@ def _default_name(predictor):
         Class of the predictor
     """
     return type(predictor).__name__.lower()
-
-
-def to_mlinexpr(df, is_input: bool):
-    """Function to convert the dataframe into an mlinexpr"""
-    if is_input:
-        # If variable is an input we can convert it to an MLinexp
-        # but it's better to have an MVar so try this first
-        if all(map(lambda i: isinstance(i, gp.Var), df.to_numpy().ravel())):
-            rval = gp.MVar.fromlist(df.to_numpy().to_list())
-            if len(rval.shape) == 1:
-                rval = rval.reshape(1, -1)
-            return rval
-        return MVarPlusConst.fromdf(df)
-
-    else:
-        if any(map(lambda i: not isinstance(i, gp.Var), df.to_numpy().ravel())):
-            raise TypeError("Dataframe can't be converted to an MVar")
-        rval = gp.MVar.fromlist(df.to_numpy().tolist())
-        if len(rval.shape) == 1:
-            rval = rval.reshape(-1, 1)
-        return rval
-
-
-def validate_gp_vars(gp_vars: gp.MVar, is_input: bool):
-    """Put variables into appropriate form (matrix of variable).
-
-    Parameters
-    ----------
-    gpvars:
-        Decision variables used.
-    isinput:
-        True if variables are used as input. False if variables are used
-        as output.
-
-    Returns
-    -------
-    mvar_array_like
-        Decision variables with correctly adjusted shape.
-    """
-    if HAS_PANDAS:
-        if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
-            gp_vars = to_mlinexpr(gp_vars, is_input)
-            return gp_vars
-        if isinstance(gp_vars, (pd.DataFrame, MVarPlusConst)):
-            return gp_vars
-    if isinstance(gp_vars, gp.MLinExpr):
-        if gp_vars.ndim == 2:
-            return gp_vars
-    if isinstance(gp_vars, gp.MVar):
-        if gp_vars.ndim == 1 and is_input:
-            return gp_vars.reshape(1, -1)
-        if gp_vars.ndim in (1, 2):
-            return gp_vars
-        raise ParameterError("Variables should be an MVar of dimension 1 or 2")
-    if isinstance(gp_vars, dict):
-        gp_vars = gp_vars.values()
-    if isinstance(gp_vars, list):
-        if is_input:
-            return gp.MVar.fromlist(gp_vars).reshape(1, -1)
-        return gp.MVar.fromlist(gp_vars)
-    if isinstance(gp_vars, gp.Var):
-        return gp.MVar.fromlist([gp_vars]).reshape(1, 1)
-    raise ParameterError("Could not validate variables")
 
 
 class AbstractPredictorConstr(ABC, SubModel):
@@ -121,12 +58,111 @@ class AbstractPredictorConstr(ABC, SubModel):
     """
 
     def __init__(self, gp_model, input_vars, output_vars=None, **kwargs):
-        self._input = validate_gp_vars(input_vars, True)
-        if output_vars is not None:
-            self._output = validate_gp_vars(output_vars, False)
-        else:
-            self._output = None
+        self._input = input_vars
+        self._output = output_vars
         SubModel.__init__(self, gp_model, **kwargs)
+
+    def to_mvar(self, df, is_input: bool):
+        """Function to convert the dataframe into an mlinexpr"""
+        if is_input:
+            if isinstance(df, pd.DataFrame):
+                data = df.to_numpy()
+                columns = df.columns
+                index = df.index
+            elif isinstance(df, pd.Series):
+                data = df.to_numpy()
+                columns = df.columns
+                raise NotImplemented("Input variable as pd.Series is not implemented")
+            else:
+                data = df
+
+                if len(df.shape) == 2:
+                    main_shape = df.shape[1]
+                    minor_shape = df.shape[0]
+                else:
+                    main_shape = df.shape[0]
+                    minor_shape = 1
+                columns = [f"feat{i}" for i in range(main_shape)]
+                index = list(range(minor_shape))
+            # If variable is an input we can convert it to an MLinexp
+            # but it's better to have an MVar so try this first
+            if all(map(lambda i: isinstance(i, gp.Var), data.ravel())):
+                rval = gp.MVar.fromlist(data.tolist())
+                if len(rval.shape) == 1:
+                    rval = rval.reshape(1, -1)
+                return rval
+
+            model = self._gp_model
+            rval = np.zeros(data.shape, dtype=object)
+            const_indices = []
+            for i, a in enumerate(data.T):
+                if all(map(lambda i: isinstance(i, gp.Var), a)):
+                    rval[:, i] = a
+                    continue
+                try:
+                    rval[:, i] = a.astype(np.float64)
+                except TypeError:
+                    raise TypeError(
+                        "Dataframe can't be converted to a linear expression"
+                    )
+                const_indices.append(i)
+
+            mvar = model.addMVar((data.shape[0], len(const_indices)))
+            for i, j in enumerate(const_indices):
+                mvar[:, i].LB = rval[:, j]
+                mvar[:, i].UB = rval[:, j]
+                mvar[:, i].VarName = [f"{columns[j]}[{k}]" for k in index]
+                rval[:, j] = mvar[:, i].tolist()
+            model.update()
+            rval = gp.MVar.fromlist(rval)
+            return rval
+
+        if isinstance(df, (pd.DataFrame, pd.Series)):
+            data = df.to_numpy()
+        else:
+            data = df
+        if any(map(lambda i: not isinstance(i, gp.Var), data.ravel())):
+            raise TypeError("Dataframe can't be converted to an MVar")
+        rval = gp.MVar.fromlist(df.tolist())
+        if len(rval.shape) == 1:
+            rval = rval.reshape(-1, 1)
+        return rval
+
+    def validate_gp_vars(self, gp_vars: gp.MVar, is_input: bool):
+        """Put variables into appropriate form (matrix of variable).
+
+        Parameters
+        ----------
+        gpvars:
+            Decision variables used.
+        isinput:
+            True if variables are used as input. False if variables are used
+            as output.
+
+        Returns
+        -------
+        mvar_array_like
+            Decision variables with correctly adjusted shape.
+        """
+        if HAS_PANDAS:
+            if isinstance(gp_vars, (pd.DataFrame, pd.Series, np.ndarray)):
+                gp_vars = self.to_mvar(gp_vars, is_input)
+                return gp_vars
+        if isinstance(gp_vars, gp.MVar):
+            if gp_vars.ndim == 1 and is_input:
+                return gp_vars.reshape(1, -1)
+            if gp_vars.ndim in (1, 2):
+                return gp_vars
+            raise ParameterError("Variables should be an MVar of dimension 1 or 2")
+        if isinstance(gp_vars, dict):
+            gp_vars = gp_vars.values()
+        if isinstance(gp_vars, list):
+            if is_input:
+                return gp.MVar.fromlist(gp_vars).reshape(1, -1)
+            return gp.MVar.fromlist(gp_vars)
+        if isinstance(gp_vars, gp.Var):
+            return gp.MVar.fromlist([gp_vars]).reshape(1, 1)
+        raise ParameterError("Could not validate variables")
 
     def _validate(self):
         """Validate input and output variables (check shapes, reshape if needed)."""
@@ -150,12 +186,12 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     def _build_submodel(self, gp_model, *args, **kwargs):
         """Predict output from input using predictor or transformer"""
+        self._input = self.validate_gp_vars(self._input, True)
         if self._output is None:
             self._create_output_vars(self._input)
         if self._output is not None:
+            self._output = self.validate_gp_vars(self._output, False)
             self._validate()
-        else:
-            self._input = validate_gp_vars(self._input, True)
         self._mip_model(**kwargs)
         assert self._output is not None
         return self
@@ -247,8 +283,6 @@ class AbstractPredictorConstr(ABC, SubModel):
     def input_values(self):
         if isinstance(self._input, (gp.MLinExpr,)):
             return self.input.getValue()
-        elif isinstance(self._input, (MVarPlusConst)):
-            return self.input.get_value()
         else:
             return self.input.X
 
