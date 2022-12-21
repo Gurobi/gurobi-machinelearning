@@ -23,6 +23,7 @@ from ..modeling.base_predictor_constr import AbstractPredictorConstr
 from ..modeling.get_convertor import get_convertor
 from ..register_user_predictor import user_predictors
 from .predictors_list import sklearn_predictors, sklearn_transformers
+from .preprocessing import add_column_transformer_constr
 from .skgetter import SKgetter
 
 
@@ -71,7 +72,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         self._default_name = "pipe"
         SKgetter.__init__(self, pipeline, **kwargs)
         AbstractPredictorConstr.__init__(
-            self, gp_model, input_vars, output_vars, **kwargs
+            self, gp_model, input_vars, output_vars, validate_input=False, **kwargs
         )
 
     def _mip_model(self, **kwargs):
@@ -81,6 +82,9 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         output_vars = self._output
         steps = self._steps
         transformers = sklearn_transformers()
+        transformers["ColumnTransformer"] = add_column_transformer_constr
+        kwargs["validate_input"] = True
+
         for transformer in pipeline[:-1]:
             convertor = get_convertor(transformer, transformers)
             if convertor is None:

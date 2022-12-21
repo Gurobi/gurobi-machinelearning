@@ -62,8 +62,7 @@ class AbstractPredictorConstr(ABC, SubModel):
         self._output = output_vars
         SubModel.__init__(self, gp_model, **kwargs)
 
-    def to_mvar(self, df, is_input: bool):
-        """Function to convert the dataframe into an mlinexpr"""
+    def _dataframe_to_mvar(self, df, is_input):
         if is_input:
             if isinstance(df, pd.DataFrame):
                 data = df.to_numpy()
@@ -71,59 +70,60 @@ class AbstractPredictorConstr(ABC, SubModel):
                 index = df.index
             elif isinstance(df, pd.Series):
                 data = df.to_numpy()
-                columns = df.columns
+                index = df.columns
+                columns = None
                 raise NotImplemented("Input variable as pd.Series is not implemented")
+            return self._input_to_mvar(data, columns, index)
+        return self._output_to_mvar(df.to_numpy())
+
+    def _input_to_mvar(self, data, columns=None, index=None):
+        """Function to convert the dataframe into an mlinexpr"""
+        if columns is None or index is None:
+            if len(data.shape) == 2:
+                main_shape = data.shape[1]
+                minor_shape = data.shape[0]
             else:
-                data = df
-
-                if len(df.shape) == 2:
-                    main_shape = df.shape[1]
-                    minor_shape = df.shape[0]
-                else:
-                    main_shape = df.shape[0]
-                    minor_shape = 1
+                main_shape = data.shape[0]
+                minor_shape = 1
+            if columns is None:
                 columns = [f"feat{i}" for i in range(main_shape)]
+            if index is None:
                 index = list(range(minor_shape))
-            # If variable is an input we can convert it to an MLinexp
-            # but it's better to have an MVar so try this first
-            if all(map(lambda i: isinstance(i, gp.Var), data.ravel())):
-                rval = gp.MVar.fromlist(data.tolist())
-                if len(rval.shape) == 1:
-                    rval = rval.reshape(1, -1)
-                return rval
-
-            model = self._gp_model
-            rval = np.zeros(data.shape, dtype=object)
-            const_indices = []
-            for i, a in enumerate(data.T):
-                if all(map(lambda i: isinstance(i, gp.Var), a)):
-                    rval[:, i] = a
-                    continue
-                try:
-                    rval[:, i] = a.astype(np.float64)
-                except TypeError:
-                    raise TypeError(
-                        "Dataframe can't be converted to a linear expression"
-                    )
-                const_indices.append(i)
-
-            mvar = model.addMVar((data.shape[0], len(const_indices)))
-            for i, j in enumerate(const_indices):
-                mvar[:, i].LB = rval[:, j]
-                mvar[:, i].UB = rval[:, j]
-                mvar[:, i].VarName = [f"{columns[j]}[{k}]" for k in index]
-                rval[:, j] = mvar[:, i].tolist()
-            model.update()
-            rval = gp.MVar.fromlist(rval)
+        # If variable is an input we can convert it to an MLinexp
+        # but it's better to have an MVar so try this first
+        if all(map(lambda i: isinstance(i, gp.Var), data.ravel())):
+            rval = gp.MVar.fromlist(data.tolist())
+            if len(rval.shape) == 1:
+                rval = rval.reshape(1, -1)
             return rval
 
-        if isinstance(df, (pd.DataFrame, pd.Series)):
-            data = df.to_numpy()
-        else:
-            data = df
+        model = self._gp_model
+        rval = np.zeros(data.shape, dtype=object)
+        const_indices = []
+        for i, a in enumerate(data.T):
+            if all(map(lambda i: isinstance(i, gp.Var), a)):
+                rval[:, i] = a
+                continue
+            try:
+                rval[:, i] = a.astype(np.float64)
+            except TypeError:
+                raise TypeError("Dataframe can't be converted to a linear expression")
+            const_indices.append(i)
+
+        mvar = model.addMVar((data.shape[0], len(const_indices)))
+        for i, j in enumerate(const_indices):
+            mvar[:, i].LB = rval[:, j]
+            mvar[:, i].UB = rval[:, j]
+            mvar[:, i].VarName = [f"{columns[j]}[{k}]" for k in index]
+            rval[:, j] = mvar[:, i].tolist()
+        model.update()
+        rval = gp.MVar.fromlist(rval)
+        return rval
+
+    def _output_to_mvar(self, data):
         if any(map(lambda i: not isinstance(i, gp.Var), data.ravel())):
             raise TypeError("Dataframe can't be converted to an MVar")
-        rval = gp.MVar.fromlist(df.tolist())
+        rval = gp.MVar.fromlist(data.tolist())
         if len(rval.shape) == 1:
             rval = rval.reshape(-1, 1)
         return rval
@@ -145,9 +145,14 @@ class AbstractPredictorConstr(ABC, SubModel):
             Decision variables with correctly adjusted shape.
         """
         if HAS_PANDAS:
-            if isinstance(gp_vars, (pd.DataFrame, pd.Series, np.ndarray)):
-                gp_vars = self.to_mvar(gp_vars, is_input)
+            if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
+                gp_vars = self._dataframe_to_mvar(gp_vars, is_input)
                 return gp_vars
+        if isinstance(gp_vars, np.ndarray):
+            if is_input:
+                return self._input_to_mvar(gp_vars)
+            else:
+                return self._output_to_mvar(gp_vars)
         if isinstance(gp_vars, gp.MVar):
             if gp_vars.ndim == 1 and is_input:
                 return gp_vars.reshape(1, -1)
@@ -186,10 +191,16 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     def _build_submodel(self, gp_model, *args, **kwargs):
         """Predict output from input using predictor or transformer"""
-        self._input = self.validate_gp_vars(self._input, True)
+        if "validate_input" in kwargs:
+            validate_input = kwargs["validate_input"]
+        else:
+            validate_input = True
+
+        if validate_input:
+            self._input = self.validate_gp_vars(self._input, True)
         if self._output is None:
             self._create_output_vars(self._input)
-        if self._output is not None:
+        if self._output is not None and validate_input:
             self._output = self.validate_gp_vars(self._output, False)
             self._validate()
         self._mip_model(**kwargs)
@@ -241,7 +252,6 @@ class AbstractPredictorConstr(ABC, SubModel):
         """Returns true if we have a solution"""
         try:
             self.input_values
-            self._output.X
             return True
         except gp.GurobiError:
             pass
@@ -281,8 +291,48 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     @property
     def input_values(self):
-        if isinstance(self._input, (gp.MLinExpr,)):
-            return self.input.getValue()
+        if isinstance(self._input, np.ndarray):
+            values = np.array(
+                [v.X if isinstance(v, gp.Var) else v for v in self._input.ravel()]
+            )
+            return values.reshape(self._input.shape)
+        if isinstance(self._input, pd.DataFrame):
+            values = np.array(
+                [
+                    v.X if isinstance(v, gp.Var) else v
+                    for v in self._input.to_numpy().ravel()
+                ]
+            )
+            values = values.reshape(self._input.shape)
+            return pd.DataFrame(
+                data=values, index=self._input.index, columns=self._input.columns
+            )
+        else:
+            return self.input.X
+
+    @property
+    def output_values(self):
+        if isinstance(self._output, np.ndarray):
+            values = np.array(
+                [v.X if isinstance(v, gp.Var) else v for v in self._output.ravel()]
+            )
+            return values.reshape(self._output.shape)
+        if isinstance(self._output, pd.DataFrame):
+            values = np.array(
+                [
+                    v.X if isinstance(v, gp.Var) else v
+                    for v in self._output.to_numpy().ravel()
+                ]
+            )
+            values = values.reshape(self._output.shape)
+            return pd.DataFrame(
+                data=values, index=self._output.index, columns=self._output.columns
+            )
+        if isinstance(self._output, pd.Series):
+            values = np.array(
+                [v.X if isinstance(v, gp.Var) else v for v in self._output.to_numpy()]
+            )
+            return pd.Series(data=values, index=self._output.index)
         else:
             return self.input.X
 

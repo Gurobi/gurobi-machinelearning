@@ -164,3 +164,59 @@ class PolynomialFeaturesConstr(SKtransformer):
                 self.gp_model.addConstr(
                     output[k, i] == q_expr, name=f"polyfeat[{k},{i}]"
                 )
+
+
+def sklearn_transformers():
+    return {
+        "StandardScaler": add_standard_scaler_constr,
+        "PolynomialFeatures": add_polynomial_features_constr,
+    }
+
+
+class ColumnTransformerConstr(SKtransformer):
+    def __init__(self, gp_model, column_transformer, input_vars, **kwargs):
+        self._default_name = "col_trans"
+        super().__init__(gp_model, column_transformer, input_vars, **kwargs)
+
+    def _create_output_vars(self, input_vars, **kwargs):
+        out_shape = (input_vars.shape[0], self.transformer.n_output_features_)
+        rval = self._gp_model.addMVar(out_shape, name="polyx", lb=-gp.GRB.INFINITY)
+        self._gp_model.update()
+        self._output = rval
+
+    # For this class we need to reimplement submodel because we don't want
+    # to transform input variables to Gurobi variable. We can't do it for categorical
+    # The input should be unchanged.
+    def _build_submodel(self, gp_model, *args, **kwargs):
+        """Predict output from input using predictor or transformer"""
+        self._mip_model(**kwargs)
+        assert self._output is not None
+        return self
+
+    def _mip_model(self, **kwargs):
+        """Do the transformation on x"""
+        column_transform = self.transformer
+        _input = self._input
+        transformers = {k.lower(): v for k, v in sklearn_transformers().items()}
+        transformed = []
+        for name, trans, cols in column_transform.transformers_:
+            if trans == "passthrough":
+                transformed.append(_input.loc[:, cols])
+            elif trans == "drop":
+                pass
+            else:
+                data = _input.loc[:, cols]
+                anyvar = any(
+                    map(lambda i: isinstance(i, gp.Var), data.to_numpy().ravel())
+                )
+                if anyvar:
+                    if name in transformers:
+                        trans_constr = transformers[name](self._gp_model, trans, data)
+                    transformed.append(trans_constr.output.tolist())
+                else:
+                    transformed.append(trans.transform(_input.loc[:, cols]))
+        self._output = column_transform._hstack(transformed)
+
+
+def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kwargs):
+    return ColumnTransformerConstr(gp_model, column_transformer, input_vars, **kwargs)
