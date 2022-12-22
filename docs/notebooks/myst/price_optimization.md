@@ -319,7 +319,7 @@ feat_transform = make_column_transformer(
     remainder='drop'
 )
 
-X = df
+X = df[["region", "price", "year_index", "peak"]]
 y = df["units_sold"]
 ```
 
@@ -629,13 +629,6 @@ Now, we just need to call
 to insert the constraints linking the features and the demand.
 
 ```{code-cell} ipython3
-import sys
-sys.path.append('../../../src/')
-%load_ext autoreload
-%autoreload 2
-```
-
-```{code-cell} ipython3
 from gurobi_ml import add_predictor_constr
 ```
 
@@ -662,10 +655,6 @@ $2$.
 ```{code-cell} ipython3
 m.Params.NonConvex = 2
 m.optimize()
-```
-
-```{code-cell} ipython3
-pred_constr.get_error()
 ```
 
 The solver solved the optimization problem in less than a second. Let us now
