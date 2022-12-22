@@ -72,7 +72,9 @@ class AbstractPredictorConstr(ABC, SubModel):
                 data = df.to_numpy()
                 index = df.columns
                 columns = None
-                raise NotImplemented("Input variable as pd.Series is not implemented")
+                raise NotImplementedError(
+                    "Input variable as pd.Series is not implemented"
+                )
             return self._input_to_mvar(data, columns, index)
         return self._output_to_mvar(df.to_numpy())
 
@@ -186,8 +188,9 @@ class AbstractPredictorConstr(ABC, SubModel):
                 + f"{output_vars.shape[0]} != {input_vars.shape[0]}"
             )
 
+        input_shape = getattr(self, "_input_shape", None)
         if hasattr(self, "_input_shape") and input_vars.shape[1] != self._input_shape:
-            raise Exception(
+            raise ParameterError(
                 "Non-conforming dimension between "
                 + f"input variable and {type(self)} expected dimension: "
                 + f"{self._input_shape} != {input_vars.shape[1]}"
