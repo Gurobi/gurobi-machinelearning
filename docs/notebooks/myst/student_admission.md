@@ -92,6 +92,10 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
+import sys
+sys.path.append('../../../src')
+%load_ext autoreload
+%autoreload 2
 import gurobipy as gp
 
 from gurobi_ml import add_predictor_constr
@@ -141,7 +145,9 @@ we randomly pick 250 students from it.
 ```{code-cell} ipython3
 # Retrieve new data used to build the optimization problem
 studentsdata = pd.read_csv(janos_data_url + "college_applications6000.csv", index_col=0)
+```
 
+```{code-cell} ipython3
 nstudents = 250
 
 # Select randomly nstudents in the data
@@ -194,7 +200,7 @@ With the `print_stats` function we display what was added to the model.
 
 ```{code-cell} ipython3
 pred_constr = add_predictor_constr(
-    m, pipe, studentsdata.to_numpy(), y.to_numpy(), output_type="probability_1"
+    m, pipe, studentsdata, y, output_type="probability_1"
 )
 
 pred_constr.print_stats()

@@ -674,6 +674,22 @@ print("\n The optimal net revenue: $%f million" % opt_revenue)
 solution.round(4)
 ```
 
+We can also check the error in the estimate of the Gurobi solution for the regression model.
+
+```{code-cell} ipython3
+print(
+    "Maximum error in approximating the regression {:.6}".format(
+        np.max(pred_constr.get_error())
+    )
+)
+```
+
+And the features of the regression model
+
+```{code-cell} ipython3
+pred_constr.input_values
+```
+
 Let us now visualize a scatter plot between the price and the number of avocados
 sold (in millions) for the eight regions.
 
