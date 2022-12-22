@@ -16,7 +16,8 @@
 """Bases classes for modeling neural network layers"""
 
 
-from ..base_predictor_constr import AbstractPredictorConstr, _default_name
+from .._var_utils import _default_name
+from ..base_predictor_constr import AbstractPredictorConstr
 from .activations import Identity, ReLU
 from .layers import ActivationLayer, DenseLayer
 

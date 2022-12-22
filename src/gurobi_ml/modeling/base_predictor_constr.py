@@ -16,28 +16,10 @@
 from abc import ABC, abstractmethod
 
 import gurobipy as gp
-import numpy as np
-
-try:
-    import pandas as pd
-
-    HAS_PANDAS = True
-except ImportError:
-    HAS_PANDAS = False
 
 from ..exceptions import ParameterError
+from ._var_utils import _get_sol_values, validate_input_vars, validate_output_vars
 from .submodel import SubModel
-
-
-def _default_name(predictor):
-    """Make a default name for predictor constraint.
-
-    Parameters
-    ----------
-    predictor:
-        Class of the predictor
-    """
-    return type(predictor).__name__.lower()
 
 
 class AbstractPredictorConstr(ABC, SubModel):
@@ -62,124 +44,33 @@ class AbstractPredictorConstr(ABC, SubModel):
         self._output = output_vars
         SubModel.__init__(self, gp_model, **kwargs)
 
-    def _dataframe_to_mvar(self, df, is_input):
-        if is_input:
-            if isinstance(df, pd.DataFrame):
-                data = df.to_numpy()
-                columns = df.columns
-                index = df.index
-            elif isinstance(df, pd.Series):
-                data = df.to_numpy()
-                index = df.columns
-                columns = None
-                raise NotImplementedError(
-                    "Input variable as pd.Series is not implemented"
-                )
-            return self._input_to_mvar(data, columns, index)
-        return self._output_to_mvar(df.to_numpy())
-
-    def _input_to_mvar(self, data, columns=None, index=None):
-        """Function to convert the dataframe into an mlinexpr"""
-        if columns is None or index is None:
-            if len(data.shape) == 2:
-                main_shape = data.shape[1]
-                minor_shape = data.shape[0]
-            else:
-                main_shape = data.shape[0]
-                minor_shape = 1
-            if columns is None:
-                columns = [f"feat{i}" for i in range(main_shape)]
-            if index is None:
-                index = list(range(minor_shape))
-        # If variable is an input we can convert it to an MLinexp
-        # but it's better to have an MVar so try this first
-        if all(map(lambda i: isinstance(i, gp.Var), data.ravel())):
-            rval = gp.MVar.fromlist(data.tolist())
-            if len(rval.shape) == 1:
-                rval = rval.reshape(1, -1)
-            return rval
-
-        model = self._gp_model
-        rval = np.zeros(data.shape, dtype=object)
-        const_indices = []
-        for i, a in enumerate(data.T):
-            if all(map(lambda i: isinstance(i, gp.Var), a)):
-                rval[:, i] = a
-                continue
-            try:
-                rval[:, i] = a.astype(np.float64)
-            except TypeError:
-                raise TypeError("Dataframe can't be converted to a linear expression")
-            const_indices.append(i)
-
-        mvar = model.addMVar((data.shape[0], len(const_indices)))
-        for i, j in enumerate(const_indices):
-            mvar[:, i].LB = rval[:, j]
-            mvar[:, i].UB = rval[:, j]
-            mvar[:, i].VarName = [f"{columns[j]}[{k}]" for k in index]
-            rval[:, j] = mvar[:, i].tolist()
-        model.update()
-        rval = gp.MVar.fromlist(rval)
-        return rval
-
-    def _output_to_mvar(self, data):
-        if any(map(lambda i: not isinstance(i, gp.Var), data.ravel())):
-            raise TypeError("Dataframe can't be converted to an MVar")
-        rval = gp.MVar.fromlist(data.tolist())
-        if len(rval.shape) == 1:
-            rval = rval.reshape(-1, 1)
-        return rval
-
-    def validate_gp_vars(self, gp_vars: gp.MVar, is_input: bool):
-        """Put variables into appropriate form (matrix of variable).
-
-        Parameters
-        ----------
-        gpvars:
-            Decision variables used.
-        isinput:
-            True if variables are used as input. False if variables are used
-            as output.
-
-        Returns
-        -------
-        mvar_array_like
-            Decision variables with correctly adjusted shape.
-        """
-        if HAS_PANDAS:
-            if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
-                gp_vars = self._dataframe_to_mvar(gp_vars, is_input)
-                return gp_vars
-        if isinstance(gp_vars, np.ndarray):
-            if is_input:
-                return self._input_to_mvar(gp_vars)
-            else:
-                return self._output_to_mvar(gp_vars)
-        if isinstance(gp_vars, gp.MVar):
-            if gp_vars.ndim == 1 and is_input:
-                return gp_vars.reshape(1, -1)
-            if gp_vars.ndim in (1, 2):
-                return gp_vars
-            raise ParameterError("Variables should be an MVar of dimension 1 or 2")
-        if isinstance(gp_vars, dict):
-            gp_vars = gp_vars.values()
-        if isinstance(gp_vars, list):
-            if is_input:
-                return gp.MVar.fromlist(gp_vars).reshape(1, -1)
-            return gp.MVar.fromlist(gp_vars)
-        if isinstance(gp_vars, gp.Var):
-            return gp.MVar.fromlist([gp_vars]).reshape(1, 1)
-        raise ParameterError("Could not validate variables")
-
     def _validate(self):
         """Validate input and output variables (check shapes, reshape if needed)."""
         input_vars = self.input
         output_vars = self.output
+
+        if hasattr(self, "_input_shape") and input_vars.shape[1] != self._input_shape:
+            raise ParameterError(
+                "Input variables dimension doesn't conform with modeling object "
+                + f"{type(self)}, input variable dimension: "
+                + f"{self._input_shape} != {input_vars.shape[1]}"
+            )
+
         if output_vars.ndim == 1:
             if input_vars.shape[0] == 1:
                 output_vars = output_vars.reshape((1, -1))
             else:
                 output_vars = output_vars.reshape((-1, 1))
+
+        if (
+            hasattr(self, "_output_shape")
+            and output_vars.shape[1] != self._output_shape
+        ):
+            raise ParameterError(
+                "Output variables dimension doesn't conform with modeling object "
+                + f"{type(self)}, output variable dimension: "
+                + f"{output_vars.shape[1]}"
+            )
 
         if output_vars.shape[0] != input_vars.shape[0]:
             raise ParameterError(
@@ -188,34 +79,17 @@ class AbstractPredictorConstr(ABC, SubModel):
                 + f"{output_vars.shape[0]} != {input_vars.shape[0]}"
             )
 
-        input_shape = getattr(self, "_input_shape", None)
-        if hasattr(self, "_input_shape") and input_vars.shape[1] != self._input_shape:
-            raise ParameterError(
-                "Non-conforming dimension between "
-                + f"input variable and {type(self)} expected dimension: "
-                + f"{self._input_shape} != {input_vars.shape[1]}"
-            )
-
-        if (
-            hasattr(self, "_output_shape")
-            and output_vars.shape[1] != self._output_shape
-        ):
-            raise Exception(
-                "Non-conforming dimension between "
-                + f"output variable and {type(self)} expected dimension: "
-                + f"{self._output_shape} != {output_vars.shape[1]}"
-            )
-
         self._input = input_vars
         self._output = output_vars
 
     def _build_submodel(self, gp_model, *args, **kwargs):
         """Predict output from input using predictor or transformer"""
-        self._input = self.validate_gp_vars(self._input, True)
+        self._input = validate_input_vars(self._gp_model, self._input)
+
         if self._output is None:
             self._create_output_vars(self._input)
         if self._output is not None:
-            self._output = self.validate_gp_vars(self._output, False)
+            self._output = validate_output_vars(self._output)
             self._validate()
         self._mip_model(**kwargs)
         assert self._output is not None
@@ -264,7 +138,7 @@ class AbstractPredictorConstr(ABC, SubModel):
     def _has_solution(self):
         """Returns true if we have a solution"""
         try:
-            self.input_values
+            self._input_values
             return True
         except gp.GurobiError:
             pass
@@ -303,51 +177,12 @@ class AbstractPredictorConstr(ABC, SubModel):
         return self._output
 
     @property
-    def input_values(self):
-        if isinstance(self.input, np.ndarray):
-            values = np.array(
-                [v.X if isinstance(v, gp.Var) else v for v in self.input.ravel()]
-            )
-            return values.reshape(self.input.shape)
-        if isinstance(self.input, pd.DataFrame):
-            values = np.array(
-                [
-                    v.X if isinstance(v, gp.Var) else v
-                    for v in self.input.to_numpy().ravel()
-                ]
-            )
-            values = values.reshape(self.input.shape)
-            return pd.DataFrame(
-                data=values, index=self.input.index, columns=self.input.columns
-            )
-        else:
-            return self.input.X
+    def _input_values(self):
+        return _get_sol_values(self.input)
 
     @property
-    def output_values(self):
-        if isinstance(self.output, np.ndarray):
-            values = np.array(
-                [v.X if isinstance(v, gp.Var) else v for v in self.output.ravel()]
-            )
-            return values.reshape(self.output.shape)
-        if isinstance(self.output, pd.DataFrame):
-            values = np.array(
-                [
-                    v.X if isinstance(v, gp.Var) else v
-                    for v in self.output.to_numpy().ravel()
-                ]
-            )
-            values = values.reshape(self.output.shape)
-            return pd.DataFrame(
-                data=values, index=self.output.index, columns=self.output.columns
-            )
-        if isinstance(self.output, pd.Series):
-            values = np.array(
-                [v.X if isinstance(v, gp.Var) else v for v in self.output.to_numpy()]
-            )
-            return pd.Series(data=values, index=self.output.index)
-        else:
-            return self.output.X
+    def _output_values(self):
+        return _get_sol_values(self.output)
 
     @property
     def input(self):

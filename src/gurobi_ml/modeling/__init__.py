@@ -13,4 +13,4 @@
 # limitations under the License.
 # ==============================================================================
 
-from .base_predictor_constr import AbstractPredictorConstr, _default_name
+from .base_predictor_constr import AbstractPredictorConstr
