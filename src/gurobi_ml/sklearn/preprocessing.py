@@ -92,12 +92,12 @@ class SKtransformer(AbstractPredictorConstr):
     def get_error(self):
         if self._has_solution:
             transformer = self.transformer
-            input_values = self._input_values
+            input_values = self.input_values
 
-            transformed = self.transformer.transform(self._input_values)
+            transformed = self.transformer.transform(self.input_values)
             if len(transformed.shape) == 1:
                 transformed = transformed.reshape(-1, 1)
-            return np.abs(transformed - self._output_values)
+            return np.abs(transformed - self.output_values)
         raise NoSolution()
 
 

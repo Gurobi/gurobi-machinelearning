@@ -140,7 +140,7 @@ class AbstractPredictorConstr(ABC, SubModel):
     def _has_solution(self):
         """Returns true if we have a solution"""
         try:
-            self._input_values
+            self.input_values
             return True
         except gp.GurobiError:
             pass
@@ -179,11 +179,11 @@ class AbstractPredictorConstr(ABC, SubModel):
         return self._output
 
     @property
-    def _input_values(self):
+    def input_values(self):
         return _get_sol_values(self.input, self._input_columns, self._input_index)
 
     @property
-    def _output_values(self):
+    def output_values(self):
         return _get_sol_values(self.output)
 
     @property

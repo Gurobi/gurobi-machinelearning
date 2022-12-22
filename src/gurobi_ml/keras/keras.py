@@ -131,5 +131,5 @@ class KerasNetworkConstr(BaseNNConstr):
 
     def get_error(self):
         if self._has_solution:
-            return np.abs(self.predictor.predict(self._input_values) - self.output.X)
+            return np.abs(self.predictor.predict(self.input_values) - self.output.X)
         raise NoSolution()

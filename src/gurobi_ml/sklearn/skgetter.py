@@ -14,7 +14,6 @@
 # ==============================================================================
 
 """ Implements some utility tools for all scikit-learn objects """
-import warnings
 
 import numpy as np
 from sklearn.utils.validation import check_is_fitted
@@ -59,17 +58,14 @@ class SKgetter:
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         if self._has_solution:
-            X = self._input_values
+            X = self.input_values
             if self.output_type == "probability_1":
-                with warnings.catch_warnings():
-                    predicted = self.predictor.predict_proba(X)[:, 1]
+                predicted = self.predictor.predict_proba(X)[:, 1]
             elif self.output_type == "probability":
-                with warnings.catch_warnings():
-                    predicted = self.predictor.predict_proba(X)
+                predicted = self.predictor.predict_proba(X)
             else:
-                with warnings.catch_warnings():
-                    predicted = self.predictor.predict(X)
-            output_values = self._output_values
+                predicted = self.predictor.predict(X)
+            output_values = self.output_values
             if len(predicted.shape) == 1 and len(output_values.shape) == 2:
                 predicted = predicted.reshape(-1, 1)
             return np.abs(predicted - output_values)
