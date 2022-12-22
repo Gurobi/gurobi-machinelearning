@@ -38,10 +38,10 @@ class SKgetter:
         check_is_fitted(predictor)
         self.predictor = predictor
         self.output_type = output_type
-        try:
-            self.n_outputs_ = predictor.n_outputs_
-        except AttributeError:
-            pass
+        if hasattr(predictor, "n_features_in_"):
+            self._input_shape = predictor.n_features_in_
+        if hasattr(predictor, "n_outputs_"):
+            self._output_shape = predictor.n_outputs_
 
     def get_error(self):
         """Returns error in Gurobi's solution with respect to prediction from input

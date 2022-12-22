@@ -81,6 +81,10 @@ def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
 class SKtransformer(AbstractPredictorConstr):
     def __init__(self, gp_model, transformer, input_vars, **kwargs):
         self.transformer = transformer
+        if hasattr(transformer, "n_features_in_"):
+            self._input_shape = transformer.n_features_in_
+        if hasattr(transformer, "n_output_features_"):
+            self._output_shape = transformer.n_output_features_
         check_is_fitted(transformer)
         super().__init__(gp_model, input_vars, **kwargs)
 
@@ -100,13 +104,8 @@ class StandardScalerConstr(SKtransformer):
 
     def __init__(self, gp_model, scaler, input_vars, **kwargs):
         self._default_name = "std_scaler"
+        self._output_shape = scaler.n_features_in_
         super().__init__(gp_model, scaler, input_vars, **kwargs)
-
-    def _create_output_vars(self, input_vars, **kwargs):
-        rval = self._gp_model.addMVar(input_vars.shape, name="scaled")
-        rval.LB = -gp.GRB.INFINITY
-        self._gp_model.update()
-        self._output = rval
 
     def _mip_model(self, **kwargs):
         """Do the transformation on x"""
@@ -117,10 +116,7 @@ class StandardScalerConstr(SKtransformer):
         scale = self.transformer.scale_
         mean = self.transformer.mean_
 
-        self._gp_model.addConstrs(
-            (_input[:, i] - output[:, i] * scale[i] == mean[i] for i in range(nfeat)),
-            name="s",
-        )
+        self._gp_model.addConstr(_input - output * scale == mean, name="s")
         return self
 
 
@@ -134,12 +130,6 @@ class PolynomialFeaturesConstr(SKtransformer):
             )
         self._default_name = "poly_feat"
         super().__init__(gp_model, polynomial_features, input_vars, **kwargs)
-
-    def _create_output_vars(self, input_vars, **kwargs):
-        out_shape = (input_vars.shape[0], self.transformer.n_output_features_)
-        rval = self._gp_model.addMVar(out_shape, name="polyx", lb=-gp.GRB.INFINITY)
-        self._gp_model.update()
-        self._output = rval
 
     def _mip_model(self, **kwargs):
         """Do the transformation on x"""

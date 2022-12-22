@@ -99,7 +99,6 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         float_type=np.float32,
         **kwargs
     ):
-        self.n_outputs_ = predictor.n_outputs_
         self.epsilon = epsilon
         self.scale = scale
         self.float_type = float_type
@@ -116,7 +115,6 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         _input = self._input
         output = self._output
         outdim = output.shape[1]
-        assert outdim == self.n_outputs_
         nex = _input.shape[0]
         nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name="node")
         self.nodevars = nodes
@@ -178,7 +176,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                 model.addConstrs(
                     (nodes[k, node].item() == 1)
                     >> (output[k, i] == tree.value[node][i][0])
-                    for i in range(self.n_outputs_)
+                    for i in range(outdim)
                     for k in range(nex)
                 )
 

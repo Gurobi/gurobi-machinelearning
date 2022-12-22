@@ -66,7 +66,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
     Stores the changes to :gurobipy:`model` when embedding an instance into it."""
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
-        self.n_outputs_ = 1
+        self._output_shape = 1
         self.estimators_ = []
         self._default_name = "gbtree_reg"
         SKgetter.__init__(self, predictor)

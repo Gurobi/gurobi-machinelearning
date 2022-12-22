@@ -171,8 +171,8 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     def _validate(self):
         """Validate input and output variables (check shapes, reshape if needed)."""
-        input_vars = self._input
-        output_vars = self._output
+        input_vars = self.input
+        output_vars = self.output
         if output_vars.ndim == 1:
             if input_vars.shape[0] == 1:
                 output_vars = output_vars.reshape((1, -1))
@@ -186,21 +186,32 @@ class AbstractPredictorConstr(ABC, SubModel):
                 + f"{output_vars.shape[0]} != {input_vars.shape[0]}"
             )
 
+        if hasattr(self, "_input_shape") and input_vars.shape[1] != self._input_shape:
+            raise Exception(
+                "Non-conforming dimension between "
+                + f"input variable and {type(self)} expected dimension: "
+                + f"{self._input_shape} != {input_vars.shape[1]}"
+            )
+
+        if (
+            hasattr(self, "_output_shape")
+            and output_vars.shape[1] != self._output_shape
+        ):
+            raise Exception(
+                "Non-conforming dimension between "
+                + f"output variable and {type(self)} expected dimension: "
+                + f"{self._output_shape} != {output_vars.shape[1]}"
+            )
+
         self._input = input_vars
         self._output = output_vars
 
     def _build_submodel(self, gp_model, *args, **kwargs):
         """Predict output from input using predictor or transformer"""
-        if "validate_input" in kwargs:
-            validate_input = kwargs["validate_input"]
-        else:
-            validate_input = True
-
-        if validate_input:
-            self._input = self.validate_gp_vars(self._input, True)
+        self._input = self.validate_gp_vars(self._input, True)
         if self._output is None:
             self._create_output_vars(self._input)
-        if self._output is not None and validate_input:
+        if self._output is not None:
             self._output = self.validate_gp_vars(self._output, False)
             self._validate()
         self._mip_model(**kwargs)
@@ -235,17 +246,16 @@ class AbstractPredictorConstr(ABC, SubModel):
             print(f"Input has shape {self.input.shape}", file=file)
             print(f"Output has shape {self.output.shape}", file=file)
 
-    def _create_output_vars(self, input_vars, name="output"):
+    def _create_output_vars(self, input_vars, name="out"):
         """May be defined in derived class to create the output variables of predictor"""
         try:
-            n_outputs = self.n_outputs_
+            n_outputs = self._output_shape
         except AttributeError:
             return
-        rval = self._gp_model.addMVar(
+        self._output = self._gp_model.addMVar(
             (input_vars.shape[0], n_outputs), lb=-gp.GRB.INFINITY, name=name
         )
         self._gp_model.update()
-        self._output = rval
 
     @property
     def _has_solution(self):

@@ -67,7 +67,6 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
     Stores the changes to :gurobipy:`model` when embedding an instance into it."""
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
-        self.n_outputs_ = predictor.n_outputs_
         self.estimators_ = []
         self._default_name = "rand_forest_reg"
         SKgetter.__init__(self, predictor)
@@ -89,7 +88,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         nex = _input.shape[0]
 
         tree_vars = model.addMVar(
-            (nex, predictor.n_estimators, self.n_outputs_),
+            (nex, predictor.n_estimators, self._output_shape),
             lb=-GRB.INFINITY,
             name="estimator",
         )

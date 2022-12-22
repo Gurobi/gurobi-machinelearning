@@ -75,6 +75,20 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
             self, gp_model, input_vars, output_vars, validate_input=False, **kwargs
         )
 
+    def _build_submodel(self, gp_model, *args, **kwargs):
+        """Predict output from input using predictor or transformer
+
+        Pipelines are different from other objects because they can't validate
+        their input and output. They are just containers of other objects that will
+        do it.
+        """
+        self._mip_model(**kwargs)
+        assert self.output is not None
+        assert self.input is not None
+        # We can call validate only after the model is created
+        self._validate()
+        return self
+
     def _mip_model(self, **kwargs):
         pipeline = self.predictor
         gp_model = self._gp_model
