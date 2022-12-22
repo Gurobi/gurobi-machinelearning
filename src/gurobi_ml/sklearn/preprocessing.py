@@ -18,6 +18,7 @@ Guobi model"""
 
 import gurobipy as gp
 import numpy as np
+import pandas as pd
 from sklearn.utils.validation import check_is_fitted
 
 from ..exceptions import NoModel, NoSolution
@@ -89,11 +90,14 @@ class SKtransformer(AbstractPredictorConstr):
         super().__init__(gp_model, input_vars, **kwargs)
 
     def get_error(self):
-        if self._has_solution():
-            transformed = self.transformer.transform(self.input.X)
+        if self._has_solution:
+            transformer = self.transformer
+            input_values = self._input_values
+
+            transformed = self.transformer.transform(self._input_values)
             if len(transformed.shape) == 1:
                 transformed = transformed.reshape(-1, 1)
-            return np.abs(transformed - self.output.X)
+            return np.abs(transformed - self._output_values)
         raise NoSolution()
 
 
@@ -179,6 +183,10 @@ class ColumnTransformerConstr(SKtransformer):
     # The input should be unchanged.
     def _build_submodel(self, gp_model, *args, **kwargs):
         """Predict output from input using predictor or transformer"""
+        _input = self.input
+        if isinstance(_input, (pd.DataFrame, pd.Series)):
+            self._input_columns = _input.columns
+            self._input_index = _input.index
         self._mip_model(**kwargs)
         assert self._output is not None
         return self

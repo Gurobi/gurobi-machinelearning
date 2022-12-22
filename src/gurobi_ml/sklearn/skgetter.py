@@ -62,15 +62,12 @@ class SKgetter:
             X = self._input_values
             if self.output_type == "probability_1":
                 with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", category=UserWarning)
                     predicted = self.predictor.predict_proba(X)[:, 1]
             elif self.output_type == "probability":
                 with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", category=UserWarning)
                     predicted = self.predictor.predict_proba(X)
             else:
                 with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", category=UserWarning)
                     predicted = self.predictor.predict(X)
             output_values = self._output_values
             if len(predicted.shape) == 1 and len(output_values.shape) == 2:

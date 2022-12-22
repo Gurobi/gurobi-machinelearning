@@ -84,7 +84,9 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     def _build_submodel(self, gp_model, *args, **kwargs):
         """Predict output from input using predictor or transformer"""
-        self._input = validate_input_vars(self._gp_model, self._input)
+        self._input, columns, index = validate_input_vars(self._gp_model, self._input)
+        self._input_index = index
+        self._input_columns = columns
 
         if self._output is None:
             self._create_output_vars(self._input)
@@ -178,7 +180,7 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     @property
     def _input_values(self):
-        return _get_sol_values(self.input)
+        return _get_sol_values(self.input, self._input_columns, self._input_index)
 
     @property
     def _output_values(self):

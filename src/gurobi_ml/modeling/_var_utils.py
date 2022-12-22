@@ -39,7 +39,7 @@ def _default_name(predictor):
     return type(predictor).__name__.lower()
 
 
-def _get_sol_values(values):
+def _get_sol_values(values, columns=None, index=None):
     """Get solution values
 
     This is complicated because of the column_transformer.
@@ -55,7 +55,10 @@ def _get_sol_values(values):
         return np.array(
             [v.X if isinstance(v, gp.Var) else v for v in values.ravel()]
         ).reshape(values.shape)
-    return values.X
+    X = values.X
+    if columns is not None and HAS_PANDAS:
+        X = pd.DataFrame(data=X, columns=columns, index=index)
+    return X
 
 
 def _dataframe_to_mvar(model, df):
@@ -196,20 +199,22 @@ def validate_input_vars(model, gp_vars):
     """
     if HAS_PANDAS:
         if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
+            columns = gp_vars.columns
+            index = gp_vars.index
             gp_vars = _dataframe_to_mvar(model, gp_vars)
-            return gp_vars
+            return (gp_vars, columns, index)
     if isinstance(gp_vars, np.ndarray):
-        return _array_to_mvar(model, gp_vars)
+        return (_array_to_mvar(model, gp_vars), None, None)
     if isinstance(gp_vars, gp.MVar):
         if gp_vars.ndim == 1:
-            return gp_vars.reshape(1, -1)
+            return (gp_vars.reshape(1, -1), None, None)
         if gp_vars.ndim == 2:
-            return gp_vars
+            return (gp_vars, None, None)
         raise ParameterError("Variables should be an MVar of dimension 1 or 2")
     if isinstance(gp_vars, dict):
         gp_vars = gp_vars.values()
     if isinstance(gp_vars, list):
-        return gp.MVar.fromlist(gp_vars).reshape(1, -1)
+        return (gp.MVar.fromlist(gp_vars).reshape(1, -1), None, None)
     if isinstance(gp_vars, gp.Var):
-        return gp.MVar.fromlist([gp_vars]).reshape(1, 1)
+        return (gp.MVar.fromlist([gp_vars]).reshape(1, 1), None, None)
     raise ParameterError("Could not validate variables")

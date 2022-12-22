@@ -164,6 +164,10 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
     def input(self):
         return self[0].input
 
+    @property
+    def _input_values(self):
+        return self[0]._input_values
+
     def __getitem__(self, key):
         """Get an item from the pipeline steps"""
         return self._steps[key]
