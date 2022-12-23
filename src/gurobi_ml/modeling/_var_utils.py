@@ -57,7 +57,10 @@ def _get_sol_values(values, columns=None, index=None):
         ).reshape(values.shape)
     X = values.X
     if columns is not None and HAS_PANDAS:
-        X = pd.DataFrame(data=X, columns=columns, index=index)
+        if isinstance(index, (pd.Index, pd.MultiIndex)):
+            X = pd.DataFrame(data=X, columns=columns, index=index)
+        else:
+            X = pd.Series(data=X, columns=columns, name=index)
     return X
 
 
@@ -71,9 +74,9 @@ def _dataframe_to_mvar(model, df):
         index = df.index
     elif isinstance(df, pd.Series):
         data = df.to_numpy()
-        index = df.columns
-        columns = None
-        raise NotImplementedError("Input variable as pd.Series is not implemented")
+        index = df.name
+        columns = df.columns
+        raise NotImplementedError("Input variables as pd.Series is not implemented")
     return _array_to_mvar(model, data, columns, index)
 
 
@@ -120,7 +123,9 @@ def _array_to_mvar(model, data, columns=None, index=None):
         try:
             rval[:, i] = a.astype(np.float64)
         except TypeError:
-            raise ValueError("Dataframe can't be converted to a linear expression")
+            raise ValueError(
+                f"Column {i} of input variables can't be converted to gurobipy variables or floats"
+            )
         const_indices.append(i)
 
     # If columns and index are not passed try to infer something to name the variables
@@ -168,8 +173,6 @@ def validate_output_vars(gp_vars):
         if any(map(lambda i: not isinstance(i, gp.Var), gp_vars.ravel())):
             raise TypeError("Dataframe can't be converted to an MVar")
         rval = gp.MVar.fromlist(gp_vars.tolist())
-        if rval.ndim == 1:
-            rval = rval.reshape(-1, 1)
         return rval
     if isinstance(gp_vars, gp.MVar):
         if gp_vars.ndim in (1, 2):
