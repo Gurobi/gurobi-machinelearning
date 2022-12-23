@@ -69,7 +69,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         self._output_shape = 1
         self.estimators_ = []
         self._default_name = "gbtree_reg"
-        SKgetter.__init__(self, predictor)
+        SKgetter.__init__(self, predictor, input_vars)
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )

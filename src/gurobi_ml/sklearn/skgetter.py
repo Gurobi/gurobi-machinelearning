@@ -33,9 +33,10 @@ class SKgetter:
 
     """
 
-    def __init__(self, predictor, output_type="regular", **kwargs):
+    def __init__(self, predictor, input, output_type="regular", **kwargs):
         check_is_fitted(predictor)
         self.predictor = predictor
+        predictor._check_feature_names(input, reset=False)
         self.output_type = output_type
         if hasattr(predictor, "n_features_in_"):
             self._input_shape = predictor.n_features_in_

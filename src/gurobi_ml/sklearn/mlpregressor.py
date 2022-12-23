@@ -74,7 +74,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         clean_predictor=False,
         **kwargs,
     ):
-        SKgetter.__init__(self, predictor, **kwargs)
+        SKgetter.__init__(self, predictor, input_vars, **kwargs)
         BaseNNConstr.__init__(
             self,
             gp_model,

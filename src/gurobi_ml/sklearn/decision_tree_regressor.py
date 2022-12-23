@@ -103,7 +103,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         self.scale = scale
         self.float_type = float_type
         self._default_name = "tree_reg"
-        SKgetter.__init__(self, predictor)
+        SKgetter.__init__(self, predictor, input_vars)
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )

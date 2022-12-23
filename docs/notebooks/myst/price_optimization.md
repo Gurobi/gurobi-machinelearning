@@ -619,7 +619,8 @@ m.update()
 First, we create our full input for the predictor constraint. We merge the `p` variables (stored in a pandas Series) wiht the rest of the fixed features
 
 ```{code-cell} ipython3
-feats = pd.concat([feats, p], axis=1)
+feats = pd.concat([feats, p], axis=1)[["region", "price", "year_index", "peak"]]
+
 
 feats
 ```

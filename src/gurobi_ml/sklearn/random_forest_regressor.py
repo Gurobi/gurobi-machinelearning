@@ -69,7 +69,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.estimators_ = []
         self._default_name = "rand_forest_reg"
-        SKgetter.__init__(self, predictor)
+        SKgetter.__init__(self, predictor, input_vars)
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )
