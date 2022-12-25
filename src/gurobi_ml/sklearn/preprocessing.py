@@ -18,7 +18,6 @@ Guobi model"""
 
 import gurobipy as gp
 import numpy as np
-import pandas as pd
 from sklearn.utils.validation import check_is_fitted
 
 from ..exceptions import NoModel, NoSolution
@@ -184,8 +183,9 @@ class ColumnTransformerConstr(SKtransformer):
     def _build_submodel(self, gp_model, *args, **kwargs):
         """Predict output from input using predictor or transformer"""
         _input = self.input
-        if isinstance(_input, (pd.DataFrame, pd.Series)):
+        if hasattr(self._input, "columns"):
             self._input_columns = _input.columns
+        if hasattr(self._input, "index"):
             self._input_index = _input.index
         self._mip_model(**kwargs)
         assert self._output is not None

@@ -32,6 +32,10 @@ class FixedRegressionModel(unittest.TestCase):
 
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
             x = gpm.addMVar(examples.shape, lb=examples - 1e-4, ub=examples + 1e-4)
+            if hasattr(examples, "columns"):
+                import pandas as pd
+
+                x = pd.DataFrame(data=x.tolist(), columns=examples.columns)
 
             pred_constr = add_predictor_constr(gpm, predictor, x, **kwargs)
 
@@ -69,16 +73,28 @@ class FixedRegressionModel(unittest.TestCase):
 
     def do_one_case(self, one_case, X, n_sample, combine, **kwargs):
         choice = self.rng.integers(X.shape[0], size=n_sample)
-        examples = X[choice, :]
+        if hasattr(X, "columns"):
+            examples = X.iloc[choice, :].copy()
+        else:
+            examples = X[choice, :]
         if combine == "all":
             # Do the average case
-            examples = (examples.sum(axis=0) / n_sample).reshape(1, -1) - 1e-2
+            if hasattr(X, "columns"):
+                examples.iloc[0, :] = examples.mean()
+                examples = examples.iloc[:1, :]
+            else:
+                examples = (examples.sum(axis=0) / n_sample).reshape(1, -1) - 1e-2
         elif combine == "pairs":
             # Make pairwise combination of the examples
-            even_rows = examples[::2, :]
-            odd_rows = examples[1::2, :]
+            if hasattr(X, "columns"):
+                even_rows = examples.iloc[::2, :] / 2.0
+                odd_rows = examples.iloc[1::2, :] / 2.0
+                odd_rows.index = even_rows.index
+            else:
+                even_rows = examples[::2, :] / 2.0
+                odd_rows = examples[1::2, :] / 2.0
             assert odd_rows.shape == even_rows.shape
-            examples = (even_rows + odd_rows) / 2.0 - 1e-2
+            examples = (even_rows + odd_rows) - 1e-2
             assert examples.shape == even_rows.shape
 
         predictor = one_case["predictor"]

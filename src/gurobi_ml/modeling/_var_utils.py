@@ -45,12 +45,13 @@ def _get_sol_values(values, columns=None, index=None):
     This is complicated because of the column_transformer.
     In most cases we can just do values.X but if we have a column transformer with
     some constants that can't be translated to Gurobi variables we need to fill in missing values"""
-    if isinstance(values, pd.DataFrame):
-        return pd.DataFrame(
-            data=_get_sol_values(values.to_numpy()),
-            index=values.index,
-            columns=values.columns,
-        )
+    if HAS_PANDAS:
+        if isinstance(values, pd.DataFrame):
+            return pd.DataFrame(
+                data=_get_sol_values(values.to_numpy()),
+                index=values.index,
+                columns=values.columns,
+            )
     if isinstance(values, np.ndarray):
         return np.array(
             [v.X if isinstance(v, gp.Var) else v for v in values.ravel()]

@@ -194,6 +194,23 @@ class DiabetesCases(Cases):
         self._data = (X, y)
 
 
+class DiabetesCasesAsFrame(Cases):
+    """Base class to have cases for testing regression models on diabetes set
+
+    This is appropriate for testing a regression with a single output."""
+
+    def __init__(self):
+        excluded = ["LogisticRegression"]
+        super().__init__("diabetes_pandas", excluded=excluded)
+
+    def load_data(self):
+        data = datasets.load_diabetes(as_frame=True)
+
+        X = data["data"]
+        y = data["target"]
+        self._data = (X, y)
+
+
 class IrisCases(Cases):
     """Base class to have cases for testing regression models on iris set
 
