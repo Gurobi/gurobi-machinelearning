@@ -57,6 +57,7 @@ dep_versions = get_versions(root_path / "requirements.tox.txt")
 dep_versions = get_versions(root_path / "requirements.keras.txt", dep_versions)
 dep_versions = get_versions(root_path / "requirements.pytorch.txt", dep_versions)
 dep_versions = get_versions(root_path / "requirements.sklearn.txt", dep_versions)
+dep_versions = get_versions(root_path / "requirements.pandas.txt", dep_versions)
 
 
 VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
