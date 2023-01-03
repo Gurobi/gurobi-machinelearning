@@ -89,7 +89,7 @@ class FixedRegressionModel(unittest.TestCase):
             self.assertLessEqual(np.max(abserror), tol)
 
     def do_one_case(self, one_case, X, n_sample, combine="", **kwargs):
-        choice = self.rng.integers(X.shape[0], size=n_sample)
+        choice = self.rng.choice(X.shape[0], size=n_sample, replace=False)
         if hasattr(X, "columns"):
             examples = X.iloc[choice, :].copy()
         else:
