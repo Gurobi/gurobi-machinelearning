@@ -16,6 +16,7 @@
 """ Module for embedding a :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
 into a :gurobipy:`model`.
 """
+from itertools import product
 
 import numpy as np
 from gurobipy import GRB
@@ -158,26 +159,21 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                     nodes[fixed_left, right].UB = 0.0
                     nodes[~fixed_left, left].UB = 0.0
                 else:
+                    lhs = scale * (_input[:, feature] - threshold)
                     model.addConstrs(
-                        (nodes[k, left].item() == 1)
-                        >> (scale * _input[k, feature] <= scale * threshold)
+                        (nodes[k, left].item() == 1) >> (lhs[k] <= 0.0)
                         for k in range(nex)
                     )
                     model.addConstrs(
-                        (nodes[k, right].item() == 1)
-                        >> (
-                            scale * _input[k, feature]
-                            >= scale * threshold + self.epsilon
-                        )
+                        (nodes[k, right].item() == 1) >> (lhs[k] >= self.epsilon)
                         for k in range(nex)
                     )
             else:
                 # Leaf node:
+                lhs = output - tree.value[node, :, 0]
                 model.addConstrs(
-                    (nodes[k, node].item() == 1)
-                    >> (output[k, i] == tree.value[node][i][0])
-                    for i in range(outdim)
-                    for k in range(nex)
+                    (nodes[k, node].item() == 1) >> (lhs[k, i] == 0)
+                    for k, i in product(range(nex), range(outdim))
                 )
 
         # We should attain 1 leaf
