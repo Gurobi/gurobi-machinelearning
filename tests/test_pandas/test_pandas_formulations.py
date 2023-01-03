@@ -7,7 +7,7 @@ from sklearn.pipeline import Pipeline
 from gurobi_ml.sklearn.pipeline import PipelineConstr
 
 from ..fixed_formulation import FixedRegressionModel
-from ..test_sklearn.sklearn_cases import DiabetesCasesAsFrame
+from ..test_sklearn.sklearn_cases import DiabetesCasesAsFrame, WageCase
 
 VERBOSE = False
 
@@ -40,6 +40,28 @@ class TestSklearnPandasModel(FixedRegressionModel):
             onecase = cases.get_case(regressor)
             self.do_one_case(onecase, X, 5, "all", float_type=np.float32)
             self.do_one_case(onecase, X, 6, "pairs", float_type=np.float32)
+
+    def test_wages(self):
+        cases = WageCase()
+
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            X = onecase["data"]
+            # onecase["nonconvex"] = 1
+            self.do_one_case(
+                onecase,
+                X,
+                6,
+                numerical_features=cases.numerical_features,
+                float_type=np.float32,
+            )
+            self.do_one_case(
+                onecase,
+                X,
+                1,
+                numerical_features=cases.numerical_features,
+                float_type=np.float32,
+            )
 
 
 if __name__ == "__main__":

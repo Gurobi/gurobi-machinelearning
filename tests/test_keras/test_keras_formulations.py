@@ -14,10 +14,6 @@ class TestKerasModel(FixedRegressionModel):
 
     basedir = os.path.join(os.path.dirname(__file__), "..", "predictors")
 
-    def additional_test(self, predictor, pred_constr):
-        # No additional test
-        pass
-
     def test_diabetes_keras(self):
         X = load(os.path.join(self.basedir, "examples_diabetes.joblib"))
 

@@ -5,6 +5,7 @@ import numpy as np
 from joblib import dump, load
 from sklearn import __version__ as sklearn_version
 from sklearn import datasets
+from sklearn.compose import make_column_transformer
 from sklearn.cross_decomposition import PLSCanonical, PLSRegression  # noqa
 from sklearn.ensemble import GradientBoostingRegressor  # noqa
 from sklearn.ensemble import RandomForestRegressor  # noqa
@@ -14,23 +15,25 @@ from sklearn.neural_network import MLPClassifier, MLPRegressor  # noqa
 from sklearn.pipeline import Pipeline  # noqa
 from sklearn.pipeline import make_pipeline  # noqa
 from sklearn.preprocessing import PolynomialFeatures  # noqa
-from sklearn.preprocessing import StandardScaler  # noqa
+from sklearn.preprocessing import OneHotEncoder, StandardScaler  # noqa
 from sklearn.tree import DecisionTreeRegressor  # noqa
 
 from gurobi_ml.sklearn import sklearn_predictors, sklearn_transformers
 
 
 def init_predictor(name):
-    params = {
-        "MLPRegressor": "[20, 20]",
-        "MLPClassifier": "[50, 50]",
-        "GradientBoostingRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
-        "RandomForestRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
-        "DecisionTreeRegressor": "max_leaf_nodes=50",
-        "PLSRegression": "n_components=1",
-        "PLSCanonical": "n_components=1",
-    }.get(name, "")
-    return eval(f"{name}({params})")
+    if isinstance(name, str):
+        params = {
+            "MLPRegressor": "[20, 20]",
+            "MLPClassifier": "[50, 50]",
+            "GradientBoostingRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
+            "RandomForestRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
+            "DecisionTreeRegressor": "max_leaf_nodes=50",
+            "PLSRegression": "n_components=1",
+            "PLSCanonical": "n_components=1",
+        }.get(name, "")
+        return eval(f"{name}({params})")
+    return name
 
 
 def predictor_as_string(predictor):
@@ -82,6 +85,7 @@ class Cases(ABC):
         excluded=None,
         regressors=None,
         transformers=None,
+        need_pipeline=False,
         saved_training=0,
     ):
         self.basedir = os.path.join(os.path.dirname(__file__), "..", "predictors")
@@ -96,7 +100,10 @@ class Cases(ABC):
         if transformers is None:
             transformers = list(sklearn_transformers().keys())
 
-        self.all_test = [init_predictor(reg) for reg in regressors]
+        if need_pipeline:
+            self.all_test = []
+        else:
+            self.all_test = [init_predictor(reg) for reg in regressors]
 
         if len(transformers):
             self.all_test += [
@@ -166,8 +173,6 @@ class Cases(ABC):
         (Done when we have a new sklearn version)"""
         for predictor in self:
             rval = self.build_predictor(predictor)
-
-            dump(rval, os.path.join(self.basedir, self.predictor_file(predictor)))
 
     def get_case(self, predictor):
         filename = self.predictor_file(predictor)
@@ -270,7 +275,37 @@ class MNISTCase(Cases):
         mnist = datasets.fetch_openml("mnist_784", parser="auto")
         X, y = mnist.data, mnist.target
 
-        X = X.to_numpy()
+        X = X.to_numpy().astype(np.float64)
         y = y.to_numpy()
         X /= 255.0  # scaling
+        self._data = (X, y)
+
+
+class WageCase(Cases):
+    """Wage case
+
+    We use it for testing column_transformer and OneHotEncoding of fixed categorical features."""
+
+    def __init__(self):
+        self.categorical_features = ["OCCUPATION", "SECTOR"]
+        self.numerical_features = ["EDUCATION", "EXPERIENCE", "AGE"]
+        preprocessor = make_column_transformer(
+            (OneHotEncoder(), self.categorical_features),
+            (StandardScaler(), self.numerical_features),
+            remainder="drop",
+        )
+        super().__init__(
+            "wages",
+            excluded=["LogisticRegression"],
+            transformers=[
+                preprocessor,
+            ],
+            need_pipeline=True,
+            saved_training=100,
+        )
+
+    def load_data(self):
+        survey = datasets.fetch_openml(data_id=534, as_frame=True, parser="pandas")
+        X, y = survey.data[survey.feature_names], survey.target.values.ravel()
+
         self._data = (X, y)

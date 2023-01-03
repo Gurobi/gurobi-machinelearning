@@ -12,10 +12,6 @@ class TestPytorchModel(FixedRegressionModel):
 
     basedir = os.path.join(os.path.dirname(__file__), "..", "predictors")
 
-    def additional_test(self, predictor, pred_constr):
-        # No addtional test
-        pass
-
     def test_diabetes_pytorch(self):
         X = load(os.path.join(self.basedir, "examples_diabetes.joblib"))
 

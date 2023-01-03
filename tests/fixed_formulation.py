@@ -19,11 +19,17 @@ class FixedRegressionModel(unittest.TestCase):
     def setUp(self) -> None:
         self.rng = np.random.default_rng(1)
 
-    def fixed_model(self, predictor, examples, nonconvex, **kwargs):
+    def additional_tests(self, predictor, pred_constr):
+        """Define this to do additional tests"""
+
+    def fixed_model(
+        self, predictor, examples, nonconvex, numerical_features=None, **kwargs
+    ):
         params = {
             "OutputFlag": 0,
-            "NonConvex": 2,
         }
+        if nonconvex:
+            params["NonConvex"] = 2
         for param in params:
             try:
                 params[param] = int(params[param])
@@ -31,11 +37,22 @@ class FixedRegressionModel(unittest.TestCase):
                 pass
 
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
-            x = gpm.addMVar(examples.shape, lb=examples - 1e-4, ub=examples + 1e-4)
-            if hasattr(examples, "columns"):
+            if numerical_features:
+                import gurobipy_pandas as gppd
                 import pandas as pd
 
-                x = pd.DataFrame(data=x.tolist(), columns=examples.columns)
+                self.assertIsInstance(examples, pd.DataFrame)
+                self.assertIsInstance(numerical_features, list)
+                x = examples.copy()
+                nonconvex = 1
+                for feat in numerical_features:
+                    x.loc[:, feat] = gppd.add_vars(gpm, examples, lb=feat, ub=feat)
+            else:
+                x = gpm.addMVar(examples.shape, lb=examples - 1e-4, ub=examples + 1e-4)
+                if hasattr(examples, "columns"):
+                    import pandas as pd
+
+                    x = pd.DataFrame(data=x.tolist(), columns=examples.columns)
 
             pred_constr = add_predictor_constr(gpm, predictor, x, **kwargs)
 
@@ -71,7 +88,7 @@ class FixedRegressionModel(unittest.TestCase):
 
             self.assertLessEqual(np.max(abserror), tol)
 
-    def do_one_case(self, one_case, X, n_sample, combine, **kwargs):
+    def do_one_case(self, one_case, X, n_sample, combine="", **kwargs):
         choice = self.rng.integers(X.shape[0], size=n_sample)
         if hasattr(X, "columns"):
             examples = X.iloc[choice, :].copy()
