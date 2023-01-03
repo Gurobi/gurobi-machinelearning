@@ -19,7 +19,7 @@ class FixedRegressionModel(unittest.TestCase):
     def setUp(self) -> None:
         self.rng = np.random.default_rng(1)
 
-    def additional_tests(self, predictor, pred_constr):
+    def additional_test(self, predictor, pred_constr):
         """Define this to do additional tests"""
 
     def fixed_model(
