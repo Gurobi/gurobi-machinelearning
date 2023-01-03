@@ -29,6 +29,10 @@ class TestSklearnPandasModel(FixedRegressionModel):
                 self.assertEqual(
                     predictor_name, type(pred_constr[i]).__name__[: -len("Constr")]
                 )
+            self.assertLessEqual(
+                np.max(pred_constr[i].get_error().astype(float)),
+                np.max(pred_constr.get_error()),
+            )
 
     def test_diabetes_sklearn_pandas(self):
         data = datasets.load_diabetes(as_frame=True)

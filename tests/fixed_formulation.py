@@ -58,7 +58,6 @@ class FixedRegressionModel(unittest.TestCase):
 
             y = pred_constr.output
 
-            self.additional_test(predictor, pred_constr)
             with self.assertRaises(NoSolution):
                 pred_constr.get_error()
             with open(os.devnull, "w") as outnull:
@@ -72,6 +71,7 @@ class FixedRegressionModel(unittest.TestCase):
                 else:
                     raise
 
+            self.additional_test(predictor, pred_constr)
             if nonconvex:
                 tol = 5e-3
             else:

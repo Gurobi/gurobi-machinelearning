@@ -5,7 +5,7 @@ import numpy as np
 from joblib import dump, load
 from sklearn import __version__ as sklearn_version
 from sklearn import datasets
-from sklearn.compose import make_column_transformer
+from sklearn.compose import ColumnTransformer, make_column_transformer
 from sklearn.cross_decomposition import PLSCanonical, PLSRegression  # noqa
 from sklearn.ensemble import GradientBoostingRegressor  # noqa
 from sklearn.ensemble import RandomForestRegressor  # noqa
@@ -37,10 +37,17 @@ def init_predictor(name):
 
 
 def predictor_as_string(predictor):
+    if isinstance(predictor, str):
+        return f"_{predictor}"
     rval = ""
     if isinstance(predictor, Pipeline):
         rval += "_pipeline"
         for predictor in predictor:
+            rval += predictor_as_string(predictor)
+        return rval
+    if isinstance(predictor, ColumnTransformer):
+        rval += "_columntransformer"
+        for _, predictor, _ in predictor.transformers:
             rval += predictor_as_string(predictor)
         return rval
     if isinstance(predictor, MLPRegressor):
@@ -49,7 +56,7 @@ def predictor_as_string(predictor):
         for s in nn.hidden_layer_sizes[:-1]:
             size += f"{s}x"
         size += f"{nn.hidden_layer_sizes[-1]}"
-        rval += f"_mplregressor_{size}"
+        rval += f"_mlpregressor_{size}"
         return rval
     return "_" + type(predictor).__name__.lower()
 
@@ -289,17 +296,22 @@ class WageCase(Cases):
     def __init__(self):
         self.categorical_features = ["OCCUPATION", "SECTOR"]
         self.numerical_features = ["EDUCATION", "EXPERIENCE", "AGE"]
-        preprocessor = make_column_transformer(
-            (OneHotEncoder(), self.categorical_features),
-            (StandardScaler(), self.numerical_features),
-            remainder="drop",
-        )
+        preprocessors = [
+            make_column_transformer(
+                (OneHotEncoder(), self.categorical_features),
+                (StandardScaler(), self.numerical_features),
+                remainder="drop",
+            ),
+            make_column_transformer(
+                (OneHotEncoder(), self.categorical_features),
+                ("passthrough", self.numerical_features),
+                remainder="drop",
+            ),
+        ]
         super().__init__(
             "wages",
             excluded=["LogisticRegression"],
-            transformers=[
-                preprocessor,
-            ],
+            transformers=preprocessors,
             need_pipeline=True,
             saved_training=100,
         )

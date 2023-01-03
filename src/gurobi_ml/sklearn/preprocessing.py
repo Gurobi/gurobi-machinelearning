@@ -171,12 +171,6 @@ class ColumnTransformerConstr(SKtransformer):
         self._default_name = "col_trans"
         super().__init__(gp_model, column_transformer, input_vars, **kwargs)
 
-    def _create_output_vars(self, input_vars, **kwargs):
-        out_shape = (input_vars.shape[0], self.transformer.n_output_features_)
-        rval = self._gp_model.addMVar(out_shape, name="polyx", lb=-gp.GRB.INFINITY)
-        self._gp_model.update()
-        self._output = rval
-
     # For this class we need to reimplement submodel because we don't want
     # to transform input variables to Gurobi variable. We can't do it for categorical
     # The input should be unchanged.

@@ -61,6 +61,7 @@ def _get_sol_values(values, columns=None, index=None):
         if isinstance(index, (pd.Index, pd.MultiIndex)):
             X = pd.DataFrame(data=X, columns=columns, index=index)
         else:
+            raise NotImplementedError("Input variables as pd.Series is not implemented")
             X = pd.Series(data=X, columns=columns, name=index)
     return X
 
@@ -74,9 +75,6 @@ def _dataframe_to_mvar(model, df):
         columns = df.columns
         index = df.index
     elif isinstance(df, pd.Series):
-        data = df.to_numpy()
-        index = df.name
-        columns = df.columns
         raise NotImplementedError("Input variables as pd.Series is not implemented")
     return _array_to_mvar(model, data, columns, index)
 
@@ -107,8 +105,6 @@ def _array_to_mvar(model, data, columns=None, index=None):
     # If data only contains gp.Var's we can directly convert it to an MVar
     if all(map(lambda i: isinstance(i, gp.Var), data.ravel())):
         rval = gp.MVar.fromlist(data.tolist())
-        if len(rval.shape) == 1:
-            rval = rval.reshape(1, -1)
         return rval
 
     # data doesn't contain only contain gp.Var,s.
