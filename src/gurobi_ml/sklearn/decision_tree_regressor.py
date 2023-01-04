@@ -16,7 +16,6 @@
 """ Module for embedding a :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
 into a :gurobipy:`model`.
 """
-from itertools import product
 
 import numpy as np
 from gurobipy import GRB
@@ -140,7 +139,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         )
 
         # Node splitting
-        for node in range(tree.capacity):
+        for node in notleafs.nonzero()[0]:
             left = tree.children_left[node]
             right = tree.children_right[node]
             threshold = tree.threshold[node]
@@ -160,22 +159,29 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                     nodes[fixed_left, right].UB = 0.0
                     nodes[~fixed_left, left].UB = 0.0
                 else:
-                    lhs = scale * (_input[:, feature] - threshold)
+                    lhs = _input[:, feature].tolist()
+                    rhs = nodes[:, left].tolist()
+                    threshold *= scale
                     model.addConstrs(
-                        (nodes[k, left].item() == 1) >> (lhs[k] <= 0.0)
+                        ((rhs[k] == 1) >> (scale * lhs[k] <= threshold))
                         for k in range(nex)
                     )
+                    rhs = nodes[:, right].tolist()
                     model.addConstrs(
-                        (nodes[k, right].item() == 1) >> (lhs[k] >= self.epsilon)
+                        ((rhs[k] == 1) >> (scale * lhs[k] >= threshold + self.epsilon))
                         for k in range(nex)
                     )
-            else:
-                # Leaf node:
-                lhs = output - tree.value[node, :, 0]
-                model.addConstrs(
-                    (nodes[k, node].item() == 1) >> (lhs[k, i] == 0)
-                    for k, i in product(range(nex), range(outdim))
-                )
+
+        for node in leafs.nonzero()[0]:
+            # Leaf node:
+            lhs = output.tolist()
+            rhs = nodes[:, node].tolist()
+            value = tree.value[node, :, 0]
+            model.addConstrs(
+                (rhs[k] == 1) >> (lhs[k][i] == value[i])
+                for k in range(nex)
+                for i in range(outdim)
+            )
 
         # We should attain 1 leaf
         model.addConstr(nodes[:, leafs].sum(axis=1) == 1)
