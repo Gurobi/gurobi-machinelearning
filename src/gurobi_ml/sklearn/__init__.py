@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
+from .column_transformer import add_column_transformer_constr
 from .decision_tree_regressor import add_decision_tree_regressor_constr
 from .gradient_boosting_regressor import add_gradient_boosting_regressor_constr
 from .linear_regression import add_linear_regression_constr

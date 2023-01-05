@@ -19,10 +19,11 @@ import numpy as np
 from sklearn.utils.validation import check_is_fitted
 
 from ..exceptions import NoSolution
+from ..modeling import AbstractPredictorConstr
 
 
 class SKgetter:
-    """Utility class for sklearn convertors
+    """Utility class for sklearn regression models convertors
 
     Implement some common functionalities: check predictor is fitted, output dimension, get error
 
@@ -33,10 +34,10 @@ class SKgetter:
 
     """
 
-    def __init__(self, predictor, input, output_type="regular", **kwargs):
+    def __init__(self, predictor, input_vars, output_type="regular", **kwargs):
         check_is_fitted(predictor)
         self.predictor = predictor
-        predictor._check_feature_names(input, reset=False)
+        predictor._check_feature_names(input_vars, reset=False)
         self.output_type = output_type
         if hasattr(predictor, "n_features_in_"):
             self._input_shape = predictor.n_features_in_
@@ -70,4 +71,37 @@ class SKgetter:
             if len(predicted.shape) == 1 and len(output_values.shape) == 2:
                 predicted = predicted.reshape(-1, 1)
             return np.abs(predicted - output_values)
+        raise NoSolution()
+
+
+class SKtransformer(AbstractPredictorConstr):
+    """Utility class for sklearn preprocessing models convertors
+
+    Implement some common functionalities.
+
+    Attributes
+    ----------
+    transformer
+        Scikit-Learn transformer embedded into Gurobi model.
+
+    """
+
+    def __init__(self, gp_model, transformer, input_vars, **kwargs):
+        self.transformer = transformer
+        if hasattr(transformer, "n_features_in_"):
+            self._input_shape = transformer.n_features_in_
+        if hasattr(transformer, "n_output_features_"):
+            self._output_shape = transformer.n_output_features_
+        check_is_fitted(transformer)
+        super().__init__(gp_model, input_vars, **kwargs)
+
+    def get_error(self):
+        if self._has_solution:
+            transformer = self.transformer
+            input_values = self.input_values
+
+            transformed = transformer.transform(input_values)
+            if len(transformed.shape) == 1:
+                transformed = transformed.reshape(-1, 1)
+            return np.abs(transformed - self.output_values)
         raise NoSolution()

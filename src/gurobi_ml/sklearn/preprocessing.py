@@ -17,11 +17,9 @@
 Guobi model"""
 
 import gurobipy as gp
-import numpy as np
-from sklearn.utils.validation import check_is_fitted
 
-from ..exceptions import NoModel, NoSolution
-from ..modeling import AbstractPredictorConstr
+from ..exceptions import NoModel
+from .skgetter import SKtransformer
 
 
 def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **kwargs):
@@ -39,7 +37,7 @@ def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **
     gp_model: :gurobipy:`model`
         The gurobipy model where polynomial features should be inserted.
     polynomial_features: :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures`
-        The polynomial features to insert as predictor.
+        The polynomial features to insert in gp_model.
     input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for polynomial features in model.
 
@@ -78,30 +76,8 @@ def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
     return StandardScalerConstr(gp_model, standard_scaler, input_vars, **kwargs)
 
 
-class SKtransformer(AbstractPredictorConstr):
-    def __init__(self, gp_model, transformer, input_vars, **kwargs):
-        self.transformer = transformer
-        if hasattr(transformer, "n_features_in_"):
-            self._input_shape = transformer.n_features_in_
-        if hasattr(transformer, "n_output_features_"):
-            self._output_shape = transformer.n_output_features_
-        check_is_fitted(transformer)
-        super().__init__(gp_model, input_vars, **kwargs)
-
-    def get_error(self):
-        if self._has_solution:
-            transformer = self.transformer
-            input_values = self.input_values
-
-            transformed = self.transformer.transform(self.input_values)
-            if len(transformed.shape) == 1:
-                transformed = transformed.reshape(-1, 1)
-            return np.abs(transformed - self.output_values)
-        raise NoSolution()
-
-
 class StandardScalerConstr(SKtransformer):
-    """Class to model trained :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler` with gurobipy
+    """Class to model a fitted :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler` with gurobipy
 
     Stores the changes to :gurobipy:`model` when embedding an instance into it."""
 
@@ -115,7 +91,6 @@ class StandardScalerConstr(SKtransformer):
         _input = self._input
         output = self._output
 
-        nfeat = _input.shape[1]
         scale = self.transformer.scale_
         mean = self.transformer.mean_
 
@@ -164,51 +139,3 @@ def sklearn_transformers():
         "StandardScaler": add_standard_scaler_constr,
         "PolynomialFeatures": add_polynomial_features_constr,
     }
-
-
-class ColumnTransformerConstr(SKtransformer):
-    def __init__(self, gp_model, column_transformer, input_vars, **kwargs):
-        self._default_name = "col_trans"
-        super().__init__(gp_model, column_transformer, input_vars, **kwargs)
-
-    # For this class we need to reimplement submodel because we don't want
-    # to transform input variables to Gurobi variable. We can't do it for categorical
-    # The input should be unchanged.
-    def _build_submodel(self, gp_model, *args, **kwargs):
-        """Predict output from input using predictor or transformer"""
-        _input = self.input
-        if hasattr(self._input, "columns"):
-            self._input_columns = _input.columns
-        if hasattr(self._input, "index"):
-            self._input_index = _input.index
-        self._mip_model(**kwargs)
-        assert self._output is not None
-        return self
-
-    def _mip_model(self, **kwargs):
-        """Do the transformation on x"""
-        column_transform = self.transformer
-        _input = self._input
-        transformers = {k.lower(): v for k, v in sklearn_transformers().items()}
-        transformed = []
-        for name, trans, cols in column_transform.transformers_:
-            if trans == "passthrough":
-                transformed.append(_input.loc[:, cols])
-            elif trans == "drop":
-                pass
-            else:
-                data = _input.loc[:, cols]
-                anyvar = any(
-                    map(lambda i: isinstance(i, gp.Var), data.to_numpy().ravel())
-                )
-                if anyvar:
-                    if name in transformers:
-                        trans_constr = transformers[name](self._gp_model, trans, data)
-                    transformed.append(trans_constr.output.tolist())
-                else:
-                    transformed.append(trans.transform(_input.loc[:, cols]))
-        self._output = column_transform._hstack(transformed)
-
-
-def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kwargs):
-    return ColumnTransformerConstr(gp_model, column_transformer, input_vars, **kwargs)

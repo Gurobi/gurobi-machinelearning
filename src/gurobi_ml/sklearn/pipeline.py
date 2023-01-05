@@ -22,8 +22,9 @@ from ..exceptions import NoModel
 from ..modeling.base_predictor_constr import AbstractPredictorConstr
 from ..modeling.get_convertor import get_convertor
 from ..register_user_predictor import user_predictors
+from .column_transformer import add_column_transformer_constr
 from .predictors_list import sklearn_predictors
-from .preprocessing import add_column_transformer_constr, sklearn_transformers
+from .preprocessing import sklearn_transformers
 from .skgetter import SKgetter
 
 
@@ -158,19 +159,23 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
 
     @property
     def output(self):
+        """Returns output variables of pipeline, i.e. output of its last step"""
         return self[-1].output
 
     @property
+    def output_values(self):
+        """Returns output values of pipeline in solution, i.e. output of its last step"""
+        return self[-1].output_values
+
+    @property
     def input(self):
+        """Returns input variables of pipeline, i.e. input of its first step"""
         return self[0].input
 
     @property
     def input_values(self):
+        """Returns input values of pipeline in solution, i.e. input of its first step"""
         return self[0].input_values
-
-    @property
-    def output_values(self):
-        return self[-1].output_values
 
     def __getitem__(self, key):
         """Get an item from the pipeline steps"""

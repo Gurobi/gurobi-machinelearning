@@ -46,22 +46,28 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
     The parameters `input_vars` and `output_vars` can be either
 
      * Gurobipy matrix variables :gurobipy:`mvar`
+     * Pandas data frames containing columns of variables or constants
      * Lists of variables
      * Dictionaries of variables
 
-    For internal use in the package they are cast into matrix variables and it is
-    the preferred and most convenient format to use.
+    For internal use in the package they are cast into matrix variables.
 
     They should have dimensions that conforms with the input/output of the predictor.
     We denote by `n_features` the dimension of the input of the predictor and by `n_output` the dimension of the output.
-
-    If they are lists or dictionaries, `input_vars` should have length `n_features` and `output_vars`
-    should have length `n_output`.
 
     If they are matrix variables, `input_vars` and `output_vars` can be either of shape `(n_features)` and
     `(n_outputs,)` respectively or `(k, n_features)` and `(k, n_outputs)` respectively (with `k >= 1`).
     The latter form is especially useful if the predictor is used to associate different groups of
     variables (e.g. a prediction is made for every time period in a planning horizon).
+
+    If they are pandas dataframe, `input_vars` should have the features as columns and `output_vars` the
+    outputs of predictors. Note that the input_vars dataframe may have *fixed* columns containing constant values
+    and *variable* columns containing gurobipy variables. A column should not mix constants and variables.
+
+    If they are lists or dictionaries, `input_vars` should have length `n_features` and `output_vars`
+    should have length `n_output`.
+    List and dictionaries can have bad performances in particular if the same predictor is used with different input/output many times.
+
     """
     convertors = registered_predictors()
     convertor = get_convertor(predictor, convertors)

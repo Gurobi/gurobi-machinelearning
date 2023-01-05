@@ -80,6 +80,11 @@ to insert it in a Gurobi model.
        <sklearn.preprocessing.PolynomialFeatures>`
      - :py:mod:`add_polynomial_features_constr
        <gurobi_ml.sklearn.add_polynomial_features_constr>`
+   * - ColumnTransformer
+     - :external:py:class:`ColumnTransformer
+       <sklearn.compose.ColumnTransformer>`
+     - :py:mod:`add_column_transformer_constr
+       <gurobi_ml.sklearn.add_column_transformer_constr>`
 
 Keras
 -----
