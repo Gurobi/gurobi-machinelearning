@@ -1,5 +1,5 @@
 Logistic Regression
-===================
+###################
 
 .. automodule:: gurobi_ml.sklearn.logistic_regression
 

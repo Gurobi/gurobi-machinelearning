@@ -8,7 +8,7 @@
 
 
 Gurobi Machine Learning
-=======================
+#######################
 
 |
 |
@@ -45,6 +45,7 @@ different machine learning frameworks (scikit-learn, Keras and PyTorch).
    :caption: Machine Learning Models
 
    mlm-supported
+   mlm-mip-models
    mlm-examples
    mlm-further-reading
 

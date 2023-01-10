@@ -1,5 +1,5 @@
 Pytorch Sequential
-==================
+##################
 
 .. autofunction:: gurobi_ml.torch.add_sequential_constr
 

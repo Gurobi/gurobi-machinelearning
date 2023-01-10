@@ -1,5 +1,5 @@
 API Reference manual
-====================
+####################
 
 High level function and modeling objects
 

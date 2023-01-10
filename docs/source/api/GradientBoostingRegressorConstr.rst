@@ -1,5 +1,5 @@
 Gradient Boosting Regressor
-===========================
+###########################
 
 .. automodule:: gurobi_ml.sklearn.gradient_boosting_regressor
 

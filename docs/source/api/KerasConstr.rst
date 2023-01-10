@@ -1,5 +1,5 @@
 Keras Model
-===========
+###########
 
 .. automodule:: gurobi_ml.keras.keras
 

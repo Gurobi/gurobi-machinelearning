@@ -1,5 +1,5 @@
 Pipeline
-========
+########
 
 .. automodule:: gurobi_ml.sklearn.pipeline
 

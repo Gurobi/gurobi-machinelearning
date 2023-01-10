@@ -13,7 +13,7 @@ kernelspec:
 ---
 
 Usage Example
-=============
+#############
 
 In this page, we provide a simple example of using the Gurobi Machine Learning package.
 

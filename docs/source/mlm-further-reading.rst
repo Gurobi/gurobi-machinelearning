@@ -1,5 +1,5 @@
 Further Reading
-===============
+###############
 
 The approach of embedding machine learning models in optimization models has
 received sustained attention in recent years with several publications and

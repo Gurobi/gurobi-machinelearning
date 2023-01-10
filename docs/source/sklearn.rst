@@ -1,5 +1,5 @@
 Scikit-learn regression models
-==============================
+##############################
 
 Functions and modeling object for Scikit-learn regression models
 

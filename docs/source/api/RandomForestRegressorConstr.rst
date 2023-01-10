@@ -1,5 +1,5 @@
 Random Forest Regressor
-=======================
+#######################
 
 .. automodule:: gurobi_ml.sklearn.random_forest_regressor
 

@@ -1,5 +1,5 @@
 Partial Least Square Regression
-===============================
+###############################
 
 .. automodule:: gurobi_ml.sklearn.pls_regression
 

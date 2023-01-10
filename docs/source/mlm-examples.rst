@@ -1,5 +1,5 @@
 Examples
-========
+########
 
 We develop here examples that showcase specific applications where
 Gurobi Machine Learning can be used. Each example should be self-contained, and explains

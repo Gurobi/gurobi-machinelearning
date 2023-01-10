@@ -1,5 +1,5 @@
 Supported Regression models
-===========================
+###########################
 
 The package currently support various `scikit-learn
 <https://scikit-learn.org/stable/>`_ objects. It also has limited support for

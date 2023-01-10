@@ -1,8 +1,8 @@
 Basics
-======
+######
 
 Introduction
-------------
+************
 
 The integration of Machine Learning (ML) techniques and Mathematical
 Optimization is a topic of growing interest. One particular approach is to
@@ -41,7 +41,7 @@ that is currently not available.
 Below, we give basic installation and usage instructions.
 
 Install
--------
+*******
 
 We encourage to install the package via pip (or add it to your
 `requirements.txt` file):

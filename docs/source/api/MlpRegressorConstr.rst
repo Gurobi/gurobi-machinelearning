@@ -1,5 +1,5 @@
 MLP Regressor
-=============
+#############
 
 .. automodule:: gurobi_ml.sklearn.mlpregressor
 

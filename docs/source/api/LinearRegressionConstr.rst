@@ -1,5 +1,5 @@
 Linear Regression
-=================
+#################
 
 .. automodule:: gurobi_ml.sklearn.linear_regression
 

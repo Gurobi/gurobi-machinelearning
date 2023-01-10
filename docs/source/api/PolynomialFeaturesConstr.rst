@@ -1,5 +1,5 @@
 Polynomial Features
-===================
+###################
 
 Function for embedding :external:py:class:`PolynomialFeatures <sklearn.preprocessing.PolynomialFeatures>`
 into a :gurobipy:`model`.
