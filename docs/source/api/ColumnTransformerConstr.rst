@@ -1,5 +1,5 @@
 Column Transformer
-==================
+##################
 
 .. automodule:: gurobi_ml.sklearn.column_transformer
 

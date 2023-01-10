@@ -94,7 +94,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         predictor,
         input_vars,
         output_vars=None,
-        epsilon=0.0,
+        epsilon=1e-6,
         scale=1.0,
         float_type=np.float32,
         **kwargs
@@ -123,17 +123,10 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         # Can be added all at once
         notleafs = tree.children_left >= 0
         leafs = tree.children_left < 0
-        model.addConstr(nodes[:, notleafs] >= nodes[:, tree.children_left[notleafs]])
-        model.addConstr(nodes[:, notleafs] >= nodes[:, tree.children_right[notleafs]])
         model.addConstr(
             nodes[:, notleafs]
-            <= nodes[:, tree.children_right[notleafs]]
+            == nodes[:, tree.children_right[notleafs]]
             + nodes[:, tree.children_left[notleafs]]
-        )
-        model.addConstr(
-            nodes[:, tree.children_right[notleafs]]
-            + nodes[:, tree.children_left[notleafs]]
-            <= 1
         )
 
         # Node splitting
@@ -143,33 +136,31 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
             threshold = tree.threshold[node]
             threshold = self.float_type(threshold)
             scale = max(abs(1 / threshold), self.scale)
-            if left >= 0:
-                # Intermediate node
-                feature = tree.feature[node]
-                feat_var = _input[:, feature]
+            # Intermediate node
+            feature = tree.feature[node]
+            feat_var = _input[:, feature]
 
-                fixed_input = (feat_var.UB == feat_var.LB).all()
+            fixed_input = (feat_var.UB == feat_var.LB).all()
 
-                if fixed_input:
-                    # Special case where we have an MVarPlusConst object
-                    # If that feature is a constant we can directly fix it.
-                    value = _input[:, feature].LB
-                    fixed_left = value <= threshold
-                    nodes[fixed_left, right].UB = 0.0
-                    nodes[~fixed_left, left].UB = 0.0
-                else:
-                    lhs = _input[:, feature].tolist()
-                    rhs = nodes[:, left].tolist()
-                    threshold *= scale
-                    model.addConstrs(
-                        ((rhs[k] == 1) >> (scale * lhs[k] <= threshold))
-                        for k in range(nex)
-                    )
-                    rhs = nodes[:, right].tolist()
-                    model.addConstrs(
-                        ((rhs[k] == 1) >> (scale * lhs[k] >= threshold + self.epsilon))
-                        for k in range(nex)
-                    )
+            if fixed_input:
+                # Special case where we have an MVarPlusConst object
+                # If that feature is a constant we can directly fix it.
+                value = _input[:, feature].LB
+                fixed_left = value <= threshold
+                nodes[fixed_left, right].UB = 0.0
+                nodes[~fixed_left, left].UB = 0.0
+            else:
+                lhs = _input[:, feature].tolist()
+                rhs = nodes[:, left].tolist()
+                threshold *= scale
+                model.addConstrs(
+                    ((rhs[k] == 1) >> (scale * lhs[k] <= threshold)) for k in range(nex)
+                )
+                rhs = nodes[:, right].tolist()
+                model.addConstrs(
+                    ((rhs[k] == 1) >> (scale * lhs[k] >= threshold + self.epsilon))
+                    for k in range(nex)
+                )
 
         for node in leafs.nonzero()[0]:
             # Leaf node:
