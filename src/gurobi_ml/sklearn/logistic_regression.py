@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for embedding :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` into a
+""" Module for formulating a :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` in a
 :gurobipy:`model`
 """
 
@@ -34,9 +34,9 @@ def add_logistic_regression_constr(
     pwl_attributes=None,
     **kwargs,
 ):
-    """Embed logistic_regression into gp_model
+    """Formulate logistic_regression in gp_model
 
-    Predict the values of output_vars using input_vars.
+    The formulation predicts the values of output_vars using input_vars according to logistic_regression.
 
     Note that the model uses a piecewise linear approximation of the logistic function.
     The quality of the approximation can be controlled with the parameter pwl_attributes.
@@ -88,8 +88,7 @@ def add_logistic_regression_constr(
     Returns
     -------
     LogisticRegressionConstr
-        Object containing information about what was added to gp_model to embed the
-        predictor into it
+        Object containing information about what was added to gp_model to formulate logistic_regression.
 
     Raises
     ------
@@ -119,7 +118,7 @@ def add_logistic_regression_constr(
 class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
     """Class to model trained :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` with gurobipy
 
-    Stores the changes to :gurobipy:`model` when embedding an instance into it."""
+    |ClassShort|"""
 
     def __init__(
         self,

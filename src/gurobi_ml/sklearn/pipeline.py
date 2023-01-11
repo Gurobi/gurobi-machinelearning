@@ -13,8 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for embedding a :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
-into a :gurobipy:`model`.
+""" Module for formulating a :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
+in a :gurobipy:`model`.
 """
 
 
@@ -29,9 +29,9 @@ from .skgetter import SKgetter
 
 
 def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwargs):
-    """Embed pipeline into gp_model
+    """Formulate pipeline into gp_model
 
-    Predict the values of output_vars using input_vars
+    The formulation predicts the values of output_vars using input_vars according to pipeline.
 
     Parameters
     ----------
@@ -66,7 +66,7 @@ def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwar
 class PipelineConstr(SKgetter, AbstractPredictorConstr):
     """Class to model trained :external+sklearn:py:class:`sklearn.pipeline.Pipeline` with gurobipy
 
-    Stores the changes to :gurobipy:`model` when embedding an instance into it."""
+    |ClassShort|"""
 
     def __init__(self, gp_model, pipeline, input_vars, output_vars=None, **kwargs):
         self._steps = []

@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for embedding a :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
+""" Module for formulating a :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
 into a :gurobipy:`model`.
 """
 
@@ -27,9 +27,9 @@ from .skgetter import SKgetter
 def add_gradient_boosting_regressor_constr(
     gp_model, gradient_boosting_regressor, input_vars, output_vars=None, **kwargs
 ):
-    """Embed gradient_boosting_regressor into gp_model
+    """Formulate gradient_boosting_regressor into gp_model
 
-    Predict the values of output_vars using input_vars
+    The formulation predicts the values of output_vars using input_vars according to gradient_boosting_regressor.
 
     Parameters
     ----------
@@ -44,8 +44,7 @@ def add_gradient_boosting_regressor_constr(
     Returns
     -------
     GradientBoostingRegressorConstr
-        Object containing information about what was added to gp_model to embed the
-        predictor into it
+        Object containing information about what was added to gp_model to formulate gradient_boosting_regressor.
 
     Note
     ----
@@ -63,7 +62,9 @@ def add_gradient_boosting_regressor_constr(
 class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model trained :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor` with gurobipy
 
-    Stores the changes to :gurobipy:`model` when embedding an instance into it."""
+    |ClassShort|
+
+    """
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self._output_shape = 1

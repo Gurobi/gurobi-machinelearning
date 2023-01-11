@@ -13,22 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Class to embed a column transformer in a gurobipy model
-
-Note
-----
-This object differs from all the other object in the Gurobi Machine Learning package in
-that it may not be possible to write all of its input with Gurobi variables. Specifically
-some input may consist of categorical features to be encoded using the column transformer.
-
-Then such input cannot be directly represented in Gurobi but the result of the encoding may be represented.
-If the categorical features are fixed for the optimization model, we can use it so it is allowed by
-the ColumnTransormerConstr class.
-
-The rule we use to apply the ColumnTransformer to the input is that if the set of columns to which a preprocessing
-transformation is constant in the input we use directly the scikit learn preprocessing object. It at least one of the columns
-is made of gurobipy variables, we use the gurobi-ml object (if it exists).
-"""
+""" Module to embed a column transformer in a gurobipy model"""
 
 import gurobipy as gp
 
@@ -37,7 +22,23 @@ from .skgetter import SKtransformer
 
 
 class ColumnTransformerConstr(SKtransformer):
-    """Class to model a fitted :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` with gurobipy"""
+    """Class to model a fitted :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` with gurobipy
+
+    Note
+    ----
+    This object differs from all the other object in the Gurobi Machine Learning package in
+    that it may not be possible to write all of its input with Gurobi variables. Specifically
+    some input may consist of categorical features to be encoded using the column transformer.
+
+    Then such input cannot be directly represented in Gurobi but the result of the encoding may be represented.
+    If the categorical features are fixed for the optimization model, we can use it so it is allowed by
+    the ColumnTransormerConstr class.
+
+    The rule we use to apply the ColumnTransformer to the input is that if the set of columns to which a preprocessing
+    transformation is constant in the input we use directly the scikit learn preprocessing object. It at least one of the columns
+    is made of gurobipy variables, we use the gurobi-ml object (if it exists).
+
+    """
 
     def __init__(self, gp_model, column_transformer, input_vars, **kwargs):
         self._default_name = "col_trans"
@@ -83,7 +84,7 @@ class ColumnTransformerConstr(SKtransformer):
 
 
 def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kwargs):
-    """Embed a column transformer in gurobipy model
+    """Formulate column_transformer in gurobipy model
 
     Parameters
     ----------
@@ -99,5 +100,6 @@ def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kw
     sklearn.preprocessing.ColumnTransformerConstr
         Object containing information about what was added to gp_model to insert the
         polynomial_features in it.
+
     """
     return ColumnTransformerConstr(gp_model, column_transformer, input_vars, **kwargs)

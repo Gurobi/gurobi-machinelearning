@@ -17,7 +17,7 @@
 
 
 class SubModel:
-    """Base class for building and representing a sub-model embedded in a gurobipy.Model.
+    """Base class for building and representing a MIP formulation embedded in a gurobipy.Model.
 
     When instantiating this class, a (sub-)model is created in the provided
     gurobipy.Model.  The instance represents the sub-model that was created,

@@ -13,8 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for embedding a :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
-into a :gurobipy:`model`.
+""" Module for formulating a :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
+in a :gurobipy:`model`.
 """
 
 import numpy as np
@@ -34,9 +34,9 @@ def add_decision_tree_regressor_constr(
     float_type=np.float32,
     **kwargs
 ):
-    """Embed decision_tree_regressor into gp_model
+    """Formulate decision_tree_regressor into gp_model
 
-    Predict the values of output_vars using input_vars
+    The formulation predicts the values of output_vars using input_vars according to decision_tree_regressor.
 
     Parameters
     ----------
@@ -58,8 +58,7 @@ def add_decision_tree_regressor_constr(
     Returns
     -------
     DecisionTreeRegressorConstr
-        Object containing information about what was added to gp_model to embed the
-        predictor into it
+        Object containing information about what was added to gp_model to formulate decision_tree_regressor
 
 
     Note
@@ -86,7 +85,9 @@ def add_decision_tree_regressor_constr(
 class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model trained :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor` with gurobipy
 
-    Stores the changes to :gurobipy:`model` when embedding an instance into it."""
+    |ClassShort|
+
+    """
 
     def __init__(
         self,

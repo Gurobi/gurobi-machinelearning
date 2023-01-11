@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for embeding a :external+torch:py:class:`torch.nn.Sequential` model into a
+""" Module for formulating :external+torch:py:class:`torch.nn.Sequential` model in a
 :gurobipy:`model`.
 """
 
@@ -28,9 +28,9 @@ from ..modeling.neuralnet import BaseNNConstr
 def add_sequential_constr(
     gp_model, sequential_model, input_vars, output_vars=None, **kwargs
 ):
-    """Embed sequential_model into gp_model
+    """Formulate sequential_model into gp_model
 
-    Predict the values of output_vars using input_vars
+    The formulation predicts the values of output_vars using input_vars according to sequential_model.
 
 
     Parameters
@@ -72,7 +72,9 @@ def add_sequential_constr(
 
 class SequentialConstr(BaseNNConstr):
     """Transform a pytorch Sequential Neural Network to Gurobi constraint with
-    input and output as matrices of variables."""
+    input and output as matrices of variables.
+
+    |ClassShort|"""
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         for step in predictor:

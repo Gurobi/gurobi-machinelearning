@@ -26,14 +26,14 @@ class AbstractPredictorConstr(ABC, SubModel):
     """Base class to store sub-model added by :py:func:`gurobi_ml.add_predictor_constr`
 
     This class is the base class to store everything that is added to
-    a Gurobi model when embedding a trained predictor into it. Depending on
+    a Gurobi model when a trained predictor is inserted into it. Depending on
     the type of the predictor, a class derived from it will be returned
     by :py:func:`gurobi_ml.add_predictor_constr`.
 
     Warning
     -------
 
-    Users should usually never construct objects of this class and it's inherited
+    Users should usually never construct objects of this class or one of its derived
     classes. They are returned by the :py:func:`gurobi_ml.add_predictor_constr` and other
     functions.
 
@@ -112,6 +112,7 @@ class AbstractPredictorConstr(ABC, SubModel):
 
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.
+
         """
 
         if abbrev:
@@ -155,11 +156,12 @@ class AbstractPredictorConstr(ABC, SubModel):
         error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.output`
             Assuming that we have a solution for the input and output variables
             `x, y`. Returns the absolute value of the differences between `predictor.predict(x)` and
-            `y`. Where predictor is the Pytorch model this object is modeling.
+            `y`. Where predictor is the regression model represented by this object.
         Raises
         ------
         NoSolution
             If the Gurobi model has no solution (either was not optimized or is infeasible).
+
         """
         ...
 
@@ -175,20 +177,57 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     @property
     def output(self):
-        """Returns the output variables of embedded predictor"""
+        """Output variables of embedded predictor
+
+        Returns
+        -------
+        output: :gurobipy:`MVar`.
+
+        """
         return self._output
 
     @property
     def input_values(self):
+        """Returns the values for the input variables if a solution is known
+
+        Returns
+        -------
+        output_value: ndarray or pandas dataframe with values
+
+        Raises
+        ------
+        NoSolution
+            If the Gurobi model has no solution (either was not optimized or is infeasible).
+
+        """
+
         return _get_sol_values(self.input, self._input_columns, self._input_index)
 
     @property
     def output_values(self):
+        """Returns the values for the output variables if a solution is known
+
+        Returns
+        -------
+        output_value: ndarray or pandas dataframe with values
+
+        Raises
+        ------
+        NoSolution
+            If the Gurobi model has no solution (either was not optimized or is infeasible).
+
+        """
         return _get_sol_values(self.output)
 
     @property
     def input(self):
-        """Returns the input variables of embedded predictor"""
+        """Returns the input variables of embedded predictor
+
+        Returns
+        -------
+        output: :gurobipy:`MVar`.
+
+        """
         return self._input
 
     def __str__(self):

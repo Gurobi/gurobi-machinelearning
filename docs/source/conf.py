@@ -61,6 +61,7 @@ dep_versions = get_versions(root_path / "requirements.pandas.txt", dep_versions)
 
 
 VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
+CLASS_SHORT = """Stores the changes to :gurobipy:`model` for representing an instance into it.\nInherits from :class:`AbstractPredictorConstr <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr>`."""
 
 
 rst_epilog = f"""
@@ -72,6 +73,7 @@ rst_epilog = f"""
 .. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}
 .. |TensorflowVersion| replace:: {dep_versions["tensorflow"]}
 .. |VariablesDimensionsWarn| replace:: {VARS_SHAPE}
+.. |ClassShort| replace:: {CLASS_SHORT}
 """
 
 # Add any paths that contain templates here, relative to this directory.

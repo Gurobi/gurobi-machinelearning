@@ -26,7 +26,7 @@ def register_predictor_constr(predictor, predictor_constr):
     predictor:
         Class of the predictor
     predictor_constr:
-        Class implementing the MIP model that embeds a trained object of
+        Class implementing the MIP formulation of a trained object of
         class predictor in a gurobi Model <https://www.gurobi.com/documentation/9.5/refman/py_model.html>
     """
     USER_PREDICTORS[predictor] = predictor_constr

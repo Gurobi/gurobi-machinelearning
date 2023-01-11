@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for inserting simple Scikit-Learn PLS regression models into a gurobipy model
+""" Module for formulating simple Scikit-Learn PLS regression models in a gurobipy model
 """
 
 import numpy as np
@@ -25,7 +25,9 @@ from .skgetter import SKgetter
 def add_pls_regression_constr(
     gp_model, pls_regression, input_vars, output_vars=None, **kwargs
 ):
-    """Embed pls_regression in gp_model to predict the values of output_vars using input_vars
+    """Formulate pls_regression in gp_model
+
+    The formulation predicts the values of output_vars using input_vars according to pls_regression.
 
     Parameters
     ----------
@@ -43,8 +45,7 @@ def add_pls_regression_constr(
     Returns
     -------
     PLSRegressionConstr
-        Object containing information about what was added to gp_model to embed the
-        predictor into it
+        Object containing information about what was added to gp_model to formulate pls_regression.
 
     Note
     ----
@@ -58,7 +59,7 @@ def add_pls_regression_constr(
 class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
     """Class to model trained :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression` with gurobipy
 
-    Stores the changes to :gurobipy:`model` when embedding an instance into it."""
+    |ClassShort|"""
 
     def __init__(
         self,

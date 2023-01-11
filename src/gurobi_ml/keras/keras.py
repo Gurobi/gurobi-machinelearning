@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for embedding a Keras model into a :gurobipy:`model`
+""" Module for formulating a Keras model into a :gurobipy:`model`
 """
 
 import numpy as np
@@ -24,9 +24,9 @@ from ..modeling.neuralnet import BaseNNConstr
 
 
 def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwargs):
-    """Embed keras_model into gp_model
+    """Formulate keras_model into gp_model
 
-    Predict the values of output_vars using input_vars
+    The formulation predicts the values of output_vars using input_vars according to keras_model.
 
     Parameters
     ----------
@@ -42,8 +42,8 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
     Returns
     -------
     KerasNetworkConstr
-        Object containing information about what was added to gp_model to embed the
-        predictor into it
+        Object containing information about what was added to gp_model to formulate
+        keras_model into it
 
 
     Warning
@@ -67,6 +67,12 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
 
 
 class KerasNetworkConstr(BaseNNConstr):
+    """Class to model trained `keras.Model <https://keras.io/api/models/model/>` with gurobipy
+
+    |ClassShort|
+
+    """
+
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         assert predictor.built
         for step in predictor.layers:

@@ -1,5 +1,5 @@
-Generic Predictor Function
-##########################
+Generic Predictor Constraint
+############################
 
 .. autofunction:: gurobi_ml.add_predictor_constr
 

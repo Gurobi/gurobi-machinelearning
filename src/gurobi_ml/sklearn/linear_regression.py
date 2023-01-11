@@ -27,7 +27,9 @@ from .base_regressions import BaseSKlearnRegressionConstr
 def add_linear_regression_constr(
     gp_model, linear_regression, input_vars, output_vars=None, **kwargs
 ):
-    """Embed linear_regression in gp_model to predict the values of output_vars using input_vars
+    """Formulate linear_regression in gp_model
+
+    The formulation predicts the values of output_vars using input_vars according to linear_regression.
 
     Parameters
     ----------
@@ -46,8 +48,7 @@ def add_linear_regression_constr(
     Returns
     -------
     LinearRegressionConstr
-        Object containing information about what was added to gp_model to embed the
-        predictor into it
+        Object containing information about what was added to gp_model to formulate linear_regression.
 
     Note
     ----
@@ -61,7 +62,7 @@ def add_linear_regression_constr(
 class LinearRegressionConstr(BaseSKlearnRegressionConstr):
     """Class to model trained :external+sklearn:py:class:`sklearn.linear_model.LinearRegression` with gurobipy
 
-    Stores the changes to :gurobipy:`model` when embedding an instance into it."""
+    |ClassShort|"""
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         self._default_name = "lin_reg"

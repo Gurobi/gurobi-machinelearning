@@ -23,7 +23,7 @@ from .skgetter import SKtransformer
 
 
 def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **kwargs):
-    """Embed polynomial_features into gp_model
+    """Formulate polynomial_features into gp_model
 
     Note that this function creates the output variables from
     the input variables.
@@ -52,7 +52,7 @@ def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **
 
 
 def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
-    """Embed standard_scaler into gp_model
+    """Formulate standard_scaler into gp_model
 
     Note that this function creates the output variables from
     the input variables.
@@ -79,7 +79,9 @@ def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
 class StandardScalerConstr(SKtransformer):
     """Class to model a fitted :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler` with gurobipy
 
-    Stores the changes to :gurobipy:`model` when embedding an instance into it."""
+    Stores the changes to :gurobipy:`model` when embedding an instance into it.
+
+    """
 
     def __init__(self, gp_model, scaler, input_vars, **kwargs):
         self._default_name = "std_scaler"

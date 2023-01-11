@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for embedding a :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor`
+""" Module for formulating a :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor`
 into a :gurobipy:`model`.
 """
 
@@ -27,9 +27,9 @@ from .skgetter import SKgetter
 def add_random_forest_regressor_constr(
     gp_model, random_forest_regressor, input_vars, output_vars=None, **kwargs
 ):
-    """Embed random_forest_regressor into gp_model
+    """Formulate random_forest_regressor in gp_model
 
-    Predict the values of output_vars using input_vars
+    The formulation predicts the values of output_vars using input_vars according to random_forest_regressor.
 
     Parameters
     ----------
@@ -45,8 +45,7 @@ def add_random_forest_regressor_constr(
     Returns
     -------
     RandomForestRegressorConstr
-       Object containing information about what was added to gp_model to embed the
-       predictor into it
+       Object containing information about what was added to gp_model to formulate random_forest_regressor.
 
     Note
     ----
@@ -64,7 +63,7 @@ def add_random_forest_regressor_constr(
 class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
     """Class to model trained :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor` with gurobipy
 
-    Stores the changes to :gurobipy:`model` when embedding an instance into it."""
+    |ClassShort|"""
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.estimators_ = []

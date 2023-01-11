@@ -42,7 +42,7 @@ def sklearn_convertors():
 
 
 def pytorch_convertors():
-    """Collect known PyTorch objects that can be embedded and the conversion class"""
+    """Collect known PyTorch objects that can be formulated and the conversion class"""
     if "torch" in sys.modules:
         import torch  # pylint: disable=import-outside-toplevel
 

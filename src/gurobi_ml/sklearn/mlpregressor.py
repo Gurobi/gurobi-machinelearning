@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for embeding a :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` into a
+""" Module for formulating a :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a
 :gurobipy:`model`
 """
 from ..exceptions import NoModel
@@ -24,9 +24,9 @@ from .skgetter import SKgetter
 def add_mlp_regressor_constr(
     gp_model, mlp_regressor, input_vars, output_vars=None, **kwargs
 ):
-    """Embed mlp_regressor into gp_model
+    """Formulate mlp_regressor in gp_model
 
-    Predict the values of output_vars using input_vars
+    The formulation predicts the values of output_vars using input_vars according to mlp_regressor.
 
     Parameters
     ----------
@@ -42,8 +42,7 @@ def add_mlp_regressor_constr(
     Returns
     -------
     MLPRegressorConstr
-        Object containing information about what was added to gp_model to embed the
-        predictor into it
+        Object containing information about what was added to gp_model to formulate mlp_regressor.
 
     Raises
     ------
@@ -61,8 +60,10 @@ def add_mlp_regressor_constr(
 
 
 class MLPRegressorConstr(SKgetter, BaseNNConstr):
-    """Predict a Gurobi matrix variable using a neural network that
-    takes another Gurobi matrix variable as input.
+    """Class to model trained :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` with gurobipy
+
+    |ClassShort|
+
     """
 
     def __init__(
