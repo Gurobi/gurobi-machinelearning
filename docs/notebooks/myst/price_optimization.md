@@ -685,7 +685,7 @@ print(
 )
 ```
 
-And the features of the regression model
+And the computed features of the regression model in a pandas dataframe.
 
 ```{code-cell} ipython3
 pred_constr.input_values

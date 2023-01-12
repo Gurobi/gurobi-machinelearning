@@ -93,9 +93,6 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 import sys
-sys.path.append('../../../src')
-%load_ext autoreload
-%autoreload 2
 import gurobipy as gp
 
 from gurobi_ml import add_predictor_constr
@@ -268,6 +265,12 @@ print(
         np.max(pred_constr.get_error())
     )
 )
+```
+
+Finally note that we can directly get the input values for the regression in a solution as a pandas dataframe using input_values.
+
+```{code-cell} ipython3
+pred_constr.input_values
 ```
 
 +++ {"nbsphinx": "hidden"}
