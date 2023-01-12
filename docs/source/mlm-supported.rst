@@ -5,7 +5,8 @@ The package currently support various `scikit-learn
 <https://scikit-learn.org/stable/>`_ objects. It also has limited support for
 `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_. Only
 sequential neural networks with ReLU activation function are currently
-supported.
+supported. In :ref:`Mixed Integer Formulations`, we briefly outline the formulations used for the various
+regression models.
 
 The versions of those packages tested with the current version (|version|) are
 listed in the table :ref:`table-versions`.

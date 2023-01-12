@@ -27,6 +27,7 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
     """Formulate keras_model into gp_model
 
     The formulation predicts the values of output_vars using input_vars according to keras_model.
+    See our :ref:`Users Guide <Neural Networks>` for details on the mip formulation used.
 
     Parameters
     ----------

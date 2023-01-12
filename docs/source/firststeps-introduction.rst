@@ -138,7 +138,9 @@ The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` is
 a shorthand that should add the correct model for any supported regression
 model, but individual functions for each regression model are also available.
 For the list of frameworks and regression models supported, and the corresponding
-functions please refer to the :doc:`mlm-supported` section.
+functions please refer to the :doc:`mlm-supported` section. We also briefly
+outline how the various regression models are expressed in Gurobi in the :ref:`Mixed Integer Formulations`
+section.
 
 For some regression models, additional optional parameters can be set to tune
 the way the predictor is inserted in the Gurobi model. Those are documented in

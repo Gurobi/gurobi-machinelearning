@@ -30,6 +30,7 @@ def add_linear_regression_constr(
     """Formulate linear_regression in gp_model
 
     The formulation predicts the values of output_vars using input_vars according to linear_regression.
+    See our :ref:`Users Guide <Linear Regression>` for details on the mip formulation used.
 
     Parameters
     ----------

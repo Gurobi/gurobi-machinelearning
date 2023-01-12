@@ -30,6 +30,7 @@ def add_gradient_boosting_regressor_constr(
     """Formulate gradient_boosting_regressor into gp_model
 
     The formulation predicts the values of output_vars using input_vars according to gradient_boosting_regressor.
+    See our :ref:`User's Guide <Gradient Boosting Regression>` for details on the mip formulation used.
 
     Parameters
     ----------

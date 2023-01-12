@@ -10,22 +10,22 @@ particular to our models for the logistic regression and decision trees (also
 random forest and gradient boosting that are based on decision trees)
 
 Throughout,
-we denote by :math:`x` the independent variables (or input of the regression
-models) and :math:`y` the dependent variables (or output of the regression model)
+we denote by :math:`x` the input of the regression (i.e. the independent variables)
+and :math:`y` the output of the regression model (i.e. the dependent variables).
 
 
 Linear Regression
 =================
 
-With given weights :math:`\beta \in \mathbb R^{p+1}` the linear regression model
-takes the form
+Denoting by :math:`\beta \in \mathbb R^{p+1}` the computed weights of linear regression,
+its model takes the form
 
 .. math::
 
   y = \sum_{i=1}^p \beta_i x_i + \beta_0.
 
-Since this is purely linear, it can be represented using linear constraints in
-Gurobi. Note that the model fits other techniques than ordinary linear
+Since this is linear, it can be represented directly in Gurobi using
+linear constraints. Note that the model fits other techniques than ordinary linear
 regression such as Ridge or Lasso.
 
 Logistic Regression
@@ -39,17 +39,18 @@ and with the same notations as above, the model for logistic regression reads
   y = f(\sum_{i=1}^p \beta_i x_i + \beta_0) = \frac{1}{1 - e^{- \sum_{i=1}^p
   \beta_i x_i - \beta_0}}
 
-This model is formulated in Gurobi by using the logistic `general function
+This model is formulated in Gurobi by using the logistic
+`general function
 constraint
-<https://www.gurobi.com/documentation/latest/refman/constraints.html#subsubsection:GenConstrFunction>`_.
+<https://www.gurobi.com/documentation/current/refman/constraints.html#subsubsection:GenConstrFunction>`_.
 First an intermediate free variable :math:`\omega = \sum_{i=1}^p \beta_i x_i +
 \beta_0` is created, and then we can express :math:`y = f(\omega)` using the
 general constraint.
 
 Internally, Gurobi then makes a piecewise linear approximation of the logistic
 function. By default, the approximation guarantees a maximal error of
-:math:`10^{-2}`. Those parameters can be tuned by setting the _pwl_attributes_
-keyword argument when the constraints are added (see
+:math:`10^{-2}`. Those parameters can be tuned by setting the `pwl_attributes`
+keyword argument when the constraints is added (see
 :doc:`mlm-examples/student_admission` for an example of how to change the
 default values).
 
@@ -64,7 +65,7 @@ given neuron the relation between its inputs and outputs is given by:
 
     y = \max(\sum_{i=1}^p \beta_i x_i + \beta_0, 0).
 
-The relationship is formulated in the optimization model by using the
+The relationship is formulated in the optimization model by using Gurobi
 :math:`max` `general constraint
 <https://www.gurobi.com/documentation/latest/refman/constraints.html#subsubsection:GeneralConstraints>`_
 with:
@@ -79,14 +80,15 @@ with :math:`\omega` an auxiliary free variable. The neurons are then connected
 according to the topology of the network.
 
 
-Decision Trees
-==============
+Decision Tree Regression
+========================
 
 For representing decision tree in Gurobi, we add one binary decision variable
-:math:`\delta` for each node of the tree. Those variables represent the path
-taken in the decision tree with the values of the input variables. For a node
-:math:`i`, we will have :math:`\delta_i = 1` if node :math:`i` is on the
-decision path and :math:`\delta =0` otherwise.
+:math:`\delta` for each node of the tree (and each input vector). Those variables represent the path
+taken in the decision tree that corresponds to the values of the input vector. For a node
+:math:`i`, we have :math:`\delta_i = 1` if node :math:`i` is on the
+decision path and :math:`\delta =0` otherwise. The variable corresponding to the root of the tree is
+always set to 1.
 
 Let :math:`i` be a node with left child :math:`j` and right child :math:`k`. The
 connectivity of the decision path is modeled with the following constraint that
@@ -101,16 +103,16 @@ specifies that if :math:`i` is on the decision path then either :math:`j` or
 For further detailing the formulation, we differentiate between splitting nodes
 and leafs of the tree.
 
-We first consider the leafs of the tree that are more simple. Let :math:`i` be a
-leaf of the decision tree, then if :math:`i` is on the decision path, the output
-value of the regression is fixed to the value :math:`\theta_i`. We model this through
-the indicator constraint:
+First consider the leafs of the tree. Let :math:`i` be a
+leaf of the decision tree with a corresponding value of the output variables :math:`\nu_i`.
+We use an indicator constraint to model that if :math:`i` is on the decision path, the output
+value of the output is fixed to :math:`\nu_i`:
 
 .. math::
 
-   \delta_i = 1 \rightarrow y = \theta_i.
+   \delta_i = 1 \rightarrow y = \nu_i.
 
-Note that :math:`y` here might be multidimensional.
+Note that :math:`y` and :math:`nu_i` here might be multidimensional.
 
 Now we consider the more complicated case of a splitting node. Let :math:`i` be
 a splitting node with left child :math:`j` and right child :math:`k`.
@@ -141,35 +143,35 @@ value for :math:`\epsilon` is 0. This means in particular that if :math:`x_{s_i}
 :math:`k` and :math:`j` and either may be picked in the decision path. This may
 happen also whenever :math:`\epsilon` is set to a value that is below the
 `feasibility tolerance
-<https://www.gurobi.com/documentation/latest/refman/feasibilitytol.html#parameter:FeasibilityTol>`_
+<https://www.gurobi.com/documentation/current/refman/feasibilitytol.html#parameter:FeasibilityTol>`_
 of Gurobi. If the value is instead set above the feasibility tolerance, then the
 left and right nodes are correctly discriminated by the model, but a small
 interval is created between :math:`\theta` and :math:`\theta + \epsilon` where
-there is no feasible solution. This might result in an infeasible model
+there is no feasible solution. This may artifically make the optimization model infeasible
 depending on how tightly the input of the decision tree regressor is
 constrained.
 
 The reasoning behind our default setting is that even though there may be a
 difference between the output value of the Gurobi model and the prediction of
-the original decision tree, it mostly corresponds to a small perturbation in the
+the original decision tree, it only corresponds to a small perturbation in the
 values of the input variables.
 
-Random Forests
-==============
+Random Forest Regression
+========================
 
 The regression model of Random Forests is a linear combination of decision trees.
 Each decision tree is represented using the model above. The same difficulties
-with the choice of :math:`epsilon` apply to this case.
+with the choice of :math:`\epsilon` apply to this case.
 
 We note additionally that the random forests are often very large and generating
 their representation in Gurobi may take a significant amount of time.
 
-Gradient Boosting Regressors
-=============================
+Gradient Boosting Regression
+============================
 
 The gradient boosting regressor is a linear combination of decision trees. Each
 decision tree is represented using the model above. The same difficulties with
-the choice of :math:`epsilon` apply to this case.
+the choice of :math:`\epsilon` apply to this case.
 
 We note additionally that the gradient boosting regressors are often very large
 and generating their representation in Gurobi may take a significant amount of

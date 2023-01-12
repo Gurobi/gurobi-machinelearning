@@ -37,6 +37,7 @@ def add_decision_tree_regressor_constr(
     """Formulate decision_tree_regressor into gp_model
 
     The formulation predicts the values of output_vars using input_vars according to decision_tree_regressor.
+    See our :ref:`User's Guide <Decision Tree Regression>` for details on the mip formulation used.
 
     Parameters
     ----------
@@ -120,15 +121,19 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name="node")
         self.nodevars = nodes
 
-        # Intermediate nodes constraints
-        # Can be added all at once
+        # Collect leafs and non-leafs nodes
         notleafs = tree.children_left >= 0
         leafs = tree.children_left < 0
+
+        # Connectivity constraint
         model.addConstr(
             nodes[:, notleafs]
             == nodes[:, tree.children_right[notleafs]]
             + nodes[:, tree.children_left[notleafs]]
         )
+
+        # The value of the root is always 1
+        nodes[:, 0].LB = 1.0
 
         # Node splitting
         for node in notleafs.nonzero()[0]:

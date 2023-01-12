@@ -61,7 +61,7 @@ dep_versions = get_versions(root_path / "requirements.pandas.txt", dep_versions)
 
 
 VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
-CLASS_SHORT = """Stores the changes to :gurobipy:`model` for representing an instance into it.\nInherits from :class:`AbstractPredictorConstr <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr>`."""
+CLASS_SHORT = """Stores the changes to :gurobipy:`model` for representing an instance into it.\n    Inherits from :class:`AbstractPredictorConstr <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr>`.\n"""
 
 
 rst_epilog = f"""

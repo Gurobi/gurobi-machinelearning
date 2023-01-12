@@ -30,6 +30,7 @@ def add_random_forest_regressor_constr(
     """Formulate random_forest_regressor in gp_model
 
     The formulation predicts the values of output_vars using input_vars according to random_forest_regressor.
+    See our :ref:`User's Guide <Random Forest Regression>` for details on the mip formulation used.
 
     Parameters
     ----------

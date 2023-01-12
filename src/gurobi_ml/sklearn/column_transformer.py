@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module to embed a column transformer in a gurobipy model"""
+""" Module for formulating a column transformer in a :gurobipy:`gurobipy model <Model>`"""
 
 import gurobipy as gp
 

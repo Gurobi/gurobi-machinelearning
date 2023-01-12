@@ -217,7 +217,8 @@ approximation of the logistic function. We can therefore get some significant
 errors when comparing the results of the Gurobi model with what is predicted by
 the regression.
 
-We print the error. Here we need to use `get_error_proba`.
+We print the error using [get_error](../api/AbstractPredictorConstr.rst#gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.get_error) (note that we take the maximal error
+over all input vectors).
 
 ```{code-cell} ipython3
 print(

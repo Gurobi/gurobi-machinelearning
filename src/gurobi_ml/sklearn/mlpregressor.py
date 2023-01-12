@@ -27,6 +27,7 @@ def add_mlp_regressor_constr(
     """Formulate mlp_regressor in gp_model
 
     The formulation predicts the values of output_vars using input_vars according to mlp_regressor.
+    See our :ref:`Users Guide <Neural Networks>` for details on the mip formulation used.
 
     Parameters
     ----------

@@ -41,6 +41,7 @@ def add_logistic_regression_constr(
     Note that the model uses a piecewise linear approximation of the logistic function.
     The quality of the approximation can be controlled with the parameter pwl_attributes.
     By default, it is parametrized so that the maximal error of the approximation is `1e-2`.
+    See our :ref:`Users Guide <Logistic Regression>` for details on the mip formulation used.
 
 
 
