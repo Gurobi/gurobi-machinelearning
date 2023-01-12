@@ -39,13 +39,15 @@ If you encounter issues with Gurobi or ``gurobipy`` please contact
 - [`gurobipy`](https://pypi.org/project/gurobipy/) >= 10.0
 - [`scipy`](https://pypi.org/project/scipy/) >= 1.9.3
 
-The current version supports the following ML package versions:
-- [`torch`](https://pypi.org/project/torch/1.12.1/) == 1.12.1
-- [`scikit-learn`](https://pypi.org/project/scikit-learn/1.1.2/) == 1.1.2
-- [`tensorflow`](https://pypi.org/project/tensorflow/2.10.0/) == 2.10.0
+The current version supports the following ML packages:
+- [`torch`](https://pypi.org/project/torch/)
+- [`scikit-learn`](https://pypi.org/project/scikit-learn)
+- [`tensorflow`](https://pypi.org/project/tensorflow)
 
 Installing these package is only required if the predictor you want to insert uses them
 (i.e. to insert a Keras based predictor you need to have `tensorflow` installed).
+
+The up to date supported and tested versions of each package for the last release can be [found in the documentation](https://gurobi-machinelearning.readthedocs.io/en/1.1.x/firststeps-introduction.html#table-versions).
 
 ## Pip installation
 
