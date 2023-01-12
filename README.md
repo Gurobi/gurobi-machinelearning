@@ -27,7 +27,7 @@ For reporting bugs, issues and feature request please
 [open an issue](https://github.com/Gurobi/gurobi-machinelearning/issues).
 
 If you encounter issues with Gurobi or ``gurobipy`` please contact
-[Gurobi Support](https://support.gurobi.com/hc/en-us)
+[Gurobi Support](https://support.gurobi.com/hc/en-us).
 
 # Installation
 
@@ -44,7 +44,7 @@ The current version supports the following ML packages:
 - [`scikit-learn`](https://pypi.org/project/scikit-learn)
 - [`tensorflow`](https://pypi.org/project/tensorflow)
 
-Installing these package is only required if the predictor you want to insert uses them
+Installing these packages is only required if the predictor you want to insert uses them
 (i.e. to insert a Keras based predictor you need to have `tensorflow` installed).
 
 The up to date supported and tested versions of each package for the last release can be [found in the documentation](https://gurobi-machinelearning.readthedocs.io/en/1.1.x/firststeps-introduction.html#table-versions).
