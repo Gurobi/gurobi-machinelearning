@@ -99,18 +99,120 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         epsilon=1e-6,
         scale=1.0,
         float_type=np.float32,
+        formulation="leafs",
         **kwargs
     ):
         self.epsilon = epsilon
         self.scale = scale
         self.float_type = float_type
         self._default_name = "tree_reg"
+        self._formulation = formulation
         SKgetter.__init__(self, predictor, input_vars)
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )
 
+    def _compute_leafs_bounds(self):
+
+        tree = self.predictor.tree_
+
+        node_lb = -np.ones((tree.n_features, tree.capacity)) * GRB.INFINITY
+        node_ub = np.ones((tree.n_features, tree.capacity)) * GRB.INFINITY
+
+        children_left = tree.children_left
+        children_right = tree.children_right
+        feature = tree.feature
+        threshold = tree.threshold
+
+        stack = [
+            0,
+        ]
+        while len(stack):
+            node = stack.pop()
+            left = children_left[node]
+            if left < 0:
+                continue
+            right = children_right[node]
+            assert left not in stack
+            assert right not in stack
+            node_ub[:, right] = node_ub[:, node]
+            node_lb[:, right] = node_lb[:, node]
+            node_ub[:, left] = node_ub[:, node]
+            node_lb[:, left] = node_lb[:, node]
+
+            node_ub[feature[node], left] = threshold[node]
+            node_lb[feature[node], right] = threshold[node] + self.epsilon
+            stack.append(right)
+            stack.append(left)
+        return (node_lb, node_ub)
+
+    def _leaf_mip_model(self, **kwargs):
+        tree = self.predictor.tree_
+        model = self._gp_model
+
+        _input = self._input
+        output = self._output
+        outdim = output.shape[1]
+        nex = _input.shape[0]
+
+        # Collect leafs and non-leafs nodes
+        notleafs = tree.children_left >= 0
+        leafs = tree.children_left < 0
+
+        leafs_vars = model.addMVar((nex, sum(leafs)), vtype=GRB.BINARY, name="leafs")
+        self.nodevars = leafs_vars
+
+        (node_lb, node_ub) = self._compute_leafs_bounds()
+        input_ub = _input.UB
+        input_lb = _input.LB
+
+        for i, node in enumerate(leafs.nonzero()[0]):
+            reachable = (input_ub >= node_lb[:, node]).all(axis=1) & (
+                input_lb <= node_ub[:, node]
+            ).all(axis=1)
+            # Non reachable nodes
+            leafs_vars[~reachable, i].UB = 0.0
+            # Leaf node:
+            lhs = output[reachable, :].tolist()
+            rhs = leafs_vars[reachable, i].tolist()
+            value = tree.value[node, :, 0]
+            model.addConstrs(
+                (rhs[k] == 1) >> (lhs[k][i] == value[i])
+                for k in range(sum(reachable))
+                for i in range(outdim)
+            )
+
+            for feature in range(tree.n_features):
+                lb = node_lb[feature, node]
+                ub = node_ub[feature, node]
+
+                tight = (input_lb[:, feature] < lb) & reachable
+                rhs = leafs_vars[tight, i].tolist()
+                lhs = _input[tight, feature].tolist()
+                model.addConstrs(
+                    (rhs[k] == 1) >> (lhs[k] >= lb) for k in range(sum(tight))
+                )
+
+                tight = (input_ub[:, feature] > ub) & reachable
+                rhs = leafs_vars[tight, i].tolist()
+                lhs = _input[tight, feature].tolist()
+                model.addConstrs(
+                    (rhs[k] == 1) >> (lhs[k] <= ub) for k in range(sum(tight))
+                )
+
+        # We should attain 1 leaf
+        model.addConstr(leafs_vars.sum(axis=1) == 1)
+
+        output.LB = np.min(tree.value)
+        output.UB = np.max(tree.value)
+
     def _mip_model(self, **kwargs):
+        if self._formulation == "leafs":
+            return self._leaf_mip_model(**kwargs)
+        else:
+            return self._paths_mip_model(**kwargs)
+
+    def _paths_mip_model(self, **kwargs):
         tree = self.predictor.tree_
         model = self._gp_model
 
