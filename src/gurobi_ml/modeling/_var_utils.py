@@ -47,11 +47,17 @@ def _get_sol_values(values, columns=None, index=None):
     some constants that can't be translated to Gurobi variables we need to fill in missing values"""
     if HAS_PANDAS:
         if isinstance(values, pd.DataFrame):
-            return pd.DataFrame(
+            rval = pd.DataFrame(
                 data=_get_sol_values(values.to_numpy()),
                 index=values.index,
                 columns=values.columns,
             )
+            for col in rval.columns:
+                try:
+                    rval[col] = rval[col].astype(np.float64)
+                except ValueError:
+                    pass
+            return rval.convert_dtypes()
     if isinstance(values, np.ndarray):
         return np.array(
             [v.X if isinstance(v, gp.Var) else v for v in values.ravel()]
