@@ -67,8 +67,8 @@ def _get_sol_values(values, columns=None, index=None):
         if isinstance(index, (pd.Index, pd.MultiIndex)):
             X = pd.DataFrame(data=X, columns=columns, index=index)
         else:
-            raise NotImplementedError("Input variables as pd.Series is not implemented")
             X = pd.Series(data=X, columns=columns, name=index)
+            raise NotImplementedError("Input variables as pd.Series is not implemented")
     return X
 
 

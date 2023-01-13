@@ -97,6 +97,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         output_vars = self._output
         steps = self._steps
         transformers = sklearn_transformers()
+        transformers |= user_predictors()
         transformers["ColumnTransformer"] = add_column_transformer_constr
         kwargs["validate_input"] = True
 

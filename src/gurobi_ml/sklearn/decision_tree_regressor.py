@@ -119,7 +119,6 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         outdim = output.shape[1]
         nex = _input.shape[0]
         nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name="node")
-        self.nodevars = nodes
 
         # Collect leafs and non-leafs nodes
         notleafs = tree.children_left >= 0
@@ -178,9 +177,6 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                 for k in range(nex)
                 for i in range(outdim)
             )
-
-        # We should attain 1 leaf
-        model.addConstr(nodes[:, leafs].sum(axis=1) == 1)
 
         output.LB = np.min(tree.value)
         output.UB = np.max(tree.value)
