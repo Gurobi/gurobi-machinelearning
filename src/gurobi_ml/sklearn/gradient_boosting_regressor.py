@@ -13,7 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for formulating a :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
+"""Module for formulating a
+:external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
 into a :gurobipy:`model`.
 """
 
@@ -27,33 +28,36 @@ from .skgetter import SKgetter
 def add_gradient_boosting_regressor_constr(
     gp_model, gradient_boosting_regressor, input_vars, output_vars=None, **kwargs
 ):
-    """Formulate gradient_boosting_regressor into gp_model
+    """Formulate gradient_boosting_regressor into gp_model.
 
-    The formulation predicts the values of output_vars using input_vars according to gradient_boosting_regressor.
-    See our :ref:`User's Guide <Gradient Boosting Regression>` for details on the mip formulation used.
+    The formulation predicts the values of output_vars using input_vars
+    according to gradient_boosting_regressor. See our :ref:`User's Guide
+    <Gradient Boosting Regression>` for details on the mip formulation used.
 
     Parameters
     ----------
-    gp_model: :gurobipy:`model`
+    gp_model : :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    gradient_boosting_regressor: :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
+    gradient_boosting_regressor : :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
         The gradient boosting regressor to insert as predictor.
-    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for gradient boosting regressor in model.
-    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
         Decision variables used as output for gradient boosting regressor in model.
+
     Returns
     -------
     GradientBoostingRegressorConstr
-        Object containing information about what was added to gp_model to formulate gradient_boosting_regressor.
+        Object containing information about what was added to gp_model to formulate
+        gradient_boosting_regressor.
 
     Note
     ----
     |VariablesDimensionsWarn|
 
-    Also see :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor`
+    Also see
+    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor`
     for specific parameters to model decision tree estimators.
-
     """
     return GradientBoostingRegressorConstr(
         gp_model, gradient_boosting_regressor, input_vars, output_vars, **kwargs
@@ -61,10 +65,11 @@ def add_gradient_boosting_regressor_constr(
 
 
 class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor` with gurobipy
+    """Class to model trained
+    :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
+    with gurobipy.
 
     |ClassShort|
-
     """
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
@@ -114,7 +119,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         )
 
     def print_stats(self, abbrev=False, file=None):
-        """Print statistics on model additions stored by this class
+        """Print statistics on model additions stored by this class.
 
         This function prints detailed statistics on the variables
         and constraints that where added to the model.
@@ -132,9 +137,12 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
             return
         print(file=file)
 
-        header = f"{'Estimator':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
+        header = f"{'Estimator':13} {'Output Shape':>14} {'Variables':>12} "
+        header += f"{'Constraints':^38}"
+
         print("-" * len(header), file=file)
         print(header, file=file)
+
         print(f"{' '*41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)
         print("=" * len(header), file=file)
         for estimator in self.estimators_:

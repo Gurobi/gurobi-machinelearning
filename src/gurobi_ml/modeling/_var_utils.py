@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Utility functions for dealing with input and output variables of predictor constr objects"""
+"""Utility functions for dealing with input and output variables of predictor constr objects."""
 
 import gurobipy as gp
 import numpy as np
@@ -40,11 +40,12 @@ def _default_name(predictor):
 
 
 def _get_sol_values(values, columns=None, index=None):
-    """Get solution values
+    """Get solution values.
 
     This is complicated because of the column_transformer.
     In most cases we can just do values.X but if we have a column transformer with
-    some constants that can't be translated to Gurobi variables we need to fill in missing values"""
+    some constants that can't be translated to Gurobi variables we need to fill in missing values
+    """
     if HAS_PANDAS:
         if isinstance(values, pd.DataFrame):
             rval = pd.DataFrame(
@@ -73,9 +74,10 @@ def _get_sol_values(values, columns=None, index=None):
 
 
 def _dataframe_to_mvar(model, df):
-    """Convert a DataFrame to an mvar
+    """Convert a DataFrame to an mvar.
 
-    This just calls the array_to_mvar function"""
+    This just calls the array_to_mvar function
+    """
     if isinstance(df, pd.DataFrame):
         data = df.to_numpy()
         columns = df.columns
@@ -86,7 +88,7 @@ def _dataframe_to_mvar(model, df):
 
 
 def _array_to_mvar(model, data, columns=None, index=None):
-    """Function to create an MVar from an ndarray
+    """Function to create an MVar from an ndarray.
 
     The array data may contain columns of Gurobi variables and constant values.
     In this function we create an array of same shape as data where constant
@@ -97,12 +99,12 @@ def _array_to_mvar(model, data, columns=None, index=None):
 
     Parameters
     ----------
-    model: gp.Model
+    model : gp.Model
         The gurobipy model
-    data: ndarray
+    data : ndarray
         A numpy array whose columns are either columns of gp.Var or data that
         can be converted to a float
-    columns: optional
+    columns : optional
         Name of data columns
     index:
         Name of data rows
@@ -157,7 +159,7 @@ def _array_to_mvar(model, data, columns=None, index=None):
 
 
 def validate_output_vars(gp_vars):
-    """Put variables into appropriate form (matrix of variable) for the output of a predictor constraint
+    """Put variables into appropriate form (matrix of variable) for the output of a predictor constraint.
 
     Parameters
     ----------
@@ -191,7 +193,7 @@ def validate_output_vars(gp_vars):
 
 
 def validate_input_vars(model, gp_vars):
-    """Put variables into appropriate form (matrix of variable) for the input of a predictor constraint
+    """Put variables into appropriate form (matrix of variable) for the input of a predictor constraint.
 
     Parameters
     ----------

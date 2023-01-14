@@ -13,7 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for formulating a :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor`
+"""Module for formulating a
+:external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor`
 into a :gurobipy:`model`.
 """
 
@@ -27,34 +28,36 @@ from .skgetter import SKgetter
 def add_random_forest_regressor_constr(
     gp_model, random_forest_regressor, input_vars, output_vars=None, **kwargs
 ):
-    """Formulate random_forest_regressor in gp_model
+    """Formulate random_forest_regressor in gp_model.
 
-    The formulation predicts the values of output_vars using input_vars according to random_forest_regressor.
-    See our :ref:`User's Guide <Random Forest Regression>` for details on the mip formulation used.
+    The formulation predicts the values of output_vars using input_vars according to
+    random_forest_regressor. See our :ref:`User's Guide <Random Forest Regression>` for
+    details on the mip formulation used.
 
     Parameters
     ----------
-    gp_model: :gurobipy:`model`
+    gp_model : :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    random_forest_regressor: :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor`
+    random_forest_regressor : :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor`
         The random forest regressor to insert as predictor.
-    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for random forest in model.
-    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
         Decision variables used as output for random forest in model.
 
     Returns
     -------
     RandomForestRegressorConstr
-       Object containing information about what was added to gp_model to formulate random_forest_regressor.
+       Object containing information about what was added to gp_model to formulate
+       random_forest_regressor.
 
     Note
     ----
     |VariablesDimensionsWarn|
 
-    Also see :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor`
+    Also see
+    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor`
     for specific parameters to model decision tree estimators.
-
     """
     return RandomForestRegressorConstr(
         gp_model, random_forest_regressor, input_vars, output_vars, **kwargs
@@ -62,9 +65,11 @@ def add_random_forest_regressor_constr(
 
 
 class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor` with gurobipy
-
-    |ClassShort|"""
+    """Class to model trained
+    :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor` with
+    gurobipy
+    |ClassShort|.
+    """
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.estimators_ = []
@@ -106,7 +111,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         model.addConstr(predictor.n_estimators * output == tree_vars.sum(axis=1))
 
     def print_stats(self, abbrev=False, file=None):
-        """Print statistics on model additions stored by this class
+        """Print statistics on model additions stored by this class.
 
         This function prints detailed statistics on the variables
         and constraints that where added to the model.
@@ -124,7 +129,9 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
             return
         print(file=file)
 
-        header = f"{'Estimator':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
+        header = f"{'Estimator':13} {'Output Shape':>14} {'Variables':>12}"
+        header += f"{'Constraints':^38}"
+
         print("-" * len(header), file=file)
         print(header, file=file)
         print(f"{' '*41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)

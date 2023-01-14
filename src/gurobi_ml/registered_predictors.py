@@ -13,15 +13,14 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Define generic function that can add any known trained predictor
-"""
+"""Define generic function that can add any known trained predictor."""
 import sys
 
 from .register_user_predictor import user_predictors
 
 
 def sklearn_convertors():
-    """Collect convertors for Scikit-learn objects"""
+    """Collect convertors for Scikit-learn objects."""
     if "sklearn" in sys.modules:
         from .sklearn import (  # pylint: disable=import-outside-toplevel
             add_pipeline_constr,
@@ -42,7 +41,7 @@ def sklearn_convertors():
 
 
 def pytorch_convertors():
-    """Collect known PyTorch objects that can be formulated and the conversion class"""
+    """Collect known PyTorch objects that can be formulated and the conversion class."""
     if "torch" in sys.modules:
         import torch  # pylint: disable=import-outside-toplevel
 
@@ -55,7 +54,7 @@ def pytorch_convertors():
 
 
 def keras_convertors():
-    """Collect known Keras objects that can be embedded and the conversion class"""
+    """Collect known Keras objects that can be embedded and the conversion class."""
     if "tensorflow" in sys.modules:
         from keras.engine.functional import (  # pylint: disable=import-outside-toplevel
             Functional,
@@ -76,7 +75,7 @@ def keras_convertors():
 
 
 def registered_predictors():
-    """Return the list of registered predictors"""
+    """Return the list of registered predictors."""
     convertors = {}
     convertors |= sklearn_convertors()
     convertors |= pytorch_convertors()

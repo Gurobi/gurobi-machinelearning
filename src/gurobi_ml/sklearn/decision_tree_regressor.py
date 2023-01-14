@@ -13,7 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for formulating a :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
+"""Module for formulating a
+:external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
 in a :gurobipy:`model`.
 """
 
@@ -34,42 +35,48 @@ def add_decision_tree_regressor_constr(
     float_type=np.float32,
     **kwargs
 ):
-    """Formulate decision_tree_regressor into gp_model
+    """Formulate decision_tree_regressor into gp_model.
 
-    The formulation predicts the values of output_vars using input_vars according to decision_tree_regressor.
-    See our :ref:`User's Guide <Decision Tree Regression>` for details on the mip formulation used.
+    The formulation predicts the values of output_vars using input_vars
+    according to decision_tree_regressor. See our :ref:`User's Guide <Decision
+    Tree Regression>` for details on the mip formulation used.
 
     Parameters
     ----------
-    gp_model: :gurobipy:`model`
+    gp_model : :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    decision_tree_regressor: :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
+    decision_tree_regressor : :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
         The decision tree regressor to insert as predictor.
-    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for decision tree in model.
-    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
         Decision variables used as output for decision tree in model.
-    epsilon: float, optional
-        Small value used to impose strict inequalities for splitting nodes in MIP formulations.
-    scale: float, optional
+    epsilon : float, optional
+        Small value used to impose strict inequalities for splitting nodes in
+        MIP formulations.
+    scale : float, optional
         Value
-    float_type: type, optional
-        Float type for the thresholds defining the node splits in the MIP formulation
+    float_type : type, optional
+        Float type for the thresholds defining the node splits in the MIP
+        formulation
 
     Returns
     -------
     DecisionTreeRegressorConstr
-        Object containing information about what was added to gp_model to formulate decision_tree_regressor
-
+        Object containing information about what was added to gp_model to
+        formulate decision_tree_regressor
 
     Note
     ----
+
     |VariablesDimensionsWarn|
 
     Warning
     -------
-    Although decision trees with multiple outputs are tested they were never used in
-    a non-trivial optimization model. It should be used with care at this point.
+
+    Although decision trees with multiple outputs are tested they were never
+    used in a non-trivial optimization model. It should be used with care at
+    this point.
     """
     return DecisionTreeRegressorConstr(
         gp_model,
@@ -84,10 +91,11 @@ def add_decision_tree_regressor_constr(
 
 
 class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor` with gurobipy
+    """Class to model trained
+    :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor` with
+    gurobipy.
 
     |ClassShort|
-
     """
 
     def __init__(

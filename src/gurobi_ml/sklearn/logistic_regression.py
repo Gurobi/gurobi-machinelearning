@@ -13,8 +13,9 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for formulating a :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` in a
-:gurobipy:`model`
+"""Module for formulating a
+:external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` in a
+:gurobipy:`model`.
 """
 
 import gurobipy as gp
@@ -34,62 +35,65 @@ def add_logistic_regression_constr(
     pwl_attributes=None,
     **kwargs,
 ):
-    """Formulate logistic_regression in gp_model
+    """Formulate logistic_regression in gp_model.
 
-    The formulation predicts the values of output_vars using input_vars according to logistic_regression.
+    The formulation predicts the values of output_vars using input_vars according to
+    logistic_regression.
 
     Note that the model uses a piecewise linear approximation of the logistic function.
-    The quality of the approximation can be controlled with the parameter pwl_attributes.
-    By default, it is parametrized so that the maximal error of the approximation is `1e-2`.
-    See our :ref:`Users Guide <Logistic Regression>` for details on the mip formulation used.
-
-
+    The quality of the approximation can be controlled with the parameter
+    pwl_attributes. By default, it is parametrized so that the maximal error of the
+    approximation is `1e-2`. See our :ref:`Users Guide <Logistic Regression>` for
+    details on the mip formulation used.
 
     Parameters
     ----------
 
-    gp_model: :gurobipy:`model`
+    gp_model : :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    logistic_regression: :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
+    logistic_regression : :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
         The logistic regression to insert.
-    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for logistic regression in model.
-    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
         Decision variables used as output for logistic regression in model.
 
-    output_type: {'classification', 'probability_1'}, default='classification'
+    output_type : {'classification', 'probability_1'}, default='classification'
         If the option chosen is 'classification' the output is the class label
-        of either 0 or 1 given by the logistic regression.
-        If the option 'probability_1' is chosen the output is the probability of the class 1.
+        of either 0 or 1 given by the logistic regression. If the option
+        'probability_1' is chosen the output is the probability of the class 1.
 
-    epsilon: float, default=0.0
+    epsilon : float, default=0.0
         When the `output_type` is 'classification', this tolerance can be set
-        to enforce that class 1 is chosen when the result of the logistic function is greater or
-        equal to *0.5 + epsilon*.
+        to enforce that class 1 is chosen when the result of the logistic
+        function is greater or equal to *0.5 + epsilon*.
 
-        By default, with the value of *0.0*, if the result of the logistic function is
-        very close to *0.5* (up to Gurobi tolerances) in the solution of the optimization model,
-        the output of the regression can be either 0 or 1.
-        The optimization model doesn't make a distinction between the two values.
+        By default, with the value of *0.0*, if the result of the logistic
+        function is very close to *0.5* (up to Gurobi tolerances) in the
+        solution of the optimization model, the output of the regression can be
+        either 0 or 1. The optimization model doesn't make a distinction
+        between the two values.
 
-        Setting *esilon* to a small value will remove this ambiguity on the output but may
-        also make the model infeasible if the problem is very constrained:
-        the open interval *(0.5, 0.5 + epsilon)* is excluded from the feasible set of the optimization
-        problem.
+        Setting *esilon* to a small value will remove this ambiguity on the
+        output but may also make the model infeasible if the problem is very
+        constrained: the open interval *(0.5, 0.5 + epsilon)* is excluded from
+        the feasible set of the optimization problem.
 
-    pwl_attributes: dict, optional
-        Dictionary for non-default attributes for Gurobi to build the piecewise linear
-        approximation of the logistic function.
-        The default values for those attributes set in the package can be obtained
-        with LogisticRegressionConstr.default_pwl_attributes().
-        The dictionary keys should be the `attributes for modeling piece wise linear functions
+    pwl_attributes : dict, optional
+        Dictionary for non-default attributes for Gurobi to build the piecewise
+        linear approximation of the logistic function. The default values for
+        those attributes set in the package can be obtained with
+        LogisticRegressionConstr.default_pwl_attributes(). The dictionary keys
+        should be the `attributes for modeling piece wise linear functions
         <https://www.gurobi.com/documentation/9.1/refman/general_constraint_attribu.html>`_
-        and the values the corresponding value the users wants to pass to Gurobi.
+        and the values the corresponding value the users wants to pass to
+        Gurobi.
 
     Returns
     -------
     LogisticRegressionConstr
-        Object containing information about what was added to gp_model to formulate logistic_regression.
+        Object containing information about what was added to gp_model to formulate
+        logistic_regression.
 
     Raises
     ------
@@ -117,9 +121,10 @@ def add_logistic_regression_constr(
 
 
 class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
-    """Class to model trained :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` with gurobipy
-
-    |ClassShort|"""
+    """Class to model trained
+    :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` with gurobipy
+    |ClassShort|.
+    """
 
     def __init__(
         self,
@@ -158,9 +163,10 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
 
     @staticmethod
     def default_pwl_attributes():
-        """Default attributes for approximating the logistic function with Gurobi
+        """Default attributes for approximating the logistic function with Gurobi.
 
-        See `Gurobi's User Manual <https://www.gurobi.com/documentation/9.1/refman/general_constraint_attribu.html>`_
+        See `Gurobi's User Manual
+        <https://www.gurobi.com/documentation/9.1/refman/general_constraint_attribu.html>`_
         for the meaning of the attributes.
         """
         return {
@@ -171,7 +177,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         }
 
     def _mip_model(self, **kwargs):
-        """Add the prediction constraints to Gurobi"""
+        """Add the prediction constraints to Gurobi."""
         outputvars = self._output
         self._create_output_vars(self._input, name="affine_trans")
         affinevars = self._output
@@ -190,14 +196,14 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
 
         self._output = outputvars
         for index in np.ndindex(outputvars.shape):
-            gc = self.gp_model.addGenConstrLogistic(
+            self.gp_model.addGenConstrLogistic(
                 affinevars[index],
                 log_result[index],
                 name=self._indexed_name(index, "logistic"),
             )
         num_gc = self.gp_model.NumGenConstrs
         self.gp_model.update()
-        for gc in self.gp_model.getGenConstrs()[num_gc:]:
+        for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
             for attr, val in self.attributes.items():
-                gc.setAttr(attr, val)
+                gen_constr.setAttr(attr, val)
         self.gp_model.update()

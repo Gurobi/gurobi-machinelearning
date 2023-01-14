@@ -13,7 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for inserting ordinary Scikit-Learn regression models into a :gurobipy:`model`
+"""Module for inserting ordinary Scikit-Learn regression models into a
+:gurobipy:`model`.
 
 The following linear models are tested and should work:
    - :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
@@ -27,16 +28,17 @@ from .base_regressions import BaseSKlearnRegressionConstr
 def add_linear_regression_constr(
     gp_model, linear_regression, input_vars, output_vars=None, **kwargs
 ):
-    """Formulate linear_regression in gp_model
+    """Formulate linear_regression in gp_model.
 
-    The formulation predicts the values of output_vars using input_vars according to linear_regression.
-    See our :ref:`Users Guide <Linear Regression>` for details on the mip formulation used.
+    The formulation predicts the values of output_vars using input_vars according to
+    linear_regression. See our :ref:`Users Guide <Linear Regression>` for details on the
+    mip formulation used.
 
     Parameters
     ----------
-    gp_model: :gurobipy:`model`
+    gp_model : :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    linear_regression: :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
+    linear_regression : :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
      The linear regression to insert. It can be of any of the following types:
          * :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
          * :external+sklearn:py:class:`sklearn.linear_model.Ridge`
@@ -49,7 +51,8 @@ def add_linear_regression_constr(
     Returns
     -------
     LinearRegressionConstr
-        Object containing information about what was added to gp_model to formulate linear_regression.
+        Object containing information about what was added to gp_model to formulate
+        linear_regression.
 
     Note
     ----
@@ -61,9 +64,10 @@ def add_linear_regression_constr(
 
 
 class LinearRegressionConstr(BaseSKlearnRegressionConstr):
-    """Class to model trained :external+sklearn:py:class:`sklearn.linear_model.LinearRegression` with gurobipy
-
-    |ClassShort|"""
+    """Class to model trained
+    :external+sklearn:py:class:`sklearn.linear_model.LinearRegression` with gurobipy
+    |ClassShort|.
+    """
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         self._default_name = "lin_reg"
@@ -77,5 +81,5 @@ class LinearRegressionConstr(BaseSKlearnRegressionConstr):
         )
 
     def _mip_model(self, **kwargs):
-        """Add the prediction constraints to Gurobi"""
+        """Add the prediction constraints to Gurobi."""
         self.add_regression_constr()

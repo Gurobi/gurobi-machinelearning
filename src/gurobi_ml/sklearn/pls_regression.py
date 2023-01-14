@@ -13,8 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for formulating simple Scikit-Learn PLS regression models in a gurobipy model
-"""
+"""Module for formulating simple Scikit-Learn PLS regression models in a gurobipy model."""
 
 import numpy as np
 
@@ -25,15 +24,16 @@ from .skgetter import SKgetter
 def add_pls_regression_constr(
     gp_model, pls_regression, input_vars, output_vars=None, **kwargs
 ):
-    """Formulate pls_regression in gp_model
+    """Formulate pls_regression in gp_model.
 
-    The formulation predicts the values of output_vars using input_vars according to pls_regression.
+    The formulation predicts the values of output_vars using input_vars
+    according to pls_regression.
 
     Parameters
     ----------
-    gp_model: :gurobipy:`model`
+    gp_model : :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    pls_regression: :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression`
+    pls_regression : :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression`
      The linear regression to insert. It can be of any of the following types:
          * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression`
          * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSCanonical`
@@ -45,7 +45,8 @@ def add_pls_regression_constr(
     Returns
     -------
     PLSRegressionConstr
-        Object containing information about what was added to gp_model to formulate pls_regression.
+        Object containing information about what was added to gp_model to
+        formulate pls_regression.
 
     Note
     ----
@@ -57,9 +58,11 @@ def add_pls_regression_constr(
 
 
 class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression` with gurobipy
-
-    |ClassShort|"""
+    """Class to model trained
+    :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression` with
+    gurobipy
+    |ClassShort|.
+    """
 
     def __init__(
         self,
@@ -81,7 +84,7 @@ class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
         )
 
     def add_regression_constr(self):
-        """Add the prediction constraints to Gurobi"""
+        """Add the prediction constraints to Gurobi."""
         x_mean = self.predictor._x_mean
         x_std = self.predictor._x_std
         coefs = self.predictor._coef_.T
@@ -95,5 +98,5 @@ class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
         )
 
     def _mip_model(self, **kwargs):
-        """Add the prediction constraints to Gurobi"""
+        """Add the prediction constraints to Gurobi."""
         self.add_regression_constr()
