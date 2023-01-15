@@ -124,7 +124,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.
         """
-        super().print_stats(file=file)
+        super().print_stats(abbrev=abbrev, file=file)
         if abbrev:
             return
         print(file=file)
