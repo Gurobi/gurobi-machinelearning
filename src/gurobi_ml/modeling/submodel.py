@@ -15,6 +15,8 @@
 
 """Building Sub-models with gurobipy."""
 
+from time import time
+
 
 class SubModel:
     """Base class for building and representing a MIP formulation embedded in a gurobipy.Model.
@@ -115,6 +117,12 @@ class SubModel:
 
         if not hasattr(self, "_default_name"):
             self._default_name = type(self).__name__
+
+        if "verbose" in kwargs:
+            self.verbose = kwargs["verbose"]
+            self._start_time = time()
+        else:
+            self.verbose = False
 
         before = self._open(gp_model)
         self._objects = self._build_submodel(gp_model, *args, **kwargs)
@@ -302,6 +310,9 @@ class SubModel:
                     self._gp_model._modeling_data.push_name_handler(name_handler)
                 name = name_handler.get_name(self)
             self._name = name
+            if self.verbose:
+                gen_time = time() - self._start_time
+                print(f"Added {name} took {gen_time:.2f} seconds.")
             prefix_names(self._gp_model, self.vars, "VarName", name)
             prefix_names(self._gp_model, self.constrs, "ConstrName", name)
             prefix_names(self._gp_model, self.qconstrs, "QCName", name)
