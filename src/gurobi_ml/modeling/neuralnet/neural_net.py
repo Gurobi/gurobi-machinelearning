@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Bases classes for modeling neural network layers"""
+"""Bases classes for modeling neural network layers."""
 
 
 from .._var_utils import _default_name
@@ -23,7 +23,7 @@ from .layers import ActivationLayer, DenseLayer
 
 
 class BaseNNConstr(AbstractPredictorConstr):
-    """Base class for inserting a regressor based on neural-network/tensor into Gurobi"""
+    """Base class for inserting a regressor based on neural-network/tensor into Gurobi."""
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.predictor = predictor
@@ -58,12 +58,12 @@ class BaseNNConstr(AbstractPredictorConstr):
         activation_vars=None,
         **kwargs,
     ):
-        """Add a dense layer to gurobipy model
+        """Add a dense layer to gurobipy model.
 
         Parameters
-        ---------
+        ----------
 
-        input_vars:  mvar_array_like
+        input_vars : mvar_array_like
             Decision variables used as input for predictor in model.
         layer_coefs:
             Coefficient for each node in a layer
@@ -71,7 +71,7 @@ class BaseNNConstr(AbstractPredictorConstr):
             Intercept bias
         activation:
             Activation function
-        activation_vars: None, optional
+        activation_vars : None, optional
             Output variables
         """
         layer = DenseLayer(
@@ -89,16 +89,16 @@ class BaseNNConstr(AbstractPredictorConstr):
     def add_activation_layer(
         self, input_vars, activation, activation_vars=None, **kwargs
     ):
-        """Add an activation layer to gurobipy model
+        """Add an activation layer to gurobipy model.
 
         Parameters
-        ---------
+        ----------
 
-        input_vars:  mvar_array_like
+        input_vars : mvar_array_like
             Decision variables used as input for predictor in gurobipy model.
         activation:
             Activation function
-        activation_vars: mvar_array_like, optional
+        activation_vars : mvar_array_like, optional
             Output variables
         """
         layer = ActivationLayer(
@@ -108,12 +108,12 @@ class BaseNNConstr(AbstractPredictorConstr):
         return layer
 
     def print_stats(self, abbrev=False, file=None):
-        """Print statistics about submodel created
+        """Print statistics about submodel created.
 
         Parameters
-        ---------
+        ----------
 
-        file: None, optional
+        file : None, optional
             Text stream to which output should be redirected. By default sys.stdout.
         """
         super().print_stats(abbrev, file)

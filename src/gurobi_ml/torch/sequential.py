@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for formulating :external+torch:py:class:`torch.nn.Sequential` model in a
+"""Module for formulating :external+torch:py:class:`torch.nn.Sequential` model in a
 :gurobipy:`model`.
 """
 
@@ -28,21 +28,20 @@ from ..modeling.neuralnet import BaseNNConstr
 def add_sequential_constr(
     gp_model, sequential_model, input_vars, output_vars=None, **kwargs
 ):
-    """Formulate sequential_model into gp_model
+    """Formulate sequential_model into gp_model.
 
     The formulation predicts the values of output_vars using input_vars according to sequential_model.
     See our :ref:`Users Guide <Neural Networks>` for details on the mip formulation used.
 
-
     Parameters
     ----------
-    gp_model: :gurobipy:`model`
+    gp_model : :gurobipy:`model`
         The gurobipy model where the sequential model should be inserted.
-    sequential_model: :external+torch:py:class:`torch.nn.Sequential`
+    sequential_model : :external+torch:py:class:`torch.nn.Sequential`
         The sequential model to insert as predictor.
-    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for logistic regression in model.
-    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
         Decision variables used as output for logistic regression in model.
 
     Returns
@@ -51,16 +50,16 @@ def add_sequential_constr(
         Object containing information about what was added to model to insert the
         predictor in it
 
-    Warning
-    -------
-    Only :external+torch:py:class:`torch.nn.Linear` layers and
-    :external+torch:py:class:`torch.nn.ReLU` layers are supported.
-
     Raises
     ------
     NoModel
         If the translation for some of the Pytorch model structure
         (layer or activation) is not implemented.
+
+    Warning
+    -------
+    Only :external+torch:py:class:`torch.nn.Linear` layers and
+    :external+torch:py:class:`torch.nn.ReLU` layers are supported.
 
     Note
     ----
@@ -74,8 +73,8 @@ def add_sequential_constr(
 class SequentialConstr(BaseNNConstr):
     """Transform a pytorch Sequential Neural Network to Gurobi constraint with
     input and output as matrices of variables.
-
-    |ClassShort|"""
+    |ClassShort|.
+    """
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         for step in predictor:

@@ -13,23 +13,23 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Internal module to make MIP modeling of activation functions"""
+"""Internal module to make MIP modeling of activation functions."""
 
 import numpy as np
 from gurobipy import GRB
 
 
 class Identity:
-    """Class to apply identity activation on a neural network layer
+    """Class to apply identity activation on a neural network layer.
 
     Parameters
     ----------
-    setbounds: Bool
+    setbounds : Bool
         Optional flag not to set bounds on the output variables.
 
     Attributes
     ----------
-    setbounds: Bool
+    setbounds : Bool
         Optional flag not to set bounds on the output variables.
     """
 
@@ -37,11 +37,11 @@ class Identity:
         pass
 
     def mip_model(self, layer):
-        """MIP model for identity activation on a layer
+        """MIP model for identity activation on a layer.
 
         Parameters
         ----------
-        layer: AbstractNNLayer
+        layer : AbstractNNLayer
             Layer to which activation is applied.
         """
         output = layer.output
@@ -49,20 +49,20 @@ class Identity:
 
 
 class ReLU:
-    """Class to apply the ReLU activation on a neural network layer
+    """Class to apply the ReLU activation on a neural network layer.
 
     Parameters
     ----------
-    setbounds: Bool
+    setbounds : Bool
         Optional flag not to set bounds on the output variables.
-    bigm: Float
+    bigm : Float
         Optional maximal value for bounds use in the formulation
 
     Attributes
     ----------
-    setbounds: Bool
+    setbounds : Bool
         Optional flag not to set bounds on the output variables.
-    bigm: Float
+    bigm : Float
         Optional maximal value for bounds use in the formulation
     """
 
@@ -70,11 +70,11 @@ class ReLU:
         pass
 
     def mip_model(self, layer):
-        """MIP model for ReLU activation on a layer
+        """MIP model for ReLU activation on a layer.
 
         Parameters
         ----------
-        layer: AbstractNNLayer
+        layer : AbstractNNLayer
             Layer to which activation is applied.
         """
         output = layer.output

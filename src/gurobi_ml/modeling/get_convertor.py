@@ -13,11 +13,11 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Utility function to find function that add a predictor in dictionnary """
+"""Utility function to find function that add a predictor in dictionnary."""
 
 
 def get_convertor(predictor, convertors):
-    """Return the convertor for a given predictor"""
+    """Return the convertor for a given predictor."""
     convertor = None
     try:
         convertor = convertors[type(predictor)]

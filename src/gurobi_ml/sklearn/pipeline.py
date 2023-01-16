@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for formulating a :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
+"""Module for formulating a :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
 in a :gurobipy:`model`.
 """
 
@@ -29,19 +29,20 @@ from .skgetter import SKgetter
 
 
 def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwargs):
-    """Formulate pipeline into gp_model
+    """Formulate pipeline into gp_model.
 
-    The formulation predicts the values of output_vars using input_vars according to pipeline.
+    The formulation predicts the values of output_vars using input_vars according to
+    pipeline.
 
     Parameters
     ----------
-    gp_model: :gurobipy:`model`
+    gp_model : :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    pipeline: :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
+    pipeline : :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
         The pipeline to insert as predictor.
-    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for regression in model.
-    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
         Decision variables used as output for regression in model.
 
     Returns
@@ -64,9 +65,10 @@ def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwar
 
 
 class PipelineConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained :external+sklearn:py:class:`sklearn.pipeline.Pipeline` with gurobipy
-
-    |ClassShort|"""
+    """Class to model trained :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
+    with gurobipy
+    |ClassShort|.
+    """
 
     def __init__(self, gp_model, pipeline, input_vars, output_vars=None, **kwargs):
         self._steps = []
@@ -77,7 +79,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         )
 
     def _build_submodel(self, gp_model, *args, **kwargs):
-        """Predict output from input using predictor or transformer
+        """Predict output from input using predictor or transformer.
 
         Pipelines are different from other objects because they can't validate
         their input and output. They are just containers of other objects that will
@@ -97,6 +99,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         output_vars = self._output
         steps = self._steps
         transformers = sklearn_transformers()
+        transformers |= user_predictors()
         transformers["ColumnTransformer"] = add_column_transformer_constr
         kwargs["validate_input"] = True
 
@@ -123,7 +126,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
             self._output = steps[-1].output
 
     def print_stats(self, file=None):
-        """Print statistics on model additions stored by this class
+        """Print statistics on model additions stored by this class.
 
         This function prints detailed statistics on the variables
         and constraints that where added to the model.
@@ -159,32 +162,32 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
 
     @property
     def output(self):
-        """Returns output variables of pipeline, i.e. output of its last step"""
+        """Returns output variables of pipeline, i.e. output of its last step."""
         return self[-1].output
 
     @property
     def output_values(self):
-        """Returns output values of pipeline in solution, i.e. output of its last step"""
+        """Returns output values of pipeline in solution, i.e. output of its last step."""
         return self[-1].output_values
 
     @property
     def input(self):
-        """Returns input variables of pipeline, i.e. input of its first step"""
+        """Returns input variables of pipeline, i.e. input of its first step."""
         return self[0].input
 
     @property
     def input_values(self):
-        """Returns input values of pipeline in solution, i.e. input of its first step"""
+        """Returns input values of pipeline in solution, i.e. input of its first step."""
         return self[0].input_values
 
     def __getitem__(self, key):
-        """Get an item from the pipeline steps"""
+        """Get an item from the pipeline steps."""
         return self._steps[key]
 
     def __iter__(self):
-        """Iterate through pipeline steps"""
+        """Iterate through pipeline steps."""
         return self._steps.__iter__()
 
     def __len__(self):
-        """Get number of pipeline steps"""
+        """Get number of pipeline steps."""
         return self._steps.__len__()

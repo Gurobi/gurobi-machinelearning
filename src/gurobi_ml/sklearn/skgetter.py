@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Implements some utility tools for all scikit-learn objects """
+"""Implements some utility tools for all scikit-learn objects."""
 
 import numpy as np
 from sklearn.utils.validation import check_is_fitted
@@ -23,7 +23,7 @@ from ..modeling import AbstractPredictorConstr
 
 
 class SKgetter:
-    """Utility class for sklearn regression models convertors
+    """Utility class for sklearn regression models convertors.
 
     Implement some common functionalities: check predictor is fitted, output dimension, get error
 
@@ -31,7 +31,6 @@ class SKgetter:
     ----------
     predictor
         Scikit-Learn predictor embedded into Gurobi model.
-
     """
 
     def __init__(self, predictor, input_vars, output_type="regular", **kwargs):
@@ -45,11 +44,11 @@ class SKgetter:
             self._output_shape = predictor.n_outputs_
 
     def get_error(self):
-        """Returns error in Gurobi's solution with respect to prediction from input
+        """Returns error in Gurobi's solution with respect to prediction from input.
 
         Returns
         -------
-        error: ndarray of same shape as :py:attr:`gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.output`
+        error : ndarray of same shape as :py:attr:`gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.output`
             Assuming that we have a solution for the input and output variables
             `x, y`. Returns the absolute value of the differences between `predictor.predict(x)` and
             `y`. Where predictor is the regression this object is modeling.
@@ -75,7 +74,7 @@ class SKgetter:
 
 
 class SKtransformer(AbstractPredictorConstr):
-    """Utility class for sklearn preprocessing models convertors
+    """Utility class for sklearn preprocessing models convertors.
 
     Implement some common functionalities.
 
@@ -83,7 +82,6 @@ class SKtransformer(AbstractPredictorConstr):
     ----------
     transformer
         Scikit-Learn transformer embedded into Gurobi model.
-
     """
 
     def __init__(self, gp_model, transformer, input_vars, **kwargs):

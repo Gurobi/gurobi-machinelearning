@@ -13,13 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for inserting simple Scikit-Learn regression models into a gurobipy model
+"""Module for inserting simple Scikit-Learn regression models into a gurobipy model.
 
 All linear models should work:
    - :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
    - :external+sklearn:py:class:`sklearn.linear_model.Ridge`
    - :external+sklearn:py:class:`sklearn.linear_model.Lasso`
-
 """
 
 
@@ -52,7 +51,7 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
         )
 
     def add_regression_constr(self):
-        """Add the prediction constraints to Gurobi"""
+        """Add the prediction constraints to Gurobi."""
         coefs = self.predictor.coef_.reshape(-1, 1)
         intercept = self.predictor.intercept_
         self.gp_model.addConstr(

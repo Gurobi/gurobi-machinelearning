@@ -13,8 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for formulating a Keras model into a :gurobipy:`model`
-"""
+"""Module for formulating a Keras model into a :gurobipy:`model`."""
 
 import numpy as np
 from tensorflow import keras
@@ -24,20 +23,20 @@ from ..modeling.neuralnet import BaseNNConstr
 
 
 def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwargs):
-    """Formulate keras_model into gp_model
+    """Formulate keras_model into gp_model.
 
     The formulation predicts the values of output_vars using input_vars according to keras_model.
     See our :ref:`Users Guide <Neural Networks>` for details on the mip formulation used.
 
     Parameters
     ----------
-    gp_model: :gurobipy:`model`
+    gp_model : :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    keras_model: `keras.Model <https://keras.io/api/models/model/>`
+    keras_model : `keras.Model <https://keras.io/api/models/model/>`
         The keras model to insert as predictor.
-    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for Keras model in gp_model.
-    output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
         Decision variables used as output for Keras model in gp_model.
 
     Returns
@@ -46,6 +45,11 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
         Object containing information about what was added to gp_model to formulate
         keras_model into it
 
+    Raises
+    ------
+    NoModel
+        If the translation for some of the Keras model structure
+        (layer or activation) is not implemented.
 
     Warning
     -------
@@ -53,12 +57,6 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
       Only `Dense <https://keras.io/api/layers/core_layers/dense/>`_ (possibly
       with `relu` activation), and `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ with
       default settings are supported.
-
-    Raises
-    ------
-    NoModel
-        If the translation for some of the Keras model structure
-        (layer or activation) is not implemented.
 
     Note
     ----
@@ -68,10 +66,9 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
 
 
 class KerasNetworkConstr(BaseNNConstr):
-    """Class to model trained `keras.Model <https://keras.io/api/models/model/>` with gurobipy
+    """Class to model trained `keras.Model <https://keras.io/api/models/model/>` with gurobipy.
 
     |ClassShort|
-
     """
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):

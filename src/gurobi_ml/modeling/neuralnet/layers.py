@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Bases classes for modeling neural network layers"""
+"""Bases classes for modeling neural network layers."""
 
 import gurobipy as gp
 
@@ -22,7 +22,7 @@ from ..base_predictor_constr import AbstractPredictorConstr
 
 
 class AbstractNNLayer(AbstractPredictorConstr):
-    """Abstract class for NN layers"""
+    """Abstract class for NN layers."""
 
     def __init__(
         self,
@@ -41,12 +41,12 @@ class AbstractNNLayer(AbstractPredictorConstr):
         assert False
 
     def print_stats(self, file=None):
-        """Print statistics about submodel created
+        """Print statistics about submodel created.
 
         Parameters
-        ---------
+        ----------
 
-        file: None, optional
+        file : None, optional
           Text stream to which output should be redirected. By default sys.stdout.
         """
         print(
@@ -58,7 +58,7 @@ class AbstractNNLayer(AbstractPredictorConstr):
 
 
 class ActivationLayer(AbstractNNLayer):
-    """Class to build one activation layer of a neural network"""
+    """Class to build one activation layer of a neural network."""
 
     def __init__(
         self,
@@ -84,7 +84,7 @@ class ActivationLayer(AbstractNNLayer):
         self._output = rval
 
     def _mip_model(self, **kwargs):
-        """Add the layer to model"""
+        """Add the layer to model."""
         model = self.gp_model
         model.update()
         if "activation" in kwargs:
@@ -98,7 +98,7 @@ class ActivationLayer(AbstractNNLayer):
 
 
 class DenseLayer(AbstractNNLayer):
-    """Class to build one layer of a neural network"""
+    """Class to build one layer of a neural network."""
 
     def __init__(
         self,
@@ -130,7 +130,7 @@ class DenseLayer(AbstractNNLayer):
         self._output = rval
 
     def _mip_model(self, **kwargs):
-        """Add the layer to model"""
+        """Add the layer to model."""
         model = self.gp_model
         model.update()
         if "activation" in kwargs:

@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Module for formulating a column transformer in a :gurobipy:`gurobipy model <Model>`"""
+"""Module for formulating a column transformer in a :gurobipy:`gurobipy model <Model>`."""
 
 import gurobipy as gp
 
@@ -22,7 +22,7 @@ from .skgetter import SKtransformer
 
 
 class ColumnTransformerConstr(SKtransformer):
-    """Class to model a fitted :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` with gurobipy
+    """Class to model a fitted :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` with gurobipy.
 
     Note
     ----
@@ -37,7 +37,6 @@ class ColumnTransformerConstr(SKtransformer):
     The rule we use to apply the ColumnTransformer to the input is that if the set of columns to which a preprocessing
     transformation is constant in the input we use directly the scikit learn preprocessing object. It at least one of the columns
     is made of gurobipy variables, we use the gurobi-ml object (if it exists).
-
     """
 
     def __init__(self, gp_model, column_transformer, input_vars, **kwargs):
@@ -48,7 +47,7 @@ class ColumnTransformerConstr(SKtransformer):
     # to transform input variables to Gurobi variable. We can't do it for categorical
     # The input should be unchanged.
     def _build_submodel(self, gp_model, *args, **kwargs):
-        """Predict output from input using predictor or transformer"""
+        """Predict output from input using predictor or transformer."""
         _input = self.input
         if hasattr(self._input, "columns"):
             self._input_columns = _input.columns
@@ -59,7 +58,7 @@ class ColumnTransformerConstr(SKtransformer):
         return self
 
     def _mip_model(self, **kwargs):
-        """Do the transformation on x"""
+        """Do the transformation on x."""
         column_transform = self.transformer
         _input = self._input
         transformers = {k.lower(): v for k, v in sklearn_transformers().items()}
@@ -84,7 +83,7 @@ class ColumnTransformerConstr(SKtransformer):
 
 
 def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kwargs):
-    """Formulate column_transformer in gurobipy model
+    """Formulate column_transformer in gurobipy model.
 
     Parameters
     ----------
@@ -92,7 +91,7 @@ def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kw
         The gurobipy model where polynomial features should be inserted.
     column_transformer : :external+sklearn:py:class:`sklearn.compose.ColumnTransformer`
         The column transformer to insert in gp_model.
-    input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for polynomial features in model.
 
     Returns
@@ -100,6 +99,5 @@ def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kw
     sklearn.preprocessing.ColumnTransformerConstr
         Object containing information about what was added to gp_model to insert the
         polynomial_features in it.
-
     """
     return ColumnTransformerConstr(gp_model, column_transformer, input_vars, **kwargs)
