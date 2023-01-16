@@ -207,7 +207,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                         (rhs[k] == 1) >> (lhs[k] <= ub) for k in range(sum(tight))
                     )
             if verbose:
-                timer.timing(f"Added leaf")
+                timer.timing(f"Added leaf {node}")
 
         # We should attain 1 leaf
         model.addConstr(leafs_vars.sum(axis=1) == 1)

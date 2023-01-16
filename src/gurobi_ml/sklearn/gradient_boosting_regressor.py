@@ -110,6 +110,8 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
             kwargs["no_record"] = True
         for i in range(predictor.n_estimators_):
             tree = predictor.estimators_[i]
+            if self.verbose:
+                self._timer.timing(f"Estimator {i}")
             estimators.append(
                 add_decision_tree_regressor_constr(
                     model, tree[0], _input, treevars[:, i, :], name="", **kwargs
