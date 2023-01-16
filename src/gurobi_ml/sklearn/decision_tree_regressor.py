@@ -31,8 +31,6 @@ def add_decision_tree_regressor_constr(
     input_vars,
     output_vars=None,
     epsilon=0.0,
-    scale=1.0,
-    float_type=np.float32,
     **kwargs
 ):
     """Formulate decision_tree_regressor into gp_model.
@@ -54,12 +52,6 @@ def add_decision_tree_regressor_constr(
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
-    scale : float, optional
-        Value
-    float_type : type, optional
-        Float type for the thresholds defining the node splits in the MIP
-        formulation
-
     Returns
     -------
     DecisionTreeRegressorConstr
@@ -79,14 +71,7 @@ def add_decision_tree_regressor_constr(
     this point.
     """
     return DecisionTreeRegressorConstr(
-        gp_model,
-        decision_tree_regressor,
-        input_vars,
-        output_vars,
-        epsilon,
-        scale,
-        float_type,
-        **kwargs
+        gp_model, decision_tree_regressor, input_vars, output_vars, epsilon, **kwargs
     )
 
 
@@ -104,7 +89,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         predictor,
         input_vars,
         output_vars=None,
-        epsilon=1e-6,
+        epsilon=0.0,
         scale=1.0,
         float_type=np.float32,
         formulation="leafs",
@@ -114,6 +99,12 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         self.scale = scale
         self.float_type = float_type
         self._default_name = "tree_reg"
+
+        formulations = ("leafs", "paths")
+        if formulation not in formulations:
+            raise ValueError(
+                "Wrong value for formulation should be one of {}.".format(formulations)
+            )
         self._formulation = formulation
         SKgetter.__init__(self, predictor, input_vars)
         AbstractPredictorConstr.__init__(
@@ -194,31 +185,27 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                 lb = node_lb[feature, node]
                 ub = node_ub[feature, node]
 
-                tight = (input_lb[:, feature] < lb) & reachable
-                rhs = leafs_vars[tight, i].tolist()
-                lhs = _input[tight, feature].tolist()
-                model.addConstrs(
-                    (rhs[k] == 1) >> (lhs[k] >= lb) for k in range(sum(tight))
-                )
+                if lb > -GRB.INFINITY:
+                    tight = (input_lb[:, feature] < lb) & reachable
+                    rhs = leafs_vars[tight, i].tolist()
+                    lhs = _input[tight, feature].tolist()
+                    model.addConstrs(
+                        (rhs[k] == 1) >> (lhs[k] >= lb) for k in range(sum(tight))
+                    )
 
-                tight = (input_ub[:, feature] > ub) & reachable
-                rhs = leafs_vars[tight, i].tolist()
-                lhs = _input[tight, feature].tolist()
-                model.addConstrs(
-                    (rhs[k] == 1) >> (lhs[k] <= ub) for k in range(sum(tight))
-                )
+                if ub < GRB.INFINITY:
+                    tight = (input_ub[:, feature] > ub) & reachable
+                    rhs = leafs_vars[tight, i].tolist()
+                    lhs = _input[tight, feature].tolist()
+                    model.addConstrs(
+                        (rhs[k] == 1) >> (lhs[k] <= ub) for k in range(sum(tight))
+                    )
 
         # We should attain 1 leaf
         model.addConstr(leafs_vars.sum(axis=1) == 1)
 
         output.LB = np.min(tree.value)
         output.UB = np.max(tree.value)
-
-    def _mip_model(self, **kwargs):
-        if self._formulation == "leafs":
-            return self._leaf_mip_model(**kwargs)
-        else:
-            return self._paths_mip_model(**kwargs)
 
     def _paths_mip_model(self, **kwargs):
         tree = self.predictor.tree_
@@ -290,3 +277,9 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         output.LB = np.min(tree.value)
         output.UB = np.max(tree.value)
+
+    def _mip_model(self, **kwargs):
+        if self._formulation == "leafs":
+            return self._leaf_mip_model(**kwargs)
+        else:
+            return self._paths_mip_model(**kwargs)
