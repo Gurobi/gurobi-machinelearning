@@ -96,6 +96,17 @@ class AbstractPredictorConstr(ABC, SubModel):
         assert self._output is not None
         return self
 
+    def _print_container_steps(self, iterations_name, iterable, file):
+        header = f"{iterations_name:13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
+        print("-" * len(header), file=file)
+        print(header, file=file)
+        print(f"{' '*41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)
+        print("=" * len(header), file=file)
+        for step in iterable:
+            step.print_stats(abbrev=True, file=file)
+            print(file=file)
+        print("-" * len(header), file=file)
+
     def print_stats(self, abbrev=False, file=None):
         """Print statistics on model additions stored by this class.
 

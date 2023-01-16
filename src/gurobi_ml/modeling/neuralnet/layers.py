@@ -15,7 +15,11 @@
 
 """Bases classes for modeling neural network layers."""
 
+import io
+
 import gurobipy as gp
+
+from gurobi_ml.modeling.neuralnet.activations import Identity
 
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
@@ -40,7 +44,7 @@ class AbstractNNLayer(AbstractPredictorConstr):
     def get_error(self):
         assert False
 
-    def print_stats(self, file=None):
+    def print_stats(self, abbrev=False, file=None):
         """Print statistics about submodel created.
 
         Parameters
@@ -49,12 +53,7 @@ class AbstractNNLayer(AbstractPredictorConstr):
         file : None, optional
           Text stream to which output should be redirected. By default sys.stdout.
         """
-        print(
-            f"{self._name:12} {_default_name(self.activation):12} "
-            + f"{self.output.shape.__str__():>12} {len(self.vars):>10} "
-            + f"{len(self.constrs):>10} {len(self.qconstrs):>10} {len(self.genconstrs):>10}",
-            file=file,
-        )
+        return AbstractPredictorConstr.print_stats(self, True, file)
 
 
 class ActivationLayer(AbstractNNLayer):
@@ -141,3 +140,22 @@ class DenseLayer(AbstractNNLayer):
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
         self._gp_model.update()
+
+    def print_stats(self, abbrev=False, file=None):
+        """Print statistics about submodel created.
+
+        Parameters
+        ----------
+
+        file : None, optional
+          Text stream to which output should be redirected. By default sys.stdout.
+        """
+        if not isinstance(self.activation, Identity):
+            output = io.StringIO()
+            AbstractPredictorConstr.print_stats(self, abbrev=True, file=output)
+            activation_name = f"({_default_name(self.activation)})"
+
+            out_string = output.getvalue()
+            print(f"{out_string[:-1]} {activation_name}", file=file)
+            return
+        AbstractPredictorConstr.print_stats(self, abbrev=True, file=file)
