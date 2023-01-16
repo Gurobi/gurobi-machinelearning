@@ -97,7 +97,7 @@ class SequentialConstr(BaseNNConstr):
                 output = self._output
             if isinstance(step, nn.ReLU):
                 layer = self.add_activation_layer(
-                    _input, self.act_dict["relu"], output, name="relu"
+                    _input, self.act_dict["relu"], output, name=f"relu_{i}", **kwargs
                 )
                 _input = layer.output
             elif isinstance(step, nn.Linear):
@@ -112,7 +112,8 @@ class SequentialConstr(BaseNNConstr):
                     layer_bias,
                     self.act_dict["identity"],
                     output,
-                    name="linear",
+                    name=f"linear_{i}",
+                    **kwargs,
                 )
                 _input = layer.output
         if self._output is None:

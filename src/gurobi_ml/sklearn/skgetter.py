@@ -22,7 +22,7 @@ from ..exceptions import NoSolution
 from ..modeling import AbstractPredictorConstr
 
 
-class SKgetter:
+class SKgetter(AbstractPredictorConstr):
     """Utility class for sklearn regression models convertors.
 
     Implement some common functionalities: check predictor is fitted, output dimension, get error
@@ -44,7 +44,7 @@ class SKgetter:
             self._output_shape = predictor.n_outputs_
 
     def get_error(self):
-        """Returns error in Gurobi's solution with respect to prediction from input.
+        """Return error in Gurobi's solution with respect to prediction from input.
 
         Returns
         -------
@@ -94,6 +94,20 @@ class SKtransformer(AbstractPredictorConstr):
         super().__init__(gp_model, input_vars, **kwargs)
 
     def get_error(self):
+        """Return error in Gurobi's solution with respect to preprocessing from input.
+
+        Returns
+        -------
+        error : ndarray of same shape as :py:attr:`gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.output`
+            Assuming that we have a solution for the input and output variables
+            `x, y`. Returns the absolute value of the differences between `transformer.transform(x)` and
+            `y`. Where transformer is the prepocessing this object is modeling.
+
+        Raises
+        ------
+        NoSolution
+            If the Gurobi model has no solution (either was not optimized or is infeasible).
+        """
         if self._has_solution:
             transformer = self.transformer
             input_values = self.input_values

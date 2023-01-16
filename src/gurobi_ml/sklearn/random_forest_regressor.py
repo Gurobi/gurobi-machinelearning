@@ -129,14 +129,4 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
             return
         print(file=file)
 
-        header = f"{'Estimator':13} {'Output Shape':>14} {'Variables':>12}"
-        header += f"{'Constraints':^38}"
-
-        print("-" * len(header), file=file)
-        print(header, file=file)
-        print(f"{' '*41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)
-        print("=" * len(header), file=file)
-        for estimator in self.estimators_:
-            estimator.print_stats(abbrev=True, file=file)
-            print(file=file)
-        print("-" * len(header), file=file)
+        self._print_container_steps("Estimator", self.estimators_, file=file)

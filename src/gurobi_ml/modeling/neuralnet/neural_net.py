@@ -116,20 +116,12 @@ class BaseNNConstr(AbstractPredictorConstr):
         file : None, optional
             Text stream to which output should be redirected. By default sys.stdout.
         """
-        super().print_stats(abbrev, file)
-        if abbrev:
-            return
-        print(file=file)
-
-        header = (
-            f"{'Layer':12} {'Activation':12} {'Output Shape':>12} {'Variables':>10} "
-        )
-        header += f"{'Constraints':^38}"
-        print("-" * len(header), file=file)
-        print(header, file=file)
-        print(f"{' '*50} {'Linear':>10} {'Quadratic':>10} {'General':>10}", file=file)
-        print("=" * len(header), file=file)
-        for layer in self:
-            layer.print_stats(file=file)
+        if not abbrev:
+            super().print_stats(abbrev, file)
             print(file=file)
-        print("-" * len(header), file=file)
+
+            self._print_container_steps("Layer", self._layers, file=file)
+        else:
+            for layer in self:
+                layer.print_stats(abbrev=True, file=file)
+                print(file=file)
