@@ -100,16 +100,19 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         ), "Output dimension of gradient boosting regressor should be 1"
 
         treevars = model.addMVar(
-            (nex, predictor.n_estimators_, 1), lb=-GRB.INFINITY, name="estimator"
+            (nex, predictor.n_estimators_, 1), lb=-GRB.INFINITY, name=""
         )
         constant = predictor.init_.constant_
 
         estimators = []
+        print(f"No debug: {self._no_debug}")
+        if self._no_debug:
+            kwargs["no_record"] = True
         for i in range(predictor.n_estimators_):
             tree = predictor.estimators_[i]
             estimators.append(
                 add_decision_tree_regressor_constr(
-                    model, tree[0], _input, treevars[:, i, :], **kwargs
+                    model, tree[0], _input, treevars[:, i, :], name="", **kwargs
                 )
             )
         self.estimators_ = estimators
@@ -133,7 +136,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
             Text stream to which output should be redirected. By default sys.stdout.
         """
         super().print_stats(abbrev=abbrev, file=file)
-        if abbrev:
+        if abbrev or self._no_debug:
             return
         print(file=file)
 

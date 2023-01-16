@@ -120,15 +120,39 @@ class SubModel:
 
         if "verbose" in kwargs:
             self.verbose = kwargs["verbose"]
-            self._start_time = time()
+            self._timer = SubModel._ModelingTimer()
+            print()
+            self._timer.timing(f"Start building formulation for {self._default_name}")
         else:
             self.verbose = False
 
+        if "no_record" in kwargs:
+            self._no_recording = kwargs["no_record"]
+        else:
+            self._no_recording = False
+
+        if "no_debug" in kwargs:
+            self._no_debug = kwargs["no_debug"]
+        else:
+            self._no_debug = False
+
         before = self._open(gp_model)
+
+        if self.verbose:
+            self._timer.timing("Model statistics")
+
         self._objects = self._build_submodel(gp_model, *args, **kwargs)
+
+        if self.verbose:
+            self._timer.timing("Built model")
+
         if self._objects is None:
             self._objects = {}
+
         self._close(before, name)
+
+        if self.verbose:
+            print()
 
     def _build_submodel(self, gp_model, *args, **kwargs):
         """Method to be overridden for generating the model in a sub-class.
@@ -137,6 +161,18 @@ class SubModel:
         implementation of this method simply calls the modeling function.
         """
         return self._model_function(gp_model, *args, **kwargs)
+
+    class _ModelingTimer:
+        def __init__(self):
+            self.start = time()
+            self.last = self.start
+
+        def timing(self, message: str):
+            current = time()
+            print(
+                f"{message} in {current - self.last:.2f} secs, acum time {current - self.start:.2f}"
+            )
+            self.last = current
 
     class _ModelingData:
         """Class for recording modeling data in a gurobipy.Model object."""
@@ -263,7 +299,11 @@ class SubModel:
             modeling_data = SubModel._ModelingData()
         gp_model._modeling_data = modeling_data
 
-        return (self._modelstats(gp_model), gp_model._modeling_data.pop_name_handler())
+        if self._no_recording:
+            modelstats = None
+        else:
+            modelstats = self._modelstats(gp_model)
+        return (modelstats, gp_model._modeling_data.pop_name_handler())
 
     def _close(self, before, name):
         """Finalize addition of modeling objects to the gurobipy.Model object.
@@ -277,15 +317,17 @@ class SubModel:
             def __init__(self):
                 self.name = {}
 
-            def get_name(self, sub: SubModel):
+            def get_name(self, sub: SubModel, name: str):
                 """Return a default name for specified submodel sub."""
-                name = sub.default_name
+                if name is None or name == "":
+                    name = sub.default_name
                 try:
                     num = self.name[name]
+                    self.name[name] = num + 1
+                    return f"{name}{num}"
                 except KeyError:
-                    num = 1
-                self.name[name] = num + 1
-                return f"{name}{num}"
+                    self.name[name] = 0
+                    return name
 
         def prefix_names(gp_model, objs, attr, name):
             """Prefix all modeling object names with name."""
@@ -298,27 +340,31 @@ class SubModel:
         # re-install name handler
         self._gp_model._modeling_data.push_name_handler(before[1])
 
+        if self._no_recording:
+            return
+
         # record all newly added modeling objects
         self._record(self._gp_model, before[0])
 
-        # prefix names of newly created modeling objects
+        name_handler = self._gp_model._modeling_data.name_handler
+        if name_handler is None:
+            name_handler = NameHandler()
+            self._gp_model._modeling_data.push_name_handler(name_handler)
+
         if name != "":
-            if name is None:
-                name_handler = self._gp_model._modeling_data.name_handler
-                if name_handler is None:
-                    name_handler = NameHandler()
-                    self._gp_model._modeling_data.push_name_handler(name_handler)
-                name = name_handler.get_name(self)
+            # prefix names of newly created modeling objects
+            name = name_handler.get_name(self, name)
             self._name = name
-            if self.verbose:
-                gen_time = time() - self._start_time
-                print(f"Added {name} took {gen_time:.2f} seconds.")
             prefix_names(self._gp_model, self.vars, "VarName", name)
             prefix_names(self._gp_model, self.constrs, "ConstrName", name)
             prefix_names(self._gp_model, self.qconstrs, "QCName", name)
             prefix_names(self._gp_model, self.genconstrs, "GenConstrName", name)
             # SOS can't have a name! :-O
             # prefix_names(self._gp_model, self.sos, "SOSName", name)
+        else:
+            name = name_handler.get_name(self, name)
+        if self.verbose:
+            self._timer.timing(f"Added {name}")
 
     def print_stats(self, abbrev=False, file=None):
         """Print statistics about submodel.

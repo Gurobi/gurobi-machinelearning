@@ -18,6 +18,7 @@
 in a :gurobipy:`model`.
 """
 
+
 import numpy as np
 from gurobipy import GRB
 
@@ -31,7 +32,7 @@ def add_decision_tree_regressor_constr(
     input_vars,
     output_vars=None,
     epsilon=0.0,
-    **kwargs
+    **kwargs,
 ):
     """Formulate decision_tree_regressor into gp_model.
 
@@ -93,7 +94,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         scale=1.0,
         float_type=np.float32,
         formulation="leafs",
-        **kwargs
+        **kwargs,
     ):
         self.epsilon = epsilon
         self.scale = scale
@@ -154,13 +155,18 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         outdim = output.shape[1]
         nex = _input.shape[0]
 
+        verbose = self.verbose
+
+        timer = AbstractPredictorConstr._ModelingTimer()
+
         # Collect leafs and non-leafs nodes
         notleafs = tree.children_left >= 0
         leafs = tree.children_left < 0
 
         leafs_vars = model.addMVar((nex, sum(leafs)), vtype=GRB.BINARY, name="leafs")
-        self.nodevars = leafs_vars
 
+        if verbose:
+            timer.timing(f"Added leafs vars")
         (node_lb, node_ub) = self._compute_leafs_bounds()
         input_ub = _input.UB
         input_lb = _input.LB
@@ -200,12 +206,19 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                     model.addConstrs(
                         (rhs[k] == 1) >> (lhs[k] <= ub) for k in range(sum(tight))
                     )
+            if verbose:
+                timer.timing(f"Added leaf")
 
         # We should attain 1 leaf
         model.addConstr(leafs_vars.sum(axis=1) == 1)
 
+        if verbose:
+            timer.timing(f"Added lin constr")
+
         output.LB = np.min(tree.value)
         output.UB = np.max(tree.value)
+        if verbose:
+            timer.timing(f"Updated model")
 
     def _paths_mip_model(self, **kwargs):
         tree = self.predictor.tree_
