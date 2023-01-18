@@ -381,7 +381,7 @@ model. The subscript $r$ will be used to denote each region.
 - $B$: available avocados to be distributed across the regions,
 - $c_{waste}$: cost ($\$$) per wasted avocado,
 - $c^r_{transport}$: cost ($\$$) of transporting a avocado to region $r \in R$,
-- $a^r_{min},a^r_{max}$: minimum and maximum price ($\$$) per avocado for reigon
+- $a^r_{min},a^r_{max}$: minimum and maximum price ($\$$) per avocado for region
   $r \in R$,
 - $b^r_{min},b^r_{max}$: minimum and maximum number of avocados allocated to
   region $r \in R$,
@@ -390,26 +390,11 @@ The following code loads the Gurobi python package and initiates the
 optimization model. The value of $B$ is set to $30$ million avocados, which is
 close to the average weekly supply value from the data. For illustration, let us
 consider the peak season of 2021. The cost of wasting an avocado is set to
-$\$0.10$. The cost of transporting an avocado ranges between $\$0.10$ to
+$\$0.80$. The cost of transporting an avocado ranges between $\$0.10$ to
 $\$0.50$ based on each region's distance from the southern border, where the
 [majority of avocado supply comes
 from](https://www.britannica.com/plant/avocado). Further, we can set the price
 of an avocado to not exceed $\$ 2$ apiece.
-
-<div class="alert alert-info">
-Note
-
-There are subtle but significant differences in the model with respect to the original notebook.
-
-Here, we use Gurobi matrix variables API instead of variables indexed by the
-regions. Our variables are then vectors and matrices and are not indexed by
-regions (they are just indexed by their row and column numbers).
-
-Because of this, we have to make certain that the data is always presented with
-the regions in the exact same order. We repeatedly use `.loc[regions]` on the
-data stored in pandas to make sure of that.
-
-</div>
 
 ```{code-cell} ipython3
 # Sets and parameters
@@ -418,7 +403,7 @@ B = 30  # total amount ot avocado supply
 peak_or_not = 1  # 1 if it is the peak season; 1 if isn't
 year = 2022
 
-c_waste = 0.1  # the cost ($) of wasting an avocado
+c_waste = 0.8  # the cost ($) of wasting an avocado
 
 # the cost of transporting an avocado
 c_transport = pd.Series(
@@ -483,22 +468,20 @@ feats
 
 ### Decision Variables
 
-Let us now define the decision variables. In our model, we want to store the
-price and number of avocados allocated to each region. We also want variables
-that track how many avocados are predicted to be sold and how many are predicted
+Let us now define the decision variables. In our model, we supply to each region the full demand of avocados. We want to store the
+price and demand of avocados allocated to each region. We also want a variable
+that tracks how many avocados are predicted
 to be wasted. The following notation is used to model these decision variables.
 
 $p$ the price of an avocado ($\$$) in each region,
 
-$x$ the number of avocados supplied to each region,
+$d$ the predicted demand in each region,
 
-$s$ the predicted number of avocados sold in each region,
+$w$ the predicted number of avocados wasted.
 
-$w$ the predicted number of avocados wasted in each region.
 
-$d$ the predicted demand in each region.
-
-All those variables are created using gurobipy-pandas, with the function `gppd.add_vars` they are given the same index as the `data` dataframe.
+The variables $p$ and $d$ are created using gurobipy-pandas, with the function `gppd.add_vars` they are given the same index as the `data` dataframe.
+The variable $w$ is a simple gurobipy variable.
 
 ```{code-cell} ipython3
 import gurobipy as gp
@@ -506,10 +489,9 @@ import gurobipy as gp
 m = gp.Model("Avocado_Price_Allocation")
 
 p = gppd.add_vars(m, data, name="price", lb=a_min, ub=a_max)
-x = gppd.add_vars(m, data, name="x", lb='min_delivery', ub='max_delivery')
-s = gppd.add_vars(m, data, name="s") # predicted amount of sales in each region for the given price).
-w = gppd.add_vars(m, data, name="w") # excess wasteage in each region).
-d = gppd.add_vars(m, data, lb=-gp.GRB.INFINITY, name="demand") # Add variables for the regression
+d = gppd.add_vars(m, data, lb='min_delivery', ub='max_delivery', name="demand") # Add variables for the regression
+
+w = m.addVar(name="waste") # excess wasteage in each region).
 
 m.update()
 
@@ -536,7 +518,7 @@ c^r_{transport} * x_r)& \end{align}
 Let us now add the objective function to the model.
 
 ```{code-cell} ipython3
-m.setObjective((p * s).sum() - c_waste * w.sum() - (c_transport * x).sum(),
+m.setObjective((p * d).sum() - c_waste * w - (c_transport * d).sum(),
                gp.GRB.MAXIMIZE)
 ```
 
@@ -546,57 +528,12 @@ We now introduce the constraints. The first constraint is to make sure that the
 total number of avocados supplied is equal to $B$, which can be mathematically
 expressed as follows.
 
-\begin{align*} \sum_{r} x_r &= B \end{align*}
+\begin{align*} \sum_{r} x_r + w &= B \end{align*}
 
 The following code adds this constraint to the model.
 
 ```{code-cell} ipython3
-m.addConstr(x.sum() == B)
-m.update()
-```
-
-### Add Constraints That Define Sales Quantity
-
-Next, we should define the predicted sales quantity in each region. We can
-assume that if we supply more than the predicted demand, we sell exactly the
-predicted demand. Otherwise, we sell exactly the allocated amount. Hence, the
-predicted sales quantity is the minimum of the allocated quantity and the
-predicted demand, i.e., $s_r = \min \{x_r,d_r(p_r)\}$. This relationship can be
-modeled by the following two constraints for each region $r$.
-
-\begin{align*} s_r &\leq x_r  \\
-s_r &\leq d(p_r,r) \end{align*}
-
-These constraints will ensure that the sales quantity $s_r$ in region $r$ is
-greater than neither the allocated quantity nor the predicted demand. Note that
-the maximization objective function tries to maximize the revenue from sales,
-and therefore the optimizer will maximize the predicted sales quantity. This is
-assuming that the surplus and transportation costs are less than the sales price
-per avocado. Hence, these constraints along with the objective will ensure that
-the sales are equal to the minimum of supply and predicted demand.
-
-Let us now add these constraints to the model.
-
-In this case, we use gurobipy-pandas, add_constrs function
-
-```{code-cell} ipython3
-gppd.add_constrs(m, s, gp.GRB.LESS_EQUAL, x)
-gppd.add_constrs(m, s, gp.GRB.LESS_EQUAL, d)
-m.update()
-```
-
-### Add the Wastage Constraints
-
-Finally, we should define the predicted wastage in each region, given by the
-supplied quantity that is not predicted to be sold. We can express this
-mathematically for each region $r$.
-
-\begin{align*} w_r &= x_r - s_r \end{align*}
-
-We can add these constraints to the model.
-
-```{code-cell} ipython3
-gppd.add_constrs(m, w, gp.GRB.EQUAL, x - s)
+m.addConstr(d.sum() + w == B)
 m.update()
 ```
 
@@ -653,13 +590,11 @@ analyze the optimal solution by storing it in a Pandas dataframe.
 solution = pd.DataFrame(index=regions)
 
 solution["Price"] = p.gppd.X
-solution["Allocated"] = x.gppd.X
-solution["Sold"] = s.gppd.X
-solution["Wasted"] = w.gppd.X
-solution["Pred_demand"] = d.gppd.X
+solution["Demand"] = d.gppd.X
 
 opt_revenue = m.ObjVal
-print("\n The optimal net revenue: $%f million" % opt_revenue)
+print(f"\n The optimal net revenue: {opt_revenue:.3f} million")
+print(f"\n The wasted avocados: {w.X:.3f} million")
 solution.round(4)
 ```
 
@@ -685,20 +620,16 @@ sold (in millions) for the eight regions.
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1)
 
-plot_sol = sns.scatterplot(data=solution, x="Price", y="Sold", hue=solution.index, s=100)
-plot_waste = sns.scatterplot(
-    data=solution, x="Price", y="Wasted", marker="x", hue=solution.index, s=100, legend=False
-)
+plot_sol = sns.scatterplot(data=solution, x="Price", y="Demand", hue=solution.index, s=100)
 
 plot_sol.legend(loc="center left", bbox_to_anchor=(1.25, 0.5), ncol=1)
-plot_waste.legend(loc="center left", bbox_to_anchor=(1.25, 0.5), ncol=1)
 plt.ylim(0, 5)
 plt.xlim(1, 2.2)
 ax.set_xlabel("Price per avocado ($)")
 ax.set_ylabel("Number of avocados sold (millions)")
 plt.show()
 print(
-    "The circles represent sales quantity and the cross markers represent the wasted quantity."
+    "The circles represent sales quantity for each region."
 )
 ```
 
