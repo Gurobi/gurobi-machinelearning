@@ -40,7 +40,7 @@ repos:
         types: [python]
 
     - repo: https://github.com/mwouts/jupytext
-      rev: v1.14.1
+      rev: v1.14.4
       hooks:
       - id: jupytext
         args: ["--sync"]

@@ -144,17 +144,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         print(f"Pipeline has {len(self._steps)} steps:", file=file)
         print(file=file)
 
-        header = (
-            f"{'Step':13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
-        )
-        print("-" * len(header), file=file)
-        print(header, file=file)
-        print(f"{' '*41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)
-        print("=" * len(header), file=file)
-        for step in self:
-            step.print_stats(abbrev=True, file=file)
-            print(file=file)
-        print("-" * len(header), file=file)
+        self._print_container_steps("Step", self._steps, file=file)
 
     @property
     def _has_solution(self):
