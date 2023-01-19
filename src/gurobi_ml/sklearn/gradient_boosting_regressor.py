@@ -99,28 +99,33 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
             outdim == 1
         ), "Output dimension of gradient boosting regressor should be 1"
 
-        treevars = model.addMVar(
-            (nex, predictor.n_estimators_, 1), lb=-GRB.INFINITY, name=""
-        )
-        constant = predictor.init_.constant_
-
         estimators = []
-        print(f"No debug: {self._no_debug}")
         if self._no_debug:
             kwargs["no_record"] = True
+
+        if self._name == "" or self._no_recording:
+            name = ""
+        else:
+            name = "estimator"
+
+        tree_vars = model.addMVar(
+            (nex, predictor.n_estimators_, 1), lb=-GRB.INFINITY, name=name
+        )
+
         for i in range(predictor.n_estimators_):
             tree = predictor.estimators_[i]
             if self.verbose:
                 self._timer.timing(f"Estimator {i}")
             estimators.append(
                 add_decision_tree_regressor_constr(
-                    model, tree[0], _input, treevars[:, i, :], name="", **kwargs
+                    model, tree[0], _input, tree_vars[:, i, :], **kwargs
                 )
             )
         self.estimators_ = estimators
 
+        constant = predictor.init_.constant_
         model.addConstr(
-            output == predictor.learning_rate * treevars.sum(axis=1) + constant[0][0]
+            output == predictor.learning_rate * tree_vars.sum(axis=1) + constant[0][0]
         )
 
     def print_stats(self, abbrev=False, file=None):

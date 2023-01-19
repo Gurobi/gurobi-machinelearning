@@ -92,14 +92,24 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         output = self._output
         nex = _input.shape[0]
 
+        if self._no_debug:
+            kwargs["no_record"] = True
+
+        if self._name == "" or self._no_recording:
+            name = ""
+        else:
+            name = "estimator"
+
         tree_vars = model.addMVar(
             (nex, predictor.n_estimators, self._output_shape),
             lb=-GRB.INFINITY,
-            name="estimator",
+            name=name,
         )
 
         estimators = []
         for i in range(predictor.n_estimators):
+            if self.verbose:
+                self._timer.timing(f"Estimator {i}")
             tree = predictor.estimators_[i]
             estimators.append(
                 add_decision_tree_regressor_constr(
@@ -125,7 +135,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
             Text stream to which output should be redirected. By default sys.stdout.
         """
         super().print_stats(abbrev=abbrev, file=file)
-        if abbrev:
+        if abbrev or self._no_debug:
             return
         print(file=file)
 

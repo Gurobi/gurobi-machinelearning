@@ -118,24 +118,20 @@ class SubModel:
         if not hasattr(self, "_default_name"):
             self._default_name = type(self).__name__
 
+        self.verbose = False
         if "verbose" in kwargs:
             self.verbose = kwargs["verbose"]
             self._timer = SubModel._ModelingTimer()
             print()
             self._timer.timing(f"Start building formulation for {self._default_name}")
-        else:
-            self.verbose = False
 
+        self._no_recording = False
         if "no_record" in kwargs:
             self._no_recording = kwargs["no_record"]
-        else:
-            self._no_recording = False
 
+        self._no_debug = False
         if "no_debug" in kwargs:
             self._no_debug = kwargs["no_debug"]
-        else:
-            self._no_debug = False
-
         before = self._open(gp_model)
 
         if self.verbose:

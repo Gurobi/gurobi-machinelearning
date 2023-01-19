@@ -161,7 +161,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         # Collect leaf nodes
         leafs = tree.children_left < 0
-        if self._name != "" and self._record == True:
+        if self._name != "" and self._record:
             name = ""
         else:
             name = "leafs"
@@ -231,7 +231,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         output = self._output
         outdim = output.shape[1]
         nex = _input.shape[0]
-        if self._name != "" and self._record == True:
+        if self._name != "" and self._record:
             name = ""
         else:
             name = "node"
