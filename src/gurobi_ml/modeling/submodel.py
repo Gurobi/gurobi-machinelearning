@@ -170,7 +170,7 @@ class SubModel:
         def timing(self, message: str):
             current = time()
             print(
-                f"{message} in {current - self.last:.2f} secs, acum time {current - self.start:.2f}"
+                f"{message} in {current - self.last:.2f} secs (total: {current - self.start:.2f})."
             )
             self.last = current
 

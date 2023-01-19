@@ -159,28 +159,31 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         timer = AbstractPredictorConstr._ModelingTimer()
 
-        # Collect leafs and non-leafs nodes
-        notleafs = tree.children_left >= 0
+        # Collect leaf nodes
         leafs = tree.children_left < 0
-
-        leafs_vars = model.addMVar((nex, sum(leafs)), vtype=GRB.BINARY, name="leafs")
+        if self._name != "" and self._record == True:
+            name = ""
+        else:
+            name = "leafs"
+        leafs_vars = model.addMVar((nex, sum(leafs)), vtype=GRB.BINARY, name=name)
 
         if verbose:
-            timer.timing(f"Added leafs vars")
+            timer.timing(f"Added {nex*sum(leafs)} leafs vars")
         (node_lb, node_ub) = self._compute_leafs_bounds()
-        input_ub = _input.UB
-        input_lb = _input.LB
+        input_ub = _input.getAttr(GRB.Attr.UB)
+        input_lb = _input.getAttr(GRB.Attr.LB)
 
         for i, node in enumerate(leafs.nonzero()[0]):
             reachable = (input_ub >= node_lb[:, node]).all(axis=1) & (
                 input_lb <= node_ub[:, node]
             ).all(axis=1)
             # Non reachable nodes
-            leafs_vars[~reachable, i].UB = 0.0
+            leafs_vars[~reachable, i].setAttr(GRB.Attr.UB, 0.0)
             # Leaf node:
             lhs = output[reachable, :].tolist()
             rhs = leafs_vars[reachable, i].tolist()
             value = tree.value[node, :, 0]
+            n_indicators = sum(reachable)
             model.addConstrs(
                 (rhs[k] == 1) >> (lhs[k][i] == value[i])
                 for k in range(sum(reachable))
@@ -195,6 +198,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                     tight = (input_lb[:, feature] < lb) & reachable
                     rhs = leafs_vars[tight, i].tolist()
                     lhs = _input[tight, feature].tolist()
+                    n_indicators += sum(tight)
                     model.addConstrs(
                         (rhs[k] == 1) >> (lhs[k] >= lb) for k in range(sum(tight))
                     )
@@ -203,22 +207,21 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                     tight = (input_ub[:, feature] > ub) & reachable
                     rhs = leafs_vars[tight, i].tolist()
                     lhs = _input[tight, feature].tolist()
+                    n_indicators += sum(tight)
                     model.addConstrs(
                         (rhs[k] == 1) >> (lhs[k] <= ub) for k in range(sum(tight))
                     )
             if verbose:
-                timer.timing(f"Added leaf {node}")
+                timer.timing(f"Added leaf {node} using {n_indicators} indicators")
 
         # We should attain 1 leaf
         model.addConstr(leafs_vars.sum(axis=1) == 1)
 
         if verbose:
-            timer.timing(f"Added lin constr")
+            timer.timing(f"Added {nex} linear constraints")
 
-        output.LB = np.min(tree.value)
-        output.UB = np.max(tree.value)
-        if verbose:
-            timer.timing(f"Updated model")
+        output.setAttr(GRB.Attr.LB, np.min(tree.value))
+        output.setAttr(GRB.Attr.UB, np.max(tree.value))
 
     def _paths_mip_model(self, **kwargs):
         tree = self.predictor.tree_
@@ -228,7 +231,11 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         output = self._output
         outdim = output.shape[1]
         nex = _input.shape[0]
-        nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name="node")
+        if self._name != "" and self._record == True:
+            name = ""
+        else:
+            name = "node"
+        nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name=name)
 
         # Collect leafs and non-leafs nodes
         notleafs = tree.children_left >= 0
