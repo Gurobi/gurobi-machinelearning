@@ -180,15 +180,13 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
             # Non reachable nodes
             leafs_vars[~reachable, i].setAttr(GRB.Attr.UB, 0.0)
             # Leaf node:
-            lhs = output[reachable, :].tolist()
-            rhs = leafs_vars[reachable, i].tolist()
-            value = tree.value[node, :, 0]
+            rhs = output[reachable, :].tolist()
+            lhs = leafs_vars[reachable, i].tolist()
+            values = tree.value[node, :, 0]
             n_indicators = sum(reachable)
-            model.addConstrs(
-                (rhs[k] == 1) >> (lhs[k][i] == value[i])
-                for k in range(sum(reachable))
-                for i in range(outdim)
-            )
+            for l_var, r_vars in zip(lhs, rhs):
+                for r_var, value in zip(r_vars, values):
+                    model.addGenConstrIndicator(l_var, 1, r_var, GRB.EQUAL, value)
 
             for feature in range(tree.n_features):
                 lb = node_lb[feature, node]
@@ -196,21 +194,21 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
 
                 if lb > -GRB.INFINITY:
                     tight = (input_lb[:, feature] < lb) & reachable
-                    rhs = leafs_vars[tight, i].tolist()
-                    lhs = _input[tight, feature].tolist()
+                    lhs = leafs_vars[tight, i].tolist()
+                    rhs = _input[tight, feature].tolist()
                     n_indicators += sum(tight)
-                    model.addConstrs(
-                        (rhs[k] == 1) >> (lhs[k] >= lb) for k in range(sum(tight))
-                    )
+                    for l_var, r_var in zip(lhs, rhs):
+                        model.addGenConstrIndicator(
+                            l_var, 1, r_var, GRB.GREATER_EQUAL, lb
+                        )
 
                 if ub < GRB.INFINITY:
                     tight = (input_ub[:, feature] > ub) & reachable
-                    rhs = leafs_vars[tight, i].tolist()
-                    lhs = _input[tight, feature].tolist()
+                    lhs = leafs_vars[tight, i].tolist()
+                    rhs = _input[tight, feature].tolist()
                     n_indicators += sum(tight)
-                    model.addConstrs(
-                        (rhs[k] == 1) >> (lhs[k] <= ub) for k in range(sum(tight))
-                    )
+                    for l_var, r_var in zip(lhs, rhs):
+                        model.addGenConstrIndicator(l_var, 1, r_var, GRB.LESS_EQUAL, ub)
             if verbose:
                 timer.timing(f"Added leaf {node} using {n_indicators} indicators")
 
