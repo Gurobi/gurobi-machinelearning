@@ -54,6 +54,7 @@ class FixedRegressionModel(unittest.TestCase):
 
                     x = pd.DataFrame(data=x.tolist(), columns=examples.columns)
 
+            gpm.update()
             pred_constr = add_predictor_constr(gpm, predictor, x, **kwargs)
 
             y = pred_constr.output

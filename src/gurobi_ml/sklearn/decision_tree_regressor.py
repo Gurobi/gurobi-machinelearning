@@ -94,12 +94,14 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         scale=1.0,
         float_type=np.float32,
         formulation="leafs",
+        big_m=1e6,
         **kwargs,
     ):
         self.epsilon = epsilon
         self.scale = scale
         self.float_type = float_type
         self._default_name = "tree_reg"
+        self.big_m = big_m
 
         formulations = ("leafs", "paths")
         if formulation not in formulations:
@@ -152,7 +154,6 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         _input = self._input
         output = self._output
-        outdim = output.shape[1]
         nex = _input.shape[0]
 
         verbose = self.verbose
@@ -161,8 +162,8 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         # Collect leaf nodes
         leafs = tree.children_left < 0
-        if self._name != "" and self._record:
-            name = ""
+        if self._name is None or self._no_recording:
+            name = None
         else:
             name = "leafs"
         leafs_vars = model.addMVar((nex, sum(leafs)), vtype=GRB.BINARY, name=name)
@@ -173,20 +174,48 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         input_ub = _input.getAttr(GRB.Attr.UB)
         input_lb = _input.getAttr(GRB.Attr.LB)
 
+        output_lb = np.min(tree.value[leafs, :, 0])
+        output_ub = np.max(tree.value[leafs, :, 0])
+        output.setAttr(GRB.Attr.LB, output_lb)
+        output.setAttr(GRB.Attr.UB, output_ub)
+
         for i, node in enumerate(leafs.nonzero()[0]):
-            reachable = (input_ub >= node_lb[:, node]).all(axis=1) & (
-                input_lb <= node_ub[:, node]
-            ).all(axis=1)
+            values = tree.value[node, :, 0]
+            reachable = (
+                (input_ub >= node_lb[:, node]).all(axis=1)
+                & (input_lb <= node_ub[:, node]).all(axis=1)
+                & (output_lb <= values).all()
+                & (output_ub >= values).all()
+            )
             # Non reachable nodes
             leafs_vars[~reachable, i].setAttr(GRB.Attr.UB, 0.0)
-            # Leaf node:
-            rhs = output[reachable, :].tolist()
-            lhs = leafs_vars[reachable, i].tolist()
-            values = tree.value[node, :, 0]
+
             n_indicators = sum(reachable)
-            for l_var, r_vars in zip(lhs, rhs):
-                for r_var, value in zip(r_vars, values):
-                    model.addGenConstrIndicator(l_var, 1, r_var, GRB.EQUAL, value)
+            # Leaf node:
+            if self.big_m < GRB.INFINITY:
+                model.addConstrs(
+                    (
+                        output[reachable, k]
+                        >= output_lb
+                        + (values - output_lb)[k] * leafs_vars[reachable, i]
+                    )
+                    for k in range(len(values))
+                )
+                model.addConstrs(
+                    (
+                        output[reachable, k]
+                        <= output_ub
+                        + (values - output_ub)[k] * leafs_vars[reachable, i]
+                    )
+                    for k in range(len(values))
+                )
+            else:
+                rhs = output[reachable, :].tolist()
+                lhs = leafs_vars[reachable, i].tolist()
+                values = tree.value[node, :, 0]
+                for l_var, r_vars in zip(lhs, rhs):
+                    for r_var, value in zip(r_vars, values):
+                        model.addGenConstrIndicator(l_var, 1, r_var, GRB.EQUAL, value)
 
             for feature in range(tree.n_features):
                 lb = node_lb[feature, node]
@@ -194,21 +223,42 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
 
                 if lb > -GRB.INFINITY:
                     tight = (input_lb[:, feature] < lb) & reachable
-                    lhs = leafs_vars[tight, i].tolist()
-                    rhs = _input[tight, feature].tolist()
                     n_indicators += sum(tight)
-                    for l_var, r_var in zip(lhs, rhs):
-                        model.addGenConstrIndicator(
-                            l_var, 1, r_var, GRB.GREATER_EQUAL, lb
+                    if sum(tight) == 0:
+                        continue
+                    big_m = input_lb[tight, feature]
+                    if np.max(np.abs(big_m)) <= self.big_m:
+                        model.addConstr(
+                            _input[tight, feature]
+                            >= big_m + (lb - big_m) * leafs_vars[tight, i]
                         )
+                    else:
+                        lhs = leafs_vars[tight, i].tolist()
+                        rhs = _input[tight, feature].tolist()
+                        for l_var, r_var in zip(lhs, rhs):
+                            model.addGenConstrIndicator(
+                                l_var, 1, r_var, GRB.GREATER_EQUAL, lb
+                            )
 
                 if ub < GRB.INFINITY:
                     tight = (input_ub[:, feature] > ub) & reachable
-                    lhs = leafs_vars[tight, i].tolist()
-                    rhs = _input[tight, feature].tolist()
                     n_indicators += sum(tight)
-                    for l_var, r_var in zip(lhs, rhs):
-                        model.addGenConstrIndicator(l_var, 1, r_var, GRB.LESS_EQUAL, ub)
+                    if sum(tight) == 0:
+                        continue
+                    big_m = input_ub[tight, feature]
+                    if np.max(np.abs(big_m)) <= self.big_m:
+                        model.addConstr(
+                            _input[tight, feature]
+                            <= big_m + (ub - big_m) * leafs_vars[tight, i]
+                        )
+                    else:
+                        lhs = leafs_vars[tight, i].tolist()
+                        rhs = _input[tight, feature].tolist()
+
+                        for l_var, r_var in zip(lhs, rhs):
+                            model.addGenConstrIndicator(
+                                l_var, 1, r_var, GRB.LESS_EQUAL, ub
+                            )
             if verbose:
                 timer.timing(f"Added leaf {node} using {n_indicators} indicators")
 
@@ -218,9 +268,6 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         if verbose:
             timer.timing(f"Added {nex} linear constraints")
 
-        output.setAttr(GRB.Attr.LB, np.min(tree.value))
-        output.setAttr(GRB.Attr.UB, np.max(tree.value))
-
     def _paths_mip_model(self, **kwargs):
         tree = self.predictor.tree_
         model = self._gp_model
@@ -229,8 +276,8 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         output = self._output
         outdim = output.shape[1]
         nex = _input.shape[0]
-        if self._name != "" and self._record:
-            name = ""
+        if self._name is None or self._no_recording:
+            name = None
         else:
             name = "node"
         nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name=name)

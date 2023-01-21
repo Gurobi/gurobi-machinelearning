@@ -347,7 +347,7 @@ class SubModel:
             name_handler = NameHandler()
             self._gp_model._modeling_data.push_name_handler(name_handler)
 
-        if name != "":
+        if name is not None:
             # prefix names of newly created modeling objects
             name = name_handler.get_name(self, name)
             self._name = name

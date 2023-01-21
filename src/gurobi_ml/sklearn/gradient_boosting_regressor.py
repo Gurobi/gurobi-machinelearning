@@ -103,14 +103,15 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         if self._no_debug:
             kwargs["no_record"] = True
 
-        if self._name == "" or self._no_recording:
-            name = ""
+        if self._name is None or self._no_recording:
+            name = None
         else:
             name = "estimator"
 
         tree_vars = model.addMVar(
             (nex, predictor.n_estimators_, 1), lb=-GRB.INFINITY, name=name
         )
+        model.update()
 
         for i in range(predictor.n_estimators_):
             tree = predictor.estimators_[i]
