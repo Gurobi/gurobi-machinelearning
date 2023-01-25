@@ -21,7 +21,7 @@
 import gurobipy as gp
 import numpy as np
 
-from ..exceptions import NoModel, ParameterError
+from ..exceptions import ParameterError
 from .base_regressions import BaseSKlearnRegressionConstr
 
 
@@ -137,10 +137,6 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         pwl_attributes=None,
         **kwargs,
     ):
-        if len(predictor.classes_) > 2:
-            raise NoModel(
-                predictor, "Logistic regression only supported for two classes"
-            )
         if pwl_attributes is None:
             self.attributes = self.default_pwl_attributes()
         else:
@@ -176,7 +172,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             "FuncPieceRatio": -1.0,
         }
 
-    def _mip_model(self, **kwargs):
+    def _two_classes_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
         outputvars = self._output
         self._create_output_vars(self._input, name="affine_trans")
@@ -207,3 +203,31 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             for attr, val in self.attributes.items():
                 gen_constr.setAttr(attr, val)
         self.gp_model.update()
+
+    def _multi_class_model(self, **kwargs):
+        """Add the prediction constraints to Gurobi."""
+        outputvars = self._output
+        coefs = self.predictor.coef_
+        intercept = self.predictor.intercept_
+        self._create_output_vars(self._input, name="affine_trans")
+        affinevars = self._output
+        self.gp_model.addConstr(
+            affinevars == self.input @ coefs.T + intercept, name="linreg"
+        )
+
+        self._output = outputvars
+        exp_vars = self.gp_model.addMVar(outputvars.shape)
+        sum_vars = self.gp_model.addMVar((outputvars.shape[0], 1))
+        for index in np.ndindex(outputvars.shape):
+            self.gp_model.addGenConstrExp(
+                affinevars[index],
+                exp_vars[index],
+                name=self._indexed_name(index, "exponential"),
+            )
+        self.gp_model.addConstr(sum_vars == exp_vars.sum(axis=1))
+        self.gp_model.addConstr(outputvars * sum_vars == exp_vars)
+
+    def _mip_model(self, **kwargs):
+        if self._output_shape > 2:
+            return self._multi_class_model(**kwargs)
+        return self._two_classes_model(**kwargs)

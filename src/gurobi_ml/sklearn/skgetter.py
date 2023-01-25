@@ -42,6 +42,8 @@ class SKgetter(AbstractPredictorConstr):
             self._input_shape = predictor.n_features_in_
         if hasattr(predictor, "n_outputs_"):
             self._output_shape = predictor.n_outputs_
+        if hasattr(predictor, "classes_"):
+            self._output_shape = len(predictor.classes_)
 
     def get_error(self):
         """Return error in Gurobi's solution with respect to prediction from input.
