@@ -53,12 +53,9 @@ guacamole needs the right blend of onion, lemon and spices, finding an optimal
 avocado price needs the right blend of descriptive, predictive and prescriptive
 analytics.
 
-|<img
-src="https://github.com/Gurobi/modeling-examples/blob/master/price_optimization/avocado_image_grocery.jpeg?raw=1"
-width="500" align="center">| |:--:| | <b>Avocados: a quintessential corner of a
-grocery store. Image Credits: [New York
-Post](https://nypost.com/2022/02/15/us-will-halt-mexico-avocado-imports-as-long-as-necessary/)
-</b>|
+|<img src="https://github.com/Gurobi/modeling-examples/blob/master/price_optimization/avocado_image_grocery.jpeg?raw=1" width="500" align="center">|
+|:--:|
+| <b>Avocados: a quintessential corner of a grocery store. Image Credits: [New York Post](https://nypost.com/2022/02/15/us-will-halt-mexico-avocado-imports-as-long-as-necessary/) </b>|
 
 
 **Goal**: Develop a data science pipeline for pricing and distribution of
