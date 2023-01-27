@@ -179,30 +179,34 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         affinevars = self._output
         self.add_regression_constr()
         if self.output_type == "classification":
-            # For classification we need an extra binary variable
-            self._create_output_vars(self._input, name="log_result")
-            log_result = self._output
-            self.gp_model.addConstr(outputvars >= log_result - 0.5 + self.epsilon)
-            self.gp_model.addConstr(outputvars <= log_result + 0.5)
+            # For classification output var should be binary
             outputvars.VType = gp.GRB.BINARY
-            outputvars.LB = 0.0
-            outputvars.UB = 1.0
+            for index in np.ndindex(outputvars.shape):
+                self.gp_model.addGenConstrIndicator(
+                    outputvars[index],
+                    1,
+                    affinevars[index],
+                    gp.GRB.GREATER_EQUAL,
+                    self.epsilon,
+                )
+                self.gp_model.addGenConstrIndicator(
+                    outputvars[index], 0, affinevars[index], gp.GRB.LESS_EQUAL, 0
+                )
         else:
             log_result = outputvars
 
-        self._output = outputvars
-        for index in np.ndindex(outputvars.shape):
-            self.gp_model.addGenConstrLogistic(
-                affinevars[index],
-                log_result[index],
-                name=self._indexed_name(index, "logistic"),
-            )
-        num_gc = self.gp_model.NumGenConstrs
-        self.gp_model.update()
-        for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
-            for attr, val in self.attributes.items():
-                gen_constr.setAttr(attr, val)
-        self.gp_model.update()
+            self._output = outputvars
+            for index in np.ndindex(outputvars.shape):
+                self.gp_model.addGenConstrLogistic(
+                    affinevars[index],
+                    log_result[index],
+                    name=self._indexed_name(index, "logistic"),
+                )
+            num_gc = self.gp_model.NumGenConstrs
+            self.gp_model.update()
+            for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
+                for attr, val in self.attributes.items():
+                    gen_constr.setAttr(attr, val)
 
     def _multi_class_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
@@ -216,16 +220,39 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         )
 
         self._output = outputvars
-        exp_vars = self.gp_model.addMVar(outputvars.shape)
-        sum_vars = self.gp_model.addMVar((outputvars.shape[0], 1))
-        for index in np.ndindex(outputvars.shape):
-            self.gp_model.addGenConstrExp(
-                affinevars[index],
-                exp_vars[index],
-                name=self._indexed_name(index, "exponential"),
-            )
-        self.gp_model.addConstr(sum_vars == exp_vars.sum(axis=1))
-        self.gp_model.addConstr(outputvars * sum_vars == exp_vars)
+        if self.output_type == "classification":
+            self.gp_model.addConstr(self.output.sum(axis=1) == 1)
+
+            # Do the argmax
+            # We use indicators (a lot of them)
+            for index in np.ndindex(outputvars.shape):
+                i, j = index
+                for k in np.ndindex(outputvars.shape[1]):
+                    if k == j:
+                        continue
+                    self.gp_model.addGenConstrIndicator(
+                        outputvars[index],
+                        1,
+                        affinevars[index] - affinevars[i, k],
+                        gp.GRB.GREATER_EQUAL,
+                        self.epsilon,
+                    )
+        else:
+            exp_vars = self.gp_model.addMVar(outputvars.shape)
+            sum_vars = self.gp_model.addMVar((outputvars.shape[0], 1))
+            num_gc = self.gp_model.NumGenConstrs
+            for index in np.ndindex(outputvars.shape):
+                self.gp_model.addGenConstrExp(
+                    affinevars[index],
+                    exp_vars[index],
+                    name=self._indexed_name(index, "exponential"),
+                )
+            self.gp_model.update()
+            for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
+                for attr, val in self.attributes.items():
+                    gen_constr.setAttr(attr, val)
+            self.gp_model.addConstr(sum_vars == exp_vars.sum(axis=1))
+            self.gp_model.addConstr(outputvars * sum_vars == exp_vars)
 
     def _mip_model(self, **kwargs):
         if self._output_shape > 2:
