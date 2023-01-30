@@ -250,7 +250,9 @@ class CircleCase(Cases):
 
     def __init__(self):
         super().__init__(
-            "circle", regressors=["DecisionTreeRegressor", "RandomForestRegressor"]
+            "circle",
+            regressors=["DecisionTreeRegressor", "RandomForestRegressor"],
+            saved_training=-1,
         )
 
     def load_data(self):
@@ -279,11 +281,11 @@ class MNISTCase(Cases):
         )
 
     def load_data(self):
-        mnist = datasets.fetch_openml("mnist_784", parser="auto")
+        mnist = datasets.fetch_openml("mnist_784", parser="auto", as_frame=False)
         X, y = mnist.data, mnist.target
 
-        X = X.to_numpy().astype(np.float64)
-        y = y.to_numpy()
+        X = X.astype(np.float64)
+        y = y
         X /= 255.0  # scaling
         self._data = (X, y)
 
