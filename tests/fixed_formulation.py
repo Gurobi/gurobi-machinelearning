@@ -81,7 +81,7 @@ class FixedRegressionModel(unittest.TestCase):
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
             tol = max(tol, vio)
-            tol *= np.max(y.X)
+            tol *= np.max(np.abs(y.X))
             abserror = pred_constr.get_error().astype(float)
             if (abserror > tol).any():
                 print(f"Error: {y.X} != {predictor.predict(examples)}")
