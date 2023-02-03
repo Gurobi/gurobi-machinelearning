@@ -161,11 +161,9 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         # Collect leaf nodes
         leafs = tree.children_left < 0
-        if self._name != "" and self._record:
-            name = ""
-        else:
-            name = "leafs"
-        leafs_vars = model.addMVar((nex, sum(leafs)), vtype=GRB.BINARY, name=name)
+        leafs_vars = model.addMVar(
+            (nex, sum(leafs)), vtype=GRB.BINARY, name=self._name_var("leafs")
+        )
 
         if verbose:
             timer.timing(f"Added {nex*sum(leafs)} leafs vars")
@@ -229,11 +227,9 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         output = self._output
         outdim = output.shape[1]
         nex = _input.shape[0]
-        if self._name != "" and self._record:
-            name = ""
-        else:
-            name = "node"
-        nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name=name)
+        nodes = model.addMVar(
+            (nex, tree.capacity), vtype=GRB.BINARY, name=self._name_var("node")
+        )
 
         # Collect leafs and non-leafs nodes
         notleafs = tree.children_left >= 0

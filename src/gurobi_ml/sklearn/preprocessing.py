@@ -96,7 +96,9 @@ class StandardScalerConstr(SKtransformer):
         scale = self.transformer.scale_
         mean = self.transformer.mean_
 
-        self._gp_model.addConstr(_input - output * scale == mean, name="s")
+        self._gp_model.addConstr(
+            _input - output * scale == mean, name=self._name_var("s")
+        )
         return self
 
 
@@ -135,7 +137,7 @@ class PolynomialFeaturesConstr(SKtransformer):
                     elif power[j] == 1:
                         q_expr *= feat.item()
                 self.gp_model.addConstr(
-                    output[k, i] == q_expr, name=f"polyfeat[{k},{i}]"
+                    output[k, i] == q_expr, name=self._indexed_name((k, i), "polyfeat")
                 )
 
 
