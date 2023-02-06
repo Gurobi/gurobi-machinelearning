@@ -11,7 +11,7 @@
 
 # Gurobi Machine Learning
 
-Gurobi Machine Learning is an [open-source](https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com/en/latest/meta-license.html) python package to embed trained regression models in a [`gurobipy`](https://pypi.org/project/gurobipy/) model to be solved with the Gurobi solver.
+Gurobi Machine Learning is an [open-source](https://gurobi-machinelearning.readthedocs.io/en/stable/meta-license.html) python package to embed trained regression models in a [`gurobipy`](https://pypi.org/project/gurobipy/) model to be solved with the Gurobi solver.
 
 The package currently supports various [scikit-learn](https://scikit-learn.org/stable/) objects. It has limited support for the [Keras](https://keras.io/) API of [TensorFlow](https://www.tensorflow.org/) and [PyTorch](https://pytorch.org/). Only neural networks with ReLU activation can be used with these two packages.
 
