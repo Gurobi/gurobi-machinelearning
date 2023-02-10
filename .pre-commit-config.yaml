@@ -15,7 +15,7 @@ repos:
           args: [--in-place, --remove-all-unused-imports, --recursive, --ignore-init-module-imports]
 
     - repo: https://github.com/pycqa/isort
-      rev: 5.10.1
+      rev: 5.12.0
       hooks:
         - id: isort
           args: ["--profile", "black", "--filter-files"]

@@ -51,6 +51,10 @@ class TestSklearnModel(FixedRegressionModel):
             onecase = cases.get_case(regressor)
             self.do_one_case(onecase, X, 5, "all", float_type=np.float32)
             self.do_one_case(onecase, X, 6, "pairs", float_type=np.float32)
+            self.do_one_case(onecase, X, 5, "all", float_type=np.float32, no_debug=True)
+            self.do_one_case(
+                onecase, X, 6, "pairs", float_type=np.float32, no_debug=True
+            )
 
     def test_iris_proba(self):
         data = datasets.load_iris()
@@ -67,6 +71,12 @@ class TestSklearnModel(FixedRegressionModel):
             onecase = cases.get_case(regressor)
             self.do_one_case(onecase, X, 5, "all", output_type="probability_1")
             self.do_one_case(onecase, X, 6, "pairs", output_type="probability_1")
+            self.do_one_case(
+                onecase, X, 5, "all", output_type="probability_1", no_debug=True
+            )
+            self.do_one_case(
+                onecase, X, 6, "pairs", output_type="probability_1", no_debug=True
+            )
 
     def test_iris_clf(self):
         data = datasets.load_iris()
@@ -114,6 +124,8 @@ class TestSklearnModel(FixedRegressionModel):
             X = onecase["data"]
             self.do_one_case(onecase, X, 5, "all")
             self.do_one_case(onecase, X, 6, "pairs")
+            self.do_one_case(onecase, X, 5, "all", no_debug=True)
+            self.do_one_case(onecase, X, 6, "pairs", no_debug=True)
 
 
 class TestMNIST(unittest.TestCase):

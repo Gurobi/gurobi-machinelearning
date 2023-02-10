@@ -142,7 +142,9 @@ class AbstractPredictorConstr(ABC, SubModel):
         except AttributeError:
             return
         self._output = self._gp_model.addMVar(
-            (input_vars.shape[0], n_outputs), lb=-gp.GRB.INFINITY, name=name
+            (input_vars.shape[0], n_outputs),
+            lb=-gp.GRB.INFINITY,
+            name=self._name_var(name),
         )
         self._gp_model.update()
 
@@ -179,10 +181,14 @@ class AbstractPredictorConstr(ABC, SubModel):
         """Makes MIP model for the predictor the sub-class implements."""
         ...
 
-    @staticmethod
-    def _indexed_name(index, name):
+    def _indexed_name(self, index, name):
         index = f"{index}".replace(" ", "")
-        return f"{name}[{index}]"
+        return self._name_var(f"{name}[{index}]")
+
+    def _name_var(self, name):
+        if self._name != "" and not self._no_recording:
+            return name
+        return None
 
     @property
     def output(self):
