@@ -141,7 +141,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             self.attributes = self.default_pwl_attributes()
         else:
             self.attributes = pwl_attributes
-        if output_type not in ("classification", "probability_1"):
+        if output_type not in ("classification", "probability_1", "raw"):
             raise ParameterError(
                 "output_type should be either 'classification' or 'probability_1'"
             )
@@ -237,7 +237,8 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
                         gp.GRB.GREATER_EQUAL,
                         self.epsilon,
                     )
-        else:
+            return
+        if self.output_type == "probability_1":
             exp_vars = self.gp_model.addMVar(outputvars.shape)
             sum_vars = self.gp_model.addMVar((outputvars.shape[0], 1))
             num_gc = self.gp_model.NumGenConstrs
@@ -253,6 +254,8 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
                     gen_constr.setAttr(attr, val)
             self.gp_model.addConstr(sum_vars == exp_vars.sum(axis=1))
             self.gp_model.addConstr(outputvars * sum_vars == exp_vars)
+            return
+        self._gp_model.addConstr(self._output == affinevars)
 
     def _mip_model(self, **kwargs):
         if self._output_shape > 2:
