@@ -223,7 +223,27 @@ class DiabetesCasesAsFrame(Cases):
         self._data = (X, y)
 
 
-class IrisCases(Cases):
+class IrisBinaryCases(Cases):
+    """Base class to have cases for testing regression models on iris set
+
+    Transform the iris test set to binary classification.
+    This is appropriate for testing binary classification models."""
+
+    def __init__(self):
+        super().__init__("iris_binary", regressors=["LogisticRegression"])
+
+    def load_data(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        y = data.target
+        # Make it a binary classification
+        X = X[y != 2]
+        y = y[y != 2]
+        self._data = (X, y)
+
+
+class IrisMultiCases(Cases):
     """Base class to have cases for testing regression models on iris set
 
     Transform the iris test set to binary classification.
@@ -238,8 +258,6 @@ class IrisCases(Cases):
         X = data.data
         y = data.target
         # Make it a binary classification
-        X = X[y != 2]
-        y = y[y != 2]
         self._data = (X, y)
 
 

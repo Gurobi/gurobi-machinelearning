@@ -141,7 +141,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             self.attributes = self.default_pwl_attributes()
         else:
             self.attributes = pwl_attributes
-        if output_type not in ("classification", "probability_1", "raw"):
+        if output_type not in ("classification", "probability_1", "probability", "raw"):
             raise ParameterError(
                 "output_type should be either 'classification' or 'probability_1'"
             )
@@ -168,7 +168,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         return {
             "FuncPieces": -1,
             "FuncPieceLength": 0.01,
-            "FuncPieceError": 0.01,
+            "FuncPieceError": 0.001,
             "FuncPieceRatio": -1.0,
         }
 
@@ -178,6 +178,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         self._create_output_vars(self._input, name="affine_trans")
         affinevars = self._output
         self.add_regression_constr()
+        self._output = outputvars
         if self.output_type == "classification":
             # For classification output var should be binary
             outputvars.VType = gp.GRB.BINARY
@@ -192,10 +193,9 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
                 self.gp_model.addGenConstrIndicator(
                     outputvars[index], 0, affinevars[index], gp.GRB.LESS_EQUAL, 0
                 )
-        else:
+            return
+        if self.output_type == "probability_1":
             log_result = outputvars
-
-            self._output = outputvars
             for index in np.ndindex(outputvars.shape):
                 self.gp_model.addGenConstrLogistic(
                     affinevars[index],
@@ -207,6 +207,8 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
                 for attr, val in self.attributes.items():
                     gen_constr.setAttr(attr, val)
+            return
+        self._gp_model.addConstr(self._output == affinevars)
 
     def _multi_class_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
@@ -238,9 +240,9 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
                         self.epsilon,
                     )
             return
-        if self.output_type == "probability_1":
-            exp_vars = self.gp_model.addMVar(outputvars.shape)
-            sum_vars = self.gp_model.addMVar((outputvars.shape[0], 1))
+        if self.output_type == "probability":
+            exp_vars = self.gp_model.addMVar(outputvars.shape, lb=-1e30)
+            sum_vars = self.gp_model.addMVar((outputvars.shape[0]), lb=-1e30)
             num_gc = self.gp_model.NumGenConstrs
             for index in np.ndindex(outputvars.shape):
                 self.gp_model.addGenConstrExp(
@@ -253,7 +255,10 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
                 for attr, val in self.attributes.items():
                     gen_constr.setAttr(attr, val)
             self.gp_model.addConstr(sum_vars == exp_vars.sum(axis=1))
-            self.gp_model.addConstr(outputvars * sum_vars == exp_vars)
+            self.gp_model.addConstrs(
+                outputvars[i, :] * sum_vars[i] == exp_vars[i, :]
+                for i in range(outputvars.shape[0])
+            )
             return
         self._gp_model.addConstr(self._output == affinevars)
 

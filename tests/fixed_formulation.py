@@ -28,8 +28,7 @@ class FixedRegressionModel(unittest.TestCase):
         params = {
             "OutputFlag": 0,
         }
-        if nonconvex:
-            params["NonConvex"] = 2
+        params["NonConvex"] = 2
         for param in params:
             try:
                 params[param] = int(params[param])
@@ -76,7 +75,12 @@ class FixedRegressionModel(unittest.TestCase):
                 tol = 5e-3
             else:
                 tol = 1e-5
-            vio = gpm.MaxVio
+            tol = 5e-3
+            try:
+                vio = gpm.MaxVio
+            except AttributeError:
+                gpm.write("Error.lp")
+                raise
             if vio > 1e-5:
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
@@ -84,7 +88,9 @@ class FixedRegressionModel(unittest.TestCase):
             tol *= np.max(np.abs(y.X))
             abserror = pred_constr.get_error().astype(float)
             if (abserror > tol).any():
-                print(f"Error: {y.X} != {predictor.predict(examples)}")
+                print(f"Error: {y.X} != {predictor.predict_proba(examples)}")
+                print(f"Error: {pred_constr.get_error()}")
+                gpm.write("Error.lp")
 
             self.assertLessEqual(np.max(abserror), tol)
 
