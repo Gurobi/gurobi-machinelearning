@@ -150,7 +150,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             self.attributes = self.default_pwl_attributes()
         else:
             self.attributes = pwl_attributes
-        if output_type not in ("classification", "probability_1", "raw"):
+        if output_type not in ("classification", "probability_1", "probability", "raw"):
             raise ParameterError(
                 "output_type should be either 'classification' or 'probability_1'"
             )
@@ -260,9 +260,9 @@ Upgrading to version 11 is recommended when using logistic regressions."""
                         self.epsilon,
                     )
             return
-        if self.output_type == "probability_1":
-            exp_vars = self.gp_model.addMVar(outputvars.shape)
-            sum_vars = self.gp_model.addMVar((outputvars.shape[0], 1))
+        if self.output_type == "probability":
+            exp_vars = self.gp_model.addMVar(outputvars.shape, lb=-1e30)
+            sum_vars = self.gp_model.addMVar((outputvars.shape[0]), lb=-1e30)
             num_gc = self.gp_model.NumGenConstrs
             for index in np.ndindex(outputvars.shape):
                 self.gp_model.addGenConstrExp(
@@ -275,7 +275,10 @@ Upgrading to version 11 is recommended when using logistic regressions."""
                 for attr, val in self.attributes.items():
                     gen_constr.setAttr(attr, val)
             self.gp_model.addConstr(sum_vars == exp_vars.sum(axis=1))
-            self.gp_model.addConstr(outputvars * sum_vars == exp_vars)
+            self.gp_model.addConstrs(
+                outputvars[i, :] * sum_vars[i] == exp_vars[i, :]
+                for i in range(outputvars.shape[0])
+            )
             return
         self._gp_model.addConstr(self._output == affinevars)
 
