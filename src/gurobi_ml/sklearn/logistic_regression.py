@@ -261,8 +261,8 @@ Upgrading to version 11 is recommended when using logistic regressions."""
                     )
             return
         if self.output_type == "probability":
-            exp_vars = self.gp_model.addMVar(outputvars.shape, lb=-1e30)
-            sum_vars = self.gp_model.addMVar((outputvars.shape[0]), lb=-1e30)
+            exp_vars = self.gp_model.addMVar(outputvars.shape)
+            sum_vars = self.gp_model.addMVar((outputvars.shape[0]), lb=self.epsilon)
             num_gc = self.gp_model.NumGenConstrs
             for index in np.ndindex(outputvars.shape):
                 self.gp_model.addGenConstrExp(
