@@ -237,6 +237,7 @@ Upgrading to version 11 is recommended when using logistic regressions."""
         intercept = self.predictor.intercept_
         self._create_output_vars(self._input, name="affine_trans")
         affinevars = self._output
+        self.affinevars = affinevars
         self.gp_model.addConstr(
             affinevars == self.input @ coefs.T + intercept, name="linreg"
         )
