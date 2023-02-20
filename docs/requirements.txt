@@ -2,7 +2,7 @@ gurobipy==10.0.1
 matplotlib-inline==0.1.6
 matplotlib==3.6.0
 sphinxcontrib_bibtex==2.5.0
-numpy==1.23.4
+numpy==1.24.2
 pandas==1.5.3
 scikit-learn==1.2.1
 seaborn==0.12.2
