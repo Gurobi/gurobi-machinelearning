@@ -15,7 +15,7 @@ include reasoning on how the new requested feature improves the code.
 
 ## Submitting changes
 We welcome external contributions to Gurobi Machine Learning.
-Note that all contributors should accept the Contributor License Agreement (CLA).
+Note that all contributors should accept the [Contributor License Agreement (CLA)](https://gist.github.com/mattmilten/d1c9640d79bde0ece8c2f46152639011).
 
 To contribute code you should use the GitHub pull request workflow. Once your pull request is ready for review, one
 of the core maintainers of Gurobi Machine Learning will review your pull request.
