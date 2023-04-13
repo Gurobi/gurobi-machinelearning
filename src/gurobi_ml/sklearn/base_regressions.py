@@ -50,10 +50,10 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
             **kwargs,
         )
 
-    def add_regression_constr(self):
+    def add_regression_constr(self, output=None):
         """Add the prediction constraints to Gurobi."""
+        if output is None:
+            output = self.output
         coefs = self.predictor.coef_.reshape(-1, 1)
         intercept = self.predictor.intercept_
-        self.gp_model.addConstr(
-            self.output == self.input @ coefs + intercept, name="linreg"
-        )
+        self.gp_model.addConstr(output == self.input @ coefs + intercept, name="linreg")
