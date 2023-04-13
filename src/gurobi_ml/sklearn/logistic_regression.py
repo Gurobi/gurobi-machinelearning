@@ -178,24 +178,27 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
 
     def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
-        outputvars = self._output
-        self._create_output_vars(self._input, name="affine_trans")
-        affinevars = self._output
-        self.add_regression_constr()
         if self.output_type == "classification":
             # For classification we need an extra binary variable
-            self._create_output_vars(self._input, name="log_result")
-            log_result = self._output
-            self.gp_model.addConstr(outputvars >= log_result - 0.5 + self.epsilon)
-            self.gp_model.addConstr(outputvars <= log_result + 0.5)
-            outputvars.VType = gp.GRB.BINARY
-            outputvars.LB = 0.0
-            outputvars.UB = 1.0
-        else:
-            log_result = outputvars
+            log_result = self._gp_model.addMVar(
+                self.output.shape, lb=-gp.GRB.INFINITY, name="log_result"
+            )
+            bin_output = self.gp_model.addMVar(
+                self.output.shape, vtype=gp.GRB.BINARY, name="bin_output"
+            )
 
-        self._output = outputvars
-        for index in np.ndindex(outputvars.shape):
+            self.gp_model.addConstr(bin_output >= log_result - 0.5 + self.epsilon)
+            self.gp_model.addConstr(bin_output <= log_result + 0.5)
+            self.gp_model.addConstr(bin_output == self.output)
+        else:
+            log_result = self.output
+
+        affinevars = self._gp_model.addMVar(
+            self.output.shape, lb=-gp.GRB.INFINITY, name="affine_trans"
+        )
+        self.add_regression_constr(output=affinevars)
+
+        for index in np.ndindex(self.output.shape):
             self.gp_model.addGenConstrLogistic(
                 affinevars[index],
                 log_result[index],

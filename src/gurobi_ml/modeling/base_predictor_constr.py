@@ -34,8 +34,8 @@ class AbstractPredictorConstr(ABC, SubModel):
     -------
 
     Users should usually never construct objects of this class or one of its derived
-    classes. They are returned by the :py:func:`gurobi_ml.add_predictor_constr` and other
-    functions.
+    classes. They are returned by the :py:func:`gurobi_ml.add_predictor_constr` and
+    other functions.
     """
 
     def __init__(self, gp_model, input_vars, output_vars=None, **kwargs):
@@ -88,7 +88,7 @@ class AbstractPredictorConstr(ABC, SubModel):
         self._input_columns = columns
 
         if self._output is None:
-            self._create_output_vars(self._input)
+            self._output = self._create_output_vars(self._input)
         if self._output is not None:
             self._output = validate_output_vars(self._output)
             self._validate()
@@ -141,10 +141,11 @@ class AbstractPredictorConstr(ABC, SubModel):
             n_outputs = self._output_shape
         except AttributeError:
             return
-        self._output = self._gp_model.addMVar(
+        output = self._gp_model.addMVar(
             (input_vars.shape[0], n_outputs), lb=-gp.GRB.INFINITY, name=name
         )
         self._gp_model.update()
+        return output
 
     @property
     def _has_solution(self):
