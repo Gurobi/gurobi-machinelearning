@@ -80,7 +80,7 @@ class ActivationLayer(AbstractNNLayer):
     def _create_output_vars(self, input_vars):
         rval = self._gp_model.addMVar(input_vars.shape, lb=-gp.GRB.INFINITY, name="act")
         self._gp_model.update()
-        self._output = rval
+        return rval
 
     def _mip_model(self, **kwargs):
         """Add the layer to model."""
@@ -126,7 +126,7 @@ class DenseLayer(AbstractNNLayer):
             (input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act"
         )
         self._gp_model.update()
-        self._output = rval
+        return rval
 
     def _mip_model(self, **kwargs):
         """Add the layer to model."""
