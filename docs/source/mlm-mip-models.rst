@@ -83,58 +83,36 @@ according to the topology of the network.
 Decision Tree Regression
 ========================
 
-For representing decision tree in Gurobi, we add one binary decision variable
-:math:`\delta` for each node of the tree (and each input vector). Those variables represent the path
-taken in the decision tree that corresponds to the values of the input vector. For a node
-:math:`i`, we have :math:`\delta_i = 1` if node :math:`i` is on the
-decision path and :math:`\delta =0` otherwise. The variable corresponding to the root of the tree is
-always set to 1.
+In a decision tree, each leaf :math:`l` is defined by a number of constraints
+on the input features of the tree that correspond to the branches taken in the
+path leading to the leaf. Namely, a set :math:`\mathcal L_l` of inequalities of
+the form :math:`x_{i_v} \le \theta_v` corresponds to the left branches leading
+to the leaf and a set :math:`\mathcal R_l` of inequalities of
+the form :math:`x_{i_v} > \theta_v` corresponds to the right branches.
 
-Let :math:`i` be a node with left child :math:`j` and right child :math:`k`. The
-connectivity of the decision path is modeled with the following constraint that
-specifies that if :math:`i` is on the decision path then either :math:`j` or
-:math:`k` is on the decision path:
+We formulate decision trees by introducing one binary decision variable
+:math:`\delta_l` for each leaf of the tree (and each input vector).
+
+We introduce the constraint
+
+.. math::
+   \sum_{l} \delta_l = 1
+
+imposing that at least one leaf is chosen.
+
+Then for each leaf, the inequalities describing :math:`\mathcal L_l` and :math:`\mathcal R_l`
+are imposed using indicator constraints:
 
 .. math::
 
-   \delta_j + \delta_k = \delta_i
+   & \delta_l = 1 \rightarrow x_{i_v} \le \theta_v, & & v \in \mathcal L
 
+   & \delta_l = 1 \rightarrow x_{i_v} \ge \theta_v + \epsilon, & & v \in \mathcal R.
 
-For further detailing the formulation, we differentiate between splitting nodes
-and leafs of the tree.
-
-First consider the leafs of the tree. Let :math:`i` be a
-leaf of the decision tree with a corresponding value of the output variables :math:`\nu_i`.
-We use an indicator constraint to model that if :math:`i` is on the decision path, the output
-value of the output is fixed to :math:`\nu_i`:
-
-.. math::
-
-   \delta_i = 1 \rightarrow y = \nu_i.
-
-Note that :math:`y` and :math:`nu_i` here might be multidimensional.
-
-Now we consider the more complicated case of a splitting node. Let :math:`i` be
-a splitting node with left child :math:`j` and right child :math:`k`.
-Furthermore, we denote by :math:`s_i` the index of the feature used for
-splitting in node :math:`i` and by :math:`theta_i` the threshold value. By
-definition, if node :math:`i` is on the decision path, then we proceed to node
-:math:`j` if :math:`x_{s_i} \le \theta_i` and to node :math:`k` otherwise (i.e.
-if :math:`x_{s_i} > \theta_i`).
-
-A difficulty here is that the strictly greater than constraint for defining node
-:math:`k` can't be represented exactly in a mixed integer optimization model. To
+A difficulty here is that the strictly greater than constraints of :math:`\mathcal R_l`
+can't be represented exactly in a mixed integer optimization model. To
 approximate it, we introduce a small threshold :math:`\epsilon`. We discuss
 below the tradeoffs for choosing a value for :math:`\epsilon`.
-
-Using :math:`\epsilon`, the splitting can be represented by the pairs of
-indicator constraints:
-
-.. math::
-
-   & \delta_j = 1 \rightarrow x_{s_i} \le \theta_i,
-
-   & \delta_k = 1 \rightarrow x_{s_i} \ge \theta_i + \epsilon.
 
 In our implementation, :math:`\epsilon` can be specified by a keyword parameter
 of :func:`add_decision_tree_regressor_constr <gurobi_ml.sklearn.add_decision_tree_regressor_constr>`. The default
