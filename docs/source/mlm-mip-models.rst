@@ -96,7 +96,7 @@ We formulate decision trees by introducing one binary decision variable
 We introduce the constraint
 
 .. math::
-   \sum_{l} \delta_l = 1
+   \sum_{l} \delta_l = 1,
 
 imposing that at least one leaf is chosen.
 
@@ -105,14 +105,14 @@ are imposed using indicator constraints:
 
 .. math::
 
-   & \delta_l = 1 \rightarrow x_{i_v} \le \theta_v, & & v \in \mathcal L
+   & \delta_l = 1 \rightarrow x_{i_v} \le \theta_v, & & \text{for } x_{i_v} \le \theta_v \in \mathcal L,
 
-   & \delta_l = 1 \rightarrow x_{i_v} \ge \theta_v + \epsilon, & & v \in \mathcal R.
+   & \delta_l = 1 \rightarrow x_{i_v} \ge \theta_v + \epsilon, & & \text{for } x_{i_v} > \theta_v \in \mathcal R.
 
 A difficulty here is that the strictly greater than constraints of :math:`\mathcal R_l`
 can't be represented exactly in a mixed integer optimization model. To
 approximate it, we introduce a small threshold :math:`\epsilon`. We discuss
-below the tradeoffs for choosing a value for :math:`\epsilon`.
+below the trade offs for choosing a value for :math:`\epsilon`.
 
 In our implementation, :math:`\epsilon` can be specified by a keyword parameter
 of :func:`add_decision_tree_regressor_constr <gurobi_ml.sklearn.add_decision_tree_regressor_constr>`. The default
@@ -125,7 +125,7 @@ happen also whenever :math:`\epsilon` is set to a value that is below the
 of Gurobi. If the value is instead set above the feasibility tolerance, then the
 left and right nodes are correctly discriminated by the model, but a small
 interval is created between :math:`\theta` and :math:`\theta + \epsilon` where
-there is no feasible solution. This may artifically make the optimization model infeasible
+there is no feasible solution. This may artificially make the optimization model infeasible
 depending on how tightly the input of the decision tree regressor is
 constrained.
 
