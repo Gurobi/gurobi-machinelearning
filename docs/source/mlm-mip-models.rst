@@ -85,10 +85,12 @@ Decision Tree Regression
 
 In a decision tree, each leaf :math:`l` is defined by a number of constraints
 on the input features of the tree that correspond to the branches taken in the
-path leading to the leaf. Namely, a set :math:`\mathcal L_l` of inequalities of
-the form :math:`x_{i_v} \le \theta_v` corresponds to the left branches leading
-to the leaf and a set :math:`\mathcal R_l` of inequalities of
-the form :math:`x_{i_v} > \theta_v` corresponds to the right branches.
+path leading to :math:`l`. For a node :math:`v`, we denote by :math:`i_v` the
+feature used for splitting and by :math:`\theta_v` the value at which the split
+is made. At a leaf :math:`l` of the tree, we have a set :math:`\mathcal L_l` of inequalities of
+the form :math:`x_{i_v} \le \theta_v` corresponding to the left branches leading to
+:math:`l` and a set :math:`\mathcal R_l` of inequalities of
+the form :math:`x_{i_v} > \theta_v` corresponding to the right branches.
 
 We formulate decision trees by introducing one binary decision variable
 :math:`\delta_l` for each leaf of the tree (and each input vector).
@@ -105,21 +107,21 @@ are imposed using indicator constraints:
 
 .. math::
 
-   & \delta_l = 1 \rightarrow x_{i_v} \le \theta_v, & & \text{for } x_{i_v} \le \theta_v \in \mathcal L,
+   & \delta_l = 1 \rightarrow x_{i_v} \le \theta_v, & & \text{for } x_{i_v} \le \theta_v \in \mathcal L_l,
 
-   & \delta_l = 1 \rightarrow x_{i_v} \ge \theta_v + \epsilon, & & \text{for } x_{i_v} > \theta_v \in \mathcal R.
+   & \delta_l = 1 \rightarrow x_{i_v} \ge \theta_v + \epsilon, & & \text{for } x_{i_v} > \theta_v \in \mathcal R_l.
 
 A difficulty here is that the strictly greater than constraints of :math:`\mathcal R_l`
 can't be represented exactly in a mixed integer optimization model. To
 approximate it, we introduce a small threshold :math:`\epsilon`. We discuss
-below the trade offs for choosing a value for :math:`\epsilon`.
+below the trade-offs for choosing a value for :math:`\epsilon`.
 
 In our implementation, :math:`\epsilon` can be specified by a keyword parameter
 of :func:`add_decision_tree_regressor_constr <gurobi_ml.sklearn.add_decision_tree_regressor_constr>`. The default
-value for :math:`\epsilon` is 0. This means in particular that if :math:`x_{s_i}
-= \theta_i` in the solution, the model doesn't discriminate between nodes
-:math:`k` and :math:`j` and either may be picked in the decision path. This may
-happen also whenever :math:`\epsilon` is set to a value that is below the
+value for :math:`\epsilon` is 0. This means in particular that if :math:`x_{i_v}
+= \theta_v` in the solution, the model doesn't discriminate between the two child
+nodes of :math:`v` and either direction may be picked. This may also
+happen whenever :math:`\epsilon` is set to a value that is below the
 `feasibility tolerance
 <https://www.gurobi.com/documentation/current/refman/feasibilitytol.html#parameter:FeasibilityTol>`_
 of Gurobi. If the value is instead set above the feasibility tolerance, then the
