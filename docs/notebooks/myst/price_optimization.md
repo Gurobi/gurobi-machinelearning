@@ -447,37 +447,6 @@ data = pd.concat([c_transport,
 data
 ```
 
-### Create dataframe for the fixed features of the regression
-
-We now start creating the input of the regression in the optimization models with the features that are fixed.
-
-We use gurobipy-pandas that help to more easily create gurobipy models using pandas data.
-
-+++
-
-First, create a dataframe with the features that are fixed in our optimization problem.
-It is indexed by the regions (we want to use one regression to predict demand for each region) and has the 3
-columns corresponding to the fixed features:
-
-* `year`
-* `peak` with the value of `peak_or_not`
-* `region` that repeat the names of the regions.
-
-Display the dataframe to make sure it is correct
-
-```{code-cell} ipython3
-import gurobipy_pandas as gppd
-feats = pd.DataFrame(
-    data={
-        "year": year,
-        "peak": peak_or_not,
-        "region": regions,
-    },
-    index=regions
-)
-feats
-```
-
 ### Decision Variables
 
 Let us now define the decision variables. In our model, we want to store the
@@ -499,6 +468,7 @@ All those variables are created using gurobipy-pandas, with the function `gppd.a
 
 ```{code-cell} ipython3
 import gurobipy as gp
+import gurobipy_pandas as gppd
 
 m = gp.Model("Avocado_Price_Allocation")
 
@@ -601,12 +571,31 @@ m.update()
 
 +++
 
-First, we create our full input for the predictor constraint. We concated the `p` variables and the fixed features
+First, we create our input for the predictor constraint.
+
+The dataframe `feats` will contain features that are fixed:
+
+* `year`
+* `peak` with the value of `peak_or_not`
+* `region` that repeat the names of the regions.
+
+and the price variable `p`.
+
+It is indexed by the regions (we predict the demand independently for each region).
+
+
+Display the dataframe to make sure it is correct
 
 ```{code-cell} ipython3
-feats = pd.concat([feats, p], axis=1)[["region", "price", "year", "peak"]]
-
-
+feats = pd.DataFrame(
+    data={
+        "region": regions,
+        "price": p,
+        "year": year,
+        "peak": peak_or_not,
+    },
+    index=regions
+)
 feats
 ```
 
