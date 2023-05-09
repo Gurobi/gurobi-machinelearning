@@ -17,6 +17,7 @@
 
 import gurobipy as gp
 
+from ..exceptions import NotRegistered
 from .preprocessing import sklearn_transformers
 from .skgetter import SKtransformer
 
@@ -77,7 +78,7 @@ class ColumnTransformerConstr(SKtransformer):
                     try:
                         trans_constr = transformers[name](self._gp_model, trans, data)
                     except KeyError:
-                        raise NotImplementedError(f"No object to transform {name}")
+                        raise NotRegistered(name)
                     transformed.append(trans_constr.output.tolist())
                 else:
                     transformed.append(trans.transform(_input.loc[:, cols]))
