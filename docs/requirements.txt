@@ -2,11 +2,11 @@ gurobipy==10.0.1
 matplotlib-inline==0.1.6
 matplotlib==3.6.0
 sphinxcontrib_bibtex==2.5.0
-numpy==1.24.2
-pandas==2.0.0
+numpy==1.24.3
+pandas==2.0.1
 scikit-learn==1.2.2
 seaborn==0.12.2
-Sphinx==6.1.3
+Sphinx==6.2.0
 sphinx-copybutton==0.5.2
 sphinx-pyproject==0.1.0
 sphinx-rtd-theme==1.2.0
@@ -14,5 +14,5 @@ nbsphinx==0.9.1
 jupytext==1.14.5
 sphinx_design==0.4.1
 gurobipy-pandas==1.0.0
-ipykernel==6.21.3
+ipykernel==6.23.0
 .
