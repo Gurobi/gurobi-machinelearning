@@ -17,6 +17,7 @@
 
 import gurobipy as gp
 
+from ..exceptions import NoModel
 from .preprocessing import sklearn_transformers
 from .skgetter import SKtransformer
 
@@ -70,12 +71,14 @@ class ColumnTransformerConstr(SKtransformer):
                 pass
             else:
                 data = _input.loc[:, cols]
-                anyvar = any(
+                any_var = any(
                     map(lambda i: isinstance(i, gp.Var), data.to_numpy().ravel())
                 )
-                if anyvar:
-                    if name in transformers:
+                if any_var:
+                    try:
                         trans_constr = transformers[name](self._gp_model, trans, data)
+                    except KeyError:
+                        raise NoModel(name, "No implementation found")
                     transformed.append(trans_constr.output.tolist())
                 else:
                     transformed.append(trans.transform(_input.loc[:, cols]))
