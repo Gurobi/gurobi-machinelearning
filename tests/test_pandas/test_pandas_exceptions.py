@@ -26,7 +26,31 @@ class TestUnsuportedPandas(unittest.TestCase):
             x.loc[:, feat] = gppd.add_vars(gpm, examples, lb=feat, ub=feat)
         return x
 
-    def test_pipeline_fail_transformer(self):
+    def test_pipeline_fail_transformer_idx(self):
+        data = datasets.load_diabetes(as_frame=True)
+
+        X = data.data
+        y = data.target
+
+        coltran = make_column_transformer(
+            (StandardScaler(), [0, 1, 2, 3]),
+            (FunctionTransformer(np.exp), [4, 5, 6, 7, 8, 9]),
+        )
+        mlpreg = make_pipeline(coltran, MLPRegressor([10] * 2))
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=ConvergenceWarning)
+            warnings.simplefilter("ignore", category=UserWarning)
+            mlpreg.fit(X, y)
+        example = X.iloc[:5, :]
+
+        m = gp.Model()
+
+        x = self.create_input(m, example)
+
+        with self.assertRaises(NoModel):
+            add_predictor_constr(m, mlpreg, x)
+
+    def test_pipeline_fail_transformer_str(self):
         data = datasets.load_diabetes(as_frame=True)
 
         X = data.data
@@ -41,7 +65,7 @@ class TestUnsuportedPandas(unittest.TestCase):
             warnings.simplefilter("ignore", category=ConvergenceWarning)
             warnings.simplefilter("ignore", category=UserWarning)
             mlpreg.fit(X, y)
-        example = X.iloc[10:11, :]
+        example = X.iloc[:5, :]
 
         m = gp.Model()
 

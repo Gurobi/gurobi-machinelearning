@@ -66,11 +66,21 @@ class ColumnTransformerConstr(SKtransformer):
         transformed = []
         for name, trans, cols in column_transform.transformers_:
             if trans == "passthrough":
-                transformed.append(_input.loc[:, cols])
+                if isinstance(cols, str) or isinstance(cols[0], str):
+                    transformed.append(_input.loc[:, cols])
+                else:
+                    if hasattr(_input, "iloc"):
+                        transformed.append(_input.iloc[:, cols])
+                    else:
+                        data = _input[:, cols]
+                        if isinstance(data, gp.MVar):
+                            transformed.append(_input[:, cols].tolist())
+                        else:
+                            transformed.append(_input[:, cols])
             elif trans == "drop":
                 pass
             else:
-                if isinstance(cols, str):
+                if isinstance(cols, str) or isinstance(cols[0], str):
                     data = _input.loc[:, cols]
                     any_var = any(
                         map(lambda i: isinstance(i, gp.Var), data.to_numpy().ravel())
