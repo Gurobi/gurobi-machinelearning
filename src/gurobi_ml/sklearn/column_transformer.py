@@ -70,10 +70,22 @@ class ColumnTransformerConstr(SKtransformer):
             elif trans == "drop":
                 pass
             else:
-                data = _input.loc[:, cols]
-                any_var = any(
-                    map(lambda i: isinstance(i, gp.Var), data.to_numpy().ravel())
-                )
+                if isinstance(cols, str):
+                    data = _input.loc[:, cols]
+                    any_var = any(
+                        map(lambda i: isinstance(i, gp.Var), data.to_numpy().ravel())
+                    )
+                else:
+                    if hasattr(_input, "iloc"):
+                        data = _input.iloc[:, cols]
+                        any_var = any(
+                            map(
+                                lambda i: isinstance(i, gp.Var), data.to_numpy().ravel()
+                            )
+                        )
+                    else:
+                        data = _input[:, cols]
+                        any_var = True
                 if any_var:
                     try:
                         trans_constr = transformers[name](self._gp_model, trans, data)
