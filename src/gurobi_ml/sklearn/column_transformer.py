@@ -72,11 +72,15 @@ class ColumnTransformerConstr(SKtransformer):
                     if hasattr(_input, "iloc"):
                         transformed.append(_input.iloc[:, cols])
                     else:
-                        data = _input[:, cols]
+                        data = _input
+                        if data.ndim == 1:
+                            # If we have a one-dimensional numpy array reshape it.
+                            # By definition pandas dataframe should be 2-dimensional
+                            data = data.reshape(1, -1)
                         if isinstance(data, gp.MVar):
-                            transformed.append(_input[:, cols].tolist())
+                            transformed.append(data[:, cols].tolist())
                         else:
-                            transformed.append(_input[:, cols])
+                            transformed.append(data[:, cols])
             elif trans == "drop":
                 pass
             else:
@@ -94,7 +98,12 @@ class ColumnTransformerConstr(SKtransformer):
                             )
                         )
                     else:
-                        data = _input[:, cols]
+                        data = _input
+                        if data.ndim == 1:
+                            # If we have a one-dimensional numpy array reshape it.
+                            # By definition pandas dataframe should be 2-dimensional
+                            data = data.reshape(1, -1)
+                        data = data[:, cols]
                         any_var = True
                 if any_var:
                     try:
