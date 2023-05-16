@@ -94,7 +94,6 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         """Add the prediction constraints to Gurobi."""
         neural_net = self.predictor
         if neural_net.activation not in self.act_dict:
-            print(self.act_dict)
             raise NoModel(
                 neural_net,
                 f"No implementation for activation function {neural_net.activation}",
