@@ -53,6 +53,19 @@ def pytorch_convertors():
     return {}
 
 
+def xgboost_convertors():
+    """Collect known PyTorch objects that can be formulated and the conversion class."""
+    if "xgboost" in sys.modules:
+        import xgboost as xgb  # pylint: disable=import-outside-toplevel
+
+        from .xgboost import (  # pylint: disable=import-outside-toplevel
+            add_xgboost_regressor_constr,
+        )
+
+        return {xgb.core.Booster: add_xgboost_regressor_constr}
+    return {}
+
+
 def keras_convertors():
     """Collect known Keras objects that can be embedded and the conversion class."""
     if "tensorflow" in sys.modules:
@@ -80,5 +93,6 @@ def registered_predictors():
     convertors |= sklearn_convertors()
     convertors |= pytorch_convertors()
     convertors |= keras_convertors()
+    convertors |= xgboost_convertors()
     convertors |= user_predictors()
     return convertors
