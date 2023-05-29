@@ -25,7 +25,7 @@ import numpy as np
 import xgboost as xgb
 from gurobipy import GRB
 
-from ..exceptions import NoSolution
+from ..exceptions import NoModel, NoSolution
 from ..modeling import AbstractPredictorConstr
 from ..modeling.decision_tree import leaf_formulation
 
@@ -108,6 +108,9 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         ), "Output dimension of gradient boosting regressor should be 1"
 
         xgb_raw = json.loads(xgb_regressor.save_raw(raw_format="json"))
+        booster_type = xgb_raw["learner"]["gradient_booster"]["name"]
+        if booster_type != "gbtree":
+            raise NoModel(xgb_regressor, f"model not implemented for {booster_type}")
         trees = xgb_raw["learner"]["gradient_booster"]["model"]["trees"]
         n_estimators = len(trees)
 
@@ -133,6 +136,13 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
             tree["value"] = tree["threshold"].reshape(-1, 1)
             tree["capacity"] = len(tree["split_conditions"])
             tree["n_features"] = int(tree["tree_param"]["num_feature"])
+
+            def _name_tree_var(name):
+                rval = self._name_var(name)
+                if rval is None:
+                    return None
+                return rval + f"_{i}"
+
             estimators.append(
                 leaf_formulation(
                     self.gp_model,
@@ -140,7 +150,7 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
                     tree_vars[:, i, :],
                     tree,
                     self.epsilon,
-                    self._name_var,
+                    _name_tree_var,
                     self.verbose,
                     timer,
                 )
