@@ -3,7 +3,7 @@ Supported Regression models
 
 The package currently support various `scikit-learn
 <https://scikit-learn.org/stable/>`_ objects. It also support
-Gradient Boosting Regreesion from `XGboost <https://xgboost.readthedocs.io/en/stable/>` and has limited support for
+Gradient Boosting Regreesion from `XGboost <https://xgboost.readthedocs.io/en/stable/>`_ and has limited support for
 `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_. Only
 sequential neural networks with ReLU activation function are currently
 supported. In :ref:`Mixed Integer Formulations`, we briefly outline the formulations used for the various
@@ -124,8 +124,10 @@ Currently, only two types of layers are supported:
 XGBoost
 -------
 
-XGboost's :external+xgb:py:class:`xgboost.Booster` cn be embedded in a Gurobi model
+XGboost's :external+xgb:py:class:`xgboost.Booster` can be embedded in a Gurobi model
 with the function :py:func:`gurobi_ml.xgboost.add_xgboost_regressor_constr`.
+The scikit-learn wrapper :external+xgb:py:class:`xgboost.XGBRFRegressor` can be embedded
+using :py:func:`gurobi_ml.xgboost.add_xgbrfregressor_constr`.
 
 Currently only "gbtree" boosters are supported.
 

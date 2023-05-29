@@ -60,9 +60,13 @@ def xgboost_convertors():
 
         from .xgboost import (  # pylint: disable=import-outside-toplevel
             add_xgboost_regressor_constr,
+            add_xgbrfregressor_constr,
         )
 
-        return {xgb.core.Booster: add_xgboost_regressor_constr}
+        return {
+            xgb.core.Booster: add_xgboost_regressor_constr,
+            xgb.XGBRFRegressor: add_xgbrfregressor_constr,
+        }
     return {}
 
 

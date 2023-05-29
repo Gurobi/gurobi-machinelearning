@@ -30,7 +30,7 @@ The aim of the package is to:
 
 The package currently supports various `scikit-learn
 <https://scikit-learn.org/stable/>`_ objects. It can also embed
-gradient boosting regression models from `XGboost <https://xgboost.readthedocs.io/en/stable/>`.
+gradient boosting regression models from `XGboost <https://xgboost.readthedocs.io/en/stable/>`_.
 Finally, it has limited support for the
 `Keras <https://keras.io/>`_ API of `TensorFlow <https://www.tensorflow.org/>`_
 and `PyTorch <https://pytorch.org/>`_. Only neural networks with ReLU activation
