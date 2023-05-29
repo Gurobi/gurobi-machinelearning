@@ -41,7 +41,7 @@ class AbstractNNLayer(AbstractPredictorConstr):
             self, gp_model, input_vars, output_vars, **kwargs
         )
 
-    def get_error(self):
+    def get_error(self, eps):
         assert False
 
     def print_stats(self, abbrev=False, file=None):

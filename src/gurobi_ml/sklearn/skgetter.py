@@ -43,7 +43,7 @@ class SKgetter(AbstractPredictorConstr):
         if hasattr(predictor, "n_outputs_"):
             self._output_shape = predictor.n_outputs_
 
-    def get_error(self):
+    def get_error(self, eps=None):
         """Return error in Gurobi's solution with respect to prediction from input.
 
         Returns
@@ -69,7 +69,11 @@ class SKgetter(AbstractPredictorConstr):
             output_values = self.output_values
             if len(predicted.shape) == 1 and len(output_values.shape) == 2:
                 predicted = predicted.reshape(-1, 1)
-            return np.abs(predicted - output_values)
+            r_val = np.abs(predicted - output_values)
+            if eps is not None and np.max(r_val) > eps:
+                print(f"{predicted} != {output_values}")
+            return r_val
+
         raise NoSolution()
 
 
@@ -93,7 +97,7 @@ class SKtransformer(AbstractPredictorConstr):
         check_is_fitted(transformer)
         super().__init__(gp_model, input_vars, **kwargs)
 
-    def get_error(self):
+    def get_error(self, eps=None):
         """Return error in Gurobi's solution with respect to preprocessing from input.
 
         Returns
@@ -115,5 +119,10 @@ class SKtransformer(AbstractPredictorConstr):
             transformed = transformer.transform(input_values)
             if len(transformed.shape) == 1:
                 transformed = transformed.reshape(-1, 1)
-            return np.abs(transformed - self.output_values)
+
+            r_val = np.abs(transformed - self.output_values)
+            if eps is not None and np.max(r_val) > eps:
+                print(f"{transformed} != {self.output_values}")
+            return r_val
+
         raise NoSolution()

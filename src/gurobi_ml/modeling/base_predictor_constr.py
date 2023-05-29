@@ -160,7 +160,7 @@ class AbstractPredictorConstr(ABC, SubModel):
         return False
 
     @abstractmethod
-    def get_error(self):
+    def get_error(self, eps):
         """Returns error in Gurobi's solution with respect to prediction from input.
 
         Returns

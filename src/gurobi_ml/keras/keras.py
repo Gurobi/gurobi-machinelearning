@@ -134,7 +134,12 @@ class KerasNetworkConstr(BaseNNConstr):
         if self._output is None:
             self._output = layer.output
 
-    def get_error(self):
+    def get_error(self, eps):
         if self._has_solution:
-            return np.abs(self.predictor.predict(self.input_values) - self.output.X)
+            r_val = np.abs(
+                self.predictor.predict(self.input_values) - self.output_values
+            )
+            if eps is not None and np.max(r_val) > eps:
+                print(f"{self.input_values} != {self.output_values}")
+            return r_val
         raise NoSolution()
