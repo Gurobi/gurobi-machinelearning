@@ -133,7 +133,7 @@ Currently only "gbtree" boosters are supported.
 
 .. rubric:: Footnotes
 
-.. [#] Only binary classification. The logsitic function is approximated by a piecewise linear function.
-.. [#] Only networks with `"relu"` activation for hidden layers and `'identity'`
+.. [#] Only binary classification. The logsitic function is approximated by a piece wise linear function.
+.. [#] Only networks with `"relu"` activation for hidden layers and `"identity"`
     for the output layer.
 .. [#] Only polynomial features of degree 2.
