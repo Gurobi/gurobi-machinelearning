@@ -33,4 +33,4 @@ class TestXGBoosthModel(FixedRegressionModel):
         xgb_reg.fit(X, y)
         one_case = {"predictor": xgb_reg.get_booster(), "nonconvex": 0}
 
-        self.do_one_case(one_case, X, 5, "all", float_type=np.float32, epsilon=1e-3)
+        self.do_one_case(one_case, X, 5, "all", epsilon=1e-5)

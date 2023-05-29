@@ -122,9 +122,9 @@ def leaf_formulation(
     output.setAttr(GRB.Attr.UB, np.max(tree["value"]))
 
 
-def paths_formulation(
-    gp_model, _input, output, tree, epsilon, _name_var, float_type, scale
-):
+def paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
+
+    DeprecationWarning("Path formulation of decision trees is not tested anymore.")
     outdim = output.shape[1]
     nex = _input.shape[0]
     nodes = gp_model.addMVar(
@@ -154,8 +154,6 @@ def paths_formulation(
         left = children_left[node]
         right = children_right[node]
         node_threshold = threshold[node]
-        node_threshold = float_type(node_threshold)
-        scale = max(abs(1 / node_threshold), scale)
         # Intermediate node
         node_feature = feature[node]
         feat_var = _input[:, node_feature]
@@ -172,14 +170,12 @@ def paths_formulation(
         else:
             lhs = _input[:, feature].tolist()
             rhs = nodes[:, left].tolist()
-            node_threshold *= scale
             gp_model.addConstrs(
-                ((rhs[k] == 1) >> (scale * lhs[k] <= node_threshold))
-                for k in range(nex)
+                ((rhs[k] == 1) >> (lhs[k] <= node_threshold)) for k in range(nex)
             )
             rhs = nodes[:, right].tolist()
             gp_model.addConstrs(
-                ((rhs[k] == 1) >> (scale * lhs[k] >= node_threshold + epsilon))
+                ((rhs[k] == 1) >> (lhs[k] >= node_threshold + epsilon))
                 for k in range(nex)
             )
 

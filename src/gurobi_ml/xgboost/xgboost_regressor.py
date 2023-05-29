@@ -124,7 +124,9 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         for i, tree in enumerate(trees):
             if self.verbose:
                 self._timer.timing(f"Estimator {i}")
-            tree["threshold"] = np.array(tree["split_conditions"])
+            tree["threshold"] = (
+                np.array(tree["split_conditions"], dtype=np.float32) - self.epsilon
+            )
             tree["children_left"] = np.array(tree["left_children"])
             tree["children_right"] = np.array(tree["right_children"])
             tree["feature"] = np.array(tree["split_indices"])
@@ -171,9 +173,12 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
 
         # self._print_container_steps("Estimator", self.estimators_, file=file)
 
-    def get_error(self):
+    def get_error(self, verbose=False):
         if self._has_solution:
             xgb_in = xgb.DMatrix(self.input_values)
             xgb_out = self.xgb_regressor.predict(xgb_in)
+            r_val = np.abs(xgb_out.reshape(-1, 1) - self.output.X)
+            if verbose:
+                print(f"{self.output.X} != {xgb_out.reshape(-1, 1)}")
             return np.abs(xgb_out.reshape(-1, 1) - self.output.X)
         raise NoSolution()

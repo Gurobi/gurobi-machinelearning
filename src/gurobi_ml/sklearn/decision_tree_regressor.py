@@ -19,8 +19,6 @@ in a :gurobipy:`model`.
 """
 
 
-import numpy as np
-
 from ..modeling import AbstractPredictorConstr
 from ..modeling.decision_tree.decision_tree_model import (
     leaf_formulation,
@@ -94,14 +92,10 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         input_vars,
         output_vars=None,
         epsilon=0.0,
-        scale=1.0,
-        float_type=np.float32,
         formulation="leafs",
         **kwargs,
     ):
         self.epsilon = epsilon
-        self.scale = scale
-        self.float_type = float_type
         self._default_name = "tree_reg"
 
         formulations = ("leafs", "paths")
@@ -147,6 +141,4 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
                 tree_dict,
                 self.epsilon,
                 self._name_var,
-                self.float_type,
-                self.scale,
             )
