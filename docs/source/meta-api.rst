@@ -17,3 +17,4 @@ Specific functions and modeling for each supported ML object:
   sklearn
   api/KerasConstr
   api/SequentialConstr
+  api/XGBoostRegressorConstr

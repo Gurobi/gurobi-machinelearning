@@ -36,14 +36,16 @@ def add_xgboost_regressor_constr(
     """Formulate gradient_boosting_regressor into gp_model.
 
     The formulation predicts the values of output_vars using input_vars
-    according to gradient_boosting_regressor. See our :ref:`User's Guide
+    according to xgboost_regressor. See our :ref:`User's Guide
     <Gradient Boosting Regression>` for details on the mip formulation used.
+
+    Note that only "gbtree" regressors are supported at this point.
 
     Parameters
     ----------
     gp_model : :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    xgboost_regressor : :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
+    xgboost_regressor : :external+xgb:py:class:`xgboost.Booster`
         The gradient boosting regressor to insert as predictor.
     input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
         Decision variables used as input for gradient boosting regressor in model.
@@ -52,7 +54,7 @@ def add_xgboost_regressor_constr(
 
     Returns
     -------
-    GradientBoostingRegressorConstr
+    XGBoostRegressorConstr
         Object containing information about what was added to gp_model to formulate
         gradient_boosting_regressor.
 
@@ -63,6 +65,11 @@ def add_xgboost_regressor_constr(
     Also see
     :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor`
     for specific parameters to model decision tree estimators.
+
+    Raises
+    ------
+    NoModel
+        If the booster is not of type "gbtree".
     """
     return XGBoostRegressorConstr(
         gp_model, xgboost_regressor, input_vars, output_vars, epsilon=epsilon, **kwargs
@@ -70,8 +77,7 @@ def add_xgboost_regressor_constr(
 
 
 class XGBoostRegressorConstr(AbstractPredictorConstr):
-    """Class to model trained
-    :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
+    """Class to model trained :external+xgb:py:class:`xgboost.Booster`
     with gurobipy.
 
     |ClassShort|
@@ -190,5 +196,5 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
             r_val = np.abs(xgb_out.reshape(-1, 1) - self.output.X)
             if verbose:
                 print(f"{self.output.X} != {xgb_out.reshape(-1, 1)}")
-            return np.abs(xgb_out.reshape(-1, 1) - self.output.X)
+            return r_val
         raise NoSolution()

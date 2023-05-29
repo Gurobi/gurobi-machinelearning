@@ -58,6 +58,7 @@ dep_versions = get_versions(root_path / "requirements.keras.txt", dep_versions)
 dep_versions = get_versions(root_path / "requirements.pytorch.txt", dep_versions)
 dep_versions = get_versions(root_path / "requirements.sklearn.txt", dep_versions)
 dep_versions = get_versions(root_path / "requirements.pandas.txt", dep_versions)
+dep_versions = get_versions(root_path / "requirements.xgboost.txt", dep_versions)
 
 
 VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
@@ -72,6 +73,7 @@ rst_epilog = f"""
 .. |TorchVersion| replace:: {dep_versions["torch"]}
 .. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}
 .. |TensorflowVersion| replace:: {dep_versions["tensorflow"]}
+.. |XGBoostVersion| replace:: {dep_versions["xgboost"]}
 .. |VariablesDimensionsWarn| replace:: {VARS_SHAPE}
 .. |ClassShort| replace:: {CLASS_SHORT}
 """
@@ -87,6 +89,7 @@ exclude_patterns = []
 intersphinx_mapping = {
     "sklearn": ("https://scikit-learn.org/stable/", None),
     "torch": ("https://pytorch.org/docs/master/", None),
+    "xgb": ("https://xgboost.readthedocs.io/en/stable/", None),
 }
 
 # -- Options for HTML output -------------------------------------------------
@@ -106,7 +109,7 @@ myst_enable_extensions = [
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 autodoc_member_order = "groupwise"
-autodoc_mock_imports = ["torch", "tensorflow"]
+autodoc_mock_imports = ["torch", "tensorflow", "xgboost"]
 nbsphinx_custom_formats = {
     ".md": ["jupytext.reads", {"fmt": "myst"}],
 }

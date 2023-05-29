@@ -29,7 +29,9 @@ The aim of the package is to:
    #. Improve the algorithmic performance of Gurobi on those models.
 
 The package currently supports various `scikit-learn
-<https://scikit-learn.org/stable/>`_ objects. It has limited support for the
+<https://scikit-learn.org/stable/>`_ objects. It can also embed
+gradient boosting regression models from `XGboost <https://xgboost.readthedocs.io/en/stable/>`.
+Finally, it has limited support for the
 `Keras <https://keras.io/>`_ API of `TensorFlow <https://www.tensorflow.org/>`_
 and `PyTorch <https://pytorch.org/>`_. Only neural networks with ReLU activation
 can be used with these two packages.
@@ -89,6 +91,8 @@ We encourage to install the package via pip (or add it to your
        - |SklearnVersion|
      * - :pypi:`tensorflow`
        - |TensorflowVersion|
+     * - :pypi:`xgboost`
+       - |XGBoostVersion|
 
   Installing any of the machine learning packages is only required if the
   predictor you want to insert uses them (i.e. to insert a Keras based predictor
