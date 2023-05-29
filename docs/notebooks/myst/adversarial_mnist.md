@@ -250,4 +250,4 @@ print(f"Solution is classified as {nn.predict(x.X)}")
 
 +++ {"nbsphinx": "hidden"}
 
-Copyright © 2022 Gurobi Optimization, LLC
+Copyright © 2023 Gurobi Optimization, LLC

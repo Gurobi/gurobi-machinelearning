@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath("../../src/"))
 config = SphinxConfig("../../pyproject.toml", globalns=globals())
 
 project = "Gurobi Machine Learning"
-copyright = "2022, Gurobi Optimization, LLC. All Rights Reserved."
+copyright = "2023, Gurobi Optimization, LLC. All Rights Reserved."
 html_logo = "_static/gurobi-logo-title.png"
 
 # -- General configuration ---------------------------------------------------
@@ -129,7 +129,7 @@ latex_logo = "_static/gurobi.png"
 latex_elements = {
     "preamble": r"""
     \newcommand\sphinxbackoftitlepage{%
-Copyright(c), 2022, Gurobi Optimization, LLC. All Rights Reserved.
+Copyright(c), 2023, Gurobi Optimization, LLC. All Rights Reserved.
 }
     """,
 }

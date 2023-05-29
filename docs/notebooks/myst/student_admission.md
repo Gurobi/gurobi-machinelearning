@@ -275,4 +275,4 @@ pred_constr.input_values
 
 +++ {"nbsphinx": "hidden"}
 
-Copyright © 2022 Gurobi Optimization, LLC
+Copyright © 2023 Gurobi Optimization, LLC

@@ -696,4 +696,4 @@ sure to take look at it.
 
 +++ {"nbsphinx": "hidden"}
 
-Copyright © 2022 Gurobi Optimization, LLC
+Copyright © 2023 Gurobi Optimization, LLC

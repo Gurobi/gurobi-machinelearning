@@ -232,4 +232,4 @@ approximation.
 
 +++ {"nbsphinx": "hidden"}
 
-Copyright © 2022 Gurobi Optimization, LLC
+Copyright © 2023 Gurobi Optimization, LLC
