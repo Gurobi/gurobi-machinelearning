@@ -15,12 +15,14 @@
 
 """ Utilities for modeling decision trees """
 
+from warnings import warn
+
 import numpy as np
 from gurobipy import GRB
 
 
 def compute_leafs_bounds(tree, epsilon):
-
+    """Compute the bounds that define each leaf of the tree"""
     capacity = tree["capacity"]
     n_features = tree["n_features"]
     children_left = tree["children_left"]
@@ -58,6 +60,11 @@ def compute_leafs_bounds(tree, epsilon):
 def leaf_formulation(
     gp_model, _input, output, tree, epsilon, _name_var, verbose, timer
 ):
+    """Formulate decision tree using 'leaf' formulation
+
+    We have one variable per leaf of the tree and a series of indicator to
+    define when that leaf is reached.
+    """
     nex = _input.shape[0]
     n_features = tree["n_features"]
 
@@ -89,26 +96,28 @@ def leaf_formulation(
                 gp_model.addGenConstrIndicator(l_var, 1, r_var, GRB.EQUAL, value)
 
         for feature in range(n_features):
-            lb = node_lb[feature, node]
-            ub = node_ub[feature, node]
+            feat_lb = node_lb[feature, node]
+            feat_ub = node_ub[feature, node]
 
-            if lb > -GRB.INFINITY:
-                tight = (input_lb[:, feature] < lb) & reachable
+            if feat_lb > -GRB.INFINITY:
+                tight = (input_lb[:, feature] < feat_lb) & reachable
                 lhs = leafs_vars[tight, i].tolist()
                 rhs = _input[tight, feature].tolist()
                 n_indicators += sum(tight)
                 for l_var, r_var in zip(lhs, rhs):
                     gp_model.addGenConstrIndicator(
-                        l_var, 1, r_var, GRB.GREATER_EQUAL, lb
+                        l_var, 1, r_var, GRB.GREATER_EQUAL, feat_lb
                     )
 
-            if ub < GRB.INFINITY:
-                tight = (input_ub[:, feature] > ub) & reachable
+            if feat_ub < GRB.INFINITY:
+                tight = (input_ub[:, feature] > feat_ub) & reachable
                 lhs = leafs_vars[tight, i].tolist()
                 rhs = _input[tight, feature].tolist()
                 n_indicators += sum(tight)
                 for l_var, r_var in zip(lhs, rhs):
-                    gp_model.addGenConstrIndicator(l_var, 1, r_var, GRB.LESS_EQUAL, ub)
+                    gp_model.addGenConstrIndicator(
+                        l_var, 1, r_var, GRB.LESS_EQUAL, feat_ub
+                    )
         if verbose:
             timer.timing(f"Added leaf {node} using {n_indicators} indicators")
 
@@ -123,8 +132,17 @@ def leaf_formulation(
 
 
 def paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
+    """
+       Path formulation for decision tree
 
-    DeprecationWarning("Path formulation of decision trees is not tested anymore.")
+    We have one variable for each node of the tree and do a formulation
+    that reconsistutes paths through the tree. This is inferior to the
+    leaf formulation and is deprecated.
+    """
+
+    warn(
+        "Path formulation of decision trees is not tested anymore.", DeprecationWarning
+    )
     outdim = output.shape[1]
     nex = _input.shape[0]
     nodes = gp_model.addMVar(
