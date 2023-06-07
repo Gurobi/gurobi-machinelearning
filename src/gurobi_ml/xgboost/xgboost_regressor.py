@@ -128,6 +128,35 @@ def add_xgboost_regressor_constr(
     )
 
 
+class TreeEstimator(AbstractPredictorConstr):
+    def __init__(
+        self, gp_model, tree, input_vars, output_vars, epsilon, timer, verbose, **kwargs
+    ):
+        self._default_name = "tree"
+        self._tree = tree
+        self._epsilon = epsilon
+        self._timer = timer
+        self._verbose = verbose
+        AbstractPredictorConstr.__init__(
+            self, gp_model, input_vars, output_vars, **kwargs
+        )
+
+    def _mip_model(self, **kwargs):
+        leaf_formulation(
+            self._gp_model,
+            self.input,
+            self.output,
+            self._tree,
+            self._epsilon,
+            self._name_var,
+            self._verbose,
+            self._timer,
+        )
+
+    def get_error(self, eps):
+        assert False
+
+
 class XGBoostRegressorConstr(AbstractPredictorConstr):
     """Class to model trained :external+xgb:py:class:`xgboost.Booster`
     with gurobipy.
@@ -202,15 +231,15 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
                 return rval + f"_{i}"
 
             estimators.append(
-                leaf_formulation(
+                TreeEstimator(
                     self.gp_model,
+                    tree,
                     self.input,
                     tree_vars[:, i, :],
-                    tree,
                     self.epsilon,
-                    _name_tree_var,
-                    self.verbose,
                     timer,
+                    self.verbose,
+                    **kwargs,
                 )
             )
 
