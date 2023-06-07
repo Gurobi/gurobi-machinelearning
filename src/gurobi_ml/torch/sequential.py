@@ -119,9 +119,12 @@ class SequentialConstr(BaseNNConstr):
         if self._output is None:
             self._output = layer.output
 
-    def get_error(self):
+    def get_error(self, eps=None):
         if self._has_solution:
             t_in = torch.from_numpy(self.input_values).float()
             t_out = self.predictor.forward(t_in)
-            return np.abs(t_out.detach().numpy() - self.output.X)
+            r_val = np.abs(t_out.detach().numpy() - self.output_values)
+            if eps is not None and np.max(r_val) > eps:
+                print(f"{t_out} != {self.output_values}")
+            return r_val
         raise NoSolution()

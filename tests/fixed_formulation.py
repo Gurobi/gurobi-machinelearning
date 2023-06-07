@@ -82,10 +82,7 @@ class FixedRegressionModel(unittest.TestCase):
                 warnings.warn(UserWarning(f"predictor {predictor}"))
             tol = max(tol, vio)
             tol *= np.max(np.abs(y.X))
-            abserror = pred_constr.get_error().astype(float)
-            if (abserror > tol).any():
-                print(f"Error: {y.X} != {predictor.predict(examples)}")
-
+            abserror = pred_constr.get_error(tol).astype(float)
             self.assertLessEqual(np.max(abserror), tol)
 
     def do_one_case(self, one_case, X, n_sample, combine="", **kwargs):
