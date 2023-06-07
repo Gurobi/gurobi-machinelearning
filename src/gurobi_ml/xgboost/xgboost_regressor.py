@@ -241,12 +241,12 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
 
         # self._print_container_steps("Estimator", self.estimators_, file=file)
 
-    def get_error(self, verbose=False):
+    def get_error(self, eps=None):
         if self._has_solution:
             xgb_in = xgb.DMatrix(self.input_values)
             xgb_out = self.xgb_regressor.predict(xgb_in)
             r_val = np.abs(xgb_out.reshape(-1, 1) - self.output.X)
-            if verbose:
+            if eps is not None and np.max(r_val) > eps:
                 print(f"{self.output.X} != {xgb_out.reshape(-1, 1)}")
             return r_val
         raise NoSolution()
