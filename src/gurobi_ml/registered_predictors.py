@@ -75,20 +75,13 @@ def xgboost_convertors():
 def keras_convertors():
     """Collect known Keras objects that can be embedded and the conversion class."""
     if "tensorflow" in sys.modules:
-        from keras.engine.functional import (  # pylint: disable=import-outside-toplevel
-            Functional,
-        )
-        from keras.engine.training import (  # pylint: disable=import-outside-toplevel
-            Model,
-        )
         from tensorflow import keras  # pylint: disable=import-outside-toplevel
 
         from .keras import add_keras_constr  # pylint: disable=import-outside-toplevel
 
         return {
             keras.Sequential: add_keras_constr,
-            Functional: add_keras_constr,
-            Model: add_keras_constr,
+            keras.Model: add_keras_constr,
         }
     return {}
 
