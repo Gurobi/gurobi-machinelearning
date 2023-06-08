@@ -18,7 +18,7 @@ class TestKerasModel(FixedRegressionModel):
         X = load(os.path.join(self.basedir, "examples_diabetes.joblib"))
 
         filename = os.path.join(self.basedir, "diabetes_keras")
-        regressor = tf.keras.saving.load_model(filename)
+        regressor = tf.keras.models.load_model(filename)
         onecase = {"predictor": regressor, "nonconvex": 0}
         self.do_one_case(onecase, X, 5, "all")
         self.do_one_case(onecase, X, 6, "pairs")
@@ -30,7 +30,7 @@ class TestKerasModel(FixedRegressionModel):
             os.path.dirname(__file__), "..", "predictors", "diabetes_keras_v2"
         )
         print(filename)
-        regressor = tf.keras.saving.load_model(filename)
+        regressor = tf.keras.models.load_model(filename)
         onecase = {"predictor": regressor, "nonconvex": 0}
         self.do_one_case(onecase, X, 5, "all")
         self.do_one_case(onecase, X, 6, "pairs")
