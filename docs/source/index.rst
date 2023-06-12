@@ -58,7 +58,3 @@ different machine learning frameworks (scikit-learn, Keras and PyTorch).
    meta-bibliography
    meta-contactus
    meta-license
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
