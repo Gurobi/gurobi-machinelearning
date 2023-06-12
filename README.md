@@ -13,7 +13,7 @@
 
 Gurobi Machine Learning is an [open-source](https://gurobi-machinelearning.readthedocs.io/en/stable/meta-license.html) python package to embed trained regression models in a [`gurobipy`](https://pypi.org/project/gurobipy/) model to be solved with the Gurobi solver.
 
-The package currently supports various [scikit-learn](https://scikit-learn.org/stable/) objects. It has limited support for the [Keras](https://keras.io/) API of [TensorFlow](https://www.tensorflow.org/) and [PyTorch](https://pytorch.org/). Only neural networks with ReLU activation can be used with these two packages.
+The package currently supports various [scikit-learn](https://scikit-learn.org/stable/) objects. It has limited support for the [Keras](https://keras.io/) API of [TensorFlow](https://www.tensorflow.org/), [PyTorch](https://pytorch.org/) and [XGBoost](https://www.xgboost.ai). Only neural networks with ReLU activation can be used with Keras and PyTorch.
 
 # Documentation
 
@@ -35,7 +35,7 @@ If you encounter issues with Gurobi or ``gurobipy`` please contact
 
 `gurobi-machinelearning` requires the following:
 - Python >= 3.9
-- [`numpy`](https://pypi.org/project/numpy/) >= 1.22.0
+- [`numpy`](https://pypi.org/project/numpy/) >= 1.23.0
 - [`gurobipy`](https://pypi.org/project/gurobipy/) >= 10.0
 - [`scipy`](https://pypi.org/project/scipy/) >= 1.9.3
 
@@ -43,11 +43,12 @@ The current version supports the following ML packages:
 - [`torch`](https://pypi.org/project/torch/)
 - [`scikit-learn`](https://pypi.org/project/scikit-learn)
 - [`tensorflow`](https://pypi.org/project/tensorflow)
+- [`XGBoost`](https://pypi.org/project/xgboost/)
 
 Installing these packages is only required if the predictor you want to insert uses them
 (i.e. to insert a Keras based predictor you need to have `tensorflow` installed).
 
-The up to date supported and tested versions of each package for the last release can be [found in the documentation](https://gurobi-machinelearning.readthedocs.io/en/1.1.x/firststeps-introduction.html#table-versions).
+The up to date supported and tested versions of each package for the last release can be [found in the documentation](https://gurobi-machinelearning.readthedocs.io/en/stable/firststeps-introduction.html#table-versions).
 
 ## Pip installation
 
