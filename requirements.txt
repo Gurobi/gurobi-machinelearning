@@ -1,4 +1,4 @@
-gurobipy==10.0.1
+gurobipy==10.0.2
 numpy==1.24.3
 pandas==2.0.2
 scikit-learn==1.2.2
