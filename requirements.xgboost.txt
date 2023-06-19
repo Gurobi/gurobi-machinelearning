@@ -1,1 +1,1 @@
-xgboost==1.7.5
+xgboost==1.7.6
