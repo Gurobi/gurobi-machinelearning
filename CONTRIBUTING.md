@@ -7,7 +7,7 @@ contribute directly to this project.
 
 ## How to report bugs or submit feature requests
 If you encounter a bug, or you think there is a need for a new feature, we recommend to
-first add the bug report or feature request to the Gurobi Machine Learning's [GitHub issue
+first add the bug report or feature requests to the Gurobi Machine Learning's [GitHub issue
 tracker](https://github.com/Gurobi/gurobi-machinelearning/issues).
 
 It would be great if you add a minimal reproducible example when reporting a bug, or
