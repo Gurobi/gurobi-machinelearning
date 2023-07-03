@@ -116,7 +116,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
         X = data.data
         y = data.target
 
-        mlpreg = make_pipeline(LinearSVR())
+        mlpreg = make_pipeline(LinearSVR(dual="auto"))
         mlpreg.fit(X, y)
         example = X[10, :]
 
