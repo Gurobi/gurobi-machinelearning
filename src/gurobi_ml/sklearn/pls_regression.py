@@ -87,7 +87,7 @@ class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
         """Add the prediction constraints to Gurobi."""
         x_mean = self.predictor._x_mean
         x_std = self.predictor._x_std
-        coefs = self.predictor._coef_.T
+        coefs = self.predictor.coef_.T
         intercept = self.predictor.intercept_
         self.gp_model.addConstr(
             self.output
