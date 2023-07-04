@@ -300,12 +300,12 @@ class WageCase(Cases):
         self.numerical_features = ["EDUCATION", "EXPERIENCE", "AGE"]
         preprocessors = [
             make_column_transformer(
-                (OneHotEncoder(), self.categorical_features),
+                (OneHotEncoder(drop="first"), self.categorical_features),
                 (StandardScaler(), self.numerical_features),
                 remainder="drop",
             ),
             make_column_transformer(
-                (OneHotEncoder(), self.categorical_features),
+                (OneHotEncoder(drop="first"), self.categorical_features),
                 ("passthrough", self.numerical_features),
                 remainder="drop",
             ),
