@@ -113,7 +113,6 @@ class TestBadShapes(unittest.TestCase):
         y = y == 2
         logreg = LogisticRegression()
         logreg.fit(X, y)
-        example = X[10:15, :]
 
         m = gp.Model()
 

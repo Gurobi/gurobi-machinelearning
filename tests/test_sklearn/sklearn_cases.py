@@ -179,7 +179,7 @@ class Cases(ABC):
         """Build all the predictor for this case.
         (Done when we have a new sklearn version)"""
         for predictor in self:
-            rval = self.build_predictor(predictor)
+            self.build_predictor(predictor)
 
     def get_case(self, predictor):
         filename = self.predictor_file(predictor)
