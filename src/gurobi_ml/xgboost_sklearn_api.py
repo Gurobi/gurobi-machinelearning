@@ -13,4 +13,22 @@
 # limitations under the License.
 # ==============================================================================
 
-from .xgboost_regressor import add_xgboost_regressor_constr, add_xgbregressor_constr
+""" Convertor for XGBoost's Scikit Learn compatible object
+
+This is to be able to use it in pipelines.
+"""
+
+import sys
+
+
+def xgboost_sklearn_convertors():
+    """Collect known PyTorch objects that can be formulated and the conversion class."""
+    if "xgboost" in sys.modules:
+        import xgboost as xgb  # pylint: disable=import-outside-toplevel
+
+        from .xgboost import add_xgbregressor_constr
+
+        return {
+            xgb.XGBRegressor: add_xgbregressor_constr,
+        }
+    return {}
