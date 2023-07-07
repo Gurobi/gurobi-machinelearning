@@ -22,6 +22,7 @@ from ..exceptions import NoModel
 from ..modeling.base_predictor_constr import AbstractPredictorConstr
 from ..modeling.get_convertor import get_convertor
 from ..register_user_predictor import user_predictors
+from ..xgboost_sklearn_api import xgboost_sklearn_convertors
 from .column_transformer import add_column_transformer_constr
 from .predictors_list import sklearn_predictors
 from .preprocessing import sklearn_transformers
@@ -115,6 +116,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
 
         predictor = pipeline[-1]
         predictors = sklearn_predictors() | user_predictors()
+        predictors |= xgboost_sklearn_convertors()
         convertor = get_convertor(predictor, predictors)
         if convertor is None:
             raise NoModel(
