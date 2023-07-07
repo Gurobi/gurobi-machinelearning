@@ -30,7 +30,7 @@ from ..modeling import AbstractPredictorConstr
 from ..modeling.decision_tree import leaf_formulation
 
 
-def add_xgbrfregressor_constr(
+def add_xgbregressor_constr(
     gp_model, xgboost_regressor, input_vars, output_vars=None, epsilon=0.0, **kwargs
 ):
     """Formulate xgboost_regressor into gp_model.
