@@ -130,13 +130,12 @@ def add_xgboost_regressor_constr(
 
 class TreeEstimator(AbstractPredictorConstr):
     def __init__(
-        self, gp_model, tree, input_vars, output_vars, epsilon, timer, verbose, **kwargs
+        self, gp_model, tree, input_vars, output_vars, epsilon, timer, **kwargs
     ):
         self._default_name = "tree"
         self._tree = tree
         self._epsilon = epsilon
         self._timer = timer
-        self._verbose = verbose
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )
@@ -149,7 +148,7 @@ class TreeEstimator(AbstractPredictorConstr):
             self._tree,
             self._epsilon,
             self._name_var,
-            self._verbose,
+            self.verbose,
             self._timer,
         )
 
@@ -238,7 +237,6 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
                     tree_vars[:, i, :],
                     self.epsilon,
                     timer,
-                    self.verbose,
                     **kwargs,
                 )
             )
