@@ -17,7 +17,7 @@ class FixedRegressionModel(unittest.TestCase):
     Gurobi is identical to what the predict function would return."""
 
     def setUp(self) -> None:
-        self.rng = np.random.default_rng(1)
+        self.rng = np.random.default_rng(2)
 
     def additional_test(self, predictor, pred_constr):
         """Define this to do additional tests"""
