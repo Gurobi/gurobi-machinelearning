@@ -1,2 +1,2 @@
 pandas==2.1.1
-gurobipy-pandas==1.0.0
+gurobipy-pandas==1.0.0.post0
