@@ -84,10 +84,6 @@ We import the necessary packages. Besides the usual (`numpy`, `gurobipy`,
 LogisticRegression.
 
 ```{code-cell} ipython3
-!pip install -U ../../..
-```
-
-```{code-cell} ipython3
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
