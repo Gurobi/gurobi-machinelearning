@@ -184,7 +184,7 @@ def validate_output_vars(gp_vars):
             return gp_vars
         raise ParameterError("Variables should be an MVar of dimension 1 or 2")
     if isinstance(gp_vars, dict):
-        gp_vars = gp_vars.values()
+        gp_vars = list(gp_vars.values())
     if isinstance(gp_vars, list):
         return gp.MVar.fromlist(gp_vars)
     if isinstance(gp_vars, gp.Var):
@@ -220,7 +220,7 @@ def validate_input_vars(model, gp_vars):
             return (gp_vars, None, None)
         raise ParameterError("Variables should be an MVar of dimension 1 or 2")
     if isinstance(gp_vars, dict):
-        gp_vars = gp_vars.values()
+        gp_vars = list(gp_vars.values())
     if isinstance(gp_vars, list):
         return (gp.MVar.fromlist(gp_vars).reshape(1, -1), None, None)
     if isinstance(gp_vars, gp.Var):
