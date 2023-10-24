@@ -48,7 +48,14 @@ extensions = [
 def get_versions(file: Path, acc=None):
     if acc is None:
         acc = dict()
-    new_dict = {x.split("==")[0]: x.split("==")[1] for x in file.read_text().split()}
+    new_dict = {}
+    for line in file.read_text().splitlines():
+        try:
+            package, version = line.split("==")
+            new_dict[package] = version
+        except ValueError:
+            pass  # Skip lines that don't split into exactly two items
+
     return {**new_dict, **acc}
 
 
