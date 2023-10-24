@@ -53,7 +53,11 @@ def get_versions(file: Path, acc=None):
 
 
 root_path = Path().resolve().parent.parent
-dep_versions = {k: v for k, v in get_versions(root_path / "requirements.txt").items() if k == 'gurobipy'}  # get only gurobipy from requirements.txt
+dep_versions = {
+    k: v
+    for k, v in get_versions(root_path / "requirements.txt").items()
+    if k == "gurobipy"
+}  # get only gurobipy from requirements.txt
 dep_versions = get_versions(root_path / "requirements.tox.txt", dep_versions)
 dep_versions = get_versions(root_path / "requirements.keras.txt", dep_versions)
 dep_versions = get_versions(root_path / "requirements.pytorch.txt", dep_versions)
