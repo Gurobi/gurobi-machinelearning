@@ -18,7 +18,7 @@ class TestXGBoosthModel(FixedRegressionModel):
         X = data["data"]
         y = data["target"]
 
-        xgb_reg = xgb.XGBRegressor(n_estimators=10, max_depth=4, max_leaf_nodes=10)
+        xgb_reg = xgb.XGBRegressor(n_estimators=10, max_depth=4)
         xgb_reg.fit(X, y)
         one_case = {"predictor": xgb_reg.get_booster(), "nonconvex": 0}
 
@@ -29,7 +29,7 @@ class TestXGBoosthModel(FixedRegressionModel):
         X = data["data"]
         y = data["target"]
 
-        xgb_reg = xgb.XGBRegressor(n_estimators=10, max_depth=4, max_leaf_nodes=10)
+        xgb_reg = xgb.XGBRegressor(n_estimators=10, max_depth=4)
         xgb_reg.fit(X, y)
         one_case = {"predictor": xgb_reg.get_booster(), "nonconvex": 0}
 
