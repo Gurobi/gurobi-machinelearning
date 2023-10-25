@@ -22,8 +22,7 @@ This model was developed in the context of the development of
 [Janos](https://github.com/INFORMSJoC/2020.1023), a toolkit similar to Gurobi
 Machine Learning to integrate ML models and Mathematical Optimization.
 
-This example illustrates in particular how to use the logistic regression and
-tune the piecewise-linear approximation of the logistic function.
+This example illustrates in particular how to use the logistic regression.
 
 We also show how to deal with fixed features in the optimization model using
 pandas data frames.
