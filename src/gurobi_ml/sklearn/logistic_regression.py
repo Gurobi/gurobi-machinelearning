@@ -18,6 +18,8 @@
 :gurobipy:`model`.
 """
 
+import warnings
+
 import gurobipy as gp
 import numpy as np
 
@@ -40,10 +42,16 @@ def add_logistic_regression_constr(
     The formulation predicts the values of output_vars using input_vars according to
     logistic_regression.
 
-    Note that the model uses a piecewise linear approximation of the logistic function.
+    For users of Gurobi ≥ 11.0, the attribute FuncNonLinear is set to 1 to
+    deal directly with the logistic function in an algorithmic fashion.
+
+    For older versions, Gurobi makes a piecewise linear approximation of the logistic
+    function.
     The quality of the approximation can be controlled with the parameter
     pwl_attributes. By default, it is parametrized so that the maximal error of the
-    approximation is `1e-2`. See our :ref:`Users Guide <Logistic Regression>` for
+    approximation is `1e-2`.
+
+    See our :ref:`Users Guide <Logistic Regression>` for
     details on the mip formulation used.
 
     Parameters
@@ -166,15 +174,21 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         """Default attributes for approximating the logistic function with Gurobi.
 
         See `Gurobi's User Manual
-        <https://www.gurobi.com/documentation/9.1/refman/general_constraint_attribu.html>`_
+        <https://www.gurobi.com/documentation/current/refman/general_constraint_attribu.html>`_
         for the meaning of the attributes.
         """
-        return {
-            "FuncPieces": -1,
-            "FuncPieceLength": 0.01,
-            "FuncPieceError": 0.01,
-            "FuncPieceRatio": -1.0,
-        }
+        if gp.gurobi.version()[0] < 11:
+            message = """
+Gurobi ≥ 11 can deal directly with nonlinear functions with 'FuncNonlinear'.
+Upgrading to version 11 is recommended when using logistic regressions."""
+            warnings.warn(message)
+            return {
+                "FuncPieces": -1,
+                "FuncPieceLength": 0.01,
+                "FuncPieceError": 0.01,
+                "FuncPieceRatio": -1.0,
+            }
+        return {"FuncNonlinear": 1}
 
     def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""

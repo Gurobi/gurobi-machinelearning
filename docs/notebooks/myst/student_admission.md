@@ -145,10 +145,10 @@ studentsdata = pd.read_csv(janos_data_url + "college_applications6000.csv", inde
 ```
 
 ```{code-cell} ipython3
-nstudents = 250
+nstudents = 25
 
 # Select randomly nstudents in the data
-studentsdata = studentsdata.sample(nstudents)
+studentsdata = studentsdata.sample(nstudents, random_state=1)
 ```
 
 We can now create the our model.
@@ -162,20 +162,23 @@ m = gp.Model()
 # The y variables are modeling the probability of enrollment of each student. They are indexed by students data
 y = gppd.add_vars(m, studentsdata, name='enroll_probability')
 
-# We add to studentsdata a column of variables to model the "merit" feature. Those variable are between 0 and 2.5.
-# They are added directly to the data frame using the gppd extension.
-studentsdata = studentsdata.gppd.add_vars(m, lb=0.0, ub=2.5, name='merit')
+
+# We want to complete studentsdata with a column of decision variables to model the "merit" feature.
+# Those variable are between 0 and 2.5.
+# They are added using the gppd extension and the resulting dataframe is stored in
+# students_opt_data.
+students_opt_data = studentsdata.gppd.add_vars(m, lb=0.0, ub=2.5, name='merit')
 
 # We denote by x the (variable) "merit" feature
-x = studentsdata.loc[:, "merit"]
+x = students_opt_data.loc[:, "merit"]
 
 # Make sure that studentsdata contains only the features column and in the right order
-studentsdata = studentsdata.loc[:, features]
+students_opt_data = students_opt_data.loc[:, features]
 
 m.update()
 
 # Let's look at our features dataframe for the optimization
-studentsdata[:10]
+students_opt_data[:10]
 ```
 
 We add the objective and the budget constraint:
@@ -197,22 +200,22 @@ With the `print_stats` function we display what was added to the model.
 
 ```{code-cell} ipython3
 pred_constr = add_predictor_constr(
-    m, pipe, studentsdata, y, output_type="probability_1"
+    m, pipe, students_opt_data, y, output_type="probability_1"
 )
 
 pred_constr.print_stats()
 ```
 
 We can now optimize the problem.
+With Gurobi ≥ 11.0, the attribute `FuncNonLinear` is automatically set to 1 by Gurobi machine learning on the nonlinear constraints it adds
+in order to deal algorithmically with the logistic function.
+
+Older versions of Gurobi would make a piece-wise linear approximation of the logistic function. You can refer to [older versions
+of this documentation](https://gurobi-machinelearning.readthedocs.io/en/v1.3.0/mlm-examples/student_admission.html) for dealing with those approximations.
 
 ```{code-cell} ipython3
 m.optimize()
 ```
-
-Remember that for the logistic regression, Gurobi does a piecewise-linear
-approximation of the logistic function. We can therefore get some significant
-errors when comparing the results of the Gurobi model with what is predicted by
-the regression.
 
 We print the error using [get_error](../api/AbstractPredictorConstr.rst#gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.get_error) (note that we take the maximal error
 over all input vectors).
@@ -225,49 +228,7 @@ print(
 )
 ```
 
-The error we get might be considered too large, but we can use Gurobi parameters
-to tune the piecewise-linear approximation made by Gurobi (at the expense of a
-harder models).
-
-The specific parameters are explained in the documentation of [Functions
-Constraints](https://www.gurobi.com/documentation/9.1/refman/constraints.html#subsubsection:GenConstrFunction)
-in Gurobi's manual.
-
-We can pass those parameters to the
-[add_predictor_constr](../api/AbstractPredictorConstr.rst#gurobi_ml.add_predictor_constr)
-function in the form of a dictionary with the keyword parameter
-`pwd_attributes`.
-
-Now we want a more precise solution, so we remove the current constraint, add a
-new one that does a tighter approximation and resolve the model.
-
-```{code-cell} ipython3
-pred_constr.remove()
-
-pwl_attributes = {
-    "FuncPieces": -1,
-    "FuncPieceLength": 0.01,
-    "FuncPieceError": 1e-5,
-    "FuncPieceRatio": -1.0,
-}
-pred_constr = add_predictor_constr(
-    m, pipe, studentsdata, y, output_type="probability_1", pwl_attributes=pwl_attributes
-)
-
-m.optimize()
-```
-
-We can see that the error has been reduced.
-
-```{code-cell} ipython3
-print(
-    "Maximum error in approximating the regression {:.6}".format(
-        np.max(pred_constr.get_error())
-    )
-)
-```
-
-Finally note that we can directly get the input values for the regression in a solution as a pandas dataframe using input_values.
+Finally, note that we can directly get the input values for the regression in a solution as a pandas dataframe using input_values.
 
 ```{code-cell} ipython3
 pred_constr.input_values

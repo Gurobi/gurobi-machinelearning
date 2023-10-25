@@ -38,7 +38,7 @@ class TestSklearnModel(FixedRegressionModel):
                 )
             self.assertLessEqual(
                 np.max(pred_constr[i].get_error().astype(float)),
-                np.max(pred_constr.get_error()),
+                np.max(pred_constr.get_error().astype(float) + 1e-10),
             )
 
     def test_diabetes_sklearn(self):

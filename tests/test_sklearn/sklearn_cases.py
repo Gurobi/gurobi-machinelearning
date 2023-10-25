@@ -293,7 +293,8 @@ class MNISTCase(Cases):
 class WageCase(Cases):
     """Wage case
 
-    We use it for testing column_transformer and OneHotEncoding of fixed categorical features."""
+    We use it for testing column_transformer and OneHotEncoding of fixed categorical features.
+    """
 
     def __init__(self):
         self.categorical_features = ["OCCUPATION", "SECTOR"]

@@ -47,7 +47,11 @@ First an intermediate free variable :math:`\omega = \sum_{i=1}^p \beta_i x_i +
 \beta_0` is created, and then we can express :math:`y = f(\omega)` using the
 general constraint.
 
-Internally, Gurobi then makes a piecewise linear approximation of the logistic
+With version 11, Gurobi introduced direct algorithmic support of nonlinear functions.
+We enable it by setting the attribute `FuncNonLinear` to 1 for the logistic functions
+created by Gurobi Machine Learning.
+
+Older versions of Gurobi make a piecewise linear approximation of the logistic
 function. By default, the approximation guarantees a maximal error of
 :math:`10^{-2}`. Those parameters can be tuned by setting the `pwl_attributes`
 keyword argument when the constraints is added (see
