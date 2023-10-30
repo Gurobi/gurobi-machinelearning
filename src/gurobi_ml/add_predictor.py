@@ -71,8 +71,8 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
 
     If they are lists or dictionaries, `input_vars` should have length `n_features` and
     `output_vars` should have length `n_output`.
-    List and dictionaries can have bad performances in particular if particular adding
-    many predictor constraints in a for loop is significantly slower.
+
+    Rectangular list of lists of variables that can be converted to a matrix shape can also be used.
     """
     convertors = registered_predictors()
     convertor = get_convertor(predictor, convertors)
