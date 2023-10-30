@@ -26,13 +26,13 @@ repos:
         - id: nbstripout
 
     - repo: https://github.com/pycqa/flake8
-      rev: 5.0.4
+      rev: 6.1.0
       hooks:
       - id: flake8
         args: ["--count", "--select=E9,F63,F7,F82", "--show-source", "--statistics"]
 
     - repo: https://github.com/psf/black
-      rev: 22.6.0
+      rev: 23.10.1
       hooks:
       - id: black-jupyter
         language_version: python3.9
@@ -40,7 +40,7 @@ repos:
         types: [python]
 
     - repo: https://github.com/mwouts/jupytext
-      rev: v1.14.4
+      rev: v1.15.2
       hooks:
       - id: jupytext
         args: ["--sync"]

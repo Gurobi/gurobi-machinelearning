@@ -186,7 +186,8 @@ def validate_output_vars(gp_vars):
     if isinstance(gp_vars, dict):
         gp_vars = list(gp_vars.values())
     if isinstance(gp_vars, list):
-        return gp.MVar.fromlist(gp_vars)
+        mvar = gp.MVar.fromlist(gp_vars)
+        return validate_output_vars(mvar)
     if isinstance(gp_vars, gp.Var):
         return gp.MVar.fromlist([gp_vars]).reshape(1, 1)
     raise ParameterError("Could not validate variables")
@@ -222,7 +223,8 @@ def validate_input_vars(model, gp_vars):
     if isinstance(gp_vars, dict):
         gp_vars = list(gp_vars.values())
     if isinstance(gp_vars, list):
-        return (gp.MVar.fromlist(gp_vars).reshape(1, -1), None, None)
+        mvar = gp.MVar.fromlist(gp_vars)
+        return validate_input_vars(model, mvar)
     if isinstance(gp_vars, gp.Var):
         return (gp.MVar.fromlist([gp_vars]).reshape(1, 1), None, None)
     raise ParameterError("Could not validate variables")
