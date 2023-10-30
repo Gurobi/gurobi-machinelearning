@@ -14,5 +14,5 @@ nbsphinx==0.9.3
 jupytext==1.15.2
 sphinx_design==0.5.0
 gurobipy-pandas==1.0.0.post0
-ipykernel==6.25.2
+ipykernel==6.26.0
 .
