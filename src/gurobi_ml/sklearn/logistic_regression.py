@@ -235,8 +235,9 @@ Upgrading to version 11 is recommended when using logistic regressions."""
         outputvars = self._output
         coefs = self.predictor.coef_
         intercept = self.predictor.intercept_
-        self._create_output_vars(self._input, name="affine_trans")
-        affinevars = self._output
+        affinevars = self._gp_model.addMVar(
+            self.output.shape, lb=-gp.GRB.INFINITY, name="affine_trans"
+        )
         self.affinevars = affinevars
         self.gp_model.addConstr(
             affinevars == self.input @ coefs.T + intercept, name="linreg"
