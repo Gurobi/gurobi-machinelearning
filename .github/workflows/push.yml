@@ -9,7 +9,6 @@ on:
       - main
       # Release branches
       - "[0-9]+.[0-9]+.x"
-      - multinomial_logistic
 
 permissions:
   contents: read
