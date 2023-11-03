@@ -39,9 +39,9 @@ def add_sequential_constr(
         The gurobipy model where the sequential model should be inserted.
     sequential_model : :external+torch:py:class:`torch.nn.Sequential`
         The sequential model to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for logistic regression in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : mvar_array_like, optional
         Decision variables used as output for logistic regression in model.
 
     Returns
@@ -56,13 +56,13 @@ def add_sequential_constr(
         If the translation for some of the Pytorch model structure
         (layer or activation) is not implemented.
 
-    Warning
-    -------
+    Warnings
+    --------
     Only :external+torch:py:class:`torch.nn.Linear` layers and
     :external+torch:py:class:`torch.nn.ReLU` layers are supported.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
     """
     return SequentialConstr(
@@ -96,7 +96,7 @@ class SequentialConstr(BaseNNConstr):
             if i == num_layers - 1:
                 output = self._output
             if isinstance(step, nn.ReLU):
-                layer = self.add_activation_layer(
+                layer = self._add_activation_layer(
                     _input, self.act_dict["relu"], output, name=f"relu_{i}", **kwargs
                 )
                 _input = layer.output
@@ -106,7 +106,7 @@ class SequentialConstr(BaseNNConstr):
                         layer_weight = param.detach().numpy().T
                     elif name == "bias":
                         layer_bias = param.detach().numpy()
-                layer = self.add_dense_layer(
+                layer = self._add_dense_layer(
                     _input,
                     layer_weight,
                     layer_bias,

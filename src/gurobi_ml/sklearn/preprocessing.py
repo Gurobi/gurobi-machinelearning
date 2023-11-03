@@ -35,7 +35,7 @@ def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **
         The gurobipy model where polynomial features should be inserted.
     polynomial_features : :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures`
         The polynomial features to insert in gp_model.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for polynomial features in model.
 
     Returns
@@ -44,8 +44,8 @@ def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **
         Object containing information about what was added to gp_model to insert the
         polynomial_features in it
 
-    Warning
-    -------
+    Warnings
+    --------
     Only polynomial features of degree 2 are supported.
     """
     return PolynomialFeaturesConstr(gp_model, polynomial_features, input_vars, **kwargs)
@@ -63,7 +63,7 @@ def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
         The gurobipy model where the standard scaler should be inserted.
     standard_scaler : :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler`
         The standard scaler to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for standard scaler in model.
 
     Returns
@@ -76,11 +76,11 @@ def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
 
 
 class StandardScalerConstr(SKtransformer):
-    """Class to model a fitted
-    :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler` with
-    gurobipy.
+    """Class to formulate a fitted
+    :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler` in a
+    gurobipy model.
 
-    Stores the changes to :gurobipy:`model` when embedding an instance into it.
+    Stores the changes to :gurobipy:`model` when formulating an instance into it.
     """
 
     def __init__(self, gp_model, scaler, input_vars, **kwargs):
@@ -96,16 +96,16 @@ class StandardScalerConstr(SKtransformer):
         scale = self.transformer.scale_
         mean = self.transformer.mean_
 
-        self._gp_model.addConstr(
+        self.gp_model.addConstr(
             _input - output * scale == mean, name=self._name_var("s")
         )
         return self
 
 
 class PolynomialFeaturesConstr(SKtransformer):
-    """Class to model trained
-    :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures` with
-    gurobipy.
+    """Class to formulate a trained
+    :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures` in a
+    gurobipy model.
     """
 
     def __init__(self, gp_model, polynomial_features, input_vars, **kwargs):

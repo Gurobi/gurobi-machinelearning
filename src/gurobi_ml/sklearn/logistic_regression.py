@@ -61,9 +61,9 @@ def add_logistic_regression_constr(
         The gurobipy model where the predictor should be inserted.
     logistic_regression : :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
         The logistic regression to insert.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for logistic regression in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : mvar_array_like, optional
         Decision variables used as output for logistic regression in model.
 
     output_type : {'classification', 'probability_1'}, default='classification'
@@ -112,8 +112,8 @@ def add_logistic_regression_constr(
     ParameterError
         If the value of output_type is set to a non-conforming value (see above).
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
     """
     return LogisticRegressionConstr(
@@ -129,9 +129,10 @@ def add_logistic_regression_constr(
 
 
 class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
-    """Class to model trained
-    :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` with gurobipy
-    |ClassShort|.
+    """Class to formulate a trained
+    :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` in a gurobipy model.
+
+    |ClassShort|
     """
 
     def __init__(
@@ -159,6 +160,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             )
         self.epsilon = epsilon
         self._default_name = "log_reg"
+        self.affinevars = None
         BaseSKlearnRegressionConstr.__init__(
             self,
             gp_model,
@@ -170,7 +172,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         )
 
     @staticmethod
-    def default_pwl_attributes():
+    def default_pwl_attributes() -> dict:
         """Default attributes for approximating the logistic function with Gurobi.
 
         See `Gurobi's User Manual
@@ -194,7 +196,7 @@ Upgrading to version 11 is recommended when using logistic regressions."""
         """Add the prediction constraints to Gurobi."""
         if self.output_type == "classification":
             # For classification we need an extra binary variable
-            log_result = self._gp_model.addMVar(
+            log_result = self.gp_model.addMVar(
                 self.output.shape, lb=-gp.GRB.INFINITY, name="log_result"
             )
             bin_output = self.gp_model.addMVar(
@@ -207,10 +209,10 @@ Upgrading to version 11 is recommended when using logistic regressions."""
         else:
             log_result = self.output
 
-        affinevars = self._gp_model.addMVar(
+        affinevars = self.gp_model.addMVar(
             self.output.shape, lb=-gp.GRB.INFINITY, name="affine_trans"
         )
-        self.add_regression_constr(output=affinevars)
+        self._add_regression_constr(output=affinevars)
 
         for index in np.ndindex(self.output.shape):
             self.gp_model.addGenConstrLogistic(
@@ -224,3 +226,10 @@ Upgrading to version 11 is recommended when using logistic regressions."""
             for attr, val in self.attributes.items():
                 gen_constr.setAttr(attr, val)
         self.gp_model.update()
+
+    @property
+    def affine_transformation_variables(self) -> gp.MVar:
+        """Variables that store the result of the affine transformation from the regression coefficient.
+        (intermediate result before applying the logistic function).
+        """
+        return self.affinevars

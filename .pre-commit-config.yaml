@@ -39,12 +39,6 @@ repos:
         language: python
         types: [python]
 
-    - repo: https://github.com/mwouts/jupytext
-      rev: v1.15.2
-      hooks:
-      - id: jupytext
-        args: ["--sync"]
-
     - repo: local
       hooks:
         - id: license_embedded

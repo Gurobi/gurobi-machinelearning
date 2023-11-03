@@ -43,8 +43,8 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
         Object containing information about what was added to gp_model to insert the
         predictor in it
 
-    Note
-    ----
+    Notes
+    -----
     The parameters `input_vars` and `output_vars` can be either
 
      * Gurobipy matrix variables :gurobipy:`mvar`

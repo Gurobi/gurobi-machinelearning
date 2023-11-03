@@ -20,8 +20,10 @@ from warnings import warn
 import numpy as np
 from gurobipy import GRB
 
+from ..base_predictor_constr import AbstractPredictorConstr
 
-def compute_leafs_bounds(tree, epsilon):
+
+def _compute_leafs_bounds(tree, epsilon):
     """Compute the bounds that define each leaf of the tree"""
     capacity = tree["capacity"]
     n_features = tree["n_features"]
@@ -57,7 +59,7 @@ def compute_leafs_bounds(tree, epsilon):
     return (node_lb, node_ub)
 
 
-def leaf_formulation(
+def _leaf_formulation(
     gp_model, _input, output, tree, epsilon, _name_var, verbose, timer
 ):
     """Formulate decision tree using 'leaf' formulation
@@ -76,7 +78,7 @@ def leaf_formulation(
 
     if verbose:
         timer.timing(f"Added {nex*sum(leafs)} leafs vars")
-    (node_lb, node_ub) = compute_leafs_bounds(tree, epsilon)
+    (node_lb, node_ub) = _compute_leafs_bounds(tree, epsilon)
     input_ub = _input.getAttr(GRB.Attr.UB)
     input_lb = _input.getAttr(GRB.Attr.LB)
 
@@ -131,7 +133,7 @@ def leaf_formulation(
     output.setAttr(GRB.Attr.UB, np.max(tree["value"]))
 
 
-def paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
+def _paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
     """
        Path formulation for decision tree
 
@@ -210,3 +212,51 @@ def paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
 
     output.LB = np.min(tree.value)
     output.UB = np.max(tree.value)
+
+
+class AbstractTreeEstimator(AbstractPredictorConstr):
+    """Abstract class to model a decision tree
+
+    The decision tree should be stored in a dictionary with a similar representation
+    as the one that scikit-learn uses:
+
+        "capacity": number of nodes in the tree (size of the arrays that follow),
+        "children_left": index of left children (-1 for a leaf)
+        "children_right": index of right children (-1 for a leaf)
+        "feature": splitting feature of node
+        "threshold": threshold for spliting node
+        "value": value of the node for output variable
+    """
+
+    def __init__(
+        self, gp_model, tree, input_vars, output_vars, epsilon, timer=None, **kwargs
+    ):
+        self._default_name = "tree"
+        self._tree = tree
+        self._epsilon = epsilon
+        if timer is None:
+            self._timer = AbstractPredictorConstr._ModelingTimer()
+        else:
+            self._timer = timer
+        AbstractPredictorConstr.__init__(
+            self, gp_model, input_vars, output_vars, **kwargs
+        )
+
+    def _mip_model(self, **kwargs):
+        _leaf_formulation(
+            self.gp_model,
+            self.input,
+            self.output,
+            self._tree,
+            self._epsilon,
+            self._name_var,
+            self.verbose,
+            self._timer,
+        )
+
+    def get_error(self, eps):
+        """Functions returns an error for an abstract class
+
+        Child classes should implement this.
+        """
+        assert False

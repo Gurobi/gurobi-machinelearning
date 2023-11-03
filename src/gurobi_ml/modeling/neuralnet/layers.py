@@ -79,8 +79,8 @@ class ActivationLayer(AbstractNNLayer):
         )
 
     def _create_output_vars(self, input_vars):
-        rval = self._gp_model.addMVar(input_vars.shape, lb=-gp.GRB.INFINITY, name="act")
-        self._gp_model.update()
+        rval = self.gp_model.addMVar(input_vars.shape, lb=-gp.GRB.INFINITY, name="act")
+        self.gp_model.update()
         return rval
 
     def _mip_model(self, **kwargs):
@@ -94,7 +94,7 @@ class ActivationLayer(AbstractNNLayer):
 
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
-        self._gp_model.update()
+        self.gp_model.update()
 
 
 class DenseLayer(AbstractNNLayer):
@@ -123,10 +123,10 @@ class DenseLayer(AbstractNNLayer):
         )
 
     def _create_output_vars(self, input_vars):
-        rval = self._gp_model.addMVar(
+        rval = self.gp_model.addMVar(
             (input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act"
         )
-        self._gp_model.update()
+        self.gp_model.update()
         return rval
 
     def _mip_model(self, **kwargs):
@@ -140,7 +140,7 @@ class DenseLayer(AbstractNNLayer):
 
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
-        self._gp_model.update()
+        self.gp_model.update()
 
     def print_stats(self, abbrev=False, file=None):
         """Print statistics about submodel created.

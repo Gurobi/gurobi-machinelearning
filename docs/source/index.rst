@@ -1,17 +1,21 @@
-.. image:: _static/image8.png
-     :width: 220
-     :target: https://www.gurobi.com
-     :alt: Gurobi
-     :class: float-right
+.. only:: html
 
-..  rst-class::  clear-both
+   .. image:: _static/gurobi_light.png
+        :width: 220
+        :target: https://www.gurobi.com
+        :alt: Gurobi
+        :align: right
+        :class: float-right, only-light
 
 
 Gurobi Machine Learning
 #######################
 
+..  rst-class::  clear-both
+
 |
 |
+
 
 .. raw:: latex
 
@@ -23,38 +27,25 @@ mathematical optimization models. The package supports a variety of regression m
 different machine learning frameworks (scikit-learn, Keras and PyTorch).
 
 
-.. button-link:: firststeps-introduction.html
-       :color: primary
-       :class: sd-rounded-pill
-       :shadow:
+.. only:: html
 
-       Get Started
+   .. button-link:: user/start.html
+          :color: primary
+          :class: sd-rounded-pill
+          :shadow:
 
+          Get Started
 
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Start
-
-   firststeps-introduction
-   firststeps-simple-example
+|
+|
+|
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
-   :caption: Machine Learning Models
+   :caption: Contents
 
-   mlm-supported
-   mlm-mip-models
-   mlm-examples
-   mlm-further-reading
-
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Reference
-
-   meta-api
-   meta-bibliography
-   meta-contactus
-   meta-license
+   userguide
+   auto_examples/index
+   api
+   meta/contactus
+   meta/license

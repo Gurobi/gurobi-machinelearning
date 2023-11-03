@@ -37,9 +37,9 @@ def add_pls_regression_constr(
      The linear regression to insert. It can be of any of the following types:
          * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression`
          * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSCanonical`
-     input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
+     input_vars: mvar_array_like
          Decision variables used as input for random forest in model.
-     output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+     output_vars: mvar_array_like, optional
          Decision variables used as output for random forest in model.
 
     Returns
@@ -48,8 +48,8 @@ def add_pls_regression_constr(
         Object containing information about what was added to gp_model to
         formulate pls_regression.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
     """
     return PLSRegressionConstr(
@@ -58,10 +58,11 @@ def add_pls_regression_constr(
 
 
 class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained
-    :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression` with
-    gurobipy
-    |ClassShort|.
+    """Class to formulate a trained
+    :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression` in a
+    gurobipy model.
+
+    |ClassShort|
     """
 
     def __init__(
@@ -83,7 +84,7 @@ class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
             **kwargs,
         )
 
-    def add_regression_constr(self):
+    def _add_regression_constr(self):
         """Add the prediction constraints to Gurobi."""
         x_mean = self.predictor._x_mean
         x_std = self.predictor._x_std
@@ -99,4 +100,4 @@ class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
 
     def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
-        self.add_regression_constr()
+        self._add_regression_constr()

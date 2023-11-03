@@ -19,6 +19,8 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-github:
-	@make html
-	@cp -a build/html/. ../docs
+clean:
+	rm -rf $(BUILDDIR)/*
+	rm -rf $(SOURCEDIR)/auto_examples/
+	rm -rf $(SOURCEDIR)/auto_userguide/
+	rm -rf $(SOURCEDIR)/auto_generated/

@@ -18,30 +18,30 @@ from abc import ABC, abstractmethod
 import gurobipy as gp
 
 from ..exceptions import ParameterError
+from ._submodel import _SubModel
 from ._var_utils import _get_sol_values, validate_input_vars, validate_output_vars
-from .submodel import SubModel
 
 
-class AbstractPredictorConstr(ABC, SubModel):
+class AbstractPredictorConstr(ABC, _SubModel):
     """Base class to store sub-model added by :py:func:`gurobi_ml.add_predictor_constr`.
 
     This class is the base class to store everything that is added to
     a Gurobi model when a trained predictor is inserted into it. Depending on
-    the type of the predictor, a class derived from it will be returned
+    the type of the predictor, a class derived from this is returned
     by :py:func:`gurobi_ml.add_predictor_constr`.
 
-    Warning
-    -------
+    Warnings
+    --------
 
-    Users should usually never construct objects of this class or one of its derived
-    classes. They are returned by the :py:func:`gurobi_ml.add_predictor_constr` and
+    Users shouldn't construct objects of this class or one of its derived
+    classes directly. Those objects are returned by the :py:func:`gurobi_ml.add_predictor_constr` and
     other functions.
     """
 
     def __init__(self, gp_model, input_vars, output_vars=None, **kwargs):
         self._input = input_vars
         self._output = output_vars
-        SubModel.__init__(self, gp_model, **kwargs)
+        _SubModel.__init__(self, gp_model, **kwargs)
 
     def _validate(self):
         """Validate input and output variables (check shapes, reshape if needed)."""
@@ -83,7 +83,7 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     def _build_submodel(self, gp_model, *args, **kwargs):
         """Predict output from input using predictor or transformer."""
-        self._input, columns, index = validate_input_vars(self._gp_model, self._input)
+        self._input, columns, index = validate_input_vars(self.gp_model, self._input)
         self._input_index = index
         self._input_columns = columns
 
@@ -117,8 +117,8 @@ class AbstractPredictorConstr(ABC, SubModel):
         details about the structure of the additions (type of ML model,
         layers if it's a neural network,...)
 
-        Arguments
-        ---------
+        Parameters
+        ----------
 
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.
@@ -141,13 +141,17 @@ class AbstractPredictorConstr(ABC, SubModel):
             n_outputs = self._output_shape
         except AttributeError:
             return
-        output = self._gp_model.addMVar(
+        output = self.gp_model.addMVar(
             (input_vars.shape[0], n_outputs),
             lb=-gp.GRB.INFINITY,
             name=self._name_var(name),
         )
-        self._gp_model.update()
+        self.gp_model.update()
         return output
+
+    def remove(self):
+        """Remove from gp_model everything that was added to embed predictor."""
+        _SubModel.remove(self)
 
     @property
     def _has_solution(self):
@@ -203,7 +207,7 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     @property
     def input_values(self):
-        """Returns the values for the input variables if a solution is known.
+        """Values for the input variables if a solution is known.
 
         Returns
         -------
@@ -219,7 +223,7 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     @property
     def output_values(self):
-        """Returns the values for the output variables if a solution is known.
+        """Values for the output variables if a solution is known.
 
         Returns
         -------
@@ -234,7 +238,7 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     @property
     def input(self):
-        """Returns the input variables of embedded predictor.
+        """Input variables of embedded predictor.
 
         Returns
         -------

@@ -19,11 +19,7 @@ in a :gurobipy:`model`.
 """
 
 
-from ..modeling import AbstractPredictorConstr
-from ..modeling.decision_tree.decision_tree_model import (
-    leaf_formulation,
-    paths_formulation,
-)
+from ..modeling.decision_tree import AbstractTreeEstimator
 from .skgetter import SKgetter
 
 
@@ -47,9 +43,9 @@ def add_decision_tree_regressor_constr(
         The gurobipy model where the predictor should be inserted.
     decision_tree_regressor : :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
         The decision tree regressor to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for decision tree in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : mvar_array_like, optional
         Decision variables used as output for decision tree in model.
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
@@ -60,13 +56,13 @@ def add_decision_tree_regressor_constr(
         Object containing information about what was added to gp_model to
         formulate decision_tree_regressor
 
-    Note
-    ----
+    Notes
+    -----
 
     |VariablesDimensionsWarn|
 
-    Warning
-    -------
+    Warnings
+    --------
 
     Although decision trees with multiple outputs are tested they were never
     used in a non-trivial optimization model. It should be used with care at
@@ -77,10 +73,10 @@ def add_decision_tree_regressor_constr(
     )
 
 
-class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained
-    :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor` with
-    gurobipy.
+class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
+    """Class to formulate a trained
+    :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor` in a
+    gurobipy model.
 
     |ClassShort|
     """
@@ -95,7 +91,6 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         formulation="leafs",
         **kwargs,
     ):
-        self.epsilon = epsilon
         self._default_name = "tree_reg"
 
         formulations = ("leafs", "paths")
@@ -105,13 +100,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
             )
         self._formulation = formulation
         SKgetter.__init__(self, predictor, input_vars)
-        AbstractPredictorConstr.__init__(
-            self, gp_model, input_vars, output_vars, **kwargs
-        )
-
-    def _mip_model(self, **kwargs):
         tree = self.predictor.tree_
-        timer = AbstractPredictorConstr._ModelingTimer()
 
         tree_dict = {
             "children_left": tree.children_left,
@@ -122,23 +111,6 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
             "capacity": tree.capacity,
             "n_features": tree.n_features,
         }
-        if self._formulation == "leafs":
-            return leaf_formulation(
-                self.gp_model,
-                self.input,
-                self.output,
-                tree_dict,
-                self.epsilon,
-                self._name_var,
-                self.verbose,
-                timer,
-            )
-        else:
-            return paths_formulation(
-                self.gp_model,
-                self.input,
-                self.output,
-                tree_dict,
-                self.epsilon,
-                self._name_var,
-            )
+        AbstractTreeEstimator.__init__(
+            self, gp_model, tree_dict, input_vars, output_vars, epsilon, **kwargs
+        )

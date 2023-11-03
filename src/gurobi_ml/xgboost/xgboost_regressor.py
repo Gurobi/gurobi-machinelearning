@@ -27,7 +27,7 @@ from gurobipy import GRB
 
 from ..exceptions import NoModel, NoSolution
 from ..modeling import AbstractPredictorConstr
-from ..modeling.decision_tree import leaf_formulation
+from ..modeling.decision_tree import AbstractTreeEstimator
 
 
 def add_xgbregressor_constr(
@@ -48,9 +48,9 @@ def add_xgbregressor_constr(
         The gurobipy model where the predictor should be inserted.
     xgboost_regressor : :external+xgb:py:class:`xgboost.XGBRFRegressor`
         The gradient boosting regressor to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for gradient boosting regressor in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : mvar_array_like, optional
         Decision variables used as output for gradient boosting regressor in model.
 
     Returns
@@ -59,8 +59,8 @@ def add_xgbregressor_constr(
         Object containing information about what was added to gp_model to formulate
         gradient_boosting_regressor.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
 
     Also see
@@ -99,9 +99,9 @@ def add_xgboost_regressor_constr(
         The gurobipy model where the predictor should be inserted.
     xgboost_regressor : :external+xgb:py:class:`xgboost.Booster`
         The gradient boosting regressor to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for gradient boosting regressor in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : mvar_array_like, optional
         Decision variables used as output for gradient boosting regressor in model.
 
     Returns
@@ -110,8 +110,8 @@ def add_xgboost_regressor_constr(
         Object containing information about what was added to gp_model to formulate
         gradient_boosting_regressor.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
 
     Also see
@@ -128,37 +128,9 @@ def add_xgboost_regressor_constr(
     )
 
 
-class TreeEstimator(AbstractPredictorConstr):
-    def __init__(
-        self, gp_model, tree, input_vars, output_vars, epsilon, timer, **kwargs
-    ):
-        self._default_name = "tree"
-        self._tree = tree
-        self._epsilon = epsilon
-        self._timer = timer
-        AbstractPredictorConstr.__init__(
-            self, gp_model, input_vars, output_vars, **kwargs
-        )
-
-    def _mip_model(self, **kwargs):
-        leaf_formulation(
-            self._gp_model,
-            self.input,
-            self.output,
-            self._tree,
-            self._epsilon,
-            self._name_var,
-            self.verbose,
-            self._timer,
-        )
-
-    def get_error(self, eps):
-        assert False
-
-
 class XGBoostRegressorConstr(AbstractPredictorConstr):
     """Class to model trained :external+xgb:py:class:`xgboost.Booster`
-    with gurobipy.
+    in a gurobipy model.
 
     |ClassShort|
     """
@@ -181,7 +153,7 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
 
         Both X and y should be array or list of variables of conforming dimensions.
         """
-        model = self._gp_model
+        model = self.gp_model
         xgb_regressor = self.xgb_regressor
 
         _input = self._input
@@ -230,7 +202,7 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
                 return rval + f"_{i}"
 
             estimators.append(
-                TreeEstimator(
+                AbstractTreeEstimator(
                     self.gp_model,
                     tree,
                     self.input,
@@ -255,8 +227,8 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
 
         Includes a summary of the estimators that it contains.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
 
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.

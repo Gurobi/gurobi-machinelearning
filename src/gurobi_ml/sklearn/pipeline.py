@@ -41,9 +41,9 @@ def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwar
         The gurobipy model where the predictor should be inserted.
     pipeline : :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
         The pipeline to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for regression in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : mvar_array_like, optional
         Decision variables used as output for regression in model.
 
     Returns
@@ -58,17 +58,18 @@ def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwar
         If the translation to Gurobi of one of the elements in the pipeline
         is not implemented or recognized.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
     """
     return PipelineConstr(gp_model, pipeline, input_vars, output_vars, **kwargs)
 
 
 class PipelineConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
-    with gurobipy
-    |ClassShort|.
+    """Class to formulate a trained :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
+    in a gurobipy model.
+
+    |ClassShort|
     """
 
     def __init__(self, gp_model, pipeline, input_vars, output_vars=None, **kwargs):
@@ -95,7 +96,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
 
     def _mip_model(self, **kwargs):
         pipeline = self.predictor
-        gp_model = self._gp_model
+        gp_model = self.gp_model
         input_vars = self._input
         output_vars = self._output
         steps = self._steps
@@ -135,8 +136,8 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
 
         The pipeline version includes a summary of the steps that it contains.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
 
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.

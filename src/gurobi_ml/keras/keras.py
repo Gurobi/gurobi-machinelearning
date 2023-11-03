@@ -34,9 +34,9 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
         The gurobipy model where the predictor should be inserted.
     keras_model : `keras.Model <https://keras.io/api/models/model/>`
         The keras model to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for Keras model in gp_model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : mvar_array_like, optional
         Decision variables used as output for Keras model in gp_model.
 
     Returns
@@ -51,22 +51,22 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
         If the translation for some of the Keras model structure
         (layer or activation) is not implemented.
 
-    Warning
-    -------
+    Warnings
+    --------
 
       Only `Dense <https://keras.io/api/layers/core_layers/dense/>`_ (possibly
       with `relu` activation), and `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ with
       default settings are supported.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
     """
     return KerasNetworkConstr(gp_model, keras_model, input_vars, output_vars, **kwargs)
 
 
 class KerasNetworkConstr(BaseNNConstr):
-    """Class to model trained `keras.Model <https://keras.io/api/models/model/>` with gurobipy.
+    """Class to formulate a trained `keras.Model <https://keras.io/api/models/model/>` in a gurobipy model.
 
     |ClassShort|
     """
@@ -111,7 +111,7 @@ class KerasNetworkConstr(BaseNNConstr):
             if isinstance(step, keras.layers.InputLayer):
                 pass
             elif isinstance(step, keras.layers.ReLU):
-                layer = self.add_activation_layer(
+                layer = self._add_activation_layer(
                     _input, self.act_dict["relu"], output, name=f"relu{i}", **kwargs
                 )
                 _input = layer.output
@@ -121,7 +121,7 @@ class KerasNetworkConstr(BaseNNConstr):
                 if activation == "linear":
                     activation = "identity"
                 weights, bias = step.get_weights()
-                layer = self.add_dense_layer(
+                layer = self._add_dense_layer(
                     _input,
                     weights,
                     bias,
