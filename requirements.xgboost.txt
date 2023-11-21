@@ -1,1 +1,1 @@
-xgboost==2.0.1
+xgboost==2.0.2
