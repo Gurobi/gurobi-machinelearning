@@ -15,6 +15,7 @@ import os
 import sys
 from pathlib import Path
 
+from sphinx_gallery.sorting import FileNameSortKey
 from sphinx_pyproject import SphinxConfig
 
 sys.path.insert(0, os.path.abspath("../../src/"))
@@ -156,7 +157,8 @@ extlinks = {
 sphinx_gallery_conf = {
     "examples_dirs": ["../examples", "../examples_userguide"],
     "gallery_dirs": ["auto_examples", "auto_userguide"],
-    "filename_pattern": "/example_",
+    "filename_pattern": "/example",
+    "within_subsection_order": FileNameSortKey,
     "reference_url": {
         # The module you locally document uses None
         "gurobi_ml": None,
