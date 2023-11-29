@@ -4,6 +4,8 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import datetime
+
 # -- Path setup --------------------------------------------------------------
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -13,6 +15,7 @@ import os
 import sys
 from pathlib import Path
 
+from sphinx_gallery.sorting import FileNameSortKey
 from sphinx_pyproject import SphinxConfig
 
 sys.path.insert(0, os.path.abspath("../../src/"))
@@ -20,8 +23,10 @@ sys.path.insert(0, os.path.abspath("../../src/"))
 config = SphinxConfig("../../pyproject.toml", globalns=globals())
 
 project = "Gurobi Machine Learning"
-copyright = "2023, Gurobi Optimization, LLC. All Rights Reserved."
-html_logo = "_static/gurobi-logo-title.png"
+copyright = (
+    f"{datetime.datetime.now().year}, Gurobi Optimization, LLC. All Rights Reserved."
+)
+html_logo = "_static/gurobi_dark.png"
 
 # -- General configuration ---------------------------------------------------
 
@@ -33,14 +38,15 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
     "sphinx.ext.imgconverter",
-    "sphinx_rtd_theme",
     "sphinx_copybutton",
     "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinxcontrib.bibtex",
+    "sphinx_rtd_theme",
     "sphinx.ext.autosectionlabel",
-    "nbsphinx",
+    "sphinx_gallery.gen_gallery",
+    "numpydoc",
     "sphinx_design",
 ]
 
@@ -74,7 +80,9 @@ dep_versions = get_versions(root_path / "requirements.xgboost.txt", dep_versions
 
 
 VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
-CLASS_SHORT = """Stores the changes to :gurobipy:`model` for representing an instance into it.\n    Inherits from :class:`AbstractPredictorConstr <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr>`.\n"""
+CLASS_SHORT = (
+    """Stores the changes to :gurobipy:`model` for formulating the predictor."""
+)
 
 
 rst_epilog = f"""
@@ -102,7 +110,24 @@ intersphinx_mapping = {
     "sklearn": ("https://scikit-learn.org/stable/", None),
     "torch": ("https://pytorch.org/docs/master/", None),
     "xgb": ("https://xgboost.readthedocs.io/en/stable/", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
 }
+
+autodoc_default_options = {
+    "show-inheritance": True,
+}
+
+autoclass_content = "class"
+
+numpydoc_xref_param_type = True
+numpydoc_xref_aliases = {
+    "DataFrame": "pandas.DataFrame",
+    "Series": "pandas.Series",
+    "Index": "pandas.Index",
+}
+numpydoc_show_inherited_class_members = {}
+numpydoc_xref_ignore = {"optional", "or", "of"}
+numpydoc_class_members_toctree = False
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -110,22 +135,13 @@ intersphinx_mapping = {
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
-
-
-myst_enable_extensions = [
-    "dollarmath",
-]
-
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 autodoc_member_order = "groupwise"
 autodoc_mock_imports = ["torch", "tensorflow", "xgboost"]
-nbsphinx_custom_formats = {
-    ".md": ["jupytext.reads", {"fmt": "myst"}],
-}
-nbsphinx_allow_errors = False
+
 bibtex_bibfiles = ["refs.bib"]
 
 extlinks_detect_hardcoded_links = True
@@ -136,6 +152,17 @@ extlinks = {
         "gurobipy %s",
     ),
     "pypi": ("https://pypi.org/project/%s/", "%s"),
+}
+
+sphinx_gallery_conf = {
+    "examples_dirs": ["../examples", "../examples_userguide"],
+    "gallery_dirs": ["auto_examples", "auto_userguide"],
+    "filename_pattern": "/example",
+    "within_subsection_order": FileNameSortKey,
+    "reference_url": {
+        # The module you locally document uses None
+        "gurobi_ml": None,
+    },
 }
 
 # -- Options for LaTeX output -----------------------------------------------------

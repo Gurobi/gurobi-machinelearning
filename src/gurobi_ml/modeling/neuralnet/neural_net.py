@@ -23,7 +23,14 @@ from .layers import ActivationLayer, DenseLayer
 
 
 class BaseNNConstr(AbstractPredictorConstr):
-    """Base class for inserting a regressor based on neural-network/tensor into Gurobi."""
+    """Base class for inserting a regressor based on a neural-network/tensor into Gurobi.
+
+    This only supports sequential neural networks.
+
+    The bracket operator can be used to iterate over the layers of the layers of the network.
+    It will give access to the modeling object of the corresponding layer.
+
+    """
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.predictor = predictor
@@ -47,9 +54,15 @@ class BaseNNConstr(AbstractPredictorConstr):
         )
 
     def __iter__(self):
-        return self._layers.__iter__()
+        """Iterate over layers of neural network"""
+        return self.layers.__iter__()
 
-    def add_dense_layer(
+    @property
+    def layers(self):
+        """Access models for successive layers of the network"""
+        return self._layers
+
+    def _add_dense_layer(
         self,
         input_vars,
         layer_coefs,
@@ -75,7 +88,7 @@ class BaseNNConstr(AbstractPredictorConstr):
             Output variables
         """
         layer = DenseLayer(
-            self._gp_model,
+            self.gp_model,
             activation_vars,
             input_vars,
             layer_coefs,
@@ -86,7 +99,7 @@ class BaseNNConstr(AbstractPredictorConstr):
         self._layers.append(layer)
         return layer
 
-    def add_activation_layer(
+    def _add_activation_layer(
         self, input_vars, activation, activation_vars=None, **kwargs
     ):
         """Add an activation layer to gurobipy model.
@@ -102,7 +115,7 @@ class BaseNNConstr(AbstractPredictorConstr):
             Output variables
         """
         layer = ActivationLayer(
-            self._gp_model, activation_vars, input_vars, activation, **kwargs
+            self.gp_model, activation_vars, input_vars, activation, **kwargs
         )
         self._layers.append(layer)
         return layer

@@ -40,9 +40,9 @@ def add_gradient_boosting_regressor_constr(
         The gurobipy model where the predictor should be inserted.
     gradient_boosting_regressor : :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
         The gradient boosting regressor to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for gradient boosting regressor in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : mvar_array_like, optional
         Decision variables used as output for gradient boosting regressor in model.
 
     Returns
@@ -51,8 +51,8 @@ def add_gradient_boosting_regressor_constr(
         Object containing information about what was added to gp_model to formulate
         gradient_boosting_regressor.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
 
     Also see
@@ -65,9 +65,9 @@ def add_gradient_boosting_regressor_constr(
 
 
 class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained
+    """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
-    with gurobipy.
+    in a gurobipy model.
 
     |ClassShort|
     """
@@ -87,7 +87,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         Both X and y should be array or list of variables of conforming dimensions.
         """
-        model = self._gp_model
+        model = self.gp_model
         predictor = self.predictor
 
         _input = self._input
@@ -133,8 +133,8 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         Includes a summary of the estimators that it contains.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
 
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.

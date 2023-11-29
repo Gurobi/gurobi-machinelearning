@@ -36,9 +36,9 @@ def add_mlp_regressor_constr(
         The gurobipy model where the predictor should be inserted.
     mlpregressor : :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor`
         The multi-layer perceptron regressor to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for regression in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
+    output_vars : mvar_array_like, optional
         Decision variables used as output for regression in model.
 
     Returns
@@ -53,8 +53,8 @@ def add_mlp_regressor_constr(
         If the translation to Gurobi of the activation function for the network is not
         implemented.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
     """
     return MLPRegressorConstr(
@@ -63,8 +63,8 @@ def add_mlp_regressor_constr(
 
 
 class MLPRegressorConstr(SKgetter, BaseNNConstr):
-    """Class to model trained
-    :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` with gurobipy.
+    """Class to formulate a trained
+    :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a gurobipy model.
 
     |ClassShort|
     """
@@ -112,7 +112,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
                 activation = self.act_dict[neural_net.out_activation_]
                 output = self._output
 
-            layer = self.add_dense_layer(
+            layer = self._add_dense_layer(
                 input_vars,
                 layer_coefs,
                 layer_intercept,
@@ -121,7 +121,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
                 **kwargs,
             )
             input_vars = layer._output  # pylint: disable=W0212
-            self._gp_model.update()
+            self.gp_model.update()
         assert (
             self._output is not None
         )  # Should never happen since sklearn object defines n_ouputs_

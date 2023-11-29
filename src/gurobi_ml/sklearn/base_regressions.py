@@ -50,7 +50,7 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
             **kwargs,
         )
 
-    def add_regression_constr(self, output=None):
+    def _add_regression_constr(self, output=None):
         """Add the prediction constraints to Gurobi."""
         if output is None:
             output = self.output

@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Module for formulating a column transformer in a :gurobipy:`gurobipy model <Model>`."""
+"""Module for formulating a :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` in a :gurobipy:`gurobipy model <Model>`."""
 
 import gurobipy as gp
 
@@ -23,10 +23,10 @@ from .skgetter import SKtransformer
 
 
 class ColumnTransformerConstr(SKtransformer):
-    """Class to model a fitted :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` with gurobipy.
+    """Class to formulate a fitted :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` in a gurobipy model.
 
-    Note
-    ----
+    Notes
+    -----
     This object differs from all the other object in the Gurobi Machine Learning package in
     that it may not be possible to write all of its input with Gurobi variables. Specifically
     some input may consist of categorical features to be encoded using the column transformer.
@@ -107,7 +107,7 @@ class ColumnTransformerConstr(SKtransformer):
                         any_var = True
                 if any_var:
                     try:
-                        trans_constr = transformers[name](self._gp_model, trans, data)
+                        trans_constr = transformers[name](self.gp_model, trans, data)
                     except KeyError:
                         raise NoModel(name, "No implementation found")
                     transformed.append(trans_constr.output.tolist())
@@ -125,7 +125,7 @@ def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kw
         The gurobipy model where polynomial features should be inserted.
     column_transformer : :external+sklearn:py:class:`sklearn.compose.ColumnTransformer`
         The column transformer to insert in gp_model.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
+    input_vars : mvar_array_like
         Decision variables used as input for polynomial features in model.
 
     Returns
