@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Module for formulating a column transformer in a :gurobipy:`gurobipy model <Model>`."""
+"""Module for formulating a :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` in a :gurobipy:`gurobipy model <Model>`."""
 
 import gurobipy as gp
 

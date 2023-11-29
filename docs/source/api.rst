@@ -78,6 +78,9 @@ PyTorch API
 
    sequential
 
+XGBoost API
+***********
+
 .. currentmodule:: gurobi_ml.xgboost
 
 .. autosummary::

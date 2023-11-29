@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Module for inserting ordinary Scikit-Learn regression models into a
+"""Module for formulating ordinary regression models into a
 :gurobipy:`model`.
 
 The following linear models are tested and should work:

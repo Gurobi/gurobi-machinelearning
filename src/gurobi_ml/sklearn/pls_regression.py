@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Module for formulating simple Scikit-Learn PLS regression models in a gurobipy model."""
+"""Module for formulating :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression` in a gurobipy model."""
 
 import numpy as np
 
