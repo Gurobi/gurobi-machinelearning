@@ -26,7 +26,6 @@ project = "Gurobi Machine Learning"
 copyright = (
     f"{datetime.datetime.now().year}, Gurobi Optimization, LLC. All Rights Reserved."
 )
-html_logo = "_static/gurobi_dark.png"
 
 # -- General configuration ---------------------------------------------------
 
@@ -43,7 +42,6 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinxcontrib.bibtex",
-    "sphinx_rtd_theme",
     "sphinx.ext.autosectionlabel",
     "sphinx_gallery.gen_gallery",
     "numpydoc",
@@ -134,7 +132,22 @@ numpydoc_class_members_toctree = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
+html_theme_options = {
+    "logo": {
+        "text": "GUROBI Machine Learning",
+        "image_light": "_static/gurobi.png",
+        "image_dark": "_static/gurobi.png",
+        "alt_text": "Gurobi home",
+    },
+    "navbar_align": "left",
+}
+html_show_sourcelink = False
+
+myst_enable_extensions = [
+    "dollarmath",
+]
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
