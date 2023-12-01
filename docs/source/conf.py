@@ -136,9 +136,9 @@ html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "logo": {
         "text": "GUROBI Machine Learning",
-        "image_light": "_static/gurobi.png",
-        "image_dark": "_static/gurobi.png",
-        "alt_text": "Gurobi home",
+        #     "image_light": "_static/gurobi.png",
+        #     "image_dark": "_static/gurobi.png",
+        #     "alt_text": "Gurobi home",
     },
     "navbar_align": "left",
     "icon_links": [
@@ -146,6 +146,12 @@ html_theme_options = {
             "name": "GitHub",
             "url": "https://github.com/Gurobi/Gurobi-machinelearning",
             "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "Gurobi",
+            "url": "https://www.gurobi.com",
+            "icon": "_static/gurobi.png",
+            "type": "local",
         },
     ],
 }
