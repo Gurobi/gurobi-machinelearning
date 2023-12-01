@@ -107,6 +107,13 @@ avocado = pd.read_csv(
 avocado_old = pd.read_csv(
     data_url + "kaggledata_till2018.csv"
 )  # dataset downloaded from Kaggle
+
+# The date is in different formats in the two data sets and
+# need to be converted separately
+avocado["date"] = pd.to_datetime(avocado["date"], format="%m/%d/%y %H:%M")
+avocado_old["date"] = pd.to_datetime(avocado_old["date"], format="%m/%d/%y")
+
+# Concatenate the two notebooks
 avocado = pd.concat([avocado, avocado_old])
 avocado
 
@@ -124,7 +131,6 @@ avocado
 #
 
 # Add the index for each year from 2015 through 2022
-avocado["date"] = pd.to_datetime(avocado["date"])
 avocado["year"] = pd.DatetimeIndex(avocado["date"]).year
 avocado = avocado.sort_values(by="date")
 
