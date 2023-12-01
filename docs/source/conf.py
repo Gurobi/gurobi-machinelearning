@@ -141,6 +141,13 @@ html_theme_options = {
         "alt_text": "Gurobi home",
     },
     "navbar_align": "left",
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/Gurobi/Gurobi-machinelearning",
+            "icon": "fa-brands fa-github",
+        },
+    ],
 }
 html_show_sourcelink = False
 
