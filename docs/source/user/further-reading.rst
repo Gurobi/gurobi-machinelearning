@@ -10,7 +10,7 @@ package. We don't claim to be exhaustive.
 The JANOS framework was proposed in :cite:t:`JANOS` with an associated `Python
 package <https://github.com/INFORMSJoC/2020.1023>`_. The package works with
 various Scikit-learn models and solves optimization problems with Gurobi. The
-:doc:`../auto_examples/example_student_admission` example was proposed in that paper.
+:doc:`../auto_examples/example2_student_admission` example was proposed in that paper.
 
 Another framework is reluMIP, :cite:t:`reluMIP.2021`. It is mostly
 aimed at neural networks with ReLU activation formulated with TensorFlow. The
