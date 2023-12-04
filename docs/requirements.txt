@@ -1,6 +1,6 @@
 gurobipy==11.0.0
 gurobipy-pandas==1.0.0.post0
-ipykernel==6.26.0
+ipykernel==6.27.1
 jupytext==1.15.2
 matplotlib==3.6.0
 matplotlib-inline==0.1.6
