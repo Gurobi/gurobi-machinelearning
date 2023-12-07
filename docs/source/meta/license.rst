@@ -8,6 +8,13 @@
           :class: float-right, only-light
 
 
+     .. image:: ../_static/gurobi_dark.png
+          :width: 220
+          :target: https://www.gurobi.com
+          :alt: GUROBI
+          :align: right
+          :class: float-right, only-dark
+
 License
 #######
 
