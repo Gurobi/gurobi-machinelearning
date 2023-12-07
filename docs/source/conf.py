@@ -140,7 +140,7 @@ html_theme_options = {
         #     "image_dark": "_static/gurobi.png",
         #     "alt_text": "Gurobi home",
     },
-    "navbar_align": "left",
+    "navbar_align": "content",
     "icon_links": [
         {
             "name": "GitHub",
