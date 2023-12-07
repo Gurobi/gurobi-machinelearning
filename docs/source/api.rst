@@ -7,6 +7,13 @@
         :align: right
         :class: float-right, only-light
 
+   .. image:: _static/gurobi_dark.png
+        :width: 220
+        :target: https://www.gurobi.com
+        :alt: Gurobi
+        :align: right
+        :class: float-right, only-dark
+
 
 API
 ###
@@ -90,10 +97,10 @@ XGBoost API
 
    xgboost_regressor
 
-Internal API
-************
+-------
 
 .. toctree::
+   :caption: Internal APIs
    :maxdepth: 1
 
    internal_apis/index
