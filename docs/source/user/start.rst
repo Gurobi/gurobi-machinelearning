@@ -116,7 +116,7 @@ then :math:`y = g(x)` in any solution.
 The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`
 returns a modeling object derived from the class
 :py:class:`AbstractPredictorConstr
-<gurobi_ml.modeling.AbstractPredictorConstr>`. That object keeps track of all
+<gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr>`. That object keeps track of all
 the variables and constraints that have been added to the :gurobipy:`model` to
 establish the relationship between input and output variables of the regression.
 
@@ -124,15 +124,15 @@ The modeling object can perform a few tasks:
 
    * Everything it created (i.e. variables and constraints to establish the
      relationship between input and output) can be removed with the
-     :py:meth:`remove <gurobi_ml.modeling.AbstractPredictorConstr.remove>`
+     :py:meth:`remove <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.remove>`
      method.
    * It can print a summary of what it added with the :py:meth:`print_stats
-     <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` method.
+     <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.print_stats>` method.
    * Once Gurobi computed a solution to the optimization problem, it can compute
      the difference between what the regression model predicts from the input
      values and the values of the output variables in Gurobi's solution with the
      :py:meth:`get_error
-     <gurobi_ml.modeling.AbstractPredictorConstr.print_stats>` method.
+     <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.print_stats>` method.
 
 
 The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` is
