@@ -1,6 +1,7 @@
 [
   {
-    "version": "dev",
+    "name": "dev",
+    "version": "latest",
     "url": "https://https://gurobi-machinelearning.readthedocs.io/en/latest/"
   },
   {
@@ -11,16 +12,16 @@
   {
     "name": "1.3.3",
     "version": "v1.3.3",
-    "url": "https://pydata-sphinx-theme.readthedocs.io/en/v1.3.3/",
+    "url": "https://pydata-sphinx-theme.readthedocs.io/en/v1.3.3/"
   },
   {
     "name": "1.4.x",
     "version": "1.4.x",
-    "url": "https://pydata-sphinx-theme.readthedocs.io/en/1.4.x/",
+    "url": "https://pydata-sphinx-theme.readthedocs.io/en/1.4.x/"
   },
   {
     "name": "1.3.x",
     "version": "1.3.x",
     "url": "https://pydata-sphinx-theme.readthedocs.io/en/1.3.x/",
-  },
+  }
 ]
