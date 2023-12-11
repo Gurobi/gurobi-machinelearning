@@ -23,11 +23,18 @@ from ._var_utils import _get_sol_values, validate_input_vars, validate_output_va
 
 
 class AbstractPredictorConstr(ABC, _SubModel):
-    """Base class to store sub-model added by :py:func:`gurobi_ml.add_predictor_constr`.
+    """Base class to store addtions for formulating predictor constraints
 
-    This class is the base class to store everything that is added to
-    a Gurobi model when a trained predictor is inserted into it. Depending on
-    the type of the predictor, a class derived from this is returned
+    This class is the base class for formulating the various predictors
+    supported by the package. It provides basic functionalities for storing
+    the modeling structures (variables, constraints,...) that are added to
+    the gurobipy models in order to formulate the predictor in a MIP.
+
+    It also provides simple functionalities to access the input and output variables
+    and their results.
+
+    The implementation of the formulations of the various models is done in child classes.
+    Depending on the type of the predictor, a class derived from this is returned
     by :py:func:`gurobi_ml.add_predictor_constr`.
 
     Warnings
