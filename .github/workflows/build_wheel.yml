@@ -32,7 +32,7 @@ jobs:
     - name: Build wheel
       run: python -m build
     - name: Store artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         path: dist/*
         if-no-files-found: error
