@@ -56,7 +56,7 @@ def pytorch_convertors():
 
 
 def xgboost_convertors():
-    """Collect known PyTorch objects that can be formulated and the conversion class."""
+    """Collect known XGBoost objects that can be formulated and the conversion class."""
     if "xgboost" in sys.modules:
         import xgboost as xgb  # pylint: disable=import-outside-toplevel
 
@@ -68,6 +68,22 @@ def xgboost_convertors():
         return {
             xgb.core.Booster: add_xgboost_regressor_constr,
             xgb.XGBRegressor: add_xgbregressor_constr,
+        }
+    return {}
+
+
+def lightgbm_convertors():
+    """Collect known LightGBM objects that can be formulated and the conversion class."""
+    if "lightgbm" in sys.modules:
+        import lightgbm as lgb  # pylint: disable=import-outside-toplevel
+
+        from .lightgbm import (  # pylint: disable=import-outside-toplevel
+            add_lgbm_booster_constr,
+            add_lgbmregressor_constr,
+        )
+
+        return {
+            lgb.sklearn.LGBMRegressor: add_lgbmregressor_constr,
         }
     return {}
 
@@ -93,5 +109,6 @@ def registered_predictors():
     convertors |= pytorch_convertors()
     convertors |= keras_convertors()
     convertors |= xgboost_convertors()
+    convertors |= lightgbm_convertors()
     convertors |= user_predictors()
     return convertors
