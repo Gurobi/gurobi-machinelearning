@@ -49,9 +49,7 @@ extensions = [
 ]
 
 
-def get_versions(file: Path, acc=None):
-    if acc is None:
-        acc = dict()
+def get_versions(file: Path):
     new_dict = {}
     for line in file.read_text().splitlines():
         try:
@@ -60,7 +58,7 @@ def get_versions(file: Path, acc=None):
         except ValueError:
             pass  # Skip lines that don't split into exactly two items
 
-    return {**new_dict, **acc}
+    return new_dict
 
 
 root_path = Path().resolve().parent.parent
@@ -69,12 +67,13 @@ dep_versions = {
     for k, v in get_versions(root_path / "requirements.txt").items()
     if k == "gurobipy"
 }  # get only gurobipy from requirements.txt
-dep_versions = get_versions(root_path / "requirements.tox.txt", dep_versions)
-dep_versions = get_versions(root_path / "requirements.keras.txt", dep_versions)
-dep_versions = get_versions(root_path / "requirements.pytorch.txt", dep_versions)
-dep_versions = get_versions(root_path / "requirements.sklearn.txt", dep_versions)
-dep_versions = get_versions(root_path / "requirements.pandas.txt", dep_versions)
-dep_versions = get_versions(root_path / "requirements.xgboost.txt", dep_versions)
+dep_versions |= get_versions(root_path / "requirements.tox.txt")
+dep_versions |= get_versions(root_path / "requirements.keras.txt")
+dep_versions |= get_versions(root_path / "requirements.pytorch.txt")
+dep_versions |= get_versions(root_path / "requirements.sklearn.txt")
+dep_versions |= get_versions(root_path / "requirements.pandas.txt")
+dep_versions |= get_versions(root_path / "requirements.xgboost.txt")
+dep_versions |= get_versions(root_path / "requirements.lightgbm.txt")
 
 
 VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
@@ -92,6 +91,7 @@ rst_epilog = f"""
 .. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}
 .. |TensorflowVersion| replace:: {dep_versions["tensorflow"]}
 .. |XGBoostVersion| replace:: {dep_versions["xgboost"]}
+.. |LightGBMVersion| replace:: {dep_versions["lightgbm"]}
 .. |VariablesDimensionsWarn| replace:: {VARS_SHAPE}
 .. |ClassShort| replace:: {CLASS_SHORT}
 """
@@ -108,6 +108,7 @@ intersphinx_mapping = {
     "sklearn": ("https://scikit-learn.org/stable/", None),
     "torch": ("https://pytorch.org/docs/master/", None),
     "xgb": ("https://xgboost.readthedocs.io/en/stable/", None),
+    "lightgbm": ("https://lightgbm.readthedocs.io/en/latest/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
 }
 

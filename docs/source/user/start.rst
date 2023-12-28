@@ -27,7 +27,8 @@ The aim of the package is to:
 
 The package currently supports various `scikit-learn
 <https://scikit-learn.org/stable/>`_ objects. It can also formulate
-gradient boosting regression models from `XGboost <https://xgboost.readthedocs.io/en/stable/>`_.
+gradient boosting regression models from `XGboost <https://xgboost.readthedocs.io/en/stable/>`_
+and `LightGBM <https://lightgbm.readthedocs.io/en/stable/>`.
 Finally, it has limited support for the
 `Keras <https://keras.io/>`_ API of `TensorFlow <https://www.tensorflow.org/>`_
 and `PyTorch <https://pytorch.org/>`_. Only neural networks with ReLU activation
@@ -90,6 +91,8 @@ We encourage to install the package via pip (or add it to your
        - |TensorflowVersion|
      * - :pypi:`xgboost`
        - |XGBoostVersion|
+     * - :pypi:`lightgbm`
+       - |LightGBMVersion|
 
   Installing any of the machine learning packages is only required if the
   predictor you want to insert uses them (i.e. to insert a Keras based predictor

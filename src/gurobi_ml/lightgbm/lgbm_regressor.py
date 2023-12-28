@@ -43,7 +43,7 @@ def add_lgbmregressor_constr(
     ----------
     gp_model : :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    lgbm_regressor : :external+lgbm:py:class:`lgbm.XGBRFRegressor`
+    lgbm_regressor : :external+lightgbm:py:class:`lightgbm.sklearn.LGBMRegressor`
         The gradient boosting regressor to insert as predictor.
     input_vars : mvar_array_like
         Decision variables used as input for gradient boosting regressor in model.
@@ -69,7 +69,7 @@ def add_lgbmregressor_constr(
     NoModel
         If the booster is not of type "gbtree".
     """
-    return LightGBMBoosterConstr(
+    return LGBMConstr(
         gp_model,
         lgbm_regressor.booster_,
         input_vars,
@@ -80,9 +80,9 @@ def add_lgbmregressor_constr(
 
 
 def add_lgbm_booster_constr(
-    gp_model, lgbm_regressor, input_vars, output_vars=None, epsilon=0.0, **kwargs
+    gp_model, lgbm_booster, input_vars, output_vars=None, epsilon=0.0, **kwargs
 ):
-    """Formulate lgbm_regressor into gp_model.
+    """Formulate lgbm_booster into gp_model.
 
     The formulation predicts the values of output_vars using input_vars
     according to lgbm_regressor. See our :ref:`User's Guide
@@ -94,8 +94,8 @@ def add_lgbm_booster_constr(
     ----------
     gp_model : :gurobipy:`model`
         The gurobipy model where the predictor should be inserted.
-    lgbm_regressor : :external+lgbm:py:class:`lgbm.Booster`
-        The gradient boosting regressor to insert as predictor.
+    lgbm_regressor : :external+lightgbm:py:class:`lightgbm.Booster`
+        The booster to insert as predictor.
     input_vars : mvar_array_like
         Decision variables used as input for gradient boosting regressor in model.
     output_vars : mvar_array_like, optional
@@ -120,13 +120,13 @@ def add_lgbm_booster_constr(
     NoModel
         If the booster is not of type "gbtree".
     """
-    return LightGBMBoosterConstr(
-        gp_model, lgbm_regressor, input_vars, output_vars, epsilon=epsilon, **kwargs
+    return LGBMConstr(
+        gp_model, lgbm_booster, input_vars, output_vars, epsilon=epsilon, **kwargs
     )
 
 
-class LightGBMBoosterConstr(AbstractPredictorConstr):
-    """Class to model trained :external+lgbm:py:class:`lgbm.Booster`
+class LGBMConstr(AbstractPredictorConstr):
+    """Class to model trained :external+lightgbm:py:class:`lightgbm.Booster`
     in a gurobipy model.
 
     |ClassShort|
@@ -206,9 +206,9 @@ class LightGBMBoosterConstr(AbstractPredictorConstr):
             dict: A dictionary representation of the flattened tree.
 
         """
-        num_leafs, num_split = LightGBMBoosterConstr._count_nodes(root_node)
+        num_leafs, num_split = LGBMConstr._count_nodes(root_node)
 
-        LightGBMBoosterConstr._assign_node_index(root_node, num_split)
+        LGBMConstr._assign_node_index(root_node, num_split)
 
         numnodes = num_leafs + num_split
         children_left = np.full(numnodes, -2, dtype=int)
