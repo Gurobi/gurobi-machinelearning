@@ -162,35 +162,13 @@ class LGBMConstr(AbstractPredictorConstr):
         num_split = 0
         while len(heap) > 0:
             node = heap.pop()
-            if "left_child" in node:
+            if "split_index" in node:
                 heap.append(node["left_child"])
                 heap.append(node["right_child"])
                 num_split += 1
             else:
                 num_leafs += 1
         return (num_leafs, num_split)
-
-    @staticmethod
-    def _assign_node_index(root_node, num_split):
-        """Assign node indices to a lightgbm tree.
-
-        Traverse the tree and assign a unique index to each node.
-        The index is stored in the node itself.
-
-        """
-        heap = [root_node]
-
-        while len(heap) > 0:
-            node = heap.pop()
-            if "split_index" in node.keys():
-                node_index = node["split_index"]
-                heap.append(node["left_child"])
-                heap.append(node["right_child"])
-                assert node_index < num_split
-            else:
-                node_index = node["leaf_index"]
-                node_index += num_split
-            node["node_index"] = node_index
 
     @staticmethod
     def _flat_tree_representation(root_node):
@@ -208,38 +186,44 @@ class LGBMConstr(AbstractPredictorConstr):
         """
         num_leafs, num_split = LGBMConstr._count_nodes(root_node)
 
-        LGBMConstr._assign_node_index(root_node, num_split)
-
         numnodes = num_leafs + num_split
         children_left = np.full(numnodes, -2, dtype=int)
         children_right = np.full(numnodes, -2, dtype=int)
         feature = np.empty(numnodes, dtype=int)
         value = np.empty(numnodes, dtype=np.float32)
+        threshold = np.empty(numnodes, dtype=np.float32)
+
+        def node_index(node):
+            if "split_index" in node.keys():
+                return node["split_index"]
+            return node["leaf_index"] + num_split
 
         heap = [root_node]
         while len(heap) > 0:
             node = heap.pop()
-            node_index = node["node_index"]
-            assert children_left[node_index] == -2
-            assert children_right[node_index] == -2
+            index = node_index(node)
+            assert children_left[index] == -2
+            assert children_right[index] == -2
             if "split_index" in node.keys():
-                feature[node_index] = node["split_feature"]
-                children_left[node_index] = node["left_child"]["node_index"]
-                children_right[node_index] = node["right_child"]["node_index"]
-                value[node_index] = node["threshold"]
+                feature[index] = node["split_feature"]
+                threshold[index] = node["threshold"]
+                children_left[index] = node_index(node["left_child"])
+                children_right[index] = node_index(node["right_child"])
 
                 heap.append(node["left_child"])
                 heap.append(node["right_child"])
             else:
-                children_left[node_index] = -1
-                children_right[node_index] = -1
-                value[node_index] = node["leaf_value"]
+                children_left[index] = -1
+                children_right[index] = -1
+                value[index] = node["leaf_value"]
 
+        assert min(children_left) >= -1
+        assert min(children_right) >= -1
         flat_tree = {
             "children_left": children_left,
             "children_right": children_right,
             "feature": feature,
-            "threshold": value,
+            "threshold": threshold,
             "value": value.reshape(-1, 1),
             "capacity": numnodes,
         }
