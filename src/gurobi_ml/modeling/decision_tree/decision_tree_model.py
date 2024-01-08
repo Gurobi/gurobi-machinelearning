@@ -82,11 +82,6 @@ def _leaf_formulation(
     input_ub = _input.getAttr(GRB.Attr.UB)
     input_lb = _input.getAttr(GRB.Attr.LB)
 
-    # FIXME: We could improve the min_value and max_value computation if we have
-    # multiple outputs.
-    min_value = float("inf")
-    max_value = float("-inf")
-
     for i, node in enumerate(leafs.nonzero()[0]):
         reachable = (input_ub >= node_lb[:, node]).all(axis=1) & (
             input_lb <= node_ub[:, node]
@@ -100,8 +95,6 @@ def _leaf_formulation(
         n_indicators = sum(reachable)
         for l_var, r_vars in zip(lhs, rhs):
             for r_var, value in zip(r_vars, values):
-                min_value = min(min_value, value)
-                max_value = max(max_value, value)
                 gp_model.addGenConstrIndicator(l_var, 1, r_var, GRB.EQUAL, value)
 
         for feature in range(n_features):
@@ -135,9 +128,6 @@ def _leaf_formulation(
 
     if verbose:
         timer.timing(f"Added {nex} linear constraints")
-
-    output.setAttr(GRB.Attr.LB, min_value)
-    output.setAttr(GRB.Attr.UB, max_value)
 
 
 def _paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
