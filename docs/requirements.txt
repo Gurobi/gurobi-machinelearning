@@ -8,7 +8,7 @@ sphinxcontrib_bibtex==2.6.2
 numpy==1.26.2
 numpydoc==1.6.0
 pandas==2.1.4
-scikit-learn==1.3.2
+scikit-learn==1.4.0
 seaborn==0.13.2
 Sphinx==7.2.6
 sphinx-copybutton==0.5.2
