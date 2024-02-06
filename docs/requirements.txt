@@ -4,7 +4,7 @@ ipykernel==6.28.0
 jupytext==1.16.1
 matplotlib==3.6.0
 matplotlib-inline==0.1.6
-sphinxcontrib_bibtex==2.6.1
+sphinxcontrib_bibtex==2.6.2
 numpy==1.26.2
 numpydoc==1.6.0
 pandas==2.1.4
