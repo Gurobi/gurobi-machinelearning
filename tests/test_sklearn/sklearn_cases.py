@@ -281,7 +281,7 @@ class MNISTCase(Cases):
         )
 
     def load_data(self):
-        mnist = datasets.fetch_openml("mnist_784", parser="auto", as_frame=False)
+        mnist = datasets.fetch_openml("mnist_784", parser="liac-arff", as_frame=False)
         X, y = mnist.data, mnist.target
 
         X = X.astype(np.float64)
