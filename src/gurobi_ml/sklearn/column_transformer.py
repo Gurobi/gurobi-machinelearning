@@ -16,6 +16,7 @@
 """Module for formulating a :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` in a :gurobipy:`gurobipy model <Model>`."""
 
 import gurobipy as gp
+from sklearn.preprocessing import FunctionTransformer
 
 from ..exceptions import NoModel
 from .preprocessing import sklearn_transformers
@@ -58,6 +59,19 @@ class ColumnTransformerConstr(SKtransformer):
         assert self._output is not None
         return self
 
+    @staticmethod
+    def is_passthrough(trans):
+        """Check if transformation is passthrough
+
+        Before scikilearn 1.4 was the string passthrough, after
+        it is a function transformer object with None function.
+        """
+        if trans == "passthrough":
+            return True
+        if type(trans) is FunctionTransformer and trans.func is None:
+            return True
+        return False
+
     def _mip_model(self, **kwargs):
         """Do the transformation on x."""
         column_transform = self.transformer
@@ -65,7 +79,7 @@ class ColumnTransformerConstr(SKtransformer):
         transformers = {k.lower(): v for k, v in sklearn_transformers().items()}
         transformed = []
         for name, trans, cols in column_transform.transformers_:
-            if trans == "passthrough":
+            if self.is_passthrough(trans):
                 if isinstance(cols, str) or isinstance(cols[0], str):
                     transformed.append(_input.loc[:, cols])
                 else:
