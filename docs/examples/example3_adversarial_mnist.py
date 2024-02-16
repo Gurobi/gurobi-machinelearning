@@ -30,11 +30,11 @@ If we can find a solution where this difference is positive, then
 we can show that the difference is never positive, no such example
 exists.
 
-Here, we use the :math:`l1-`\ norm :math:`|| x - \\bar x||_1` to define
+Here, we use the :math:`l_1-` norm :math:`|| x - \bar x||_1` to define
 the neighborhood with its size defined by a fixed parameter
 :math:`\delta`:
 
-.. math::  || x - \\bar x ||_1 \le \delta.
+.. math::  || x - \bar x ||_1 \le \delta.
 
 Denoting by :math:`g` the prediction function of the neural network, the
 full optimization model reads:
