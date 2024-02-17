@@ -97,6 +97,18 @@ XGBoost API
 
    xgboost_regressor
 
+LightGBM API
+***********
+
+.. currentmodule:: gurobi_ml.lightgbm
+
+.. autosummary::
+   :toctree: auto_generated/
+   :caption: LightGBM API
+   :template: modeling_object.rst
+
+   lgbm_regressor
+
 -------
 
 .. toctree::

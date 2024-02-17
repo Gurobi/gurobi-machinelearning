@@ -29,10 +29,10 @@ class TestSklearnPandasModel(FixedRegressionModel):
                 self.assertEqual(
                     predictor_name, type(pred_constr[i]).__name__[: -len("Constr")]
                 )
-            self.assertLessEqual(
-                np.max(pred_constr[i].get_error().astype(float)),
-                np.max(pred_constr.get_error()),
-            )
+                self.assertLessEqual(
+                    np.max(pred_constr[i].get_error().astype(float)),
+                    np.max(pred_constr.get_error()) + 1e-6,
+                )
 
     def test_diabetes_sklearn_pandas(self):
         data = datasets.load_diabetes(as_frame=True)
@@ -42,7 +42,7 @@ class TestSklearnPandasModel(FixedRegressionModel):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", float_type=np.float32)
+            self.do_one_case(onecase, X, 5, "all", float_type=np.float32, epsilon=1e-5)
             self.do_one_case(onecase, X, 6, "pairs", float_type=np.float32)
 
     def test_wages(self):

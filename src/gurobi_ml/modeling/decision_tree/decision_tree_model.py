@@ -129,9 +129,6 @@ def _leaf_formulation(
     if verbose:
         timer.timing(f"Added {nex} linear constraints")
 
-    output.setAttr(GRB.Attr.LB, np.min(tree["value"]))
-    output.setAttr(GRB.Attr.UB, np.max(tree["value"]))
-
 
 def _paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
     """

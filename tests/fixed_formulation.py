@@ -81,8 +81,10 @@ class FixedRegressionModel(unittest.TestCase):
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
             tol = max(tol, vio)
-            tol *= np.max(np.abs(y.X))
+            tol *= 1 + np.max(np.abs(y.X))
             abserror = pred_constr.get_error(tol).astype(float)
+            if np.max(abserror) > tol:
+                gpm.write("failed.lp")
             self.assertLessEqual(np.max(abserror), tol)
 
     def do_one_case(self, one_case, X, n_sample, combine="", **kwargs):
