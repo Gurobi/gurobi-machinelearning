@@ -17,6 +17,6 @@ nbsphinx==0.9.3
 jupytext==1.16.1
 sphinx_design==0.5.0
 sphinx-pyproject==0.3.0
-pydata-sphinx-theme==0.14.4
+pydata-sphinx-theme==0.15.2
 .
 sphinx-gallery==0.15.0
