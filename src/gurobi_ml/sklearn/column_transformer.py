@@ -15,6 +15,8 @@
 
 """Module for formulating a :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` in a :gurobipy:`gurobipy model <Model>`."""
 
+import warnings
+
 import gurobipy as gp
 from sklearn.preprocessing import FunctionTransformer
 
@@ -127,7 +129,15 @@ class ColumnTransformerConstr(SKtransformer):
                     transformed.append(trans_constr.output.tolist())
                 else:
                     transformed.append(trans.transform(_input.loc[:, cols]))
-        self._output = column_transform._hstack(transformed)
+        # Hack for sklearn 1.4.1 that takes a new argument
+        # Should remove it sometime
+        try:
+            self._output = column_transform._hstack(
+                transformed, n_samples=_input.shape[0]
+            )
+        except TypeError:
+            warnings.warn("Scikit-learn version < 1.4.1", DeprecationWarning)
+            self._output = column_transform._hstack(transformed)
 
 
 def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kwargs):
