@@ -271,7 +271,7 @@ class TestAddRemove(unittest.TestCase):
         with self.subTest(predictor=onecase["predictor"]):
             self.add_remove_wrong_input(**onecase)
 
-    def test_diabetes_wrong_input(self):
+    def test_diabetes_wrong_input_list(self):
         """Test adding and removing a predictor for diabetes
 
         Checks that variables/constraints/... counts match.
