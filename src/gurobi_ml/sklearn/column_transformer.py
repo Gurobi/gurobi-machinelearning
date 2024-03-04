@@ -65,6 +65,9 @@ class ColumnTransformerConstr(SKtransformer):
         transformers = {k.lower(): v for k, v in sklearn_transformers().items()}
         transformed = []
         for name, trans, cols in column_transform.transformers_:
+            if len(cols) == 0:
+                # If there are no columns to transform nothing to do
+                continue
             if trans == "passthrough":
                 if isinstance(cols, str) or isinstance(cols[0], str):
                     transformed.append(_input.loc[:, cols])
