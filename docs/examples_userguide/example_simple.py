@@ -8,7 +8,7 @@ Learning package.
 The example is entirely abstract. Its aim is only to illustrate the
 basic functionalities of the package in the most simple way. For some
 more realistic applications, please refer to the notebooks in the
-`examples <../examples.rst>`__ section.
+`examples <../auto_examples/index.html>`__ section.
 
 Before proceeding to the example itself, we need to import a number of
 packages. Here, we will use Scikit-learn to train regression models. We
@@ -31,7 +31,7 @@ from gurobi_ml import add_predictor_constr
 ######################################################################
 # Certainly, we need gurobipy to build an optimization model and from the
 # gurobi_ml package we need the
-# `add_predictor_constr <../auto_generated/gurobi_ml.add_predictor_constr.rst>`__
+# :func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`.
 # function. We also need numpy.
 #
 
@@ -112,7 +112,7 @@ output_vars = m.addMVar(y_examples.shape, lb=-gp.GRB.INFINITY)
 ######################################################################
 # The constraints linking ``input_vars`` and ``output_vars`` can now be
 # added with the function
-# :func:`add_predictor_constr <gurobi_ml.add_predictor_constr.rst>`.
+# :func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`.
 #
 # Note that because of the shape of the variables this will add the 5
 # different constraints.
