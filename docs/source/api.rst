@@ -98,7 +98,7 @@ XGBoost API
    xgboost_regressor
 
 LightGBM API
-***********
+************
 
 .. currentmodule:: gurobi_ml.lightgbm
 
