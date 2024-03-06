@@ -190,10 +190,10 @@ m.update()
 # adding the network to the Gurobi model.
 #
 # Also, we use the function
-# `add_mlp_regressor_constr <../auto_generated/gurobi_ml.sklearn.mlpregressor.add_mlp_regressor_constr.rst>`__
+# :func:`add_mlp_regressor_constr <gurobi_ml.sklearn.mlpregressor.add_mlp_regressor_constr>`.
 # directly. The network being actually for classification (i.e. of type
 # ``MLPClassifier``) the
-# `add_predictor_constr <../auto_generated/gurobi_ml.add_predictor_constr.rst>`__
+# :func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`.
 # function would not handle it automatically.
 #
 # In the output, there is a warning about adding constraints with very

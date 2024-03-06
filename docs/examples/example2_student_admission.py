@@ -230,7 +230,7 @@ m.optimize()
 
 ######################################################################
 # We print the error using
-# `get_error <../auto_generated/gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.rst#gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.remove>`__
+# :func:`get_error<gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.get_error>`
 # (note that we take the maximal error over all input vectors).
 #
 
