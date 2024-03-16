@@ -198,16 +198,15 @@ m.update()
 # Finally, we insert the constraints from the regression. In this model we
 # want to have use the probability estimate of a student joining the
 # college, so we choose the parameter ``output_type`` to be
-# ``"probability_1"``. Note that due to the shapes of the ``studentsdata``
+# ``"predict_proba"``. Note that due to the shapes of the ``studentsdata``
 # data frame and ``y``, this will insert one regression constraint for
 # each student.
 #
 # With the ``print_stats`` function we display what was added to the
 # model.
 #
-
 pred_constr = add_predictor_constr(
-    m, pipe, students_opt_data, y, output_type="probability_1"
+    m, pipe, students_opt_data, y, predict_function="predict_proba", predict_class=1
 )
 
 pred_constr.print_stats()

@@ -33,20 +33,31 @@ class SKgetter(AbstractPredictorConstr):
         Scikit-Learn predictor embedded into Gurobi model.
     """
 
-    def __init__(self, predictor, input_vars, output_type="regular", **kwargs):
+    def __init__(
+        self,
+        predictor,
+        input_vars,
+        predict_function="predict",
+        predict_class=None,
+        **kwargs,
+    ):
         check_is_fitted(predictor)
         self.predictor = predictor
         predictor._check_feature_names(input_vars, reset=False)
-        self.output_type = output_type
+        # Raises an error if prediction function is not in predictor
+        if getattr(predictor, predict_function):
+            pass
+        self.predict_function = predict_function
+        self.predict_class = predict_class
         if hasattr(predictor, "n_features_in_"):
             self._input_shape = predictor.n_features_in_
         if hasattr(predictor, "n_outputs_"):
             self._output_shape = predictor.n_outputs_
         elif hasattr(predictor, "classes_"):
-            self._output_shape = len(predictor.classes_)
-            if self._output_shape == 2:
-                # 2 classes models are defined using only one variable
+            if predict_class and predictor.classes_[predict_class]:
                 self._output_shape = 1
+            else:
+                self._output_shape = len(predictor.classes_)
 
     def get_error(self, eps=None):
         """Return error in Gurobi's solution with respect to prediction from input.
@@ -65,15 +76,16 @@ class SKgetter(AbstractPredictorConstr):
         """
         if self._has_solution:
             X = self.input_values
-            if self.output_type == "probability_1":
-                predicted = self.predictor.predict_proba(X)[:, 1]
-            elif self.output_type == "probability":
-                predicted = self.predictor.predict_proba(X)
+            if hasattr(self.predictor, "predict_proba"):
+                predict_function = self.predictor.predict_proba
             else:
-                predicted = self.predictor.predict(X)
+                predict_function = self.predictor.predict
+
+            predicted = predict_function(X)
+
+            if self.predict_class:
+                predicted = predicted[:, self.predict_class].reshape(-1, 1)
             output_values = self.output_values
-            if len(predicted.shape) == 1 and len(output_values.shape) == 2:
-                predicted = predicted.reshape(-1, 1)
             r_val = np.abs(predicted - output_values)
             if eps is not None and np.max(r_val) > eps:
                 print(f"{predicted} != {output_values}")
