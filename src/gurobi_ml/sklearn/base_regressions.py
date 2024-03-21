@@ -41,7 +41,9 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
         **kwargs,
     ):
         self._output_shape = 1
-        SKgetter.__init__(self, predictor, input_vars, predict_function, **kwargs)
+        SKgetter.__init__(
+            self, predictor, input_vars, predict_function=predict_function, **kwargs
+        )
         AbstractPredictorConstr.__init__(
             self,
             gp_model,

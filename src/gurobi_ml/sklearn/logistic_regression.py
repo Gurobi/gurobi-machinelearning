@@ -228,8 +228,9 @@ Upgrading to version 11 is recommended when using logistic regressions."""
                 gen_constr.setAttr(attr, val)
         self.gp_model.update()
 
-        self.gp_model.addConstr(log_result[:, 0] == self.output[:, 1])
-        self.gp_model.addConstr(self.output[:, 0] == 1 - self.output[:, 1])
+        if self.predict_function == "predict_proba":
+            self.gp_model.addConstr(log_result[:, 0] == self.output[:, 1])
+            self.gp_model.addConstr(self.output[:, 0] == 1 - self.output[:, 1])
 
         self.gp_model.write("debug.lp")
 

@@ -51,7 +51,7 @@ class SKgetter(AbstractPredictorConstr):
             self._input_shape = predictor.n_features_in_
         if hasattr(predictor, "n_outputs_"):
             self._output_shape = predictor.n_outputs_
-        elif hasattr(predictor, "classes_"):
+        elif hasattr(predictor, "classes_") and predict_function == "predict_proba":
             self._output_shape = len(predictor.classes_)
 
     def get_error(self, eps=None):
@@ -71,7 +71,13 @@ class SKgetter(AbstractPredictorConstr):
         """
         if self._has_solution:
             X = self.input_values
-            if hasattr(self.predictor, "predict_proba"):
+
+            # FIXME: should always test error using predict_proba even
+            # for classification
+            if (
+                hasattr(self.predictor, "predict_proba")
+                and self.predict_function == "predict_proba"
+            ):
                 predict_function = self.predictor.predict_proba
             else:
                 predict_function = self.predictor.predict
@@ -79,6 +85,8 @@ class SKgetter(AbstractPredictorConstr):
             predicted = predict_function(X)
 
             output_values = self.output_values
+            if len(predicted.shape) == 1 and len(output_values.shape) == 2:
+                predicted = predicted.reshape(-1, 1)
             r_val = np.abs(predicted - output_values)
             if eps is not None and np.max(r_val) > eps:
                 print(f"{predicted} != {output_values}")
