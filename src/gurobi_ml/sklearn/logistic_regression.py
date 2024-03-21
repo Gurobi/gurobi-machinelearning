@@ -34,7 +34,6 @@ def add_logistic_regression_constr(
     output_vars=None,
     predict_function="predict",
     epsilon=0.0,
-    predict_class=None,
     pwl_attributes=None,
     **kwargs,
 ):
@@ -124,7 +123,6 @@ def add_logistic_regression_constr(
         output_vars,
         predict_function,
         epsilon,
-        predict_class=predict_class,
         pwl_attributes=pwl_attributes,
         **kwargs,
     )
@@ -145,7 +143,6 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         output_vars=None,
         predict_function="predict",
         epsilon=0.0,
-        predict_class=None,
         pwl_attributes=None,
         **kwargs,
     ):
@@ -167,7 +164,6 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             input_vars,
             output_vars,
             predict_function,
-            predict_class,
             **kwargs,
         )
 
@@ -210,12 +206,9 @@ Upgrading to version 11 is recommended when using logistic regressions."""
             self.gp_model.addConstr(bin_output <= log_result + 0.5)
             self.gp_model.addConstr(bin_output == self.output)
         else:
-            if self.predict_class != 1:
-                log_result = self.gp_model.addMVar(
-                    (m, 1), lb=-gp.GRB.INFINITY, name="log_result"
-                )
-            else:
-                log_result = self.output
+            log_result = self.gp_model.addMVar(
+                (m, 1), lb=-gp.GRB.INFINITY, name="log_result"
+            )
 
         affinevars = self.gp_model.addMVar(
             (m, 1), lb=-gp.GRB.INFINITY, name="affine_trans"
@@ -235,9 +228,8 @@ Upgrading to version 11 is recommended when using logistic regressions."""
                 gen_constr.setAttr(attr, val)
         self.gp_model.update()
 
-        if self.predict_function == "predict_proba" and self.predict_class != 1:
-            self.gp_model.addConstr(log_result[:, 0] == self.output[:, 1])
-            self.gp_model.addConstr(self.output[:, 0] == 1 - self.output[:, 1])
+        self.gp_model.addConstr(log_result[:, 0] == self.output[:, 1])
+        self.gp_model.addConstr(self.output[:, 0] == 1 - self.output[:, 1])
 
         self.gp_model.write("debug.lp")
 
