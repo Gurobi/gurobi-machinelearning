@@ -33,15 +33,26 @@ class SKgetter(AbstractPredictorConstr):
         Scikit-Learn predictor embedded into Gurobi model.
     """
 
-    def __init__(self, predictor, input_vars, output_type="regular", **kwargs):
+    def __init__(
+        self,
+        predictor,
+        input_vars,
+        predict_function="predict",
+        **kwargs,
+    ):
         check_is_fitted(predictor)
         self.predictor = predictor
         predictor._check_feature_names(input_vars, reset=False)
-        self.output_type = output_type
+        # Raises an error if prediction function is not in predictor
+        if getattr(predictor, predict_function):
+            pass
+        self.predict_function = predict_function
         if hasattr(predictor, "n_features_in_"):
             self._input_shape = predictor.n_features_in_
         if hasattr(predictor, "n_outputs_"):
             self._output_shape = predictor.n_outputs_
+        elif hasattr(predictor, "classes_") and predict_function == "predict_proba":
+            self._output_shape = len(predictor.classes_)
 
     def get_error(self, eps=None):
         """Return error in Gurobi's solution with respect to prediction from input.
@@ -60,12 +71,19 @@ class SKgetter(AbstractPredictorConstr):
         """
         if self._has_solution:
             X = self.input_values
-            if self.output_type == "probability_1":
-                predicted = self.predictor.predict_proba(X)[:, 1]
-            elif self.output_type == "probability":
-                predicted = self.predictor.predict_proba(X)
+
+            # FIXME: should always test error using predict_proba even
+            # for classification
+            if (
+                hasattr(self.predictor, "predict_proba")
+                and self.predict_function == "predict_proba"
+            ):
+                predict_function = self.predictor.predict_proba
             else:
-                predicted = self.predictor.predict(X)
+                predict_function = self.predictor.predict
+
+            predicted = predict_function(X)
+
             output_values = self.output_values
             if len(predicted.shape) == 1 and len(output_values.shape) == 2:
                 predicted = predicted.reshape(-1, 1)
