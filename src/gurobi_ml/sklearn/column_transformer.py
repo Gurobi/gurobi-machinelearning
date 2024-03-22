@@ -20,7 +20,7 @@ import warnings
 import gurobipy as gp
 from sklearn.preprocessing import FunctionTransformer
 
-from ..exceptions import NoModel
+from ..modeling.get_convertor import get_convertor
 from .preprocessing import sklearn_transformers
 from .skgetter import SKtransformer
 
@@ -125,10 +125,9 @@ class ColumnTransformerConstr(SKtransformer):
                         data = data[:, cols]
                         any_var = True
                 if any_var:
-                    try:
-                        trans_constr = transformers[name](self.gp_model, trans, data)
-                    except KeyError:
-                        raise NoModel(name, "No implementation found")
+                    trans_constr = get_convertor(trans, sklearn_transformers())(
+                        self.gp_model, trans, data
+                    )
                     transformed.append(trans_constr.output.tolist())
                 else:
                     transformed.append(trans.transform(_input.loc[:, cols]))

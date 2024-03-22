@@ -15,6 +15,8 @@
 
 """Utility function to find function that add a predictor in dictionnary."""
 
+from ..exceptions import NotRegistered
+
 
 def get_convertor(predictor, convertors):
     """Return the convertor for a given predictor."""
@@ -23,17 +25,19 @@ def get_convertor(predictor, convertors):
         convertor = convertors[type(predictor)]
     except KeyError:
         pass
-    if convertor is None:
+    if not convertor:
         for parent in type(predictor).mro():
             try:
                 convertor = convertors[parent]
                 break
             except KeyError:
                 pass
-    if convertor is None:
+    if not convertor:
         name = type(predictor).__name__
         try:
             convertor = convertors[name]
         except KeyError:
             pass
+    if not convertor:
+        raise NotRegistered(type(predictor).__name__)
     return convertor

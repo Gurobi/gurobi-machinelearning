@@ -11,7 +11,7 @@ from sklearn.preprocessing import PolynomialFeatures, QuantileTransformer
 from sklearn.svm import LinearSVR
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoModel, ParameterError
+from gurobi_ml.exceptions import NoModel, NotRegistered, ParameterError
 
 
 class TestUnsuportedSklearn(unittest.TestCase):
@@ -88,7 +88,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
 
         x = m.addMVar(example.shape, name="x")
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(NotRegistered):
             add_predictor_constr(m, mlpreg, x)
 
     def test_polynomial_feature_degree3(self):
@@ -124,5 +124,5 @@ class TestUnsuportedSklearn(unittest.TestCase):
 
         x = m.addMVar(example.shape, name="x")
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(NotRegistered):
             add_predictor_constr(m, mlpreg, x)
