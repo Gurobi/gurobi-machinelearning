@@ -206,9 +206,7 @@ Upgrading to version 11 is recommended when using logistic regressions."""
             self.gp_model.addConstr(bin_output <= log_result + 0.5)
             self.gp_model.addConstr(bin_output == self.output)
         else:
-            log_result = self.gp_model.addMVar(
-                (m, 1), lb=-gp.GRB.INFINITY, name="log_result"
-            )
+            log_result = self.output[:, 1]
 
         affinevars = self.gp_model.addMVar(
             (m, 1), lb=-gp.GRB.INFINITY, name="affine_trans"
@@ -229,10 +227,7 @@ Upgrading to version 11 is recommended when using logistic regressions."""
         self.gp_model.update()
 
         if self.predict_function == "predict_proba":
-            self.gp_model.addConstr(log_result[:, 0] == self.output[:, 1])
             self.gp_model.addConstr(self.output[:, 0] == 1 - self.output[:, 1])
-
-        self.gp_model.write("debug.lp")
 
     @property
     def affine_transformation_variables(self) -> gp.MVar:

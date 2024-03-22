@@ -81,17 +81,13 @@ StandardScaler and LogisticRegression.
 
 """
 
-import sys
-
 import gurobipy as gp
 import gurobipy_pandas as gppd
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.tree import DecisionTreeRegressor
 
 from gurobi_ml import add_predictor_constr
 
@@ -145,7 +141,7 @@ pipe.fit(X=historical_data.loc[:, features], y=historical_data.loc[:, target])
 # Retrieve new data used to build the optimization problem
 studentsdata = pd.read_csv(janos_data_url + "college_applications6000.csv", index_col=0)
 
-nstudents = 25
+nstudents = 20
 
 # Select randomly nstudents in the data
 studentsdata = studentsdata.sample(nstudents, random_state=1)
