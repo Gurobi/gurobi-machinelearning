@@ -51,7 +51,7 @@ class TestUnsuportedKeras(unittest.TestCase):
 
         nn = tf.keras.models.Sequential(
             [
-                tf.keras.layers.InputLayer(28 * 28),
+                tf.keras.layers.InputLayer((28 * 28,)),
                 tf.keras.layers.Dense(50, activation="sigmoid"),
                 tf.keras.layers.Dense(50, activation="relu"),
                 tf.keras.layers.Dense(10),
@@ -89,7 +89,7 @@ class TestUnsuportedKeras(unittest.TestCase):
 
         nn = tf.keras.models.Sequential(
             [
-                tf.keras.layers.InputLayer(28 * 28),
+                tf.keras.layers.InputLayer((28 * 28,)),
                 tf.keras.layers.Dense(50),
                 tf.keras.layers.ReLU(**kwargs),
                 tf.keras.layers.Dense(10),
