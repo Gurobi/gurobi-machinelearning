@@ -51,3 +51,4 @@ repos:
       rev: v0.19.1 # Fill in a tag / sha here (e.g. v0.19.1)
       hooks:
       - id: gitlint
+        args: [--ignore=B6, --msg-filename]
