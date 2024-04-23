@@ -23,7 +23,7 @@ import warnings
 import gurobipy as gp
 import numpy as np
 
-from ..exceptions import NoModel, ParameterError
+from ..exceptions import ParameterError
 from .base_regressions import BaseSKlearnRegressionConstr
 
 
@@ -32,7 +32,7 @@ def add_logistic_regression_constr(
     logistic_regression,
     input_vars,
     output_vars=None,
-    output_type="classification",
+    predict_function="predict",
     epsilon=0.0,
     pwl_attributes=None,
     **kwargs,
@@ -66,13 +66,13 @@ def add_logistic_regression_constr(
     output_vars : mvar_array_like, optional
         Decision variables used as output for logistic regression in model.
 
-    output_type : {'classification', 'probability_1'}, default='classification'
-        If the option chosen is 'classification' the output is the class label
+    predict_function: {'predict', 'predict_proba'}, default='predict'
+        If the option chosen is 'predict' the output is the class label
         of either 0 or 1 given by the logistic regression. If the option
-        'probability_1' is chosen the output is the probability of the class 1.
+        'predict_proba' is chosen the output is the probability of each class.
 
     epsilon : float, default=0.0
-        When the `output_type` is 'classification', this tolerance can be set
+        When the `predict_function` is 'predict', this tolerance can be set
         to enforce that class 1 is chosen when the result of the logistic
         function is greater or equal to *0.5 + epsilon*.
 
@@ -110,7 +110,7 @@ def add_logistic_regression_constr(
         If the logistic regression is not a binary label regression
 
     ParameterError
-        If the value of output_type is set to a non-conforming value (see above).
+        If the value of predict_function is set to a non-conforming value (see above).
 
     Notes
     -----
@@ -121,7 +121,7 @@ def add_logistic_regression_constr(
         logistic_regression,
         input_vars,
         output_vars,
-        output_type,
+        predict_function,
         epsilon,
         pwl_attributes=pwl_attributes,
         **kwargs,
@@ -141,22 +141,18 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         predictor,
         input_vars,
         output_vars=None,
-        output_type="classification",
+        predict_function="predict",
         epsilon=0.0,
         pwl_attributes=None,
         **kwargs,
     ):
-        if len(predictor.classes_) > 2:
-            raise NoModel(
-                predictor, "Logistic regression only supported for two classes"
-            )
         if pwl_attributes is None:
             self.attributes = self.default_pwl_attributes()
         else:
             self.attributes = pwl_attributes
-        if output_type not in ("classification", "probability_1"):
+        if predict_function not in ("predict", "predict_proba"):
             raise ParameterError(
-                "output_type should be either 'classification' or 'probability_1'"
+                "predict_function should be either 'predict' or 'predict_proba'"
             )
         self.epsilon = epsilon
         self._default_name = "log_reg"
@@ -167,7 +163,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             predictor,
             input_vars,
             output_vars,
-            output_type,
+            predict_function,
             **kwargs,
         )
 
@@ -192,9 +188,12 @@ Upgrading to version 11 is recommended when using logistic regressions."""
             }
         return {"FuncNonlinear": 1}
 
-    def _mip_model(self, **kwargs):
+    def _two_classes_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
-        if self.output_type == "classification":
+
+        m, _ = self.output.shape
+
+        if self.predict_function == "predict":
             # For classification we need an extra binary variable
             log_result = self.gp_model.addMVar(
                 self.output.shape, lb=-gp.GRB.INFINITY, name="log_result"
@@ -207,14 +206,14 @@ Upgrading to version 11 is recommended when using logistic regressions."""
             self.gp_model.addConstr(bin_output <= log_result + 0.5)
             self.gp_model.addConstr(bin_output == self.output)
         else:
-            log_result = self.output
+            log_result = self.output[:, 1]
 
         affinevars = self.gp_model.addMVar(
-            self.output.shape, lb=-gp.GRB.INFINITY, name="affine_trans"
+            (m, 1), lb=-gp.GRB.INFINITY, name="affine_trans"
         )
         self._add_regression_constr(output=affinevars)
 
-        for index in np.ndindex(self.output.shape):
+        for index in np.ndindex(log_result.shape):
             self.gp_model.addGenConstrLogistic(
                 affinevars[index],
                 log_result[index],
@@ -227,9 +226,73 @@ Upgrading to version 11 is recommended when using logistic regressions."""
                 gen_constr.setAttr(attr, val)
         self.gp_model.update()
 
+        if self.predict_function == "predict_proba":
+            self.gp_model.addConstr(self.output[:, 0] == 1 - self.output[:, 1])
+
     @property
     def affine_transformation_variables(self) -> gp.MVar:
         """Variables that store the result of the affine transformation from the regression coefficient.
         (intermediate result before applying the logistic function).
         """
         return self.affinevars
+
+    def _multi_class_model(self, **kwargs):
+        """Add the prediction constraints to Gurobi."""
+        outputvars = self._output
+        coefs = self.predictor.coef_
+        intercept = self.predictor.intercept_
+        affinevars = self._gp_model.addMVar(
+            self.output.shape, lb=-gp.GRB.INFINITY, name="affine_trans"
+        )
+        self.affinevars = affinevars
+        self.gp_model.addConstr(
+            affinevars == self.input @ coefs.T + intercept, name="linreg"
+        )
+
+        self._output = outputvars
+        if self.predict_function == "predict":
+            self.gp_model.addConstr(self.output.sum(axis=1) == 1)
+
+            # Do the argmax
+            # We use indicators (a lot of them)
+            for index in np.ndindex(outputvars.shape):
+                i, j = index
+                for k in np.ndindex(outputvars.shape[1]):
+                    if k == j:
+                        continue
+                    self.gp_model.addGenConstrIndicator(
+                        outputvars[index],
+                        1,
+                        affinevars[index] - affinevars[i, k],
+                        gp.GRB.GREATER_EQUAL,
+                        self.epsilon,
+                    )
+            return
+        if self.predict_function == "predict_proba":
+            exp_vars = self.gp_model.addMVar(outputvars.shape)
+            self.exp_vars = exp_vars
+            sum_vars = self.gp_model.addMVar((outputvars.shape[0]), lb=self.epsilon)
+            self.sum_vars = sum_vars
+            num_gc = self.gp_model.NumGenConstrs
+            for index in np.ndindex(outputvars.shape):
+                self.gp_model.addGenConstrExp(
+                    affinevars[index],
+                    exp_vars[index],
+                    name=self._indexed_name(index, "exponential"),
+                )
+            self.gp_model.update()
+            for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
+                for attr, val in self.attributes.items():
+                    gen_constr.setAttr(attr, val)
+            self.gp_model.addConstr(sum_vars == exp_vars.sum(axis=1))
+            self.gp_model.addConstrs(
+                outputvars[i, :] * sum_vars[i] == exp_vars[i, :]
+                for i in range(outputvars.shape[0])
+            )
+            return
+        self._gp_model.addConstr(self._output == affinevars)
+
+    def _mip_model(self, **kwargs):
+        if self._output_shape > 2:
+            return self._multi_class_model(**kwargs)
+        return self._two_classes_model(**kwargs)
