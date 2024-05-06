@@ -10,7 +10,7 @@ numpydoc==1.7.0
 pandas==2.2.2
 scikit-learn==1.4.1.post1
 seaborn==0.13.2
-Sphinx==7.2.6
+Sphinx==7.3.7
 sphinx-copybutton==0.5.2
 sphinx-rtd-theme==2.0.0
 nbsphinx==0.9.3
