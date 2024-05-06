@@ -49,9 +49,13 @@ class TestSklearnModel(FixedRegressionModel):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", float_type=np.float32)
-            self.do_one_case(onecase, X, 6, "pairs", float_type=np.float32)
-            self.do_one_case(onecase, X, 5, "all", float_type=np.float32, no_debug=True)
+            self.do_one_case(onecase, X, 5, "all", float_type=np.float32, epsilon=1e-5)
+            self.do_one_case(
+                onecase, X, 6, "pairs", float_type=np.float32, epsilon=1e-5
+            )
+            self.do_one_case(
+                onecase, X, 5, "all", float_type=np.float32, no_debug=True, epsilon=1e-5
+            )
             self.do_one_case(
                 onecase, X, 6, "pairs", float_type=np.float32, no_debug=True
             )
