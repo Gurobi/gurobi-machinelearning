@@ -1,5 +1,5 @@
 gurobipy==11.0.1
-gurobipy-pandas==1.1.1
+gurobipy-pandas==1.1.2
 ipykernel==6.29.4
 jupytext==1.16.1
 matplotlib==3.6.0
