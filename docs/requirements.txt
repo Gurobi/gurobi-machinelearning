@@ -1,7 +1,7 @@
 gurobipy==11.0.1
 gurobipy-pandas==1.1.2
 ipykernel==6.29.4
-jupytext==1.16.1
+jupytext==1.16.2
 matplotlib==3.6.0
 matplotlib-inline==0.1.7
 sphinxcontrib_bibtex==2.6.2
@@ -14,7 +14,7 @@ Sphinx==7.3.7
 sphinx-copybutton==0.5.2
 sphinx-rtd-theme==2.0.0
 nbsphinx==0.9.3
-jupytext==1.16.1
+jupytext==1.16.2
 sphinx_design==0.6.0
 sphinx-pyproject==0.3.0
 pydata-sphinx-theme==0.15.2
