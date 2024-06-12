@@ -15,7 +15,6 @@
 
 """Module for formulating :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression` in a gurobipy model."""
 
-import numpy as np
 
 from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
@@ -87,14 +86,10 @@ class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
     def _add_regression_constr(self):
         """Add the prediction constraints to Gurobi."""
         x_mean = self.predictor._x_mean
-        x_std = self.predictor._x_std
         coefs = self.predictor.coef_.T
         intercept = self.predictor.intercept_
         self.gp_model.addConstr(
-            self.output
-            == self.input @ (coefs / x_std[:, np.newaxis])
-            - x_mean / x_std @ coefs
-            + intercept,
+            self.output == self.input @ coefs - x_mean @ coefs + intercept,
             name="plsreg",
         )
 
