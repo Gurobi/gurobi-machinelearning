@@ -46,3 +46,9 @@ repos:
           entry: python3 .github/hooks/license_embedded.py
           language: system
           files: (src/.*\.py|.*\.ipynb)
+
+    - repo: https://github.com/jorisroovers/gitlint
+      rev: v0.19.1 # Fill in a tag / sha here (e.g. v0.19.1)
+      hooks:
+      - id: gitlint
+        args: [--ignore=B6, --msg-filename]
