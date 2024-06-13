@@ -18,7 +18,6 @@ in a :gurobipy:`model`.
 """
 
 
-from ..exceptions import NoModel
 from ..modeling.base_predictor_constr import AbstractPredictorConstr
 from ..modeling.get_convertor import get_convertor
 from ..register_user_predictor import user_predictors
@@ -107,11 +106,6 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
 
         for transformer in pipeline[:-1]:
             convertor = get_convertor(transformer, transformers)
-            if convertor is None:
-                raise NoModel(
-                    self.predictor,
-                    f"I don't know how to deal with that object: {transformer}",
-                )
             steps.append(convertor(gp_model, transformer, input_vars, **kwargs))
             input_vars = steps[-1].output
 
@@ -119,11 +113,6 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         predictors = sklearn_predictors() | user_predictors()
         predictors |= xgboost_sklearn_convertors()
         convertor = get_convertor(predictor, predictors)
-        if convertor is None:
-            raise NoModel(
-                self.predictor,
-                f"I don't know how to deal with that object: {predictor}",
-            )
         steps.append(convertor(gp_model, predictor, input_vars, output_vars, **kwargs))
         if self._output is None:
             self._output = steps[-1].output

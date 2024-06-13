@@ -12,7 +12,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoModel
+from gurobi_ml.exceptions import NotRegistered
 
 
 class TestUnsuportedPandas(unittest.TestCase):
@@ -47,7 +47,7 @@ class TestUnsuportedPandas(unittest.TestCase):
 
         x = self.create_input(m, example)
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(NotRegistered):
             add_predictor_constr(m, mlpreg, x)
 
     def test_pipeline_fail_transformer_str(self):
@@ -71,5 +71,5 @@ class TestUnsuportedPandas(unittest.TestCase):
 
         x = self.create_input(m, example)
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(NotRegistered):
             add_predictor_constr(m, mlpreg, x)
