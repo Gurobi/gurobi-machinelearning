@@ -40,9 +40,9 @@ def add_sequential_constr(
     sequential_model : :external+torch:py:class:`torch.nn.Sequential`
         The sequential model to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for logistic regression in model.
+        Decision variables used as input for model represented by pytorch object.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for logistic regression in model.
+        Decision variables used as output for model represented by pytorch object.
 
     Returns
     -------
