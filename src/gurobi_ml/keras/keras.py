@@ -74,11 +74,26 @@ class KerasNetworkConstr(BaseNNConstr):
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         assert predictor.built
         for step in predictor.layers:
-            if isinstance(step, keras.layers.Dense):
+            if isinstance(step, (keras.layers.Dense)):
                 config = step.get_config()
                 activation = config["activation"]
-                if activation not in ("relu", "linear"):
+                if activation == "softmax":
+                    pass
+                elif activation not in ("relu", "linear"):
                     raise NoModel(predictor, f"Unsupported activation {activation}")
+            elif isinstance(step, (keras.layers.Conv2D)):
+                config = step.get_config()
+                activation = config["activation"]
+                if activation == "softmax":
+                    pass
+                elif activation not in ("relu", "linear"):
+                    raise NoModel(predictor, f"Unsupported activation {activation}")
+                kwargs["accepted_dim"] = (4,)
+            elif isinstance(
+                step,
+                (keras.layers.MaxPooling2D, keras.layers.Flatten, keras.layers.Dropout),
+            ):
+                pass
             elif isinstance(step, keras.layers.ReLU):
                 if step.negative_slope != 0.0:
                     raise NoModel(
@@ -115,12 +130,13 @@ class KerasNetworkConstr(BaseNNConstr):
                     _input, self.act_dict["relu"], output, name=f"relu{i}", **kwargs
                 )
                 _input = layer.output
-            else:
+            elif isinstance(step, keras.layers.Dense):
                 config = step.get_config()
                 activation = config["activation"]
                 if activation == "linear":
                     activation = "identity"
                 weights, bias = step.get_weights()
+                kwargs["accepted_dim"] = (2,)
                 layer = self._add_dense_layer(
                     _input,
                     weights,
@@ -128,6 +144,27 @@ class KerasNetworkConstr(BaseNNConstr):
                     self.act_dict[activation],
                     output,
                     name=f"dense{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.Conv2D):
+                config = step.get_config()
+                activation = config["activation"]
+                if activation == "linear":
+                    activation = "identity"
+                weights, bias = step.get_weights()
+                kwargs["accepted_dim"] = (4,)
+                layer = self._add_conv2d_layer(
+                    _input,
+                    weights,
+                    bias,
+                    config["filters"],
+                    config["kernel_size"],
+                    config["strides"],
+                    config["padding"],
+                    self.act_dict[activation],
+                    output,
+                    name=f"conv2d{i}",
                     **kwargs,
                 )
                 _input = layer.output

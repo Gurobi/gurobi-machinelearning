@@ -158,7 +158,7 @@ def _array_to_mvar(model, data, columns=None, index=None):
     return rval
 
 
-def validate_output_vars(gp_vars):
+def validate_output_vars(gp_vars, accepted_dim=(1, 2)):
     """Put variables into appropriate form (matrix of variable) for the output of a predictor constraint.
 
     Parameters
@@ -180,9 +180,13 @@ def validate_output_vars(gp_vars):
         rval = gp.MVar.fromlist(gp_vars.tolist())
         return rval
     if isinstance(gp_vars, gp.MVar):
-        if gp_vars.ndim in (1, 2):
+        if gp_vars.ndim in accepted_dim:
             return gp_vars
-        raise ParameterError("Variables should be an MVar of dimension 1 or 2")
+        raise ParameterError(
+            "Variables should be an MVar of dimension {}".format(
+                " or ".join([f"{d}" for d in accepted_dim])
+            )
+        )
     if isinstance(gp_vars, dict):
         gp_vars = list(gp_vars.values())
     if isinstance(gp_vars, list):
@@ -193,7 +197,7 @@ def validate_output_vars(gp_vars):
     raise ParameterError("Could not validate variables")
 
 
-def validate_input_vars(model, gp_vars):
+def validate_input_vars(model, gp_vars, accepted_dim=(1, 2)):
     """Put variables into appropriate form (matrix of variable) for the input of a predictor constraint.
 
     Parameters
@@ -206,6 +210,15 @@ def validate_input_vars(model, gp_vars):
     mvar_array_like
         Decision variables with correctly adjusted shape.
     """
+    if accepted_dim != (1, 2):
+        if gp_vars.ndim in accepted_dim:
+            return (gp_vars, None, None)
+        raise ParameterError(
+            "Variables should be an MVar of dimension {} dimension".format(
+                " or ".join([f"{d}" for d in accepted_dim]), gp_vars.ndim
+            )
+        )
+
     if HAS_PANDAS:
         if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
             columns = gp_vars.columns
