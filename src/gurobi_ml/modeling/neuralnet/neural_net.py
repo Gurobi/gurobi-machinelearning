@@ -18,7 +18,7 @@
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
 from .activations import Identity, ReLU
-from .layers import ActivationLayer, DenseLayer
+from .layers import ActivationLayer, Conv2DLayer, DenseLayer
 
 
 class BaseNNConstr(AbstractPredictorConstr):
@@ -92,6 +92,51 @@ class BaseNNConstr(AbstractPredictorConstr):
             input_vars,
             layer_coefs,
             layer_intercept,
+            activation,
+            **kwargs,
+        )
+        self._layers.append(layer)
+        return layer
+
+    def _add_conv2d_layer(
+        self,
+        input_vars,
+        layer_coefs,
+        layer_intercept,
+        channels,
+        kernel_size,
+        stride,
+        padding,
+        activation,
+        activation_vars=None,
+        **kwargs,
+    ):
+        """Add a conv2d layer to gurobipy model.
+
+        Parameters
+        ----------
+
+        input_vars : mvar_array_like
+            Decision variables used as input for predictor in model.
+        layer_coefs:
+            Coefficient for each node in a layer
+        layer_intercept:
+            Intercept bias
+        activation:
+            Activation function
+        activation_vars : None, optional
+            Output variables
+        """
+        layer = Conv2DLayer(
+            self.gp_model,
+            activation_vars,
+            input_vars,
+            layer_coefs,
+            layer_intercept,
+            channels,
+            kernel_size,
+            stride,
+            padding,
             activation,
             **kwargs,
         )

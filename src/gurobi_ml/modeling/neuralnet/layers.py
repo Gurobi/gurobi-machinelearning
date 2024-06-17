@@ -133,6 +133,137 @@ class DenseLayer(AbstractNNLayer):
         """Add the layer to model."""
         model = self.gp_model
         model.update()
+
+        mixing = self.gp_model.addMVar(
+            self.output.shape,
+            lb=-gp.GRB.INFINITY,
+            vtype=gp.GRB.CONTINUOUS,
+            name=self._name_var("mix"),
+        )
+        self.mixing = mixing
+        self.gp_model.update()
+
+        self.gp_model.addConstr(self.mixing == self.input @ self.coefs + self.intercept)
+        if "activation" in kwargs:
+            activation = kwargs["activation"]
+        else:
+            activation = self.activation
+
+        # Do the mip model for the activation in the layer
+        activation.mip_model(self)
+        self.gp_model.update()
+
+    def print_stats(self, abbrev=False, file=None):
+        """Print statistics about submodel created.
+
+        Parameters
+        ----------
+
+        file : None, optional
+          Text stream to which output should be redirected. By default sys.stdout.
+        """
+        if not isinstance(self.activation, Identity):
+            output = io.StringIO()
+            AbstractPredictorConstr.print_stats(self, abbrev=True, file=output)
+            activation_name = f"({_default_name(self.activation)})"
+
+            out_string = output.getvalue()
+            print(f"{out_string[:-1]} {activation_name}", file=file)
+            return
+        AbstractPredictorConstr.print_stats(self, abbrev=True, file=file)
+
+
+class Conv2DLayer(AbstractNNLayer):
+    """Class to build one convolution 2D layer of a neural network."""
+
+    def __init__(
+        self,
+        gp_model,
+        output_vars,
+        input_vars,
+        layer_coefs,
+        layer_intercept,
+        channels,
+        kernel_size,
+        stride,
+        padding,
+        activation_function,
+        **kwargs,
+    ):
+        self.coefs = layer_coefs
+        self.intercept = layer_intercept
+        self.channels = channels
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.zvar = None
+        self._default_name = "conv2d"
+        super().__init__(
+            gp_model,
+            output_vars,
+            input_vars,
+            activation_function,
+            **kwargs,
+        )
+
+    def _create_output_vars(self, input_vars):
+        assert len(input_vars.shape) == 4
+
+        # compute shape of output
+        # should be (input + padding)/stride
+        padding = 0
+        output_shape = input_vars.shape[1] + 2 * padding - self.kernel_size[0]
+        output_shape /= self.stride[0]
+        output_shape += 1
+        output_shape_0 = output_shape
+        output_shape = input_vars.shape[2] + 2 * padding - self.kernel_size[1]
+        output_shape /= self.stride[1]
+        output_shape += 1
+        output_shape_1 = output_shape
+        output_shape = (
+            input_vars.shape[0],
+            int(output_shape_0),
+            int(output_shape_1),
+            self.channels,
+        )
+        print(output_shape)
+        rval = self.gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="act")
+        self.gp_model.update()
+        return rval
+
+    def _mip_model(self, **kwargs):
+        """Add the layer to model."""
+        model = self.gp_model
+        model.update()
+
+        (_, height, width, _) = self.input.shape
+        mixing = self.gp_model.addMVar(
+            self.output.shape,
+            lb=-gp.GRB.INFINITY,
+            vtype=gp.GRB.CONTINUOUS,
+            name=self._name_var("mix"),
+        )
+        self.mixing = mixing
+        self.gp_model.update()
+
+        assert self.padding == "valid"
+
+        # Here comes the complicated loop...
+        # I am sure there is a better way but this is a pedestrian version
+        kernel_w, kernel_h = self.kernel_size
+        stride_w, stride_h = self.stride
+        for k in range(self.channels):
+            for i in range(0, height - kernel_h, stride_h):
+                for j in range(0, width - kernel_w, stride_w):
+                    self.gp_model.addConstr(
+                        mixing[:, i, j, k]
+                        == (
+                            self.input[:, i : i + kernel_h, j : j + kernel_w, :]
+                            * self.coefs[:, :, :, k]
+                        ).sum()
+                        + self.intercept[k]
+                    )
+
         if "activation" in kwargs:
             activation = kwargs["activation"]
         else:
