@@ -16,7 +16,6 @@
 """Internal module to make MIP modeling of activation functions."""
 
 import numpy as np
-from gurobipy import GRB
 
 
 class Identity:
@@ -44,8 +43,11 @@ class Identity:
         layer : AbstractNNLayer
             Layer to which activation is applied.
         """
-        output = layer.output
-        layer.gp_model.addConstr(output == layer.input @ layer.coefs + layer.intercept)
+        if hasattr(layer, "mixing"):
+            mixing = layer.mixing
+        else:
+            mixing = layer.input
+        layer.gp_model.addConstr(layer.output == mixing)
 
 
 class ReLU:
@@ -78,22 +80,10 @@ class ReLU:
             Layer to which activation is applied.
         """
         output = layer.output
-        if hasattr(layer, "coefs"):
-            if not hasattr(layer, "mixing"):
-                mixing = layer.gp_model.addMVar(
-                    output.shape,
-                    lb=-GRB.INFINITY,
-                    vtype=GRB.CONTINUOUS,
-                    name=layer._name_var("mix"),
-                )
-                layer.mixing = mixing
-            layer.gp_model.update()
-
-            layer.gp_model.addConstr(
-                layer.mixing == layer.input @ layer.coefs + layer.intercept
-            )
+        if hasattr(layer, "mixing"):
+            mixing = layer.mixing
         else:
-            mixing = layer._input
+            mixing = layer.input
         for index in np.ndindex(output.shape):
             layer.gp_model.addGenConstrMax(
                 output[index],
