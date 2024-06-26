@@ -155,14 +155,22 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
             raise NoModel(
                 predictor, "Logistic regression only supported for two classes"
             )
-        if pwl_attributes is None:
-            self.attributes = self.default_pwl_attributes(output_type)
-        else:
-            self.attributes = pwl_attributes
         if output_type not in ("classification", "probability_1"):
             raise ParameterError(
                 "output_type should be either 'classification' or 'probability_1'"
             )
+        if output_type == "classification" and pwl_attributes is not None:
+            message = """
+pwl_attributes are not required for classification.  The problem is
+formulated without requiring the non-linear logistic function."""
+            warnings.warn(message)
+        elif output_type != "classification":
+            self.attributes = (
+                self.default_pwl_attributes()
+                if pwl_attributes is None
+                else pwl_attributes
+            )
+
         self.epsilon = epsilon
         self._default_name = "log_reg"
         self.affinevars = None
@@ -177,14 +185,14 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         )
 
     @staticmethod
-    def default_pwl_attributes(output_type) -> dict:
+    def default_pwl_attributes() -> dict:
         """Default attributes for approximating the logistic function with Gurobi.
 
         See `Gurobi's User Manual
         <https://www.gurobi.com/documentation/current/refman/general_constraint_attribu.html>`_
         for the meaning of the attributes.
         """
-        if gp.gurobi.version()[0] < 11 and output_type != "classification":
+        if gp.gurobi.version()[0] < 11:
             message = """
 Gurobi ≥ 11 can deal directly with nonlinear functions with 'FuncNonlinear'.
 Upgrading to version 11 is recommended when using logistic regressions."""
