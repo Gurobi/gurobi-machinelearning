@@ -43,16 +43,16 @@ def add_logistic_regression_constr(
     The formulation predicts the values of output_vars using input_vars according to
     logistic_regression.
 
-    When the desired output type is classification the result can be achieved without
-    appealing to the logistic function, and consequently non-linearity can be avoided.
-    When the desired output type is regression then the (non-linear) logistic function
-    is required. For users of Gurobi ≥ 11.0, the attribute FuncNonlinear is set to 1 to
-    deal directly with the logistic function in an algorithmic fashion.
+    When the desired output type is classification a mixed integer linear formulation
+    using indicator constraints is used. When the desired output type is regression
+    then the (non-linear) logistic function is required. For users of Gurobi ≥ 11.0,
+    the attribute FuncNonlinear is set to 1 to deal directly with the logistic
+    function in an algorithmic fashion.
 
     For older versions, Gurobi makes a piecewise linear approximation of the logistic
     function.
     The quality of the approximation can be controlled with the parameter
-    pwl_attributes. By default, it is parameterized so that the maximal error of the
+    pwl_attributes. By default, it is parametrized so that the maximal error of the
     approximation is `1e-2`.
 
     See our :ref:`Users Guide <Logistic Regression>` for
