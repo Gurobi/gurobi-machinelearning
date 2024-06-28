@@ -116,7 +116,7 @@ class TestSklearnModel(FixedRegressionModel):
                 X,
                 5,
                 "all",
-                output_type="classification",
+                output_type="probability_1",
                 pwl_attributes={"FuncPieces": 5},
             )
 
