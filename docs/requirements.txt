@@ -1,4 +1,4 @@
-gurobipy==11.0.1
+gurobipy==11.0.2
 gurobipy-pandas==1.1.2
 ipykernel==6.29.4
 jupytext==1.16.2
