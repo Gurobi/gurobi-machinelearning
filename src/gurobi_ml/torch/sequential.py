@@ -101,11 +101,17 @@ class SequentialConstr(BaseNNConstr):
                 )
                 _input = layer.output
             elif isinstance(step, nn.Linear):
+                layer_weight = None
+                layer_bias = None
                 for name, param in step.named_parameters():
                     if name == "weight":
                         layer_weight = param.detach().numpy().T
                     elif name == "bias":
                         layer_bias = param.detach().numpy()
+                if layer_weight is None:
+                    raise NotImplementedError("No weights specified for newwork layer.")
+                if layer_bias is None:
+                    layer_bias = 0.0
                 layer = self._add_dense_layer(
                     _input,
                     layer_weight,
