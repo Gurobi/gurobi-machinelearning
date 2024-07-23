@@ -135,6 +135,9 @@ numpydoc_class_members_toctree = False
 #
 html_theme = "gurobi_sphinxtheme"
 html_theme_options = {
+    "version_warning": False,
+    "feedback_banner": False,
+    "construction_warning": False,
     "logo": {
         "text": "GUROBI Machine Learning",
         #     "image_light": "_static/gurobi.png",
