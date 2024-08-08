@@ -133,8 +133,11 @@ numpydoc_class_members_toctree = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "pydata_sphinx_theme"
+html_theme = "gurobi_sphinxtheme"
 html_theme_options = {
+    "version_warning": False,
+    "feedback_banner": False,
+    "construction_warning": False,
     "logo": {
         "text": "GUROBI Machine Learning",
         #     "image_light": "_static/gurobi.png",
