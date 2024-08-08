@@ -19,6 +19,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
+        gurobi-version: ["gurobi10", "gurobi11"]
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -41,3 +42,5 @@ jobs:
     - name: Test with tox, excluding the examples target
       run: |
         tox
+      env:
+        GUROBI_VERSION: ${{matrix.gurobi-version}}
