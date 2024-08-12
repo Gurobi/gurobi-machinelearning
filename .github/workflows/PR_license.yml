@@ -22,6 +22,10 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
+        gurobi-version: ["gurobi10", "gurobi11"]
+        exclude:
+          - python-version: "3.12"
+            gurobi-version: "gurobi10"
     steps:
     - uses: actions/checkout@v4
       with:
@@ -45,14 +49,9 @@ jobs:
         echo "$LICENSE" > $PWD/gurobi.lic
         echo "grb_license_file=$PWD/gurobi.lic" >> $GITHUB_OUTPUT
     - name: Test with tox
-      env:
-        GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
       run: |
         tox
         tox -e examples
-    - name: Run Gurobi 10 specific tests
-      if: matrix.python-version == '3.11'
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
-      run: |
-        tox -e $(echo py311-{lightgbm,keras,pytorch,sklearn,xgboost,no_deps,all_deps}-gurobi10 | tr ' ' ',')
+        GUROBI_VERSION: ${{ matrix.gurobi-version }}

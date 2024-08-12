@@ -47,4 +47,4 @@ jobs:
       run: |
         tox
       env:
-        GUROBI_VERSION: ${{matrix.gurobi-version}}
+        GUROBI_VERSION: ${{ matrix.gurobi-version }}
