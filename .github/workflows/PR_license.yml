@@ -26,6 +26,8 @@ jobs:
         exclude:
           - python-version: "3.12"
             gurobi-version: "gurobi10"
+    env:
+      GUROBI_VERSION: ${{ matrix.gurobi-version }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -53,5 +55,4 @@ jobs:
         tox
         tox -e examples
       env:
-        GUROBI_VERSION: ${{ matrix.gurobi-version }}
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
