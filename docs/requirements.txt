@@ -5,7 +5,7 @@ jupytext==1.16.2
 matplotlib==3.6.0
 matplotlib-inline==0.1.7
 sphinxcontrib_bibtex==2.6.2
-numpy==1.26.4
+numpy==2.0.2
 numpydoc==1.7.0
 pandas==2.2.2
 scikit-learn==1.5.1
