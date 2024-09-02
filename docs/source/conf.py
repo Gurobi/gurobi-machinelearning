@@ -134,36 +134,14 @@ numpydoc_class_members_toctree = False
 # a list of builtin themes.
 #
 html_theme = "gurobi_sphinxtheme"
+html_title = project + " Manual"
 html_theme_options = {
     "version_warning": False,
-    "feedback_banner": False,
+    "feedback_banner": True,
     "construction_warning": False,
-    "logo": {
-        "text": "GUROBI Machine Learning",
-        #     "image_light": "_static/gurobi.png",
-        #     "image_dark": "_static/gurobi.png",
-        #     "alt_text": "Gurobi home",
-    },
-    "navbar_align": "content",
-    "icon_links": [
-        {
-            "name": "GitHub",
-            "url": "https://github.com/Gurobi/Gurobi-machinelearning",
-            "icon": "fa-brands fa-github",
-        },
-        {
-            "name": "Gurobi",
-            "url": "https://www.gurobi.com",
-            "icon": "_static/gurobi.png",
-            "type": "local",
-        },
-    ],
+    "sidebar_hide_name": False,
 }
-html_show_sourcelink = False
-
-myst_enable_extensions = [
-    "dollarmath",
-]
+html_show_sourcelink = True
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -171,7 +149,9 @@ myst_enable_extensions = [
 html_static_path = ["_static"]
 autodoc_member_order = "groupwise"
 autodoc_mock_imports = ["torch", "tensorflow", "xgboost"]
-
+html_css_files = [
+    "gurobi_ml.css",
+]
 bibtex_bibfiles = ["refs.bib"]
 
 extlinks_detect_hardcoded_links = True
