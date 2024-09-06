@@ -27,7 +27,7 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
             The gurobipy model where the predictor should be inserted.
     predictor:
         The predictor to insert.
@@ -46,10 +46,10 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
     -----
     The parameters `input_vars` and `output_vars` can be either
 
-     * Gurobipy matrix variables :gurobipy:`mvar`
+     * gurobipy matrix variables :external+gurobi:py:class:`MVar`
      * Pandas data frames containing columns of variables or constants
-     * Lists of variables
-     * Dictionaries of variables
+     * Lists of gurobipy :external+gurobi:py:class:`Var`
+     * Dictionaries of gurobipy :external+gurobi:py:class:`Var`
 
     For internal use in the package they are cast into matrix variables.
 

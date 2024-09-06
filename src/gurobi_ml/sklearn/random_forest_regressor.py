@@ -15,7 +15,7 @@
 
 """Module for formulating a
 :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor`
-into a :gurobipy:`model`.
+into a :external+gurobi:py:class:`Model`.
 """
 
 from gurobipy import GRB
@@ -36,7 +36,7 @@ def add_random_forest_regressor_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     random_forest_regressor : :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor`
         The random forest regressor to insert as predictor.

@@ -31,7 +31,7 @@ def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where polynomial features should be inserted.
     polynomial_features : :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures`
         The polynomial features to insert in gp_model.
@@ -59,7 +59,7 @@ def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the standard scaler should be inserted.
     standard_scaler : :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler`
         The standard scaler to insert as predictor.
@@ -80,7 +80,7 @@ class StandardScalerConstr(SKtransformer):
     :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler` in a
     gurobipy model.
 
-    Stores the changes to :gurobipy:`model` when formulating an instance into it.
+    Stores the changes to :external+gurobi:py:class:`Model` when formulating an instance into it.
     """
 
     def __init__(self, gp_model, scaler, input_vars, **kwargs):

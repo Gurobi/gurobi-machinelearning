@@ -14,7 +14,7 @@
 # ==============================================================================
 
 """Module for formulating ordinary regression models into a
-:gurobipy:`model`.
+:external+gurobi:py:class:`Model`.
 
 The following linear models are tested and should work:
    - :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
@@ -36,7 +36,7 @@ def add_linear_regression_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     linear_regression : :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
      The linear regression to insert. It can be of any of the following types:

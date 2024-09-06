@@ -15,7 +15,7 @@
 
 """Module for formulating a
 XGBoost gradient boosting regressor
-into a :gurobipy:`model`.
+into a :external+gurobi:py:class:`Model`.
 """
 
 
@@ -44,7 +44,7 @@ def add_xgbregressor_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     xgboost_regressor : :external+xgb:py:class:`xgboost.XGBRFRegressor`
         The gradient boosting regressor to insert as predictor.
@@ -95,7 +95,7 @@ def add_xgboost_regressor_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     xgboost_regressor : :external+xgb:py:class:`xgboost.Booster`
         The gradient boosting regressor to insert as predictor.

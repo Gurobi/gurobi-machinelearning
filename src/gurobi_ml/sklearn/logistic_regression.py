@@ -15,7 +15,7 @@
 
 """Module for formulating a
 :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` in a
-:gurobipy:`model`.
+:external+gurobi:py:class:`Model`.
 """
 
 import math
@@ -61,7 +61,7 @@ def add_logistic_regression_constr(
     Parameters
     ----------
 
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     logistic_regression : :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
         The logistic regression to insert.

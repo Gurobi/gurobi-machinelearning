@@ -80,7 +80,7 @@ nn.fit(X, y)
 # (unbounded) variables and :math:`\delta` a small positive constant.
 #
 # First, let’s pick randomly 2 training examples using numpy, and create
-# our gurobipy model.
+# our :external+gurobi:py:class:`Gurobi model<Model>`.
 #
 
 n = 2
@@ -93,7 +93,7 @@ m = gp.Model()
 
 ######################################################################
 # Our only decision variables in this case, are the five inputs and
-# outputs for the regression. We use ``gurobipy.MVar`` matrix variables
+# outputs for the regression. We use :external+gurobi:py:class:`MVar` matrix variables
 # that are most convenient in this case.
 #
 # The input variables have the same shape as ``X_examples``. Their lower

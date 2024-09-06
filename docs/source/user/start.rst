@@ -13,7 +13,7 @@ feasible solution, the output variables values are the values predicted by the
 ML model from the input variables values.
 
 Gurobi Machine Learning is an :doc:`open-source <../meta/license>` Python package to formulate *trained
-regression* models [#]_ in a :gurobipy:`model` to be
+regression* models [#]_ in a :external+gurobi:py:class:`Model` to be
 solved with the `Gurobi <https://www.gurobi.com>`_ solver.
 
 The aim of the package is to:
@@ -103,13 +103,13 @@ Usage
 *****
 
 The main function provided by the package is
-:py:func:`gurobi_ml.add_predictor_constr`. It takes as arguments: a :gurobipy:`model`, a
+:py:func:`gurobi_ml.add_predictor_constr`. It takes as arguments: a :external+gurobi:py:class:`Model`, a
 :doc:`supported regression model <supported>`, input `Gurobi variables
 <https://www.gurobi.com/documentation/current/refman/variables.html>`_ and
 output `Gurobi variables
 <https://www.gurobi.com/documentation/current/refman/variables.html>`_.
 
-By invoking the function, the :gurobipy:`model` is augmented with variables and
+By invoking the function, the :external+gurobi:py:class:`Model` is augmented with variables and
 constraints so that, in a solution, the values of the output variables are
 predicted by the regression model from the values of the input variables. More
 formally, if we denote by :math:`g` the prediction function of the regression
@@ -120,7 +120,7 @@ The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`
 returns a modeling object derived from the class
 :py:class:`AbstractPredictorConstr
 <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr>`. That object keeps track of all
-the variables and constraints that have been added to the :gurobipy:`model` to
+the variables and constraints that have been added to the :external+gurobi:py:class:`Model` to
 establish the relationship between input and output variables of the regression.
 
 The modeling object can perform a few tasks:

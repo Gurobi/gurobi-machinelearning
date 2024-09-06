@@ -208,7 +208,7 @@ class AbstractPredictorConstr(ABC, _SubModel):
 
         Returns
         -------
-        output : :gurobipy:`MVar`.
+        output : :external+gurobi:py:class:`MVar`.
         """
         return self._output
 
@@ -249,7 +249,7 @@ class AbstractPredictorConstr(ABC, _SubModel):
 
         Returns
         -------
-        output : :gurobipy:`MVar`.
+        output : :external+gurobi:py:class:`MVar`.
         """
         return self._input
 
