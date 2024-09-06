@@ -15,7 +15,7 @@
 
 """Module for formulating a
 :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
-into a :gurobipy:`model`.
+into a :external+gurobi:py:class:`Model`.
 """
 
 from gurobipy import GRB
@@ -36,7 +36,7 @@ def add_gradient_boosting_regressor_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     gradient_boosting_regressor : :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
         The gradient boosting regressor to insert as predictor.
