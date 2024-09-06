@@ -1,20 +1,3 @@
-.. only:: html
-
-   .. image:: _static/gurobi_light.png
-        :width: 220
-        :target: https://www.gurobi.com
-        :alt: Gurobi
-        :align: right
-        :class: float-right, only-light
-
-   .. image:: _static/gurobi_dark.png
-        :width: 220
-        :target: https://www.gurobi.com
-        :alt: Gurobi
-        :align: right
-        :class: float-right, only-dark
-
-
 Gurobi Machine Learning
 #######################
 
@@ -49,6 +32,7 @@ different machine learning frameworks (scikit-learn, LightGBM, XGBoost, Keras an
 
 .. toctree::
    :maxdepth: 2
+   :hidden:
    :caption: Contents
 
    userguide
@@ -56,3 +40,4 @@ different machine learning frameworks (scikit-learn, LightGBM, XGBoost, Keras an
    api
    meta/contactus
    meta/license
+   gurobi.com  ressources <https://www.gurobi.com/features/gurobi-machine-learning/>

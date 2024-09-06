@@ -1,0 +1,28 @@
+{#-
+
+Adapted from the furo theme template at:
+https://github.com/pradyunsg/furo/blob/main/src/furo/theme/furo/sidebar/brand.html
+
+- Making the logo link to Gurobi.com
+- Make the project string link to master_doc
+
+-#}
+<a class="sidebar-brand{% if logo %} centered{% endif %}" href="https://www.gurobi.com">
+  {% block brand_content %}
+  {%- if logo_url %}
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="{{ logo_url }}" alt="Logo"/>
+  </div>
+  {%- endif %}
+  {%- if theme_light_logo and theme_dark_logo %}
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="{{ pathto('_static/' + theme_light_logo, 1) }}" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="{{ pathto('_static/' + theme_dark_logo, 1) }}" alt="Dark Logo"/>
+  </div>
+  {%- endif %}
+</a>
+    <br>
+  <a href="{{ pathto(master_doc) }}"
+  <span class="sidebar-brand-text" >{{ docstitle if docstitle else project }}</span>
+  </a>
+  {% endblock brand_content %}
