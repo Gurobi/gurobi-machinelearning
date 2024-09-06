@@ -108,10 +108,12 @@ Then for each leaf, the inequalities describing :math:`\mathcal L_l` and :math:`
 are imposed using indicator constraints:
 
 .. math::
+   :nowrap:
 
-   & \delta_l = 1 \rightarrow x_{i_v} \le \theta_v, & & \text{for } x_{i_v} \le \theta_v \in \mathcal L_l,
-
+   \begin{align*}
+   & \delta_l = 1 \rightarrow x_{i_v} \le \theta_v, & & \text{for } x_{i_v} \le \theta_v \in \mathcal L_l,\\
    & \delta_l = 1 \rightarrow x_{i_v} \ge \theta_v + \epsilon, & & \text{for } x_{i_v} > \theta_v \in \mathcal R_l.
+   \end{align*}
 
 A difficulty here is that the strictly greater than constraints of :math:`\mathcal R_l`
 can't be represented exactly in a mixed integer optimization model. To
