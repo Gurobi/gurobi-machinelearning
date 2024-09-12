@@ -19,6 +19,10 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
+        gurobi-version: ["gurobi10", "gurobi11"]
+        exclude:
+          - python-version: "3.12"
+            gurobi-version: "gurobi10"
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -48,6 +52,7 @@ jobs:
     - name: Test with tox
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
+        GUROBI_VERSION: ${{matrix.gurobi-version}}
       run: |
         tox
         tox -e examples
