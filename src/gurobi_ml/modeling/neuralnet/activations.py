@@ -18,6 +18,16 @@
 import numpy as np
 from gurobipy import GRB
 
+from ...exceptions import NoModel
+
+try:
+    from gurobipy import nlfunc
+
+    _HAS_NLEXPR = True
+except ImportError:
+    _HAS_NLEXPR = False
+from ..softmax import softmax
+
 
 class Identity:
     """Class to apply identity activation on a neural network layer.
@@ -103,3 +113,81 @@ class ReLU:
                 constant=0.0,
                 name=layer._indexed_name(index, "relu"),
             )
+
+
+class Logistic:
+    """Class to apply the logistic activation on a neural network layer.
+
+    Parameters
+    ----------
+    setbounds : Bool
+        Optional flag not to set bounds on the output variables.
+    bigm : Float
+        Optional maximal value for bounds use in the formulation
+
+    Attributes
+    ----------
+    setbounds : Bool
+        Optional flag not to set bounds on the output variables.
+    bigm : Float
+        Optional maximal value for bounds use in the formulation
+    """
+
+    def __init__(self):
+        if not _HAS_NLEXPR:
+            raise NoModel(self, "Can't use logistic activation without Gurobi ≥ 12.0")
+
+    def mip_model(self, layer):
+        """MIP model for logistic activation on a layer.
+
+        Parameters
+        ----------
+        layer : AbstractNNLayer
+            Layer to which activation is applied.
+        """
+        output = layer.output
+        if hasattr(layer, "coefs"):
+            layer.mixing = layer.input @ layer.coefs + layer.intercept
+            mixing = layer.mixing
+        else:
+            mixing = layer._input
+        layer._output = nlfunc.logistic(mixing)
+
+
+class SoftMax:
+    """Class to apply the SoftMax activation on a neural network layer.
+
+    Parameters
+    ----------
+    setbounds : Bool
+        Optional flag not to set bounds on the output variables.
+    bigm : Float
+        Optional maximal value for bounds use in the formulation
+
+    Attributes
+    ----------
+    setbounds : Bool
+        Optional flag not to set bounds on the output variables.
+    bigm : Float
+        Optional maximal value for bounds use in the formulation
+    """
+
+    def __init__(self):
+        pass
+
+    def mip_model(self, layer):
+        """MIP model for SoftMax activation on a layer.
+
+        Parameters
+        ----------
+        layer : AbstractNNLayer
+            Layer to which activation is applied.
+        """
+        output = layer.output
+        if hasattr(layer, "coefs"):
+            layer.mixing = layer.input @ layer.coefs + layer.intercept
+            mixing = layer.mixing
+        else:
+            mixing = layer._input
+
+        softmax(layer, mixing)

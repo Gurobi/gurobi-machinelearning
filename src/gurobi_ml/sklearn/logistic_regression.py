@@ -23,8 +23,10 @@ import warnings
 
 import gurobipy as gp
 
+from ..modeling.softmax import argmax, softmax
+
 try:
-    from gurobipy import nlfunc
+    pass
 
     _HAS_NL_EXPR = True
     _HAS_NL = True
@@ -321,101 +323,15 @@ Upgrading to version 12 is recommended when using logistic regressions."""
 
     def _multi_class_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
-        outputvars = self._output
         coefs = self.predictor.coef_
         intercept = self.predictor.intercept_
 
+        linreg = self, coefs, self.input @ coefs.T + intercept
+
         if self.predict_function == "predict":
-            affinevars = self._gp_model.addMVar(
-                self.output.shape, lb=-gp.GRB.INFINITY, name="affine_trans"
-            )
-            self.affinevars = affinevars
-            self.gp_model.addConstr(
-                affinevars == self.input @ coefs.T + intercept, name="linreg"
-            )
-
-            self._output = outputvars
-            self.gp_model.addConstr(self.output.sum(axis=1) == 1)
-
-            # Do the argmax
-            # We use indicators (a lot of them)
-            for index in np.ndindex(outputvars.shape):
-                i, j = index
-                for k in np.ndindex(outputvars.shape[1]):
-                    if k == j:
-                        continue
-                    self.gp_model.addGenConstrIndicator(
-                        outputvars[index],
-                        1,
-                        affinevars[index] - affinevars[i, k],
-                        gp.GRB.GREATER_EQUAL,
-                        self.epsilon,
-                    )
-            return
-        if self.predict_function == "predict_proba":
-            num_gc = self.gp_model.NumGenConstrs
-
-            self.gp_model.update()
-
-            if _HAS_NL_EXPR:
-                # We want to write y_j = e^z_j / sum_j=1^k e^z_j
-                # y_j are the output variable z_j = input @ coefs + intercepts
-
-                # Store the e^z_j in a nonlinear expression
-                exponentials = self.gp_model.addMVar(
-                    self.output.shape, name="exponentials"
-                )
-                self.gp_model.addConstr(
-                    exponentials == nlfunc.exp(self.input @ coefs.T + intercept)
-                )
-                # The denominator is the sum over the first axis
-                denominator = exponentials.sum(axis=1)
-
-                # Voila!
-                self.gp_model.addConstr(
-                    outputvars == exponentials / denominator, name=f"multlog"
-                )
-            else:
-                # How boy that is tedious you don't want not to use Gurobi 12!
-                affinevars = self._gp_model.addMVar(
-                    self.output.shape, lb=-gp.GRB.INFINITY, name="affine_trans"
-                )
-                self.affinevars = affinevars
-                self.gp_model.addConstr(
-                    affinevars == self.input @ coefs.T + intercept, name="linreg"
-                )
-
-                self._output = outputvars
-
-                exp_vars = self.gp_model.addMVar(outputvars.shape)
-                self.exp_vars = exp_vars
-                sum_vars = self.gp_model.addMVar((outputvars.shape[0]), lb=self.epsilon)
-                self.sum_vars = sum_vars
-
-                num_gc = self.gp_model.NumGenConstrs
-
-                for index in np.ndindex(outputvars.shape):
-                    self.gp_model.addGenConstrExp(
-                        affinevars[index],
-                        exp_vars[index],
-                        name=self._indexed_name(index, "exponential"),
-                    )
-                self.gp_model.update()
-                for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
-                    for attr, val in self.attributes.items():
-                        gen_constr.setAttr(attr, val)
-                self.gp_model.addConstr(sum_vars == exp_vars.sum(axis=1))
-
-                self.gp_model.addConstrs(
-                    outputvars[i, :] * sum_vars[i] == exp_vars[i, :]
-                    for i in range(outputvars.shape[0])
-                )
-
-            for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
-                for attr, val in self.attributes.items():
-                    gen_constr.setAttr(attr, val)
-            return
-        self._gp_model.addConstr(self._output == affinevars)
+            argmax(self, linreg, kwargs)
+        else:
+            softmax(self, linreg, kwargs)
 
     def _mip_model(self, **kwargs):
         if self._output_shape > 2:
