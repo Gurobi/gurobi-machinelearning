@@ -17,7 +17,7 @@
 
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
-from .activations import Identity, ReLU
+from .activations import Identity, Logistic, ReLU, SoftMax
 from .layers import ActivationLayer, DenseLayer
 
 
@@ -34,8 +34,10 @@ class BaseNNConstr(AbstractPredictorConstr):
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.predictor = predictor
         self.act_dict = {
-            "relu": ReLU(),
-            "identity": Identity(),
+            "relu": ReLU,
+            "identity": Identity,
+            "logistic": Logistic,
+            "softmax": SoftMax,
         }
         try:
             for activation, activation_model in kwargs["activation_models"].items():

@@ -19,7 +19,7 @@ in a :external+gurobi:py:class:`Model`.
 """
 
 from ..modeling.decision_tree import AbstractTreeEstimator
-from .skgetter import SKgetter
+from .skgetter import SKRegressor
 
 
 def add_decision_tree_regressor_constr(
@@ -72,7 +72,7 @@ def add_decision_tree_regressor_constr(
     )
 
 
-class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
+class DecisionTreeRegressorConstr(SKRegressor, AbstractTreeEstimator):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor` in a
     gurobipy model.
@@ -98,7 +98,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
                 f"Wrong value for formulation should be one of {formulations}."
             )
         self._formulation = formulation
-        SKgetter.__init__(self, predictor, input_vars)
+        SKRegressor.__init__(self, predictor, input_vars)
         tree = self.predictor.tree_
 
         tree_dict = {
