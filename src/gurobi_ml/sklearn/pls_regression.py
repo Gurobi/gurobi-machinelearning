@@ -70,11 +70,10 @@ class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
         predictor,
         input_vars,
         output_vars=None,
-        output_type="",
         **kwargs,
     ):
         self._output_shape = 1
-        SKgetter.__init__(self, predictor, input_vars, output_type, **kwargs)
+        SKgetter.__init__(self, predictor, input_vars, **kwargs)
         AbstractPredictorConstr.__init__(
             self,
             gp_model,

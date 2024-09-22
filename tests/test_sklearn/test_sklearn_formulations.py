@@ -14,7 +14,13 @@ from gurobi_ml.sklearn import add_mlp_regressor_constr
 from gurobi_ml.sklearn.pipeline import PipelineConstr
 
 from ..fixed_formulation import FixedRegressionModel
-from .sklearn_cases import CircleCase, DiabetesCases, IrisCases, MNISTCase
+from .sklearn_cases import (
+    CircleCase,
+    DiabetesCases,
+    IrisBinaryCases,
+    IrisMultiCases,
+    MNISTCase,
+)
 
 VERBOSE = False
 
@@ -69,18 +75,32 @@ class TestSklearnModel(FixedRegressionModel):
         # Make it a simple classification
         X = X[y != 2]
         y = y[y != 2]
-        cases = IrisCases()
+        cases = IrisBinaryCases()
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", output_type="probability_1")
-            self.do_one_case(onecase, X, 6, "pairs", output_type="probability_1")
+            self.do_one_case(onecase, X, 5, "all", predict_function="predict_proba")
+            self.do_one_case(onecase, X, 6, "pairs", predict_function="predict_proba")
             self.do_one_case(
-                onecase, X, 5, "all", output_type="probability_1", no_debug=True
+                onecase, X, 5, "all", predict_function="predict_proba", no_debug=True
             )
             self.do_one_case(
-                onecase, X, 6, "pairs", output_type="probability_1", no_debug=True
+                onecase, X, 6, "pairs", predict_function="predict_proba", no_debug=True
             )
+
+    def test_iris_multi(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        y = data.target
+
+        # Make it a simple classification
+        cases = IrisMultiCases()
+
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            self.do_one_case(onecase, X, 5, "all", predict_function="predict_proba")
+            self.do_one_case(onecase, X, 6, "pairs", predict_function="predict_proba")
 
     def test_iris_clf(self):
         data = datasets.load_iris()
@@ -91,12 +111,12 @@ class TestSklearnModel(FixedRegressionModel):
         # Make it a simple classification
         X = X[y != 2]
         y = y[y != 2]
-        cases = IrisCases()
+        cases = IrisBinaryCases()
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", output_type="classification")
-            self.do_one_case(onecase, X, 6, "pairs", output_type="classification")
+            self.do_one_case(onecase, X, 5, "all", predict_function="predict")
+            self.do_one_case(onecase, X, 6, "pairs", predict_function="predict")
 
     def test_iris_pwl_args(self):
         data = datasets.load_iris()
@@ -107,7 +127,7 @@ class TestSklearnModel(FixedRegressionModel):
         # Make it a simple classification
         X = X[y != 2]
         y = y[y != 2]
-        cases = IrisCases()
+        cases = IrisBinaryCases()
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
@@ -116,7 +136,7 @@ class TestSklearnModel(FixedRegressionModel):
                 X,
                 5,
                 "all",
-                output_type="probability_1",
+                predict_function="predict_proba",
                 pwl_attributes={"FuncPieces": 5},
             )
 
@@ -150,7 +170,7 @@ class TestMNIST(unittest.TestCase):
             predictor.out_activation_ = "identity"
             register_predictor_constr("MLPClassifier", add_mlp_regressor_constr)
             pred_constr = add_predictor_constr(
-                gpm, predictor, x, output_type="probability"
+                gpm, predictor, x, predict_function="predict_proba"
             )
 
             y = pred_constr.output
