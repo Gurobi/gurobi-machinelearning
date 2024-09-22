@@ -22,7 +22,7 @@ class TestBadShapes(unittest.TestCase):
         m = gp.Model()
 
         x = m.addMVar(example.shape, name="x")
-        y = m.addMVar(example.shape[0], name="y")
+        y = m.addMVar((example.shape[0], 2), name="y")
 
         add_predictor_constr(m, logreg, x, y)
 

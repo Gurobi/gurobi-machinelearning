@@ -25,7 +25,7 @@ from ..xgboost_sklearn_api import xgboost_sklearn_convertors
 from .column_transformer import add_column_transformer_constr
 from .predictors_list import sklearn_predictors
 from .preprocessing import sklearn_transformers
-from .skgetter import SKgetter
+from .skgetter import SKClassifier, SKRegressor
 
 
 def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwargs):
@@ -64,7 +64,7 @@ def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwar
     return PipelineConstr(gp_model, pipeline, input_vars, output_vars, **kwargs)
 
 
-class PipelineConstr(SKgetter, AbstractPredictorConstr):
+class PipelineConstr(SKRegressor, SKClassifier, AbstractPredictorConstr):
     """Class to formulate a trained :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
     in a gurobipy model.
 
@@ -74,7 +74,12 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
     def __init__(self, gp_model, pipeline, input_vars, output_vars=None, **kwargs):
         self._steps = []
         self._default_name = "pipe"
-        SKgetter.__init__(self, pipeline, input_vars, **kwargs)
+        if hasattr(pipeline, "predict_proba"):
+            SKClassifier.__init__(self, pipeline, input_vars, **kwargs)
+            self._isclassifier = True
+        else:
+            SKRegressor.__init__(self, pipeline, input_vars, **kwargs)
+            self._isclassifier = False
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, validate_input=False, **kwargs
         )
@@ -117,6 +122,8 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         steps.append(convertor(gp_model, predictor, input_vars, output_vars, **kwargs))
         if self._output is None:
             self._output = steps[-1].output
+        if self._isclassifier:
+            self.linear_predictor = steps[-1].linear_predictor
 
     def print_stats(self, file=None):
         """Print statistics on model additions stored by this class.
@@ -174,3 +181,8 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
     def __len__(self):
         """Get number of pipeline steps."""
         return self._steps.__len__()
+
+    def get_error(self, eps=None):
+        if self._isclassifier:
+            return SKClassifier.get_error(self, eps)
+        SKRegressor.get_error(self, eps)
