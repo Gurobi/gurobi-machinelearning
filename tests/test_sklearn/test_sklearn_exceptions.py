@@ -15,25 +15,6 @@ from gurobi_ml.exceptions import NoModel, NotRegistered, ParameterError
 
 
 class TestUnsuportedSklearn(unittest.TestCase):
-    def test_logistic_multiclass(self):
-        data = datasets.load_iris()
-
-        X = data.data
-        y = data.target
-
-        logreg = LogisticRegression()
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=ConvergenceWarning)
-            logreg.fit(X, y)
-        example = X[10, :]
-
-        m = gp.Model()
-
-        x = m.addMVar(example.shape, name="x")
-
-        with self.assertRaises(NoModel):
-            add_predictor_constr(m, logreg, x)
-
     def test_logistic_wrongarg(self):
         data = datasets.load_iris()
 
@@ -50,7 +31,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
         x = m.addMVar(example.shape, name="x")
 
         with self.assertRaises(ParameterError):
-            add_predictor_constr(m, logreg, x, output_type="proba")
+            add_predictor_constr(m, logreg, x, predict_function="predi_prba")
 
     def test_mlpregressor_wrong_act(self):
         data = datasets.load_diabetes()
