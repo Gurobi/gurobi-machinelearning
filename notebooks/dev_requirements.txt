@@ -6,4 +6,3 @@ seaborn
 keras
 torch
 skorch
-../.

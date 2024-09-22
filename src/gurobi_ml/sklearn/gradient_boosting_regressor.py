@@ -22,7 +22,7 @@ from gurobipy import GRB
 
 from ..modeling import AbstractPredictorConstr
 from .decision_tree_regressor import add_decision_tree_regressor_constr
-from .skgetter import SKgetter
+from .skgetter import SKRegressor
 
 
 def add_gradient_boosting_regressor_constr(
@@ -64,7 +64,7 @@ def add_gradient_boosting_regressor_constr(
     )
 
 
-class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
+class GradientBoostingRegressorConstr(SKRegressor, AbstractPredictorConstr):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
     in a gurobipy model.
@@ -76,7 +76,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         self._output_shape = 1
         self.estimators_ = []
         self._default_name = "gbtree_reg"
-        SKgetter.__init__(self, predictor, input_vars)
+        SKRegressor.__init__(self, predictor, input_vars)
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )

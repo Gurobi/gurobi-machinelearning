@@ -8,7 +8,7 @@ import gurobipy as gp
 from gurobi_ml import add_predictor_constr
 from gurobi_ml.exceptions import NoSolutionError
 
-from .sklearn_cases import DiabetesCases, IrisCases
+from .sklearn_cases import DiabetesCases, IrisBinaryCases
 
 
 class TestAddRemove(unittest.TestCase):
@@ -303,7 +303,7 @@ class TestAddRemove(unittest.TestCase):
 
         Checks that variables/constraints/... counts match.
         """
-        cases = IrisCases()
+        cases = IrisBinaryCases()
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
@@ -316,7 +316,7 @@ class TestAddRemove(unittest.TestCase):
 
         Checks that variables/constraints/... counts match.
         """
-        cases = IrisCases()
+        cases = IrisBinaryCases()
         for regressor in cases:
             onecase = cases.get_case(regressor)
             onecase.pop("nonconvex")
@@ -328,7 +328,7 @@ class TestAddRemove(unittest.TestCase):
 
         Checks that variables/constraints/... counts match.
         """
-        cases = IrisCases()
+        cases = IrisBinaryCases()
         regressor = random.choice(list(cases))
 
         onecase = cases.get_case(regressor)
@@ -341,7 +341,7 @@ class TestAddRemove(unittest.TestCase):
 
         Checks that variables/constraints/... counts match.
         """
-        cases = IrisCases()
+        cases = IrisBinaryCases()
         regressor = random.choice(list(cases))
 
         onecase = cases.get_case(regressor)

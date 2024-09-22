@@ -22,7 +22,7 @@ from gurobipy import GRB
 
 from ..modeling import AbstractPredictorConstr
 from .decision_tree_regressor import add_decision_tree_regressor_constr
-from .skgetter import SKgetter
+from .skgetter import SKRegressor
 
 
 def add_random_forest_regressor_constr(
@@ -64,7 +64,7 @@ def add_random_forest_regressor_constr(
     )
 
 
-class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
+class RandomForestRegressorConstr(SKRegressor, AbstractPredictorConstr):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor` in a
     gurobipy model.
@@ -75,7 +75,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.estimators_ = []
         self._default_name = "rand_forest_reg"
-        SKgetter.__init__(self, predictor, input_vars)
+        SKRegressor.__init__(self, predictor, input_vars)
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )

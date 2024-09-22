@@ -32,6 +32,7 @@ def sklearn_predictors():
         "GradientBoostingRegressor": add_gradient_boosting_regressor_constr,
         "RandomForestRegressor": add_random_forest_regressor_constr,
         "MLPRegressor": add_mlp_regressor_constr,
+        "MLPClassifier": add_mlp_regressor_constr,
         "PLSRegression": add_pls_regression_constr,
         "PLSCanonical": add_pls_regression_constr,
     }

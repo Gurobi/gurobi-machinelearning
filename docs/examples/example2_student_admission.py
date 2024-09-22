@@ -123,7 +123,7 @@ target = "enroll"
 
 # Run our regression
 scaler = StandardScaler()
-regression = LogisticRegression(random_state=1)
+regression = LogisticRegression(random_state=10)
 pipe = make_pipeline(scaler, regression)
 pipe.fit(X=historical_data.loc[:, features], y=historical_data.loc[:, target])
 
@@ -141,10 +141,10 @@ pipe.fit(X=historical_data.loc[:, features], y=historical_data.loc[:, target])
 # Retrieve new data used to build the optimization problem
 studentsdata = pd.read_csv(janos_data_url + "college_applications6000.csv", index_col=0)
 
-nstudents = 25
+nstudents = 20
 
 # Select randomly nstudents in the data
-studentsdata = studentsdata.sample(nstudents, random_state=1)
+studentsdata = studentsdata.sample(nstudents, random_state=10)
 
 
 ######################################################################
@@ -158,10 +158,6 @@ studentsdata = studentsdata.sample(nstudents, random_state=1)
 # Start with classical part of the model
 m = gp.Model()
 
-# The y variables are modeling the probability of enrollment of each student. They are indexed by students data
-y = gppd.add_vars(m, studentsdata, name="enroll_probability")
-
-
 # We want to complete studentsdata with a column of decision variables to model the "merit" feature.
 # Those variable are between 0 and 2.5.
 # They are added using the gppd extension and the resulting dataframe is stored in
@@ -174,39 +170,52 @@ x = students_opt_data.loc[:, "merit"]
 # Make sure that studentsdata contains only the features column and in the right order
 students_opt_data = students_opt_data.loc[:, features]
 
-m.update()
-
 # Let's look at our features dataframe for the optimization
 students_opt_data[:10]
 
 
 ######################################################################
-# We add the objective and the budget constraint:
+# We insert the constraints from the regression. In this model we
+# want to have use the probability estimate of a student joining the
+# college, so we choose the parameter ``predict_function`` to be
+# ``"predict_proba"``. Note that due to the shapes of the ``studentsdata``
+# data frame, this will insert one regression constraint for
+# each student.
+#
+# Note that we don't specify output variables and the function
+# will add those variables to the model.
+#
+# With the ``print_stats`` function we display what was added to the
+# model.
+#
+pred_constr = add_predictor_constr(
+    m, pipe, students_opt_data, predict_function="predict_proba"
+)
+pred_constr.print_stats()
+m.update()
+
+
+######################################################################
+# Since we didn't give the add_predictor_constr function any
+# variables for the output it created them.
+#
+# The variables if created have the shape of what would be returned
+# by the predict_proba function of the logistic regression. In this
+# model we are only interested in the probability of class 1, i.e.
+# the column of index 1. We store this as a pandas series
+
+y = pd.Series(data=pred_constr.output[:, 1].tolist(), index=x.index)
+
+y
+
+######################################################################
+# We now add the objective and the budget constraint:
 #
 
 m.setObjective(y.sum(), gp.GRB.MAXIMIZE)
 
 m.addConstr(x.sum() <= 0.2 * nstudents)
 m.update()
-
-
-######################################################################
-# Finally, we insert the constraints from the regression. In this model we
-# want to have use the probability estimate of a student joining the
-# college, so we choose the parameter ``output_type`` to be
-# ``"probability_1"``. Note that due to the shapes of the ``studentsdata``
-# data frame and ``y``, this will insert one regression constraint for
-# each student.
-#
-# With the ``print_stats`` function we display what was added to the
-# model.
-#
-
-pred_constr = add_predictor_constr(
-    m, pipe, students_opt_data, y, output_type="probability_1"
-)
-
-pred_constr.print_stats()
 
 
 ######################################################################
@@ -220,7 +229,8 @@ pred_constr.print_stats()
 # documentation <https://gurobi-machinelearning.readthedocs.io/en/v1.3.0/mlm-examples/student_admission.html>`__
 # for dealing with those approximations.
 #
-
+m.Params.NodeLimit = 10000
+m.write("students.lp")
 m.optimize()
 
 
@@ -242,7 +252,7 @@ print(
 # regression in a solution as a pandas dataframe using input_values.
 #
 
-pred_constr.input_values
+pred_constr.input_values.round(3)
 
 
 ######################################################################
