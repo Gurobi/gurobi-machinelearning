@@ -26,6 +26,7 @@ try:
     _HAS_NLEXPR = True
 except ImportError:
     _HAS_NLEXPR = False
+
 from ..softmax import softmax
 
 

@@ -18,12 +18,11 @@
 :external+gurobi:py:class:`Model`.
 """
 
-import math
 import warnings
 
 import gurobipy as gp
 
-from ..modeling.softmax import argmax, softmax
+from ..modeling.softmax import hardmax, logistic, max2, softmax
 
 try:
     pass
@@ -36,7 +35,6 @@ except ImportError:
     else:
         _HAS_NL = True
     _HAS_NL_EXPR = False
-import numpy as np
 
 from ..exceptions import ParameterError
 from .base_regressions import BaseSKlearnRegressionConstr
@@ -222,35 +220,6 @@ Upgrading to version 12 is recommended when using logistic regressions."""
             return {"FuncNonlinear": 1}
         return {}
 
-    def _addGenConstrIndicatorMvarV10(self, binvar, binval, lhs, sense, rhs, name):
-        """This function is to work around the lack of MVar compatibility in
-        Gurobi v10 indicator constraints.  Note, it is not as flexible as Model.addGenConstrIndicator
-        in V11+.  If support for v10 is dropped this function can be removed.
-
-        Parameters
-        ----------
-        binvar : MVar
-        binval : {0,1}
-        lhs : MVar or MLinExpr
-        sense : (char)
-            Options are gp.GRB.LESS_EQUAL, gp.GRB.EQUAL, or gp.GRB.GREATER_EQUAL
-        rhs : scalar
-        name : string
-        """
-        assert binvar.shape == lhs.shape
-        total_constraints = np.prod(binvar.shape)
-        binvar = binvar.reshape(total_constraints).tolist()
-        lhs = lhs.reshape(total_constraints).tolist()
-        for index in range(total_constraints):
-            self.gp_model.addGenConstrIndicator(
-                binvar[index],
-                binval,
-                lhs[index],
-                sense,
-                rhs,
-                name=self._indexed_name(index, name),
-            )
-
     def _two_classes_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
         m, _ = self.output.shape
@@ -261,57 +230,10 @@ Upgrading to version 12 is recommended when using logistic regressions."""
         self._add_regression_constr(output=linear_predictor)
 
         if self.predict_function == "predict":
-            # For classification we need an extra binary variable
-            bin_output = self.gp_model.addMVar(
-                self.output.shape, vtype=gp.GRB.BINARY, name="bin_output"
-            )
-
-            # Workaround for MVars in indicator constraints for v10.
-            addGenConstrIndicator = (
-                self.gp_model.addGenConstrIndicator
-                if gp.gurobi.version()[0] >= 11
-                else self._addGenConstrIndicatorMvarV10
-            )
-
-            # The original epsilon is with respect to the range of the logistic function.
-            # We must translate this to the domain of the logistic function.
-            linear_predictor_epsilon = -math.log(1 / (0.5 + self.epsilon) - 1)
-
-            # For classification it is enough to test result of the linear predictor
-            # and avoid adding logistic curve constraint.  See GH316.
-            addGenConstrIndicator(
-                bin_output,
-                1,
-                linear_predictor,
-                gp.GRB.GREATER_EQUAL,
-                linear_predictor_epsilon,
-                "indicator_linear_predictor_pos",
-            )
-            addGenConstrIndicator(
-                bin_output,
-                0,
-                linear_predictor,
-                gp.GRB.LESS_EQUAL,
-                0,
-                "indicator_linear_predictor_neg",
-            )
-            self.gp_model.addConstr(bin_output == self.output)
+            max2(self, linear_predictor, self.epsilon)
         else:
-            log_result = self.output[:, 1]
+            logistic(self, linear_predictor)
 
-            for index in np.ndindex(log_result.shape):
-                self.gp_model.addGenConstrLogistic(
-                    linear_predictor[index],
-                    log_result[index],
-                    name=self._indexed_name(index, "logistic"),
-                )
-            num_gc = self.gp_model.NumGenConstrs
-            self.gp_model.update()
-            for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
-                for attr, val in self.attributes.items():
-                    gen_constr.setAttr(attr, val)
-
-            self.gp_model.addConstr(self.output[:, 0] == 1 - self.output[:, 1])
         self.gp_model.update()
 
     @property
@@ -329,7 +251,7 @@ Upgrading to version 12 is recommended when using logistic regressions."""
         linreg = self, coefs, self.input @ coefs.T + intercept
 
         if self.predict_function == "predict":
-            argmax(self, linreg, kwargs)
+            hardmax(self, linreg, kwargs)
         else:
             softmax(self, linreg, kwargs)
 
