@@ -28,7 +28,9 @@ except ImportError:
 _SKIP_VARS = False
 
 
-def argmax(predictor_model: AbstractPredictorConstr, mixing: gp.MLinExpr, **kwargs):
+def argmax(
+    predictor_model: AbstractPredictorConstr, linear_predictor: gp.MLinExpr, **kwargs
+):
     gp_model: gp.Model = predictor_model.gp_model
     output: gp.MVar = predictor_model.output
 
@@ -37,11 +39,11 @@ def argmax(predictor_model: AbstractPredictorConstr, mixing: gp.MLinExpr, **kwar
     else:
         epsilon = 0.0
 
-    affinevars = gp_model.addMVar(
-        output.shape, lb=-gp.GRB.INFINITY, name="affine_trans"
+    linear_predictor_vars = gp_model.addMVar(
+        output.shape, lb=-gp.GRB.INFINITY, name="linear_predictor"
     )
-    gp_model.addConstr(affinevars == mixing, name="linreg")
-    predictor_model.affinevars = affinevars
+    gp_model.addConstr(linear_predictor_vars == linear_predictor, name="linreg")
+    predictor_model.linear_predictor = linear_predictor_vars
 
     gp_model.addConstr(output.sum(axis=1) == 1)
 
@@ -55,13 +57,15 @@ def argmax(predictor_model: AbstractPredictorConstr, mixing: gp.MLinExpr, **kwar
             gp_model.addGenConstrIndicator(
                 output[index],
                 1,
-                affinevars[index] - affinevars[i, k],
+                linear_predictor_vars[index] - linear_predictor_vars[i, k],
                 gp.GRB.GREATER_EQUAL,
                 epsilon,
             )
 
 
-def softmax(predictor_model: AbstractPredictorConstr, mixing: gp.MLinExpr, **kwargs):
+def softmax(
+    predictor_model: AbstractPredictorConstr, linear_predictor: gp.MLinExpr, **kwargs
+):
     """Add the prediction constraints to Gurobi."""
     gp_model: gp.Model = predictor_model.gp_model
     output: gp.MVar = predictor_model.output
@@ -85,35 +89,33 @@ def softmax(predictor_model: AbstractPredictorConstr, mixing: gp.MLinExpr, **kwa
 
         # Store the e^z_j in a nonlinear expression
         if _SKIP_VARS:
-            exponentials = nlfunc.exp(mixing)
+            exponentials = nlfunc.exp(linear_predictor)
         else:
             exponentials = gp_model.addMVar(output.shape, name="exponentials")
-            gp_model.addConstr(exponentials == nlfunc.exp(mixing))
+            gp_model.addConstr(exponentials == nlfunc.exp(linear_predictor))
         # The denominator is the sum over the first axis
         denominator = exponentials.sum(axis=1)
 
         # Voila!
         gp_model.addConstr(output == exponentials / denominator, name=f"multlog")
-        gp_model.addConstr(output <= 1.0)
-        gp_model.addConstr(output >= 0.0)
     else:
         # How boy that is tedious you don't want not to use Gurobi 12!
-        affinevars = gp_model.addMVar(
-            output.shape, lb=-gp.GRB.INFINITY, name="affine_trans"
+        linear_predictor_vars = gp_model.addMVar(
+            output.shape, lb=-gp.GRB.INFINITY, name="linear_predictor"
         )
-        gp_model.addConstr(affinevars == mixing, name="linreg")
-        predictor_model.affinevars = affinevars
+        gp_model.addConstr(linear_predictor_vars == linear_predictor, name="linreg")
+        predictor_model.linear_predictor = linear_predictor_vars
 
-        exp_vars = gp_model.addMVar(output.shape)
-        exp_vars = exp_vars
-        sum_vars = gp_model.addMVar((output.shape[0]), lb=epsilon)
+        exponentials = gp_model.addMVar(output.shape)
+        exponentials = exponentials
+        denominator = gp_model.addMVar((output.shape[0]), lb=epsilon)
 
         num_gc = gp_model.NumGenConstrs
 
         for index in np.ndindex(output.shape):
             gp_model.addGenConstrExp(
-                affinevars[index],
-                exp_vars[index],
+                linear_predictor_vars[index],
+                exponentials[index],
                 name=predictor_model._indexed_name(index, "exponential"),
             )
         gp_model.update()
@@ -124,10 +126,11 @@ def softmax(predictor_model: AbstractPredictorConstr, mixing: gp.MLinExpr, **kwa
         for gen_constr in gp_model.getGenConstrs()[num_gc:]:
             for attr, val in attributes.items():
                 gen_constr.setAttr(attr, val)
-        gp_model.addConstr(sum_vars == exp_vars.sum(axis=1))
+        gp_model.addConstr(denominator == exponentials.sum(axis=1))
 
         gp_model.addConstrs(
-            output[i, :] * sum_vars[i] == exp_vars[i, :] for i in range(output.shape[0])
+            output[i, :] * denominator[i] == exponentials[i, :]
+            for i in range(output.shape[0])
         )
-        gp_model.addConstr(output <= 1)
-        gp_model.addConstr(output >= 0)
+    gp_model.addConstr(output <= 1)
+    gp_model.addConstr(output >= 0)

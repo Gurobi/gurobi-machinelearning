@@ -89,26 +89,26 @@ class ReLU:
         """
         output = layer.output
         if hasattr(layer, "coefs"):
-            if not hasattr(layer, "mixing"):
-                mixing = layer.gp_model.addMVar(
+            if not hasattr(layer, "linear_predictor"):
+                linear_predictor = layer.gp_model.addMVar(
                     output.shape,
                     lb=-GRB.INFINITY,
                     vtype=GRB.CONTINUOUS,
                     name=layer._name_var("mix"),
                 )
-                layer.mixing = mixing
+                layer.linear_predictor = linear_predictor
             layer.gp_model.update()
 
             layer.gp_model.addConstr(
-                layer.mixing == layer.input @ layer.coefs + layer.intercept
+                layer.linear_predictor == layer.input @ layer.coefs + layer.intercept
             )
         else:
-            mixing = layer._input
+            linear_predictor = layer._input
         for index in np.ndindex(output.shape):
             layer.gp_model.addGenConstrMax(
                 output[index],
                 [
-                    mixing[index],
+                    linear_predictor[index],
                 ],
                 constant=0.0,
                 name=layer._indexed_name(index, "relu"),
@@ -147,11 +147,11 @@ class Logistic:
         """
         output = layer.output
         if hasattr(layer, "coefs"):
-            layer.mixing = layer.input @ layer.coefs + layer.intercept
-            mixing = layer.mixing
+            layer.linear_predictor = layer.input @ layer.coefs + layer.intercept
+            linear_predictor = layer.linear_predictor
         else:
-            mixing = layer._input
-        layer._output = nlfunc.logistic(mixing)
+            linear_predictor = layer._input
+        layer._output = nlfunc.logistic(linear_predictor)
 
 
 class SoftMax:
@@ -185,9 +185,9 @@ class SoftMax:
         """
         output = layer.output
         if hasattr(layer, "coefs"):
-            layer.mixing = layer.input @ layer.coefs + layer.intercept
-            mixing = layer.mixing
+            layer.linear_predictor = layer.input @ layer.coefs + layer.intercept
+            linear_predictor = layer.linear_predictor
         else:
-            mixing = layer._input
+            linear_predictor = layer._input
 
-        softmax(layer, mixing)
+        softmax(layer, linear_predictor)
