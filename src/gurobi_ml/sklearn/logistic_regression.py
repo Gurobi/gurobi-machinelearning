@@ -183,7 +183,7 @@ formulated without requiring the non-linear logistic function."""
 
         self.epsilon = epsilon
         self._default_name = "log_reg"
-        self.affinevars = None
+        self.linear_predictor = None
         BaseSKlearnRegressionConstr.__init__(
             self,
             gp_model,
@@ -255,10 +255,10 @@ Upgrading to version 12 is recommended when using logistic regressions."""
         """Add the prediction constraints to Gurobi."""
         m, _ = self.output.shape
 
-        affinevars = self.gp_model.addMVar(
-            (m, 1), lb=-gp.GRB.INFINITY, name="affine_trans"
+        linear_predictor = self.gp_model.addMVar(
+            (m, 1), lb=-gp.GRB.INFINITY, name="linear_predictor"
         )
-        self._add_regression_constr(output=affinevars)
+        self._add_regression_constr(output=linear_predictor)
 
         if self.predict_function == "predict":
             # For classification we need an extra binary variable
@@ -275,25 +275,25 @@ Upgrading to version 12 is recommended when using logistic regressions."""
 
             # The original epsilon is with respect to the range of the logistic function.
             # We must translate this to the domain of the logistic function.
-            affine_trans_epsilon = -math.log(1 / (0.5 + self.epsilon) - 1)
+            linear_predictor_epsilon = -math.log(1 / (0.5 + self.epsilon) - 1)
 
-            # For classification it is enough to test result of affine transformation
+            # For classification it is enough to test result of the linear predictor
             # and avoid adding logistic curve constraint.  See GH316.
             addGenConstrIndicator(
                 bin_output,
                 1,
-                affinevars,
+                linear_predictor,
                 gp.GRB.GREATER_EQUAL,
-                affine_trans_epsilon,
-                "indicator_affinevars_pos",
+                linear_predictor_epsilon,
+                "indicator_linear_predictor_pos",
             )
             addGenConstrIndicator(
                 bin_output,
                 0,
-                affinevars,
+                linear_predictor,
                 gp.GRB.LESS_EQUAL,
                 0,
-                "indicator_affinevars_neg",
+                "indicator_linear_predictor_neg",
             )
             self.gp_model.addConstr(bin_output == self.output)
         else:
@@ -301,7 +301,7 @@ Upgrading to version 12 is recommended when using logistic regressions."""
 
             for index in np.ndindex(log_result.shape):
                 self.gp_model.addGenConstrLogistic(
-                    affinevars[index],
+                    linear_predictor[index],
                     log_result[index],
                     name=self._indexed_name(index, "logistic"),
                 )
@@ -315,11 +315,11 @@ Upgrading to version 12 is recommended when using logistic regressions."""
         self.gp_model.update()
 
     @property
-    def affine_transformation_variables(self) -> gp.MVar:
-        """Variables that store the result of the affine transformation from the regression coefficient.
-        (intermediate result before applying the logistic function).
+    def linear_predictor_variables(self) -> gp.MVar:
+        """Variables that store the result of the linear_predictor
+        (i.e. before applying the logistic function).
         """
-        return self.affinevars
+        return self.linear_predictor
 
     def _multi_class_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
