@@ -16,9 +16,9 @@
 """Module for formulating a :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a
 :external+gurobi:py:class:`Model`.
 """
-from ..exceptions import NoModel
+from ..exceptions import NoModel, ParameterError
 from ..modeling.neuralnet import BaseNNConstr
-from .skgetter import SKgetter
+from .skgetter import SKClassifier
 
 
 def add_mlp_regressor_constr(
@@ -62,7 +62,7 @@ def add_mlp_regressor_constr(
     )
 
 
-class MLPRegressorConstr(SKgetter, BaseNNConstr):
+class MLPRegressorConstr(SKClassifier, BaseNNConstr):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a gurobipy model.
 
@@ -75,10 +75,17 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         predictor,
         input_vars,
         output_vars=None,
+        predict_function="predict",
         clean_predictor=False,
         **kwargs,
     ):
-        SKgetter.__init__(self, predictor, input_vars, **kwargs)
+        if predict_function not in ("predict", "predict_proba", "decision_function"):
+            raise ParameterError(
+                "predict_function should be either 'predict' or 'predict_proba'"
+            )
+        SKClassifier.__init__(
+            self, predictor, input_vars, predict_function=predict_function, **kwargs
+        )
         BaseNNConstr.__init__(
             self,
             gp_model,
@@ -111,6 +118,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
             if i == neural_net.n_layers_ - 2:
                 activation = self.act_dict[neural_net.out_activation_]()
                 output = self._output
+                kwargs["predict_function"] = self.predict_function
 
             layer = self._add_dense_layer(
                 input_vars,
@@ -125,3 +133,5 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         assert (
             self._output is not None
         )  # Should never happen since sklearn object defines n_ouputs_
+
+        self.linear_predictor = layer.linear_predictor

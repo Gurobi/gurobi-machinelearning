@@ -37,6 +37,8 @@ class AbstractNNLayer(AbstractPredictorConstr):
         **kwargs,
     ):
         self.activation = activation_function
+        if "predict_function" in kwargs:
+            self.predict_function = kwargs.pop("predict_function")
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )

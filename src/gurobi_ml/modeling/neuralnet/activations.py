@@ -27,7 +27,7 @@ try:
 except ImportError:
     _HAS_NLEXPR = False
 
-from ..softmax import softmax
+from ..softmax import hardmax, softmax
 
 
 class Identity:
@@ -191,4 +191,13 @@ class SoftMax:
         else:
             linear_predictor = layer._input
 
-        softmax(layer, linear_predictor)
+        if hasattr(layer, "predict_function"):
+            predict_function = layer.predict_function
+            if predict_function == "predict_proba":
+                softmax(layer, linear_predictor)
+            elif predict_function == "predict":
+                hardmax(layer, linear_predictor)
+            elif predict_function == "decision_function":
+                output == linear_predictor
+        else:
+            softmax(layer, linear_predictor)

@@ -163,7 +163,7 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         pwl_attributes=None,
         **kwargs,
     ):
-        if predict_function not in ("predict", "predict_proba"):
+        if predict_function not in ("predict", "predict_proba", "decision_function"):
             raise ParameterError(
                 "predict_function should be either 'predict' or 'predict_proba'"
             )
@@ -248,12 +248,14 @@ Upgrading to version 12 is recommended when using logistic regressions."""
         coefs = self.predictor.coef_
         intercept = self.predictor.intercept_
 
-        linreg = self, coefs, self.input @ coefs.T + intercept
+        linreg = self.input @ coefs.T + intercept
 
         if self.predict_function == "predict":
-            hardmax(self, linreg, kwargs)
+            hardmax(self, linreg, **kwargs)
+        elif self.predict_function == "predict_proba":
+            softmax(self, linreg, **kwargs)
         else:
-            softmax(self, linreg, kwargs)
+            self.gp_model.addConstr(self.output == linreg)
 
     def _mip_model(self, **kwargs):
         if self._output_shape > 2:

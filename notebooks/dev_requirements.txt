@@ -11,4 +11,3 @@ sphinx-rtd-theme
 tensorflow
 torch
 skorch
-../.

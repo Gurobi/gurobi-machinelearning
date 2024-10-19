@@ -17,7 +17,7 @@
 
 
 from ..modeling import AbstractPredictorConstr
-from .skgetter import SKgetter
+from .skgetter import SKRegressor
 
 
 def add_pls_regression_constr(
@@ -56,7 +56,7 @@ def add_pls_regression_constr(
     )
 
 
-class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
+class PLSRegressionConstr(SKRegressor, AbstractPredictorConstr):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression` in a
     gurobipy model.
@@ -73,7 +73,7 @@ class PLSRegressionConstr(SKgetter, AbstractPredictorConstr):
         **kwargs,
     ):
         self._output_shape = 1
-        SKgetter.__init__(self, predictor, input_vars, **kwargs)
+        SKRegressor.__init__(self, predictor, input_vars, **kwargs)
         AbstractPredictorConstr.__init__(
             self,
             gp_model,
