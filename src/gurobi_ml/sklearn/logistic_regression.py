@@ -38,6 +38,7 @@ except ImportError:
 
 from ..exceptions import ParameterError
 from .base_regressions import BaseSKlearnRegressionConstr
+from .skgetter import SKClassifier
 
 
 def add_logistic_regression_constr(
@@ -145,7 +146,7 @@ def add_logistic_regression_constr(
     )
 
 
-class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
+class LogisticRegressionConstr(SKClassifier, BaseSKlearnRegressionConstr):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` in a gurobipy model.
 
@@ -182,15 +183,17 @@ formulated without requiring the non-linear logistic function."""
         self.epsilon = epsilon
         self._default_name = "log_reg"
         self.linear_predictor = None
+        SKClassifier.__init__(self, predictor, input_vars, predict_function)
+        print(self.predict_function)
         BaseSKlearnRegressionConstr.__init__(
             self,
             gp_model,
             predictor,
             input_vars,
             output_vars,
-            predict_function,
             **kwargs,
         )
+        print(self.predict_function)
 
     @staticmethod
     def default_pwl_attributes() -> dict:
@@ -250,6 +253,7 @@ Upgrading to version 12 is recommended when using logistic regressions."""
 
         linreg = self.input @ coefs.T + intercept
 
+        print(self.predict_function)
         if self.predict_function == "predict":
             hardmax(self, linreg, **kwargs)
         elif self.predict_function == "predict_proba":

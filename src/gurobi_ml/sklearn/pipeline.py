@@ -76,10 +76,7 @@ class PipelineConstr(SKRegressor, SKClassifier, AbstractPredictorConstr):
         self._steps = []
         self._default_name = "pipe"
         if hasattr(pipeline, "predict_proba"):
-            predict_function = kwargs.pop("predict_function")
-            SKClassifier.__init__(
-                self, pipeline, input_vars, predict_function, **kwargs
-            )
+            SKClassifier.__init__(self, pipeline, input_vars, **kwargs)
             self._isclassifier = True
         else:
             SKRegressor.__init__(self, pipeline, input_vars, **kwargs)
