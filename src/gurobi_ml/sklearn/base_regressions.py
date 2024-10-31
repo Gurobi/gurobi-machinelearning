@@ -36,7 +36,6 @@ class BaseSKlearnRegressionConstr(SKRegressor, AbstractPredictorConstr):
         predictor,
         input_vars,
         output_vars=None,
-        predict_function="predict",
         **kwargs,
     ):
         coef = predictor.coef_
@@ -44,9 +43,7 @@ class BaseSKlearnRegressionConstr(SKRegressor, AbstractPredictorConstr):
             self._output_shape = 1
         else:
             self._output_shape = coef.shape[0]
-        SKRegressor.__init__(
-            self, predictor, input_vars, predict_function=predict_function, **kwargs
-        )
+        SKRegressor.__init__(self, predictor, input_vars, **kwargs)
         AbstractPredictorConstr.__init__(
             self,
             gp_model,
