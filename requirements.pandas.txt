@@ -1,2 +1,2 @@
 pandas==2.2.2
-gurobipy-pandas==1.1.4
+gurobipy-pandas==1.1.5
