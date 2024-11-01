@@ -184,7 +184,6 @@ formulated without requiring the non-linear logistic function."""
         self._default_name = "log_reg"
         self.linear_predictor = None
         SKClassifier.__init__(self, predictor, input_vars, predict_function)
-        print(self.predict_function)
         BaseSKlearnRegressionConstr.__init__(
             self,
             gp_model,
@@ -193,7 +192,6 @@ formulated without requiring the non-linear logistic function."""
             output_vars,
             **kwargs,
         )
-        print(self.predict_function)
 
     @staticmethod
     def default_pwl_attributes() -> dict:
@@ -232,6 +230,10 @@ Upgrading to version 12 is recommended when using logistic regressions."""
         )
         self._add_regression_constr(output=linear_predictor)
 
+        self.gp_model.addConstr(self.output.sum(axis=1) == 1)
+
+        self.linear_predictor = linear_predictor
+
         if self.predict_function == "predict":
             max2(self, linear_predictor, self.epsilon)
         else:
@@ -253,7 +255,6 @@ Upgrading to version 12 is recommended when using logistic regressions."""
 
         linreg = self.input @ coefs.T + intercept
 
-        print(self.predict_function)
         if self.predict_function == "predict":
             hardmax(self, linreg, **kwargs)
         elif self.predict_function == "predict_proba":

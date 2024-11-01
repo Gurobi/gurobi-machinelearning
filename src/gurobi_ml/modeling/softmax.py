@@ -65,7 +65,7 @@ def max2(
 ):
     # For classification we need an extra binary variable
     bin_output = predictor_model.gp_model.addMVar(
-        predictor_model.output.shape, vtype=gp.GRB.BINARY, name="bin_output"
+        (predictor_model.output.shape[0], 1), vtype=gp.GRB.BINARY, name="bin_output"
     )
 
     # Workaround for MVars in indicator constraints for v10.
@@ -97,7 +97,7 @@ def max2(
         0,
         "indicator_linear_predictor_neg",
     )
-    predictor_model.gp_model.addConstr(bin_output == predictor_model.output)
+    predictor_model.gp_model.addConstr(bin_output == predictor_model.output[:, 1])
 
 
 def logistic(predictor_model: AbstractPredictorConstr, linear_predictor: gp.MVar):
@@ -114,10 +114,6 @@ def logistic(predictor_model: AbstractPredictorConstr, linear_predictor: gp.MVar
     for gen_constr in predictor_model.gp_model.getGenConstrs()[num_gc:]:
         for attr, val in predictor_model.attributes.items():
             gen_constr.setAttr(attr, val)
-
-    predictor_model.gp_model.addConstr(
-        predictor_model.output[:, 0] == 1 - predictor_model.output[:, 1]
-    )
 
 
 def hardmax(
@@ -189,7 +185,9 @@ def softmax(
         denominator = exponentials.sum(axis=1)
 
         # Voila!
-        gp_model.addConstr(output == exponentials / denominator, name=f"multlog")
+        gp_model.addConstr(
+            output == exponentials / denominator[:, np.newaxis], name=f"multlog"
+        )
     else:
         # How boy that is tedious you don't want not to use Gurobi 12!
         linear_predictor_vars = gp_model.addMVar(
