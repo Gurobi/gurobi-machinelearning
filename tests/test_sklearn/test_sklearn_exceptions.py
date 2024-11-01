@@ -43,7 +43,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=ConvergenceWarning)
             mlpreg.fit(X, y)
-        example = X[10, :]
+        example = X[10:11, :]
 
         m = gp.Model()
 

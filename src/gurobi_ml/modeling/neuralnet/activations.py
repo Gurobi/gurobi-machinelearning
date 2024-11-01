@@ -57,6 +57,7 @@ class Identity:
         """
         output = layer.output
         layer.gp_model.addConstr(output == layer.input @ layer.coefs + layer.intercept)
+        layer.linear_predictor = output
 
 
 class ReLU:
@@ -105,6 +106,7 @@ class ReLU:
             )
         else:
             linear_predictor = layer._input
+
         for index in np.ndindex(output.shape):
             layer.gp_model.addGenConstrMax(
                 output[index],
@@ -152,7 +154,7 @@ class Logistic:
             linear_predictor = layer.linear_predictor
         else:
             linear_predictor = layer._input
-        layer._output = nlfunc.logistic(linear_predictor)
+        layer.gp_model.addConstr(layer.output == nlfunc.logistic(linear_predictor))
 
 
 class SoftMax:
