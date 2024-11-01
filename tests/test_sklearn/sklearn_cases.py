@@ -157,6 +157,10 @@ class Cases(ABC):
         X, y = self.data
         predictor.fit(X, y)
         non_convex = False
+        if hasattr(predictor, "predict_proba"):
+            output_shape = predictor.predict_proba(X).shape
+        else:
+            output_shape = y.shape
         if isinstance(predictor, Pipeline):
             for element in predictor:
                 if isinstance(element, PolynomialFeatures):
@@ -166,7 +170,7 @@ class Cases(ABC):
         rval = {
             "predictor": predictor,
             "input_shape": X.shape,
-            "output_shape": y.shape,
+            "output_shape": output_shape,
             "nonconvex": non_convex,
         }
         if self.saved_training:
