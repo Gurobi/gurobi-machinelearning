@@ -97,7 +97,7 @@ def max2(
         0,
         "indicator_linear_predictor_neg",
     )
-    predictor_model.gp_model.addConstr(bin_output == predictor_model.output[:, 1])
+    predictor_model.gp_model.addConstr(bin_output[:, 0] == predictor_model.output[:, 1])
 
 
 def logistic(predictor_model: AbstractPredictorConstr, linear_predictor: gp.MVar):
