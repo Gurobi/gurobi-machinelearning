@@ -70,17 +70,17 @@ class FixedRegressionModel(unittest.TestCase):
                 else:
                     raise
 
+            try:
+                vio = gpm.MaxVio
+            except AttributeError:
+                gpm.write("Error.lp")
+                raise
             self.additional_test(predictor, pred_constr)
             if nonconvex:
                 tol = 5e-3
             else:
                 tol = 1e-5
             tol = 5e-3
-            try:
-                vio = gpm.MaxVio
-            except AttributeError:
-                gpm.write("Error.lp")
-                raise
             if vio > 1e-5:
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
