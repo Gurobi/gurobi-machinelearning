@@ -334,9 +334,10 @@ class WageCase(Cases):
                 remainder="drop",
             ),
         ]
+        excluded = ["LogisticRegression", "MLPClassifier"]
         super().__init__(
             "wages",
-            excluded=["LogisticRegression"],
+            excluded=excluded,
             transformers=preprocessors,
             need_pipeline=True,
             saved_training=100,
