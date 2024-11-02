@@ -27,38 +27,6 @@ try:
 except ImportError:
     _HAS_NL_EXPR = False
 
-_SKIP_VARS = False
-
-
-def _addGenConstrIndicatorMvarV10(self, binvar, binval, lhs, sense, rhs, name):
-    """This function is to work around the lack of MVar compatibility in
-    Gurobi v10 indicator constraints.  Note, it is not as flexible as Model.addGenConstrIndicator
-    in V11+.  If support for v10 is dropped this function can be removed.
-
-    Parameters
-    ----------
-    binvar : MVar
-    binval : {0,1}
-    lhs : MVar or MLinExpr
-    sense : (char)
-        Options are gp.GRB.LESS_EQUAL, gp.GRB.EQUAL, or gp.GRB.GREATER_EQUAL
-    rhs : scalar
-    name : string
-    """
-    assert binvar.shape == lhs.shape
-    total_constraints = np.prod(binvar.shape)
-    binvar = binvar.reshape(total_constraints).tolist()
-    lhs = lhs.reshape(total_constraints).tolist()
-    for index in range(total_constraints):
-        self.gp_model.addGenConstrIndicator(
-            binvar[index],
-            binval,
-            lhs[index],
-            sense,
-            rhs,
-            name=self._indexed_name(index, name),
-        )
-
 
 def max2(
     predictor_model: AbstractPredictorConstr, linear_predictor: gp.MVar, epsilon: float
@@ -68,11 +36,40 @@ def max2(
         (predictor_model.output.shape[0], 1), vtype=gp.GRB.BINARY, name="bin_output"
     )
 
+    def _addGenConstrIndicatorMvarV10(binvar, binval, lhs, sense, rhs, name):
+        """This function is to work around the lack of MVar compatibility in
+        Gurobi v10 indicator constraints.  Note, it is not as flexible as Model.addGenConstrIndicator
+        in V11+.  If support for v10 is dropped this function can be removed.
+
+        Parameters
+        ----------
+        binvar : MVar
+        binval : {0,1}
+        lhs : MVar or MLinExpr
+        sense : (char)
+            Options are gp.GRB.LESS_EQUAL, gp.GRB.EQUAL, or gp.GRB.GREATER_EQUAL
+        rhs : scalar
+        name : string
+        """
+        assert binvar.shape == lhs.shape
+        total_constraints = np.prod(binvar.shape)
+        binvar = binvar.reshape(total_constraints).tolist()
+        lhs = lhs.reshape(total_constraints).tolist()
+        for index in range(total_constraints):
+            predictor_model.gp_model.addGenConstrIndicator(
+                binvar[index],
+                binval,
+                lhs[index],
+                sense,
+                rhs,
+                name=predictor_model._indexed_name(index, name),
+            )
+
     # Workaround for MVars in indicator constraints for v10.
     addGenConstrIndicator = (
         predictor_model.gp_model.addGenConstrIndicator
         if gp.gurobi.version()[0] >= 11
-        else predictor_model._addGenConstrIndicatorMvarV10
+        else _addGenConstrIndicatorMvarV10
     )
 
     # The original epsilon is with respect to the range of the logistic function.
@@ -181,11 +178,7 @@ def softmax(
         # y_j are the output variable z_j = input @ coefs + intercepts
 
         # Store the e^z_j in a nonlinear expression
-        if _SKIP_VARS:
-            exponentials = nlfunc.exp(linear_predictor)
-        else:
-            exponentials = gp_model.addMVar(output.shape, name="exponentials")
-            gp_model.addConstr(exponentials == nlfunc.exp(linear_predictor))
+        exponentials = nlfunc.exp(linear_predictor)
         # The denominator is the sum over the first axis
         denominator = exponentials.sum(axis=1)
 

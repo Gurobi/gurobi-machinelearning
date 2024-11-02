@@ -188,8 +188,19 @@ class SoftMax:
         """
         output = layer.output
         if hasattr(layer, "coefs"):
-            layer.linear_predictor = layer.input @ layer.coefs + layer.intercept
-            linear_predictor = layer.linear_predictor
+            if not hasattr(layer, "linear_predictor"):
+                linear_predictor = layer.gp_model.addMVar(
+                    output.shape,
+                    lb=-GRB.INFINITY,
+                    vtype=GRB.CONTINUOUS,
+                    name=layer._name_var("mix"),
+                )
+                layer.linear_predictor = linear_predictor
+            layer.gp_model.update()
+
+            layer.gp_model.addConstr(
+                layer.linear_predictor == layer.input @ layer.coefs + layer.intercept
+            )
         else:
             linear_predictor = layer._input
 

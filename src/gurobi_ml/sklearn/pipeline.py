@@ -185,4 +185,4 @@ class PipelineConstr(SKRegressor, SKClassifier, AbstractPredictorConstr):
     def get_error(self, eps=None):
         if self._isclassifier:
             return SKClassifier.get_error(self, eps)
-        SKRegressor.get_error(self, eps)
+        return SKRegressor.get_error(self, eps)

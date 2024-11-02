@@ -105,7 +105,7 @@ class SKRegressor(SKgetter):
 
 
 class SKClassifier(SKgetter):
-    """Utility class for sklearn regression models convertors.
+    """Utility class for sklearn classifiers
 
     Implement some common functionalities: check predictor is fitted, output dimension, get error
 

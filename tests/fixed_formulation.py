@@ -68,6 +68,7 @@ class FixedRegressionModel(unittest.TestCase):
                     warnings.warn(UserWarning("Limited license"))
                     self.skipTest("Model too large for limited license")
                 else:
+                    gpm.write("Error.lp")
                     raise
 
             try:
