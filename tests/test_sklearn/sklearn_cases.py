@@ -25,7 +25,7 @@ def init_predictor(name):
     if isinstance(name, str):
         params = {
             "MLPRegressor": "[20, 20]",
-            "MLPClassifier": "[50, 50]",
+            "MLPClassifier": "[10, 10]",
             "GradientBoostingRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
             "RandomForestRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
             "DecisionTreeRegressor": "max_leaf_nodes=50",
@@ -199,7 +199,7 @@ class DiabetesCases(Cases):
     This is appropriate for testing a regression with a single output."""
 
     def __init__(self):
-        excluded = ["LogisticRegression"]
+        excluded = ["LogisticRegression", "MLPClassifier"]
         super().__init__("diabetes", excluded=excluded)
 
     def load_data(self):
@@ -216,7 +216,7 @@ class DiabetesCasesAsFrame(Cases):
     This is appropriate for testing a regression with a single output."""
 
     def __init__(self):
-        excluded = ["LogisticRegression"]
+        excluded = ["LogisticRegression", "MLPClassifier"]
         super().__init__("diabetes_pandas", excluded=excluded)
 
     def load_data(self):
@@ -254,7 +254,7 @@ class IrisMultiCases(Cases):
     This is appropriate for testing binary classification models."""
 
     def __init__(self):
-        super().__init__("iris", regressors=["LogisticRegression"])
+        super().__init__("iris", regressors=["LogisticRegression", "MLPClassifier"])
 
     def load_data(self):
         data = datasets.load_iris()
@@ -297,6 +297,7 @@ class MNISTCase(Cases):
             "mnist",
             regressors=[
                 "MLPClassifier",
+                "LogisticRegression",
             ],
             transformers=[],
             saved_training=100,
