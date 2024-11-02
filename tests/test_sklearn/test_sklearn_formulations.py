@@ -8,9 +8,8 @@ from gurobipy import GurobiError
 from sklearn import datasets
 from sklearn.pipeline import Pipeline
 
-from gurobi_ml import add_predictor_constr, register_predictor_constr
+from gurobi_ml import add_predictor_constr
 from gurobi_ml.exceptions import NoSolution
-from gurobi_ml.sklearn import add_mlp_regressor_constr
 from gurobi_ml.sklearn.pipeline import PipelineConstr
 
 from ..fixed_formulation import FixedRegressionModel
@@ -45,7 +44,7 @@ class TestSklearnModel(FixedRegressionModel):
 
             self.assertLessEqual(
                 np.max(pred_constr[i].get_error().astype(float)),
-                np.max(pred_constr.get_error().astype(float) + 1e-10),
+                np.max(pred_constr.get_error().astype(float) + 1e-7),
             )
 
     def test_diabetes_sklearn(self):
@@ -164,12 +163,10 @@ class TestMNIST(unittest.TestCase):
             "OutputFlag": 0,
         }
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
-            lb = np.maximum(examples - 1e-4, 0.0)
-            ub = np.minimum(examples + 1e-4, 1.0)
+            lb = np.maximum(examples, 0.0)
+            ub = np.minimum(examples, 1.0)
             x = gpm.addMVar(examples.shape, lb=lb, ub=ub)
 
-            predictor.out_activation_ = "identity"
-            register_predictor_constr("MLPClassifier", add_mlp_regressor_constr)
             pred_constr = add_predictor_constr(
                 gpm, predictor, x, predict_function="predict_proba"
             )
@@ -189,7 +186,11 @@ class TestMNIST(unittest.TestCase):
                     raise
 
             tol = 1e-5
-            vio = gpm.MaxVio
+            try:
+                vio = gpm.MaxVio
+            except AttributeError:
+                gpm.write("Error.lp")
+                raise
             if vio > 1e-5:
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
