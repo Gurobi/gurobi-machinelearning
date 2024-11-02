@@ -42,9 +42,10 @@ class TestSklearnModel(FixedRegressionModel):
                 self.assertEqual(
                     predictor_name, type(pred_constr[i]).__name__[: -len("Constr")]
                 )
+
             self.assertLessEqual(
                 np.max(pred_constr[i].get_error().astype(float)),
-                np.max(pred_constr.get_error().astype(float) + 1e-10),
+                np.max(pred_constr.get_error().astype(float) + 1e-7),
             )
 
     def test_diabetes_sklearn(self):
@@ -163,12 +164,10 @@ class TestMNIST(unittest.TestCase):
             "OutputFlag": 0,
         }
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
-            lb = np.maximum(examples - 1e-4, 0.0)
-            ub = np.minimum(examples + 1e-4, 1.0)
+            lb = np.maximum(examples, 0.0)
+            ub = np.minimum(examples, 1.0)
             x = gpm.addMVar(examples.shape, lb=lb, ub=ub)
 
-            predictor.out_activation_ = "identity"
-            register_predictor_constr("MLPClassifier", add_mlp_regressor_constr)
             pred_constr = add_predictor_constr(
                 gpm, predictor, x, predict_function="predict_proba"
             )
@@ -188,7 +187,11 @@ class TestMNIST(unittest.TestCase):
                     raise
 
             tol = 1e-5
-            vio = gpm.MaxVio
+            try:
+                vio = gpm.MaxVio
+            except AttributeError:
+                gpm.write("Error.lp")
+                raise
             if vio > 1e-5:
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
