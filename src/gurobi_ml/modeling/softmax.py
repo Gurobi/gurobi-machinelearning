@@ -27,8 +27,6 @@ try:
 except ImportError:
     _HAS_NL_EXPR = False
 
-_SKIP_VARS = False
-
 
 def _addGenConstrIndicatorMvarV10(self, binvar, binval, lhs, sense, rhs, name):
     """This function is to work around the lack of MVar compatibility in
@@ -176,11 +174,7 @@ def softmax(
         # y_j are the output variable z_j = input @ coefs + intercepts
 
         # Store the e^z_j in a nonlinear expression
-        if _SKIP_VARS:
-            exponentials = nlfunc.exp(linear_predictor)
-        else:
-            exponentials = gp_model.addMVar(output.shape, name="exponentials")
-            gp_model.addConstr(exponentials == nlfunc.exp(linear_predictor))
+        exponentials = nlfunc.exp(linear_predictor)
         # The denominator is the sum over the first axis
         denominator = exponentials.sum(axis=1)
 
