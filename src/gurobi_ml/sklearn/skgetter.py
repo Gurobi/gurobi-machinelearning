@@ -123,7 +123,7 @@ class SKClassifier(SKgetter):
         **kwargs,
     ):
         # Raises an error if prediction function is not in predictor
-        if getattr(predictor, predict_function):
+        if predict_function == "identity" or getattr(predictor, predict_function):
             pass
         self.predict_function = predict_function
         SKgetter.__init__(self, predictor=predictor, input_vars=input_vars, **kwargs)

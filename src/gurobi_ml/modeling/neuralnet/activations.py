@@ -210,7 +210,7 @@ class SoftMax:
                 softmax(layer, linear_predictor)
             elif predict_function == "predict":
                 hardmax(layer, linear_predictor)
-            elif predict_function == "decision_function":
-                output == linear_predictor
+            elif predict_function == "identity":
+                layer.gp_model.addConstr(output == linear_predictor)
         else:
             softmax(layer, linear_predictor)
