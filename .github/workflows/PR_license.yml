@@ -50,3 +50,4 @@ jobs:
       run: |
         tox
         tox -e examples
+        tox -e $(echo py311-{lightgbm,keras,pytorch,sklearn,xgboost,no_deps,all_deps}-gurobi10 | tr ' ' ',')
