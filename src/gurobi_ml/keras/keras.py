@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Module for formulating a Keras model into a :gurobipy:`model`."""
+"""Module for formulating a Keras model into a :external+gurobi:py:class:`Model`."""
 
 import numpy as np
 from tensorflow import keras
@@ -30,7 +30,7 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     keras_model : `keras.Model <https://keras.io/api/models/model/>`
         The keras model to insert as predictor.

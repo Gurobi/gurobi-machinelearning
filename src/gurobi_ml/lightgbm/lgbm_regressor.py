@@ -15,7 +15,7 @@
 
 """Module for formulating a
 LightGBM gradient boosting regressor
-into a :gurobipy:`model`.
+into a :external+gurobi:py:class:`Model`.
 """
 
 
@@ -41,7 +41,7 @@ def add_lgbmregressor_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     lgbm_regressor : :external+lightgbm:py:class:`lightgbm.sklearn.LGBMRegressor`
         The gradient boosting regressor to insert as predictor.
@@ -92,7 +92,7 @@ def add_lgbm_booster_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     lgbm_regressor : :external+lightgbm:py:class:`lightgbm.Booster`
         The booster to insert as predictor.

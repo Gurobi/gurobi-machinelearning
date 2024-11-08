@@ -14,7 +14,7 @@
 # ==============================================================================
 
 """Module for formulating a :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a
-:gurobipy:`model`.
+:external+gurobi:py:class:`Model`.
 """
 from ..exceptions import NoModel
 from ..modeling.neuralnet import BaseNNConstr
@@ -32,7 +32,7 @@ def add_mlp_regressor_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     mlpregressor : :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor`
         The multi-layer perceptron regressor to insert as predictor.

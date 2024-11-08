@@ -14,7 +14,7 @@
 # ==============================================================================
 
 """Module for formulating a :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
-in a :gurobipy:`model`.
+in a :external+gurobi:py:class:`Model`.
 """
 
 
@@ -36,7 +36,7 @@ def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwar
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     pipeline : :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
         The pipeline to insert as predictor.
