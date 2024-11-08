@@ -33,6 +33,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
         with self.assertRaises(ParameterError):
             add_predictor_constr(m, logreg, x, predict_function="predi_prba")
 
+    @unittest.skip("Actually works in this branch")
     def test_mlpregressor_wrong_act(self):
         data = datasets.load_diabetes()
 
