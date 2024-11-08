@@ -59,10 +59,6 @@ In addition to the usual packages, we will need ``matplotlib`` to plot
 the digits, and ``joblib`` to load a pre-trained network and part of the
 training data.
 
-Note that from the ``gurobi_ml`` package we need to use directly the
-``add_mlp_regressor_constr`` function for reasons that will be clarified
-later.
-
 """
 
 import gurobipy as gp
@@ -70,11 +66,11 @@ import numpy as np
 from joblib import load
 from matplotlib import pyplot as plt
 
-from gurobi_ml.sklearn import add_mlp_regressor_constr
+from gurobi_ml import add_predictor_constr
 
 ######################################################################
 # We load a neural network that was pre-trained with Scikit-learn’s
-# MLPRegressor. The network is small (2 hidden layers of 50 neurons),
+# MLPClassifier. The network is small (2 hidden layers of 50 neurons),
 # finding a counter example shouldn’t be too difficult.
 #
 # We also load the first 100 training examples of the MNIST dataset that
@@ -183,18 +179,11 @@ m.update()
 #
 # Note that this case is not as straightforward as others. The reason is
 # that the neural network is trained for classification with a
-# ``"softmax"`` activation in the last layer. But in this model we are
-# using the network without activation in the last layer.
+# ``"softmax"`` activation in the last layer. But in this model we don't
+# need the values of softmax and can just use identity for the last layer.
 #
 # For this reason, we change manually the last layer activation before
 # adding the network to the Gurobi model.
-#
-# Also, we use the function
-# :func:`add_mlp_regressor_constr <gurobi_ml.sklearn.mlpregressor.add_mlp_regressor_constr>`.
-# directly. The network being actually for classification (i.e. of type
-# ``MLPClassifier``) the
-# :func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`.
-# function would not handle it automatically.
 #
 # In the output, there is a warning about adding constraints with very
 # small coefficients that are ignored. Neural-networks often contain very
@@ -204,14 +193,8 @@ m.update()
 # negligible.
 #
 
-# Change last layer activation to identity
-nn.out_activation_ = "identity"
 # Code to add the neural network to the constraints
-pred_constr = add_mlp_regressor_constr(m, nn, x, y)
-
-# Restore activation
-nn.out_activation_ = "softmax"
-
+pred_constr = add_predictor_constr(m, nn, x, y, predict_function="identity")
 
 ######################################################################
 # The model should be complete. We print the statistics of what was added
