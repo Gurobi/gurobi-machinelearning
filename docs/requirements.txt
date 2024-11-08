@@ -19,4 +19,4 @@ sphinx-pyproject==0.3.0
 pydata-sphinx-theme==0.15.4
 .
 sphinx-gallery==0.16.0
-gurobi-sphinxtheme @ git+https://github.com/Gurobi/gurobi-sphinxtheme.git@main
+gurobi-sphinxtheme @ git+https://github.com/Gurobi/gurobi-sphinxtheme.git@no-logo
