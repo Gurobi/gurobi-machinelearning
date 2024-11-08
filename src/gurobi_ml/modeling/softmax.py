@@ -100,17 +100,22 @@ def max2(
 def logistic(predictor_model: AbstractPredictorConstr, linear_predictor: gp.MVar):
     log_result = predictor_model.output[:, 1]
 
-    for index in np.ndindex(log_result.shape):
-        predictor_model.gp_model.addGenConstrLogistic(
-            linear_predictor[index],
-            log_result[index],
-            name=predictor_model._indexed_name(index, "logistic"),
+    if _HAS_NL_EXPR:
+        predictor_model.gp_model.addConstr(
+            log_result == nlfunc.logistic(linear_predictor[:, 0])
         )
-    num_gc = predictor_model.gp_model.NumGenConstrs
-    predictor_model.gp_model.update()
-    for gen_constr in predictor_model.gp_model.getGenConstrs()[num_gc:]:
-        for attr, val in predictor_model.attributes.items():
-            gen_constr.setAttr(attr, val)
+    else:
+        for index in np.ndindex(log_result.shape):
+            predictor_model.gp_model.addGenConstrLogistic(
+                linear_predictor[index],
+                log_result[index],
+                name=predictor_model._indexed_name(index, "logistic"),
+            )
+        num_gc = predictor_model.gp_model.NumGenConstrs
+        predictor_model.gp_model.update()
+        for gen_constr in predictor_model.gp_model.getGenConstrs()[num_gc:]:
+            for attr, val in predictor_model.attributes.items():
+                gen_constr.setAttr(attr, val)
 
 
 def hardmax(

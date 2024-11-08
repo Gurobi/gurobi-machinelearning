@@ -123,7 +123,7 @@ target = "enroll"
 
 # Run our regression
 scaler = StandardScaler()
-regression = LogisticRegression(random_state=1)
+regression = LogisticRegression(random_state=10)
 pipe = make_pipeline(scaler, regression)
 pipe.fit(X=historical_data.loc[:, features], y=historical_data.loc[:, target])
 
@@ -144,7 +144,7 @@ studentsdata = pd.read_csv(janos_data_url + "college_applications6000.csv", inde
 nstudents = 20
 
 # Select randomly nstudents in the data
-studentsdata = studentsdata.sample(nstudents, random_state=1)
+studentsdata = studentsdata.sample(nstudents, random_state=10)
 
 
 ######################################################################
@@ -229,7 +229,8 @@ m.update()
 # documentation <https://gurobi-machinelearning.readthedocs.io/en/v1.3.0/mlm-examples/student_admission.html>`__
 # for dealing with those approximations.
 #
-
+m.Params.NodeLimit = 10000
+m.write("students.lp")
 m.optimize()
 
 
@@ -251,7 +252,7 @@ print(
 # regression in a solution as a pandas dataframe using input_values.
 #
 
-pred_constr.input_values
+pred_constr.input_values.round(3)
 
 
 ######################################################################
