@@ -3,6 +3,7 @@ import os
 import numpy as np
 import xgboost as xgb
 from sklearn import datasets
+from sklearn.pipeline import make_pipeline
 
 from ..fixed_formulation import FixedRegressionModel
 
@@ -21,6 +22,18 @@ class TestXGBoosthModel(FixedRegressionModel):
         xgb_reg = xgb.XGBRegressor(n_estimators=10, max_depth=4)
         xgb_reg.fit(X, y)
         one_case = {"predictor": xgb_reg.get_booster(), "nonconvex": 0}
+
+        self.do_one_case(one_case, X, 6, "pairs", float_type=np.float32)
+
+    def test_diabetes_xgboost_pipeline(self):
+        data = datasets.load_diabetes()
+        X = data["data"]
+        y = data["target"]
+
+        xgb_reg = xgb.XGBRegressor(n_estimators=10, max_depth=4)
+        pipeline = make_pipeline(xgb_reg)
+        pipeline.fit(X, y)
+        one_case = {"predictor": pipeline, "nonconvex": 0}
 
         self.do_one_case(one_case, X, 6, "pairs", float_type=np.float32)
 
