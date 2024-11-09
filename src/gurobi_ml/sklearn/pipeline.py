@@ -18,6 +18,7 @@ in a :external+gurobi:py:class:`Model`.
 """
 
 
+from ..lightgbm_sklearn_api import lightgbm_sklearn_convertors
 from ..modeling.base_predictor_constr import AbstractPredictorConstr
 from ..modeling.get_convertor import get_convertor
 from ..register_user_predictor import user_predictors
@@ -112,6 +113,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         predictor = pipeline[-1]
         predictors = sklearn_predictors() | user_predictors()
         predictors |= xgboost_sklearn_convertors()
+        predictors |= lightgbm_sklearn_convertors()
         convertor = get_convertor(predictor, predictors)
         steps.append(convertor(gp_model, predictor, input_vars, output_vars, **kwargs))
         if self._output is None:

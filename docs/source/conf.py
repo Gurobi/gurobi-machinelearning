@@ -142,6 +142,14 @@ html_theme_options = {
     "sidebar_hide_name": False,
     "footer_icons": [
         {
+            "name": "Gurobi",
+            "url": "https://www.gurobi.com",
+            "html": """
+                <svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128.5 127.5"><defs><style>.cls-1{fill:#ed3424;}.cls-2{fill:#c61814;}.cls-3{fill:#22222c;}</style></defs><g id="Layer_2-2"><polygon class="cls-2" points="94.5 6.86 59.08 0 12.07 30.33 74.92 49.88 94.5 6.86"/><polygon class="cls-1" points="9.3 34.11 6.36 53.16 0 94.45 77.03 121.14 95.78 127.64 74.33 54.35 9.3 34.11"/><polygon class="cls-2" points="97.79 10.33 78.49 52.75 100.14 126.74 128.5 98.36 97.79 10.33"/></g></svg>
+            """,
+            "class": "",
+        },
+        {
             "name": "GitHub",
             "url": "https://github.com/Gurobi/gurobi-machinelearning",
             "html": """
