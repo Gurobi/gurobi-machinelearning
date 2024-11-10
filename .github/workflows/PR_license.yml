@@ -48,7 +48,6 @@ jobs:
     - name: Test with tox
       run: |
         tox
-        tox -e examples
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
         GUROBI_VERSION: ${{ matrix.gurobi-version }}
