@@ -53,10 +53,9 @@ jobs:
         GUROBI_VERSION: ${{matrix.gurobi-version}}
       run: |
         tox
-        tox -e examples-${{matrix.gurobi-version}}
-    - name: Run Gurobi 10 specific tests
-      if: matrix.python-version == '3.11'
+    - name: Run Gurobi 11 specific tests
+      if: matrix.gurobi-version == 'gurobi11'
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
       run: |
-        tox -e $(echo py311-{lightgbm,keras,pytorch,sklearn,xgboost,no_deps,all_deps}-gurobi10 | tr ' ' ',')
+        tox -e examples-${{matrix.gurobi-version}}
