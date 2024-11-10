@@ -52,3 +52,10 @@ jobs:
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
         GUROBI_VERSION: ${{ matrix.gurobi-version }}
+    - name: Run Gurobi 11 specific tests
+      if: matrix.gurobi-version == 'gurobi11'
+      env:
+        GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
+        GUROBI_VERSION: ${{ matrix.gurobi-version }}
+      run: |
+        tox -e ${{matrix.python-version}}-examples-${{matrix.gurobi-version}}
