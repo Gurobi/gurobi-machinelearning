@@ -26,8 +26,6 @@ jobs:
         exclude:
           - python-version: "3.12"
             gurobi-version: "gurobi10"
-    env:
-      GUROBI_VERSION: ${{ matrix.gurobi-version }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -40,9 +38,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest tox tox-gh-actions
-    - name: install pandoc
-      run: |
-        sudo apt-get update && sudo apt-get install -y pandoc
     - shell: bash
       id: write-license
       env:
@@ -56,3 +51,4 @@ jobs:
         tox -e examples
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
+        GUROBI_VERSION: ${{ matrix.gurobi-version }}
