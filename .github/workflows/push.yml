@@ -53,7 +53,7 @@ jobs:
         GUROBI_VERSION: ${{matrix.gurobi-version}}
       run: |
         tox
-        tox -e examples
+        tox -e examples-${{matrix.gurobi-version}}
     - name: Run Gurobi 10 specific tests
       if: matrix.python-version == '3.11'
       env:
