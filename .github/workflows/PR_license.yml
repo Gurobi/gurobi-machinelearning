@@ -48,7 +48,13 @@ jobs:
     - name: Test with tox
       run: |
         tox
-        tox -e examples
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
         GUROBI_VERSION: ${{ matrix.gurobi-version }}
+    - name: Run Gurobi 12 specific tests
+      if: ${{ (matrix.gurobi-version == 'gurobi11') && (matrix.python-version == '3.12') }}
+      env:
+        GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
+        GUROBI_VERSION: ${{ matrix.gurobi-version }}
+      run: |
+        tox -e py312-examples-${{matrix.gurobi-version}}
