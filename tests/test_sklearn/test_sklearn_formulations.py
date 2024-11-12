@@ -115,8 +115,10 @@ class TestSklearnModel(FixedRegressionModel):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", predict_function="predict")
-            self.do_one_case(onecase, X, 6, "pairs", predict_function="predict")
+            self.do_one_case(onecase, X, 5, "all", predict_function="decision_function")
+            self.do_one_case(
+                onecase, X, 6, "pairs", predict_function="decision_function"
+            )
 
     def test_iris_pwl_args(self):
         data = datasets.load_iris()
