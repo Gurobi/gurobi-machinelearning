@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
-        gurobi-version: ["gurobi10", "gurobi11"]
+        gurobi-version: ["gurobi10", "gurobi11","gurobi12"]
         exclude:
           - python-version: "3.12"
             gurobi-version: "gurobi10"
@@ -54,7 +54,7 @@ jobs:
       run: |
         tox
     - name: Run examples with Gurobi 11
-      if: ${{ (matrix.gurobi-version == 'gurobi11') && (matrix.python-version == '3.12') }}
+      if: ${{ (matrix.gurobi-version != 'gurobi10') && (matrix.python-version == '3.12') }}
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
         GUROBI_VERSION: ${{ matrix.gurobi-version }}
