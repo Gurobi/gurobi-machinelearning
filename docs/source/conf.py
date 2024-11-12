@@ -62,12 +62,7 @@ def get_versions(file: Path):
 
 
 root_path = Path().resolve().parent.parent
-dep_versions = {
-    k: v
-    for k, v in get_versions(root_path / "requirements.txt").items()
-    if k == "gurobipy"
-}  # get only gurobipy from requirements.txt
-dep_versions |= get_versions(root_path / "requirements.tox.txt")
+dep_versions = get_versions(root_path / "requirements.tox.txt")
 dep_versions |= get_versions(root_path / "requirements.keras.txt")
 dep_versions |= get_versions(root_path / "requirements.pytorch.txt")
 dep_versions |= get_versions(root_path / "requirements.sklearn.txt")
@@ -81,7 +76,6 @@ CLASS_SHORT = """Stores the changes to :external+gurobi:py:class:`Model` for for
 
 
 rst_epilog = f"""
-.. |GurobiVersion| replace:: {dep_versions["gurobipy"]}
 .. |NumpyVersion| replace:: {dep_versions["numpy"]}
 .. |ScipyVersion| replace:: {dep_versions["scipy"]}
 .. |PandasVersion| replace:: {dep_versions["pandas"]}
