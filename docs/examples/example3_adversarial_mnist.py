@@ -194,7 +194,7 @@ m.update()
 #
 
 # Code to add the neural network to the constraints
-pred_constr = add_predictor_constr(m, nn, x, y, predict_function="identity")
+pred_constr = add_predictor_constr(m, nn, x, y, out_activation="identity")
 
 ######################################################################
 # The model should be complete. We print the statistics of what was added
