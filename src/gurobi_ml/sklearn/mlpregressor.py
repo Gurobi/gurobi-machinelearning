@@ -63,7 +63,12 @@ def add_mlp_regressor_constr(
 
 
 def add_mlp_classifier_constr(
-    gp_model, mlp_regressor, input_vars, output_vars=None, **kwargs
+    gp_model,
+    mlp_regressor,
+    input_vars,
+    output_vars=None,
+    out_activation="softmax",
+    **kwargs,
 ):
     """Formulate mlp_regressor in gp_model.
 
@@ -98,6 +103,12 @@ def add_mlp_classifier_constr(
     -----
     |VariablesDimensionsWarn|
     """
+    if out_activation == "identity":
+        kwargs["predict_function"] = "identity"
+    elif out_activation == "softmax":
+        kwargs["predict_function"] = "predict_proba"
+    else:
+        raise NoModel(f"No implementation for output activation {out_activation}")
     return MLPClassifierConstr(
         gp_model, mlp_regressor, input_vars, output_vars, **kwargs
     )
@@ -115,7 +126,7 @@ class MLPConstr(BaseNNConstr):
         gp_model,
         predictor,
         input_vars,
-        output_vars=None,
+        output_vars,
         clean_predictor=False,
         **kwargs,
     ):
@@ -183,7 +194,7 @@ class MLPRegressorConstr(SKRegressor, MLPConstr):
         gp_model,
         predictor,
         input_vars,
-        output_vars=None,
+        output_vars,
         clean_predictor=False,
         **kwargs,
     ):
@@ -217,8 +228,8 @@ class MLPClassifierConstr(SKClassifier, MLPConstr):
         gp_model,
         predictor,
         input_vars,
-        output_vars=None,
-        predict_function="predict_proba",
+        output_vars,
+        predict_function,
         clean_predictor=False,
         **kwargs,
     ):

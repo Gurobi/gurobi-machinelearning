@@ -27,7 +27,7 @@ try:
 except ImportError:
     _HAS_NLEXPR = False
 
-from ..softmax import hardmax, softmax
+from ..softmax import softmax
 
 
 class Identity:
@@ -208,8 +208,6 @@ class SoftMax:
             predict_function = layer.predict_function
             if predict_function == "predict_proba":
                 softmax(layer, linear_predictor)
-            elif predict_function == "predict":
-                hardmax(layer, linear_predictor)
             elif predict_function == "identity":
                 layer.gp_model.addConstr(output == linear_predictor)
         else:
