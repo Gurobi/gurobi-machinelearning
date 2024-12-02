@@ -13,7 +13,6 @@ Sphinx==7.3.7
 sphinx-copybutton==0.5.2
 sphinx_design==0.6.1
 sphinx-pyproject==0.3.0
-pydata-sphinx-theme==0.15.4
 .
 sphinx-gallery==0.18.0
 gurobi-sphinxtheme @ git+https://github.com/Gurobi/gurobi-sphinxtheme.git@no-logo
