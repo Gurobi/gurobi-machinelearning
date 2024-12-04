@@ -130,6 +130,7 @@ class MLPConstr(BaseNNConstr):
         clean_predictor=False,
         **kwargs,
     ):
+        assert predictor.activation_ in ("identity", "relu", "logistic")
         BaseNNConstr.__init__(
             self,
             gp_model,
@@ -139,7 +140,6 @@ class MLPConstr(BaseNNConstr):
             clean_predictor=clean_predictor,
             **kwargs,
         )
-        assert predictor.out_activation_ in ("identity", "relu", "logistic", "softmax")
 
     def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
@@ -162,7 +162,7 @@ class MLPConstr(BaseNNConstr):
             if i == neural_net.n_layers_ - 2:
                 activation = self.act_dict[neural_net.out_activation_]()
                 output = self._output
-                if neural_net.out_activation_ == "softmax":
+                if neural_net.out_activation_ in ("softmax", "logistic"):
                     kwargs["predict_function"] = self.predict_function
 
             layer = self._add_dense_layer(
@@ -198,6 +198,7 @@ class MLPRegressorConstr(SKRegressor, MLPConstr):
         clean_predictor=False,
         **kwargs,
     ):
+        assert predictor.out_activation_ in ("identity", )
         SKRegressor.__init__(
             self,
             predictor,
@@ -213,7 +214,6 @@ class MLPRegressorConstr(SKRegressor, MLPConstr):
             clean_predictor=clean_predictor,
             **kwargs,
         )
-        assert predictor.out_activation_ in ("identity", "relu", "logistic", "softmax")
 
 
 class MLPClassifierConstr(SKClassifier, MLPConstr):
@@ -233,6 +233,7 @@ class MLPClassifierConstr(SKClassifier, MLPConstr):
         clean_predictor=False,
         **kwargs,
     ):
+        assert predictor.out_activation_ in ("logistic", "softmax")
         SKClassifier.__init__(
             self,
             predictor,
@@ -249,4 +250,3 @@ class MLPClassifierConstr(SKClassifier, MLPConstr):
             clean_predictor=clean_predictor,
             **kwargs,
         )
-        assert predictor.out_activation_ in ("identity", "relu", "logistic", "softmax")
