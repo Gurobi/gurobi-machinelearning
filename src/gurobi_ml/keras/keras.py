@@ -77,7 +77,7 @@ class KerasNetworkConstr(BaseNNConstr):
             if isinstance(step, keras.layers.Dense):
                 config = step.get_config()
                 activation = config["activation"]
-                if activation not in ("relu", "linear"):
+                if activation not in ("relu", "softmax", "sigmoid", "linear"):
                     raise NoModel(predictor, f"Unsupported activation {activation}")
             elif isinstance(step, keras.layers.ReLU):
                 if step.negative_slope != 0.0:
@@ -120,6 +120,8 @@ class KerasNetworkConstr(BaseNNConstr):
                 activation = config["activation"]
                 if activation == "linear":
                     activation = "identity"
+                if activation == "sigmoid":
+                    activation = "logistic"
                 weights, bias = step.get_weights()
                 layer = self._add_dense_layer(
                     _input,
