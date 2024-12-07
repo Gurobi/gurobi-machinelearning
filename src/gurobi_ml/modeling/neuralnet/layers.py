@@ -19,8 +19,6 @@ import io
 
 import gurobipy as gp
 
-from gurobi_ml.modeling.neuralnet.activations import Identity
-
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
 
@@ -37,6 +35,8 @@ class AbstractNNLayer(AbstractPredictorConstr):
         **kwargs,
     ):
         self.activation = activation_function
+        if "predict_function" in kwargs:
+            self.predict_function = kwargs.pop("predict_function")
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )
@@ -93,7 +93,7 @@ class ActivationLayer(AbstractNNLayer):
             activation = self.activation
 
         # Do the mip model for the activation in the layer
-        activation.mip_model(self)
+        activation.mip_model(self, **kwargs)
         self.gp_model.update()
 
 
@@ -139,7 +139,7 @@ class DenseLayer(AbstractNNLayer):
             activation = self.activation
 
         # Do the mip model for the activation in the layer
-        activation.mip_model(self)
+        activation.mip_model(self, **kwargs)
         self.gp_model.update()
 
     def print_stats(self, abbrev=False, file=None):
@@ -151,12 +151,9 @@ class DenseLayer(AbstractNNLayer):
         file : None, optional
           Text stream to which output should be redirected. By default sys.stdout.
         """
-        if not isinstance(self.activation, Identity):
-            output = io.StringIO()
-            AbstractPredictorConstr.print_stats(self, abbrev=True, file=output)
-            activation_name = f"({_default_name(self.activation)})"
+        output = io.StringIO()
+        AbstractPredictorConstr.print_stats(self, abbrev=True, file=output)
+        activation_name = f"({_default_name(self.activation)})"
 
-            out_string = output.getvalue()
-            print(f"{out_string[:-1]} {activation_name}", file=file)
-            return
-        AbstractPredictorConstr.print_stats(self, abbrev=True, file=file)
+        out_string = output.getvalue()
+        print(f"{out_string[:-1]} {activation_name}", file=file)
