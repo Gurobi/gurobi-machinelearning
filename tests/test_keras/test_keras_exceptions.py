@@ -2,8 +2,7 @@ import unittest
 
 import gurobipy as gp
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
+import keras
 
 from gurobi_ml import add_predictor_constr
 from gurobi_ml.exceptions import NoModel
@@ -22,9 +21,9 @@ class TestUnsuportedKeras(unittest.TestCase):
 
     def do_test(self, nn):
         nn.compile(
-            optimizer=tf.keras.optimizers.Adam(0.001),
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-            metrics=[tf.keras.metrics.SparseCategoricalAccuracy()],
+            optimizer=keras.optimizers.Adam(0.001),
+            loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            metrics=[keras.metrics.SparseCategoricalAccuracy()],
         )
 
         nn.fit(
@@ -49,12 +48,12 @@ class TestUnsuportedKeras(unittest.TestCase):
         self.x_train = np.reshape(self.x_train, (-1, 28 * 28))
         self.x_test = np.reshape(self.x_test, (-1, 28 * 28))
 
-        nn = tf.keras.models.Sequential(
+        nn = keras.models.Sequential(
             [
-                tf.keras.layers.InputLayer((28 * 28,)),
-                tf.keras.layers.Dense(50, activation="sigmoid"),
-                tf.keras.layers.Dense(50, activation="relu"),
-                tf.keras.layers.Dense(10),
+                keras.layers.InputLayer((28 * 28,)),
+                keras.layers.Dense(50, activation="sigmoid"),
+                keras.layers.Dense(50, activation="relu"),
+                keras.layers.Dense(10),
             ]
         )
         self.do_test(nn)
@@ -65,19 +64,19 @@ class TestUnsuportedKeras(unittest.TestCase):
         self.x_train = np.reshape(self.x_train, (-1, 28, 28, 1))
         self.x_test = np.reshape(self.x_test, (-1, 28, 28, 1))
 
-        nn = tf.keras.models.Sequential(
+        nn = keras.models.Sequential(
             [
-                tf.keras.layers.InputLayer((28, 28, 1)),
-                tf.keras.layers.BatchNormalization(),
-                tf.keras.layers.Conv2D(32, (3, 3), padding="same"),
-                tf.keras.layers.ReLU(),
-                tf.keras.layers.MaxPooling2D((2, 2)),
-                tf.keras.layers.Conv2D(64, (3, 3), padding="same"),
-                tf.keras.layers.ReLU(),
-                tf.keras.layers.MaxPooling2D((2, 2)),
-                tf.keras.layers.Flatten(),
-                tf.keras.layers.Dense(100, activation="relu"),
-                tf.keras.layers.Dense(10, activation="softmax"),
+                keras.layers.InputLayer((28, 28, 1)),
+                keras.layers.BatchNormalization(),
+                keras.layers.Conv2D(32, (3, 3), padding="same"),
+                keras.layers.ReLU(),
+                keras.layers.MaxPooling2D((2, 2)),
+                keras.layers.Conv2D(64, (3, 3), padding="same"),
+                keras.layers.ReLU(),
+                keras.layers.MaxPooling2D((2, 2)),
+                keras.layers.Flatten(),
+                keras.layers.Dense(100, activation="relu"),
+                keras.layers.Dense(10, activation="softmax"),
             ]
         )
         self.do_test(nn)
@@ -87,12 +86,12 @@ class TestUnsuportedKeras(unittest.TestCase):
         self.x_train = np.reshape(self.x_train, (-1, 28 * 28))
         self.x_test = np.reshape(self.x_test, (-1, 28 * 28))
 
-        nn = tf.keras.models.Sequential(
+        nn = keras.models.Sequential(
             [
-                tf.keras.layers.InputLayer((28 * 28,)),
-                tf.keras.layers.Dense(50),
-                tf.keras.layers.ReLU(**kwargs),
-                tf.keras.layers.Dense(10),
+                keras.layers.InputLayer((28 * 28,)),
+                keras.layers.Dense(50),
+                keras.layers.ReLU(**kwargs),
+                keras.layers.Dense(10),
             ]
         )
         self.do_test(nn)

@@ -81,7 +81,7 @@ rst_epilog = f"""
 .. |PandasVersion| replace:: {dep_versions["pandas"]}
 .. |TorchVersion| replace:: {dep_versions["torch"]}
 .. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}
-.. |TensorflowVersion| replace:: {dep_versions["tensorflow"]}
+.. |KerasVersion| replace:: {dep_versions["keras"]}
 .. |XGBoostVersion| replace:: {dep_versions["xgboost"]}
 .. |LightGBMVersion| replace:: {dep_versions["lightgbm"]}
 .. |VariablesDimensionsWarn| replace:: {VARS_SHAPE}
@@ -162,7 +162,7 @@ html_show_sourcelink = True
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 autodoc_member_order = "groupwise"
-autodoc_mock_imports = ["torch", "tensorflow", "xgboost"]
+autodoc_mock_imports = ["torch", "keras", "tensorflow", "xgboost"]
 html_css_files = [
     "gurobi_ml.css",
 ]
