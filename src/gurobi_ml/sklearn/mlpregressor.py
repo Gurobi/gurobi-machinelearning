@@ -198,7 +198,7 @@ class MLPRegressorConstr(SKRegressor, MLPConstr):
         clean_predictor=False,
         **kwargs,
     ):
-        assert predictor.out_activation_ in ("identity", )
+        assert predictor.out_activation_ in ("identity",)
         SKRegressor.__init__(
             self,
             predictor,

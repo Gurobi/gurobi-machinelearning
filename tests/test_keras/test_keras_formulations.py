@@ -4,7 +4,7 @@ import keras
 from joblib import load
 
 from ..fixed_formulation import FixedRegressionModel
-
+from .keras_cases import HousingCases
 VERBOSE = False
 
 
@@ -34,3 +34,13 @@ class TestKerasModel(FixedRegressionModel):
         onecase = {"predictor": regressor, "nonconvex": 0}
         self.do_one_case(onecase, X, 5, "all")
         self.do_one_case(onecase, X, 6, "pairs")
+
+    def test_housing_keras(self):
+        cases = HousingCases()
+
+        X = cases._data[0]
+        for case in cases:
+            regressor = cases.get_case(case)
+            onecase = {"predictor": regressor, "nonconvex": 0}
+            self.do_one_case(onecase, X, 5, "all")
+            self.do_one_case(onecase, X, 6, "pairs")

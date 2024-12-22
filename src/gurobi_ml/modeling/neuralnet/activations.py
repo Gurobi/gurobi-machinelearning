@@ -140,7 +140,7 @@ class Logistic:
         if not _HAS_NLEXPR:
             raise NoModel(self, "Can't use logistic activation without Gurobi ≥ 12.0")
 
-    def mip_model(self, layer, predict_function='predict_proba', **kwargs):
+    def mip_model(self, layer, predict_function="predict_proba", **kwargs):
         """MIP model for logistic activation on a layer.
 
         Parameters
@@ -181,7 +181,7 @@ class SoftMax:
     def __init__(self):
         pass
 
-    def mip_model(self, layer, predict_function='predict_proba', **kwargs):
+    def mip_model(self, layer, predict_function="predict_proba", **kwargs):
         """MIP model for SoftMax activation on a layer.
 
         Parameters
