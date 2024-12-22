@@ -90,8 +90,8 @@ def lightgbm_convertors():
 
 def keras_convertors():
     """Collect known Keras objects that can be embedded and the conversion class."""
-    if "tensorflow" in sys.modules:
-        from tensorflow import keras  # pylint: disable=import-outside-toplevel
+    if "keras" in sys.modules:
+        import keras  # pylint: disable=import-outside-toplevel
 
         from .keras import add_keras_constr  # pylint: disable=import-outside-toplevel
 

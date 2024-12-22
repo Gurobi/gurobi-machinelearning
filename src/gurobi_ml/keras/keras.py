@@ -16,7 +16,7 @@
 """Module for formulating a Keras model into a :external+gurobi:py:class:`Model`."""
 
 import numpy as np
-from tensorflow import keras
+import keras
 
 from ..exceptions import NoModel, NoSolution
 from ..modeling.neuralnet import BaseNNConstr
