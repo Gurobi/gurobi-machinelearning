@@ -23,7 +23,6 @@ neural network. We import the corresponding objects.
 import gurobipy as gp
 import numpy as np
 from sklearn.datasets import make_regression
-from sklearn.metrics import mean_squared_error
 from sklearn.neural_network import MLPRegressor
 
 from gurobi_ml import add_predictor_constr

@@ -75,14 +75,20 @@ in a mathematical optimization model. There are three stages:
 # the data.
 #
 
-import warnings
-
+import gurobipy as gp
+import gurobipy_pandas as gppd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import sklearn
-from sklearn import tree
+from sklearn.compose import make_column_transformer
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+from gurobi_ml import add_predictor_constr
 
 ######################################################################
 # The dataset from HAB contains sales data for the years 2019-2022. This
@@ -310,8 +316,6 @@ plt.show()
 # weights using ``Scikit-learn``.
 #
 
-from sklearn.model_selection import train_test_split
-
 X = df[["region", "price", "year", "peak"]]
 y = df["units_sold"]
 # Split the data for training and testing
@@ -330,9 +334,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 # ``make_column_transformer``.
 #
 
-from sklearn.compose import make_column_transformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-
 feat_transform = make_column_transformer(
     (OneHotEncoder(drop="first"), ["region"]),
     (StandardScaler(), ["price", "year"]),
@@ -348,10 +349,6 @@ feat_transform = make_column_transformer(
 #
 # Define it and train it.
 #
-
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
-from sklearn.pipeline import make_pipeline
 
 lin_reg = make_pipeline(feat_transform, LinearRegression())
 lin_reg.fit(X_train, y_train)
@@ -496,9 +493,6 @@ data
 # ``gppd.add_vars`` they are given the same index as the ``data``
 # dataframe.
 #
-
-import gurobipy as gp
-import gurobipy_pandas as gppd
 
 m = gp.Model("Avocado_Price_Allocation")
 
@@ -654,8 +648,6 @@ feats
 # `add_predictor_constr <../auto_generated/gurobi_ml.add_predictor_constr.rst>`__
 # to insert the constraints linking the features and the demand.
 #
-
-from gurobi_ml import add_predictor_constr
 
 pred_constr = add_predictor_constr(m, lin_reg, feats, d)
 

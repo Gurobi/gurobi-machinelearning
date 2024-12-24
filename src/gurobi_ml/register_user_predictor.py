@@ -15,6 +15,7 @@
 
 
 """Module for user to register a predictor for the function add_predictor_constr."""
+
 USER_PREDICTORS = {}
 
 

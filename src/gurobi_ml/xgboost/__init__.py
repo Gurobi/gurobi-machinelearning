@@ -13,4 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-from .xgboost_regressor import add_xgboost_regressor_constr, add_xgbregressor_constr
+from .xgboost_regressor import (
+    add_xgboost_regressor_constr as add_xgboost_regressor_constr,
+)
+from .xgboost_regressor import add_xgbregressor_constr as add_xgbregressor_constr

@@ -18,7 +18,6 @@ LightGBM gradient boosting regressor
 into a :external+gurobi:py:class:`Model`.
 """
 
-
 import numpy as np
 from gurobipy import GRB
 

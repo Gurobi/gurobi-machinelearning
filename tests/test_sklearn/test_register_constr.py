@@ -1,5 +1,5 @@
 # Copyright © 2023 Gurobi Optimization, LLC
-""" Test register_predictor_constr function"""
+"""Test register_predictor_constr function"""
 
 import unittest
 

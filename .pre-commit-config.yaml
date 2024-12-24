@@ -14,12 +14,6 @@ repos:
           files: (^(src|tests)/)|(^[^/]*$)
           args: [--in-place, --remove-all-unused-imports, --recursive, --ignore-init-module-imports]
 
-    - repo: https://github.com/pycqa/isort
-      rev: 5.12.0
-      hooks:
-        - id: isort
-          args: ["--profile", "black", "--filter-files"]
-
     - repo: https://github.com/kynan/nbstripout
       rev: 0.6.0
       hooks:
@@ -31,13 +25,17 @@ repos:
       - id: flake8
         args: ["--count", "--select=E9,F63,F7,F82", "--show-source", "--statistics"]
 
-    - repo: https://github.com/psf/black
-      rev: 23.10.1
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      # Ruff version.
+      rev: v0.8.2
       hooks:
-      - id: black-jupyter
-        language_version: python3.11
-        language: python
-        types: [python]
+        # Run the linter.
+        - id: ruff
+          types_or: [ python, pyi, jupyter ]
+          args: [ --fix ]
+        # Run the formatter.
+        - id: ruff-format
+          types_or: [ python, pyi, jupyter ]
 
     - repo: local
       hooks:
