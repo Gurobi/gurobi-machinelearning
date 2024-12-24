@@ -13,18 +13,30 @@
 # limitations under the License.
 # ==============================================================================
 
-from .column_transformer import add_column_transformer_constr
-from .decision_tree_regressor import add_decision_tree_regressor_constr
-from .gradient_boosting_regressor import add_gradient_boosting_regressor_constr
-from .linear_regression import add_linear_regression_constr
-from .logistic_regression import add_logistic_regression_constr
-from .mlpregressor import add_mlp_regressor_constr
-from .pipeline import add_pipeline_constr
-from .pls_regression import add_pls_regression_constr
-from .predictors_list import sklearn_predictors
-from .preprocessing import (
-    add_polynomial_features_constr,
-    add_standard_scaler_constr,
-    sklearn_transformers,
+from .column_transformer import (
+    add_column_transformer_constr as add_column_transformer_constr,
 )
-from .random_forest_regressor import add_random_forest_regressor_constr
+from .decision_tree_regressor import (
+    add_decision_tree_regressor_constr as add_decision_tree_regressor_constr,
+)
+from .gradient_boosting_regressor import (
+    add_gradient_boosting_regressor_constr as add_gradient_boosting_regressor_constr,
+)
+from .linear_regression import (
+    add_linear_regression_constr as add_linear_regression_constr,
+)
+from .logistic_regression import (
+    add_logistic_regression_constr as add_logistic_regression_constr,
+)
+from .mlpregressor import add_mlp_regressor_constr as add_mlp_regressor_constr
+from .pipeline import add_pipeline_constr as add_pipeline_constr
+from .pls_regression import add_pls_regression_constr as add_pls_regression_constr
+from .predictors_list import sklearn_predictors as sklearn_predictors
+from .preprocessing import (
+    add_polynomial_features_constr as add_polynomial_features_constr,
+)
+from .preprocessing import add_standard_scaler_constr as add_standard_scaler_constr
+from .preprocessing import sklearn_transformers as sklearn_transformers
+from .random_forest_regressor import (
+    add_random_forest_regressor_constr as add_random_forest_regressor_constr,
+)

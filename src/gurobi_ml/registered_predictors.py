@@ -14,6 +14,7 @@
 # ==============================================================================
 
 """Define generic function that can add any known trained predictor."""
+
 import sys
 
 from .register_user_predictor import user_predictors
@@ -78,7 +79,6 @@ def lightgbm_convertors():
         import lightgbm as lgb  # pylint: disable=import-outside-toplevel
 
         from .lightgbm import (  # pylint: disable=import-outside-toplevel
-            add_lgbm_booster_constr,
             add_lgbmregressor_constr,
         )
 

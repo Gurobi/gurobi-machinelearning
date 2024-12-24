@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Utilities for modeling decision trees """
+"""Utilities for modeling decision trees"""
 
 from warnings import warn
 

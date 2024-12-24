@@ -15,7 +15,6 @@
 
 """Module for formulating :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression` in a gurobipy model."""
 
-
 from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Convertor for XGBoost's Scikit Learn compatible object
+"""Convertor for XGBoost's Scikit Learn compatible object
 
 This is to be able to use it in pipelines.
 """

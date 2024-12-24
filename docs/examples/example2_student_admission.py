@@ -81,17 +81,13 @@ StandardScaler and LogisticRegression.
 
 """
 
-import sys
-
 import gurobipy as gp
 import gurobipy_pandas as gppd
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.tree import DecisionTreeRegressor
 
 from gurobi_ml import add_predictor_constr
 

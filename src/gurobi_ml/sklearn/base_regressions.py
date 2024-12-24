@@ -21,7 +21,6 @@ All linear models should work:
    - :external+sklearn:py:class:`sklearn.linear_model.Lasso`
 """
 
-
 from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 

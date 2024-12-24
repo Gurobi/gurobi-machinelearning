@@ -18,7 +18,6 @@
 in a :external+gurobi:py:class:`Model`.
 """
 
-
 from ..modeling.decision_tree import AbstractTreeEstimator
 from .skgetter import SKgetter
 

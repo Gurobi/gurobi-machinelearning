@@ -13,4 +13,5 @@
 # limitations under the License.
 # ==============================================================================
 
-from .keras import KerasNetworkConstr, add_keras_constr
+from .keras import KerasNetworkConstr as KerasNetworkConstr
+from .keras import add_keras_constr as add_keras_constr

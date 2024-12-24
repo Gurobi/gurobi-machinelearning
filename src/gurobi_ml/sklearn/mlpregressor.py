@@ -16,6 +16,7 @@
 """Module for formulating a :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a
 :external+gurobi:py:class:`Model`.
 """
+
 from ..exceptions import NoModel
 from ..modeling.neuralnet import BaseNNConstr
 from .skgetter import SKgetter

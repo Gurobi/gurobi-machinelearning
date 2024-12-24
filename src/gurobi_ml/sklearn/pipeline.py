@@ -17,7 +17,6 @@
 in a :external+gurobi:py:class:`Model`.
 """
 
-
 from ..lightgbm_sklearn_api import lightgbm_sklearn_convertors
 from ..modeling.base_predictor_constr import AbstractPredictorConstr
 from ..modeling.get_convertor import get_convertor

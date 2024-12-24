@@ -78,7 +78,7 @@ class ColumnTransformerConstr(SKtransformer):
         """Do the transformation on x."""
         column_transform = self.transformer
         _input = self._input
-        transformers = {k.lower(): v for k, v in sklearn_transformers().items()}
+        {k.lower(): v for k, v in sklearn_transformers().items()}
         transformed = []
         for name, trans, cols in column_transform.transformers_:
             if len(cols) == 0:

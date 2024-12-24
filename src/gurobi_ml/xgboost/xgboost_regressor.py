@@ -18,7 +18,6 @@ XGBoost gradient boosting regressor
 into a :external+gurobi:py:class:`Model`.
 """
 
-
 import json
 
 import numpy as np
