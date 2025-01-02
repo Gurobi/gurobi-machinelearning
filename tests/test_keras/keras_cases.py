@@ -1,4 +1,4 @@
-""" Cases to test for Keras
+"""Cases to test for Keras
 
 We want to test networks with ReLU, Sigmoid and with or without SoftMax.
 

@@ -82,7 +82,7 @@ StandardScaler and LogisticRegression.
 """
 
 import gurobipy as gp
-import gurobipy_pandas as gppd
+import gurobipy_pandas as gppd  # noqa: F401
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression

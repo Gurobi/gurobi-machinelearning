@@ -117,7 +117,7 @@ class SequentialConstr(BaseNNConstr):
                     _input,
                     layer_weight,
                     layer_bias,
-                    self.act_dict["identity"](),
+                    self.act_dict["identity"],
                     output,
                     name=f"linear_{i}",
                     **kwargs,
@@ -127,7 +127,7 @@ class SequentialConstr(BaseNNConstr):
                 activation = self.activations[type(step)]
                 layer = self._add_activation_layer(
                     _input,
-                    self.act_dict[activation](),
+                    self.act_dict[activation],
                     output,
                     name=f"{activation}_{i}",
                     **kwargs,

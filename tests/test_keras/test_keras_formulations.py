@@ -5,6 +5,7 @@ from joblib import load
 
 from ..fixed_formulation import FixedRegressionModel
 from .keras_cases import HousingCases
+
 VERBOSE = False
 
 

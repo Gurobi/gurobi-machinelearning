@@ -165,10 +165,6 @@ def softmax(
     """Add the prediction constraints to Gurobi."""
     gp_model: gp.Model = predictor_model.gp_model
     output: gp.MVar = predictor_model.output
-    try:
-        predict_function: str = predictor_model.predict_function
-    except AttributeError:
-        predict_function = "predict_proba"
 
     if "epsilon" in kwargs:
         epsilon = kwargs["epsilon"]
@@ -190,7 +186,7 @@ def softmax(
 
         # Voila!
         gp_model.addConstr(
-            output == exponentials / denominator[:, np.newaxis], name=f"multlog"
+            output == exponentials / denominator[:, np.newaxis], name="multlog"
         )
     else:
         # How boy that is tedious you don't want not to use Gurobi 12!

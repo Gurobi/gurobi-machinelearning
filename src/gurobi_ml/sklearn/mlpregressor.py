@@ -16,6 +16,7 @@
 """Module for formulating a :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a
 :external+gurobi:py:class:`Model`.
 """
+
 from ..exceptions import NoModel
 from ..modeling.neuralnet import BaseNNConstr
 from .skgetter import SKClassifier, SKRegressor
@@ -103,6 +104,7 @@ def add_mlp_classifier_constr(
     -----
     |VariablesDimensionsWarn|
     """
+    print(f"out activation: {out_activation}")
     if out_activation == "identity":
         kwargs["predict_function"] = "identity"
     elif out_activation == "softmax":
@@ -149,7 +151,7 @@ class MLPConstr(BaseNNConstr):
                 neural_net,
                 f"No implementation for activation function {neural_net.activation}",
             )
-        activation = self.act_dict[neural_net.activation]()
+        activation = self.act_dict[neural_net.activation]
 
         input_vars = self._input
         output = None
@@ -160,10 +162,14 @@ class MLPConstr(BaseNNConstr):
 
             # For last layer change activation
             if i == neural_net.n_layers_ - 2:
-                activation = self.act_dict[neural_net.out_activation_]()
                 output = self._output
-                if neural_net.out_activation_ in ("softmax", "logistic"):
-                    kwargs["predict_function"] = self.predict_function
+                out_activation = neural_net.out_activation_
+                if (
+                    out_activation in ("softmax", "logistic")
+                    and self.predict_function == "identity"
+                ):
+                    out_activation = "identity"
+                activation = self.act_dict[out_activation]
 
             layer = self._add_dense_layer(
                 input_vars,
@@ -177,7 +183,7 @@ class MLPConstr(BaseNNConstr):
             self.gp_model.update()
         assert (
             self._output is not None
-        )  # Should never happen since sklearn object defines n_ouputs_
+        )  # Should never happen since sklearn object defines n_output_
 
         self.linear_predictor = layer.linear_predictor
 
