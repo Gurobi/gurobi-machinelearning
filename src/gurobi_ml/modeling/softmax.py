@@ -197,7 +197,6 @@ def softmax(
         predictor_model.linear_predictor = linear_predictor_vars
 
         exponentials = gp_model.addMVar(output.shape)
-        exponentials = exponentials
         denominator = gp_model.addMVar((output.shape[0]), lb=epsilon)
 
         num_gc = gp_model.NumGenConstrs

@@ -4,10 +4,17 @@ We want to test networks with ReLU, Sigmoid and with or without SoftMax.
 
 """
 
-import os
 from abc import ABC, abstractmethod
 
+import tensorflow as tf
 import keras
+
+try:
+    from gurobipy import nlfunc  # noqa: F401
+
+    HAS_NL_EXPR = True
+except ImportError:
+    HAS_NL_EXPR = False
 
 
 def layers_as_string(layers):
@@ -32,24 +39,10 @@ class Cases(ABC):
         self,
         dataset,
     ):
-        self.basedir = os.path.join(os.path.dirname(__file__), "..", "predictors")
         self.dataset = dataset
 
         # Filled with get data if needed
         self._data = None
-
-        keras_version_file = f"{dataset}_keras_version"
-
-        try:
-            with open(os.path.join(self.basedir, keras_version_file)) as file_in:
-                version = file_in.read().strip()
-        except FileNotFoundError:
-            version = None
-        if version != keras.__version__:
-            print(f"Keras version changed. Regenerate predictors for {dataset}")
-            self.build_all_predictors()
-            with open(os.path.join(self.basedir, keras_version_file), "w") as file_out:
-                print(keras.__version__, file=file_out)
 
     def __iter__(self):
         return self.all_tested_layers.__iter__()
@@ -69,30 +62,13 @@ class Cases(ABC):
             self.load_data()
         return self._data
 
-    def predictor_file(self, predictor):
-        return f"{self.dataset}_{layers_as_string(predictor)}.keras"
-
-    def build_predictor(self, layers):
+    def get_case(self, layers):
         """Build model for one predictor"""
         X, y = self.data
         predictor = self.compile(layers)
         predictor.fit(X, y)
 
-        predictor.save(self.predictor_file(layers))
         return predictor
-
-    def build_all_predictors(self):
-        """Build all the predictor for this case.
-        (Done when we have a new sklearn version)"""
-        for predictor in self:
-            self.build_predictor(predictor)
-
-    def get_case(self, predictor):
-        filename = self.predictor_file(predictor)
-        try:
-            return keras.saving.load_model(os.path.join(self.basedir, filename))
-        except ValueError:
-            return self.build_predictor(predictor)
 
 
 class HousingCases(Cases):
@@ -101,7 +77,13 @@ class HousingCases(Cases):
     This is appropriate for testing a regression with a single output."""
 
     def __init__(self):
-        self.all_tested_layers = [[keras.layers.Dense(16, activation="relu")]]
+        self.all_tested_layers = [
+            [keras.layers.Dense(16, activation="relu")],
+        ]
+        if HAS_NL_EXPR:
+            self.all_tested_layers.append(
+                [keras.layers.Dense(16, activation="sigmoid")],
+            )
         super().__init__("housing")
         self.load_data()
 
@@ -116,4 +98,38 @@ class HousingCases(Cases):
             [keras.layers.InputLayer((8,))] + layers + [keras.layers.Dense(1)]
         )
         nn.compile(loss="mean_squared_error", optimizer="adam")
+        return nn
+
+
+class MNISTCases(Cases):
+    """Base class to have cases for testing regression models on diabetes set
+
+    This is appropriate for testing a regression with a single output."""
+
+    def __init__(self):
+        self.all_tested_layers = [
+            [keras.layers.Dense(20, activation="relu")],
+        ]
+
+        if HAS_NL_EXPR:
+            self.all_tested_layers += [
+                [keras.layers.Dense(20, activation="sigmoid")],
+            ]
+        super().__init__("housing")
+        self.load_data()
+
+    def load_data(self):
+        (X_train, y_train), (_, _) = keras.datasets.fashion_mnist.load_data()
+        X_train = tf.reshape(tf.cast(X_train, tf.float32) / 255.0, [-1, 28 * 28])
+        self._data = (X_train, y_train)
+
+    def compile(self, layers):
+        nn = keras.models.Sequential(
+            [keras.layers.InputLayer((28 * 28,))] + layers + [keras.layers.Dense(10)]
+        )
+        nn.compile(
+            optimizer="adam",
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+            metrics=[tf.keras.metrics.SparseCategoricalAccuracy()],
+        )
         return nn
