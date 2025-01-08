@@ -14,7 +14,7 @@ class TestLGBMhModel(FixedRegressionModel):
 
     basedir = os.path.join(os.path.dirname(__file__), "..", "predictors")
 
-    def test_diabetes_xgboost_pairs(self):
+    def test_diabetes_lightgbm_pairs(self):
         data = datasets.load_diabetes()
         X = data["data"]
         y = data["target"]
@@ -25,7 +25,7 @@ class TestLGBMhModel(FixedRegressionModel):
 
         self.do_one_case(one_case, X, 6, "pairs", float_type=np.float32)
 
-    def test_diabetes_xgboost_pairs_pipeline(self):
+    def test_diabetes_lightgbm_pairs_pipeline(self):
         data = datasets.load_diabetes()
         X = data["data"]
         y = data["target"]
@@ -37,7 +37,7 @@ class TestLGBMhModel(FixedRegressionModel):
 
         self.do_one_case(one_case, X, 6, "pairs", float_type=np.float32)
 
-    def test_diabetes_xgboost_all(self):
+    def test_diabetes_lightgbm_all(self):
         data = datasets.load_diabetes()
         X = data["data"]
         y = data["target"]
