@@ -126,6 +126,8 @@ def _leaf_formulation(
     # We should attain 1 leaf
     gp_model.addConstr(leafs_vars.sum(axis=1) == 1)
 
+    gp_model.addConstr(output <= np.max(tree["value"], axis=0))
+    gp_model.addConstr(output >= np.min(tree["value"], axis=0))
     if verbose:
         timer.timing(f"Added {nex} linear constraints")
 
@@ -207,8 +209,8 @@ def _paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
             for i in range(outdim)
         )
 
-    output.LB = np.min(tree.value)
-    output.UB = np.max(tree.value)
+    gp_model.addConstr(output <= np.max(tree["value"], axis=0))
+    gp_model.addConstr(output >= np.min(tree["value"], axis=0))
 
 
 class AbstractTreeEstimator(AbstractPredictorConstr):
