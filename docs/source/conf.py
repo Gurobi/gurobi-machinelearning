@@ -106,7 +106,7 @@ exclude_patterns = []
 
 intersphinx_mapping = {
     "sklearn": ("https://scikit-learn.org/stable/", None),
-    "torch": ("https://pytorch.org/docs/master/", None),
+    "torch": ("https://pytorch.org/docs/main/", None),
     "xgb": ("https://xgboost.readthedocs.io/en/stable/", None),
     "lightgbm": ("https://lightgbm.readthedocs.io/en/latest/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
