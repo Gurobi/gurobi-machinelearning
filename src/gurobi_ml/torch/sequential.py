@@ -14,7 +14,7 @@
 # ==============================================================================
 
 """Module for formulating :external+torch:py:class:`torch.nn.Sequential` model in a
-:gurobipy:`model`.
+:external+gurobi:py:class:`Model`.
 """
 
 import numpy as np
@@ -35,7 +35,7 @@ def add_sequential_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the sequential model should be inserted.
     sequential_model : :external+torch:py:class:`torch.nn.Sequential`
         The sequential model to insert as predictor.

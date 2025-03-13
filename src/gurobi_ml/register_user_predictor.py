@@ -15,6 +15,7 @@
 
 
 """Module for user to register a predictor for the function add_predictor_constr."""
+
 USER_PREDICTORS = {}
 
 
@@ -27,7 +28,7 @@ def register_predictor_constr(predictor, predictor_constr):
         Class of the predictor
     predictor_constr:
         Class implementing the MIP formulation of a trained object of class predictor
-        in a gurobi :gurobipy:`Model`.
+        in a gurobi :external+gurobi:py:class:`Model`.
     """
     USER_PREDICTORS[predictor] = predictor_constr
 

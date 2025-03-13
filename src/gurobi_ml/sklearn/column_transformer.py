@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Module for formulating a :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` in a :gurobipy:`gurobipy model <Model>`."""
+"""Module for formulating a :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` in a :external+gurobi:py:class:`gurobipy model <Model>`."""
 
 import warnings
 
@@ -78,7 +78,7 @@ class ColumnTransformerConstr(SKtransformer):
         """Do the transformation on x."""
         column_transform = self.transformer
         _input = self._input
-        transformers = {k.lower(): v for k, v in sklearn_transformers().items()}
+        {k.lower(): v for k, v in sklearn_transformers().items()}
         transformed = []
         for name, trans, cols in column_transform.transformers_:
             if len(cols) == 0:
@@ -147,7 +147,7 @@ def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kw
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where polynomial features should be inserted.
     column_transformer : :external+sklearn:py:class:`sklearn.compose.ColumnTransformer`
         The column transformer to insert in gp_model.

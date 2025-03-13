@@ -14,6 +14,7 @@
 # ==============================================================================
 
 """To get version and git hash of built package."""
+
 from importlib import metadata
 
 try:

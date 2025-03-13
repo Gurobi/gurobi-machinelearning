@@ -22,6 +22,10 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
+        gurobi-version: ["gurobi10", "gurobi11","gurobi12"]
+        exclude:
+          - python-version: "3.12"
+            gurobi-version: "gurobi10"
     steps:
     - uses: actions/checkout@v4
       with:
@@ -34,9 +38,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest tox tox-gh-actions
-    - name: install pandoc
-      run: |
-        sudo apt-get update && sudo apt-get install -y pandoc
     - shell: bash
       id: write-license
       env:
@@ -45,14 +46,16 @@ jobs:
         echo "$LICENSE" > $PWD/gurobi.lic
         echo "grb_license_file=$PWD/gurobi.lic" >> $GITHUB_OUTPUT
     - name: Test with tox
-      env:
-        GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
       run: |
         tox
-        tox -e examples
-    - name: Run Gurobi 10 specific tests
-      if: matrix.python-version == '3.11'
       env:
         GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
+        GUROBI_VERSION: ${{ matrix.gurobi-version }}
+    - name: Run examples with Gurobi 11
+      if: ${{ (matrix.gurobi-version == 'gurobi11') && (matrix.python-version == '3.12') }}
+      env:
+        GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
+        GUROBI_VERSION: ${{ matrix.gurobi-version }}
       run: |
-        tox -e $(echo py311-{lightgbm,keras,pytorch,sklearn,xgboost,no_deps,all_deps}-gurobi10 | tr ' ' ',')
+        python_version_no_dot=$(echo "${{ matrix.python-version }}" | tr -d '.')
+        tox -e py${python_version_no_dot}-examples-${{matrix.gurobi-version}}

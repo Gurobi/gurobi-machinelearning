@@ -13,7 +13,7 @@ feasible solution, the output variables values are the values predicted by the
 ML model from the input variables values.
 
 Gurobi Machine Learning is an :doc:`open-source <../meta/license>` Python package to formulate *trained
-regression* models [#]_ in a :gurobipy:`model` to be
+regression* models [#]_ in a :external+gurobi:py:class:`Model` to be
 solved with the `Gurobi <https://www.gurobi.com>`_ solver.
 
 The aim of the package is to:
@@ -29,9 +29,8 @@ The package currently supports various `scikit-learn
 <https://scikit-learn.org/stable/>`_ objects. It can also formulate
 gradient boosting regression models from `XGboost <https://xgboost.readthedocs.io/en/stable/>`_
 and `LightGBM <https://lightgbm.readthedocs.io/en/stable/>`.
-Finally, it has limited support for the
-`Keras <https://keras.io/>`_ API of `TensorFlow <https://www.tensorflow.org/>`_
-and `PyTorch <https://pytorch.org/>`_. Only neural networks with ReLU activation
+Finally, it has limited support for
+`Keras <https://keras.io/>`_. Only neural networks with ReLU activation
 can be used with these two packages.
 
 The package is actively developed and users are encouraged to :doc:`contact us
@@ -60,8 +59,10 @@ We encourage to install the package via pip (or add it to your
 
 .. note::
 
-  The package has been tested with and is supported for Python 3.9 and Python
-  3.10.
+  The package is tested with and is supported for Python 3.9, 3.10, 3.11 and 3.12.
+  It is also tested and supported with Gurobi 10, 11 and 12. Note however, that some newer
+  features of Gurobi from later versions are used and some models may perform significantly
+  worse with the older versions.
 
   The following table lists the version of the relevant packages that are
   tested and supported in the current version (|version|).
@@ -75,8 +76,6 @@ We encourage to install the package via pip (or add it to your
 
      * - Package
        - Version
-     * - :pypi:`gurobipy`
-       - |GurobiVersion|
      * - :pypi:`numpy`
        - |NumpyVersion|
      * - :pypi:`scipy`
@@ -87,8 +86,8 @@ We encourage to install the package via pip (or add it to your
        - |TorchVersion|
      * - :pypi:`scikit-learn`
        - |SklearnVersion|
-     * - :pypi:`tensorflow`
-       - |TensorflowVersion|
+     * - :pypi:`keras`
+       - |KerasVersion|
      * - :pypi:`xgboost`
        - |XGBoostVersion|
      * - :pypi:`lightgbm`
@@ -96,20 +95,20 @@ We encourage to install the package via pip (or add it to your
 
   Installing any of the machine learning packages is only required if the
   predictor you want to insert uses them (i.e. to insert a Keras based predictor
-  you need to have :pypi:`tensorflow` installed).
+  you need to have :pypi:`keras` installed).
 
 
 Usage
 *****
 
 The main function provided by the package is
-:py:func:`gurobi_ml.add_predictor_constr`. It takes as arguments: a :gurobipy:`model`, a
+:py:func:`gurobi_ml.add_predictor_constr`. It takes as arguments: a :external+gurobi:py:class:`Model`, a
 :doc:`supported regression model <supported>`, input `Gurobi variables
 <https://www.gurobi.com/documentation/current/refman/variables.html>`_ and
 output `Gurobi variables
 <https://www.gurobi.com/documentation/current/refman/variables.html>`_.
 
-By invoking the function, the :gurobipy:`model` is augmented with variables and
+By invoking the function, the :external+gurobi:py:class:`Model` is augmented with variables and
 constraints so that, in a solution, the values of the output variables are
 predicted by the regression model from the values of the input variables. More
 formally, if we denote by :math:`g` the prediction function of the regression
@@ -120,7 +119,7 @@ The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`
 returns a modeling object derived from the class
 :py:class:`AbstractPredictorConstr
 <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr>`. That object keeps track of all
-the variables and constraints that have been added to the :gurobipy:`model` to
+the variables and constraints that have been added to the :external+gurobi:py:class:`Model` to
 establish the relationship between input and output variables of the regression.
 
 The modeling object can perform a few tasks:
