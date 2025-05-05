@@ -19,6 +19,7 @@ class TestPandasInput(unittest.TestCase):
             numerical_features = examples.columns
         x = examples.copy()
         for feat in numerical_features:
+            x.loc[:, feat] = x[feat].astype("object")
             x.loc[:, feat] = gppd.add_vars(gpm, examples, lb=feat, ub=feat)
         return x
 
