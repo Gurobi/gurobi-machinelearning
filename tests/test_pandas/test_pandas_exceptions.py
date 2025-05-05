@@ -21,7 +21,7 @@ class TestUnsuportedPandas(unittest.TestCase):
         """Create input for predictor constraints from a dataframe input"""
         if numerical_features is None:
             numerical_features = examples.columns
-        x = examples.copy()
+        x = examples.copy().astype("object")
         for feat in numerical_features:
             x.loc[:, feat] = gppd.add_vars(gpm, examples, lb=feat, ub=feat)
         return x

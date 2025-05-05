@@ -43,7 +43,7 @@ class FixedRegressionModel(unittest.TestCase):
 
                 self.assertIsInstance(examples, pd.DataFrame)
                 self.assertIsInstance(numerical_features, list)
-                x = examples.copy()
+                x = examples.copy().astype("object")
                 nonconvex = 1
                 for feat in numerical_features:
                     x.loc[:, feat] = gppd.add_vars(gpm, examples, lb=feat, ub=feat)
