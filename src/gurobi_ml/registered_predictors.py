@@ -14,6 +14,7 @@
 # ==============================================================================
 
 """Define generic function that can add any known trained predictor."""
+
 import sys
 
 from .register_user_predictor import user_predictors
@@ -78,7 +79,6 @@ def lightgbm_convertors():
         import lightgbm as lgb  # pylint: disable=import-outside-toplevel
 
         from .lightgbm import (  # pylint: disable=import-outside-toplevel
-            add_lgbm_booster_constr,
             add_lgbmregressor_constr,
         )
 
@@ -90,8 +90,8 @@ def lightgbm_convertors():
 
 def keras_convertors():
     """Collect known Keras objects that can be embedded and the conversion class."""
-    if "tensorflow" in sys.modules:
-        from tensorflow import keras  # pylint: disable=import-outside-toplevel
+    if "keras" in sys.modules:
+        import keras  # pylint: disable=import-outside-toplevel
 
         from .keras import add_keras_constr  # pylint: disable=import-outside-toplevel
 

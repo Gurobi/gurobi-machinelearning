@@ -15,9 +15,8 @@
 
 """Module for formulating a
 :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
-in a :gurobipy:`model`.
+in a :external+gurobi:py:class:`Model`.
 """
-
 
 from ..modeling.decision_tree import AbstractTreeEstimator
 from .skgetter import SKgetter
@@ -39,7 +38,7 @@ def add_decision_tree_regressor_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     decision_tree_regressor : :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
         The decision tree regressor to insert as predictor.

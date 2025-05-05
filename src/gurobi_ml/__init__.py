@@ -30,9 +30,11 @@ for documentation.
 
 from gurobipy import gurobi
 
-from ._version import __version__
-from .add_predictor import add_predictor_constr
-from .register_user_predictor import register_predictor_constr
+from ._version import __version__ as __version__
+from .add_predictor import add_predictor_constr as add_predictor_constr
+from .register_user_predictor import (
+    register_predictor_constr as register_predictor_constr,
+)
 
 MIN_GRB_VERSION = 10
 if gurobi.version()[0] < MIN_GRB_VERSION:

@@ -1,1 +1,2 @@
-tensorflow==2.16.1
+tensorflow==2.18.1
+keras==3.9.2

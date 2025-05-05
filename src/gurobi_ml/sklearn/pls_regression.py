@@ -15,7 +15,6 @@
 
 """Module for formulating :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression` in a gurobipy model."""
 
-
 from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
 
@@ -30,7 +29,7 @@ def add_pls_regression_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     pls_regression : :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression`
      The linear regression to insert. It can be of any of the following types:

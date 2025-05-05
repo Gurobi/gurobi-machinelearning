@@ -16,7 +16,7 @@
 """Implements some utility tools for all scikit-learn objects."""
 
 import numpy as np
-from sklearn.utils.validation import check_is_fitted
+from sklearn.utils.validation import check_is_fitted, _check_feature_names
 
 from ..exceptions import NoSolution
 from ..modeling import AbstractPredictorConstr
@@ -36,7 +36,7 @@ class SKgetter(AbstractPredictorConstr):
     def __init__(self, predictor, input_vars, output_type="regular", **kwargs):
         check_is_fitted(predictor)
         self.predictor = predictor
-        predictor._check_feature_names(input_vars, reset=False)
+        _check_feature_names(predictor, input_vars, reset=False)
         self.output_type = output_type
         if hasattr(predictor, "n_features_in_"):
             self._input_shape = predictor.n_features_in_

@@ -62,12 +62,7 @@ def get_versions(file: Path):
 
 
 root_path = Path().resolve().parent.parent
-dep_versions = {
-    k: v
-    for k, v in get_versions(root_path / "requirements.txt").items()
-    if k == "gurobipy"
-}  # get only gurobipy from requirements.txt
-dep_versions |= get_versions(root_path / "requirements.tox.txt")
+dep_versions = get_versions(root_path / "requirements.tox.txt")
 dep_versions |= get_versions(root_path / "requirements.keras.txt")
 dep_versions |= get_versions(root_path / "requirements.pytorch.txt")
 dep_versions |= get_versions(root_path / "requirements.sklearn.txt")
@@ -77,19 +72,16 @@ dep_versions |= get_versions(root_path / "requirements.lightgbm.txt")
 
 
 VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
-CLASS_SHORT = (
-    """Stores the changes to :gurobipy:`model` for formulating the predictor."""
-)
+CLASS_SHORT = """Stores the changes to :external+gurobi:py:class:`Model` for formulating the predictor."""
 
 
 rst_epilog = f"""
-.. |GurobiVersion| replace:: {dep_versions["gurobipy"]}
 .. |NumpyVersion| replace:: {dep_versions["numpy"]}
 .. |ScipyVersion| replace:: {dep_versions["scipy"]}
 .. |PandasVersion| replace:: {dep_versions["pandas"]}
 .. |TorchVersion| replace:: {dep_versions["torch"]}
 .. |SklearnVersion| replace:: {dep_versions["scikit-learn"]}
-.. |TensorflowVersion| replace:: {dep_versions["tensorflow"]}
+.. |KerasVersion| replace:: {dep_versions["keras"]}
 .. |XGBoostVersion| replace:: {dep_versions["xgboost"]}
 .. |LightGBMVersion| replace:: {dep_versions["lightgbm"]}
 .. |VariablesDimensionsWarn| replace:: {VARS_SHAPE}
@@ -110,6 +102,8 @@ intersphinx_mapping = {
     "xgb": ("https://xgboost.readthedocs.io/en/stable/", None),
     "lightgbm": ("https://lightgbm.readthedocs.io/en/latest/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+    "gurobi": ("https://docs.gurobi.com/projects/optimizer/en/current/", None),
+    "gppd": ("https://gurobipy-pandas.readthedocs.io/en/stable/", None),
 }
 
 autodoc_default_options = {
@@ -168,7 +162,7 @@ html_show_sourcelink = True
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 autodoc_member_order = "groupwise"
-autodoc_mock_imports = ["torch", "tensorflow", "xgboost"]
+autodoc_mock_imports = ["torch", "keras", "tensorflow", "xgboost"]
 html_css_files = [
     "gurobi_ml.css",
 ]
@@ -177,10 +171,6 @@ bibtex_bibfiles = ["refs.bib"]
 extlinks_detect_hardcoded_links = True
 extlinks = {
     "issue": ("https://github.com/Gurobi/gurobi-machinelearning/issues/%s", "issue %s"),
-    "gurobipy": (
-        "https://www.gurobi.com/documentation/current/refman/py_%s.html",
-        "gurobipy %s",
-    ),
     "pypi": ("https://pypi.org/project/%s/", "%s"),
 }
 

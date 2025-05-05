@@ -1,9 +1,9 @@
 [![build and test](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/push.yml/badge.svg?branch=main)](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/push.yml?query=branch%3Amain++)
 [![build wheel](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/build_wheel.yml/badge.svg?branch=main)](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/build_wheel.yml?query=branch%3Amain++)
-![Python versions](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%203.12-blue)
+![Python versions](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI](https://img.shields.io/pypi/v/gurobi-machinelearning)](https://pypi.org/project/gurobi-machinelearning)
-[![ReadTheDocs](https://readthedocs.com/projects/gurobi-optimization-gurobi-machine-learning/badge/?version=stable)](https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com)
+[![Documentation Status](https://readthedocs.org/projects/gurobi-machinelearning/badge/?version=stable)](https://gurobi-machinelearning.readthedocs.io/en/stable/?badge=stable)
 [![Gurobi-forum](https://img.shields.io/badge/Help-Gurobi--Forum-red)](https://support.gurobi.com/hc/en-us/community/topics/10373864542609-GitHub-Projects)
 
 [![Gurobi](https://raw.githubusercontent.com/Gurobi/gurobi-machinelearning/main/docs/source/_static/gurobi_light.png)](https://www.gurobi.com)
@@ -13,7 +13,7 @@
 
 Gurobi Machine Learning is an [open-source](https://gurobi-machinelearning.readthedocs.io/en/latest/meta/license.html) python package to formulate trained regression models in a [`gurobipy`](https://pypi.org/project/gurobipy/) model to be solved with the Gurobi solver.
 
-The package currently supports various [scikit-learn](https://scikit-learn.org/stable/) objects. It has limited support for the [Keras](https://keras.io/) API of [TensorFlow](https://www.tensorflow.org/), [PyTorch](https://pytorch.org/) and [XGBoost](https://www.xgboost.ai). Only neural networks with ReLU activation can be used with Keras and PyTorch.
+The package currently supports various [scikit-learn](https://scikit-learn.org/stable/) objects. It has limited support for [Keras](https://keras.io/), [PyTorch](https://pytorch.org/) and [XGBoost](https://www.xgboost.ai). Only neural networks with ReLU activation can be used with Keras and PyTorch.
 
 # Documentation
 

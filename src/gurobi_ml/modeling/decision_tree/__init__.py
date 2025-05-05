@@ -13,4 +13,4 @@
 # limitations under the License.
 # ==============================================================================
 
-from .decision_tree_model import AbstractTreeEstimator
+from .decision_tree_model import AbstractTreeEstimator as AbstractTreeEstimator

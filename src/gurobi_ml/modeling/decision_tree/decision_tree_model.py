@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-""" Utilities for modeling decision trees """
+"""Utilities for modeling decision trees"""
 
 from warnings import warn
 
@@ -126,8 +126,11 @@ def _leaf_formulation(
     # We should attain 1 leaf
     gp_model.addConstr(leafs_vars.sum(axis=1) == 1)
 
-    gp_model.addConstr(output <= np.max(tree["value"], axis=0))
-    gp_model.addConstr(output >= np.min(tree["value"], axis=0))
+    values = [tree["value"][i] for i in leafs.nonzero()[0]]
+
+    gp_model.addConstr(output <= np.max(values, axis=0))
+    gp_model.addConstr(output >= np.min(values, axis=0))
+
     if verbose:
         timer.timing(f"Added {nex} linear constraints")
 
