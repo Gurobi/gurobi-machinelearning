@@ -13,4 +13,5 @@
 # limitations under the License.
 # ==============================================================================
 
-from .lgbm_regressor import add_lgbm_booster_constr, add_lgbmregressor_constr
+from .lgbm_regressor import add_lgbm_booster_constr as add_lgbm_booster_constr
+from .lgbm_regressor import add_lgbmregressor_constr as add_lgbmregressor_constr

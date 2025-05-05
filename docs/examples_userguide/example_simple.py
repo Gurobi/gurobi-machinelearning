@@ -23,7 +23,6 @@ neural network. We import the corresponding objects.
 import gurobipy as gp
 import numpy as np
 from sklearn.datasets import make_regression
-from sklearn.metrics import mean_squared_error
 from sklearn.neural_network import MLPRegressor
 
 from gurobi_ml import add_predictor_constr
@@ -80,7 +79,7 @@ nn.fit(X, y)
 # (unbounded) variables and :math:`\delta` a small positive constant.
 #
 # First, let’s pick randomly 2 training examples using numpy, and create
-# our gurobipy model.
+# our :external+gurobi:py:class:`Gurobi model<Model>`.
 #
 
 n = 2
@@ -93,7 +92,7 @@ m = gp.Model()
 
 ######################################################################
 # Our only decision variables in this case, are the five inputs and
-# outputs for the regression. We use ``gurobipy.MVar`` matrix variables
+# outputs for the regression. We use :external+gurobi:py:class:`MVar` matrix variables
 # that are most convenient in this case.
 #
 # The input variables have the same shape as ``X_examples``. Their lower

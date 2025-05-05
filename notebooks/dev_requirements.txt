@@ -1,14 +1,9 @@
 ipywidgets
 matplotlib
-myst_nb
 notebook
 pandas
 seaborn
-Sphinx
-sphinx-copybutton
-sphinx-pyproject
-sphinx-rtd-theme
-tensorflow
+keras
 torch
 skorch
 ../.

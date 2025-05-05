@@ -1,4 +1,5 @@
-""" Test for adding and removing predictor objects"""
+"""Test for adding and removing predictor objects"""
+
 import random
 import unittest
 
