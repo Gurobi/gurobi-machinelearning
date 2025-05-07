@@ -24,6 +24,8 @@ import numpy as np
 import xgboost as xgb
 from gurobipy import GRB
 
+from gurobipy import nlfunc
+
 from ..exceptions import NoModel, NoSolution
 from ..modeling import AbstractPredictorConstr
 from ..modeling.decision_tree import AbstractTreeEstimator
@@ -216,7 +218,18 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
 
         constant = float(xgb_raw["learner"]["learner_model_param"]["base_score"])
         learning_rate = 1.0
-        model.addConstr(output == learning_rate * tree_vars.sum(axis=1) + constant)
+        objective = xgb_raw["learner"]["objective"]["name"]
+
+        if objective in ("reg:logistic", "binary:logistic"):
+            model.addConstr(
+                output == nlfunc.logistic(learning_rate * tree_vars.sum(axis=1))
+            )
+        elif objective == "reg:squarederror":
+            model.addConstr(output == learning_rate * tree_vars.sum(axis=1) + constant)
+        else:
+            raise NoModel(
+                xgb_regressor, f"objective type '{objective}' not implemented"
+            )
 
     def print_stats(self, abbrev=False, file=None):
         """Print statistics on model additions stored by this class.
