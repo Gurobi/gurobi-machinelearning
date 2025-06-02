@@ -129,7 +129,10 @@ with the function :py:func:`add_xgboost_regressor_constr <gurobi_ml.xgboost.xgbo
 The scikit-learn wrapper :external+xgb:py:class:`xgboost.XGBRegressor` can be formulated
 using :py:func:`add_xgbregressor_constr <gurobi_ml.xgboost.xgboost_regressor.add_xgbregressor_constr>`.
 
-Currently only "gbtree" boosters are supported.
+Currently only "gbtree" boosters are supported. Note that all options of "grbtree" may not be supported. In particular,
+those that may result in a different prediction function. For the "objective" option, we only support the default `reg:squarederror`
+and `reg:logistic`.
+If you encounter an issue don't hesitate to contact us.
 
 LightGBM
 --------
@@ -138,6 +141,10 @@ LightGBM's :external+lightgbm:py:class:`lightgbm.Booster` can be formulated in a
 with the function :py:func:`add_lgbm_booster_constr <gurobi_ml.lightgbm.lgbm_regressor.add_lgbm_booster_constr>`.
 The scikit-learn wrapper :external+lightgbm:py:class:`lightgbm.sklearn.LGBMRegressor` can be formulated
 using :py:func:`add_lgbmregressor_constr <gurobi_ml.lightgbm.lgbm_regressor.add_lgbmregressor_constr>`.
+
+Note that all options of LightGBM may not be supported. In particular,
+those that may result in a different prediction function.
+If you encounter an issue don't hesitate to contact us.
 
 .. rubric:: Footnotes
 
