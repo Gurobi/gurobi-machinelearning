@@ -23,6 +23,14 @@ import json
 import numpy as np
 import xgboost as xgb
 from gurobipy import GRB
+import gurobipy as gp
+
+try:
+    from gurobipy import nlfunc
+
+    HAS_NLFUNC = True
+except ImportError:
+    HAS_NLFUNC = False
 
 from ..exceptions import NoModel, NoSolution
 from ..modeling import AbstractPredictorConstr
@@ -216,7 +224,38 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
 
         constant = float(xgb_raw["learner"]["learner_model_param"]["base_score"])
         learning_rate = 1.0
-        model.addConstr(output == learning_rate * tree_vars.sum(axis=1) + constant)
+        objective = xgb_raw["learner"]["objective"]["name"]
+
+        if objective in ("reg:logistic", "binary:logistic"):
+            if gp.gurobi.version()[0] < 11:
+                raise NoModel(
+                    xgb_regressor,
+                    f"Option objective:{objective} only supported with Gurobi >= 11",
+                )
+
+            if HAS_NLFUNC:
+                model.addConstr(
+                    output == nlfunc.logistic(learning_rate * tree_vars.sum(axis=1))
+                )
+            else:
+                affinevar = model.addMVar(output.shape, lb=-float("infinity"))
+                model.addConstr(affinevar == learning_rate * tree_vars.sum(axis=1))
+                for index in np.ndindex(self.output.shape):
+                    self.gp_model.addGenConstrLogistic(
+                        affinevar[index],
+                        output[index],
+                        name=self._indexed_name(index, "logistic"),
+                    )
+                num_gc = self.gp_model.NumGenConstrs
+                self.gp_model.update()
+                for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
+                    gen_constr.setAttr("FuncNonLinear", 1)
+        elif objective == "reg:squarederror":
+            model.addConstr(output == learning_rate * tree_vars.sum(axis=1) + constant)
+        else:
+            raise NoModel(
+                xgb_regressor, f"objective type '{objective}' not implemented"
+            )
 
     def print_stats(self, abbrev=False, file=None):
         """Print statistics on model additions stored by this class.
