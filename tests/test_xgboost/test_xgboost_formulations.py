@@ -1,5 +1,6 @@
 import os
 
+import gurobipy as gp
 import numpy as np
 import xgboost as xgb
 from sklearn import datasets
@@ -47,3 +48,66 @@ class TestXGBoosthModel(FixedRegressionModel):
         one_case = {"predictor": xgb_reg.get_booster(), "nonconvex": 0}
 
         self.do_one_case(one_case, X, 5, "all", epsilon=1e-5)
+
+    @staticmethod
+    def prepare_binary_iris():
+        data = datasets.load_iris()
+        X, y = data.data, data.target
+        binary_mask = y != 2
+        return X[binary_mask], y[binary_mask]
+
+    @staticmethod
+    def create_xgb_regressor(objective):
+        return xgb.XGBRegressor(n_estimators=10, objective=objective, max_depth=4)
+
+    def run_iris_test_case(self, predictor, X, method):
+        one_case = {"predictor": predictor, "nonconvex": 0}
+        self.do_one_case(one_case, X, 6, method, float_type=np.float32)
+
+    def test_iris_xgboost_pipeline(self):
+        if gp.gurobi.version()[0] < 11:
+            self.skipTest("Gurobi < 11 not supported for this")
+        X, y = self.prepare_binary_iris()
+        pipeline = make_pipeline(self.create_xgb_regressor("binary:logistic"))
+        pipeline.fit(X, y)
+        self.run_iris_test_case(pipeline, X, "pairs")
+
+    def test_iris_xgboost_pairs(self):
+        if gp.gurobi.version()[0] < 11:
+            self.skipTest("Gurobi < 11 not supported for this")
+        X, y = self.prepare_binary_iris()
+        xgb_reg = self.create_xgb_regressor("binary:logistic")
+        xgb_reg.fit(X, y)
+        self.run_iris_test_case(xgb_reg.get_booster(), X, "pairs")
+
+    def test_iris_xgboost_all(self):
+        if gp.gurobi.version()[0] < 11:
+            self.skipTest("Gurobi < 11 not supported for this")
+        X, y = self.prepare_binary_iris()
+        xgb_reg = self.create_xgb_regressor("binary:logistic")
+        xgb_reg.fit(X, y)
+        self.run_iris_test_case(xgb_reg.get_booster(), X, "all")
+
+    def test_iris_xgboost_reg_pipeline(self):
+        if gp.gurobi.version()[0] < 11:
+            self.skipTest("Gurobi < 11 not supported for this")
+        X, y = self.prepare_binary_iris()
+        pipeline = make_pipeline(self.create_xgb_regressor("reg:logistic"))
+        pipeline.fit(X, y)
+        self.run_iris_test_case(pipeline, X, "pairs")
+
+    def test_iris_xgboost_reg_pairs(self):
+        if gp.gurobi.version()[0] < 11:
+            self.skipTest("Gurobi < 11 not supported for this")
+        X, y = self.prepare_binary_iris()
+        xgb_reg = self.create_xgb_regressor("reg:logistic")
+        xgb_reg.fit(X, y)
+        self.run_iris_test_case(xgb_reg.get_booster(), X, "pairs")
+
+    def test_iris_xgboost_reg_all(self):
+        if gp.gurobi.version()[0] < 11:
+            self.skipTest("Gurobi < 11 not supported for this")
+        X, y = self.prepare_binary_iris()
+        xgb_reg = self.create_xgb_regressor("reg:logistic")
+        xgb_reg.fit(X, y)
+        self.run_iris_test_case(xgb_reg.get_booster(), X, "all")

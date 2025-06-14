@@ -23,7 +23,7 @@ from gurobipy import GRB
 from ..base_predictor_constr import AbstractPredictorConstr
 
 
-def _compute_leafs_bounds(tree, epsilon):
+def _compute_leafs_bounds(tree, feature_is_fixed, epsilon):
     """Compute the bounds that define each leaf of the tree"""
     capacity = tree["capacity"]
     n_features = tree["n_features"]
@@ -53,7 +53,10 @@ def _compute_leafs_bounds(tree, epsilon):
         node_lb[:, left] = node_lb[:, node]
 
         node_ub[feature[node], left] = threshold[node]
-        node_lb[feature[node], right] = threshold[node] + epsilon
+        if feature_is_fixed[feature[node]]:
+            node_lb[feature[node], right] = threshold[node]
+        else:
+            node_lb[feature[node], right] = threshold[node] + epsilon
         stack.append(right)
         stack.append(left)
     return (node_lb, node_ub)
@@ -78,7 +81,10 @@ def _leaf_formulation(
 
     if verbose:
         timer.timing(f"Added {nex*sum(leafs)} leafs vars")
-    (node_lb, node_ub) = _compute_leafs_bounds(tree, epsilon)
+    # Get fixed features we don't want to apply the epsilon for them
+    feature_is_fixed = (_input.lb == _input.ub).all(axis=0)
+
+    (node_lb, node_ub) = _compute_leafs_bounds(tree, feature_is_fixed, epsilon)
     input_ub = _input.getAttr(GRB.Attr.UB)
     input_lb = _input.getAttr(GRB.Attr.LB)
 
