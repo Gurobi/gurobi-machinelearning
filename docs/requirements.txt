@@ -6,7 +6,7 @@ matplotlib-inline==0.1.7
 sphinxcontrib_bibtex==2.6.5
 numpy==2.0.2
 numpydoc==1.9.0
-pandas==2.3.0
+pandas==2.3.1
 scikit-learn==1.6.1
 seaborn==0.13.2
 Sphinx==8.2.1
