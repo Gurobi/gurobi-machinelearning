@@ -27,7 +27,7 @@ jobs:
           - python-version: "3.12"
             gurobi-version: "gurobi10"
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         ref: ${{ github.event.pull_request.head.sha }}
     - name: Set up Python ${{ matrix.python-version }}
