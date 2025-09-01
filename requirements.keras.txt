@@ -1,2 +1,2 @@
-tensorflow==2.19.0
+tensorflow==2.20.0
 keras==3.10.0
