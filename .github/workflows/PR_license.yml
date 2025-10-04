@@ -21,7 +21,7 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'safe to test')
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         gurobi-version: ["gurobi11","gurobi12"]
     steps:
     - uses: actions/checkout@v5
