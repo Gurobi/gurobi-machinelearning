@@ -227,7 +227,9 @@ class Conv2DLayer(AbstractNNLayer):
             int(output_shape_1),
             self.channels,
         )
-        print(output_shape)
+        print(
+            f"Conv2D layer with input shape {input_vars.shape} gives output shape {output_shape}"
+        )
         rval = self.gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="act")
         self.gp_model.update()
         return rval
@@ -252,10 +254,10 @@ class Conv2DLayer(AbstractNNLayer):
         # Here comes the complicated loop...
         # I am sure there is a better way but this is a pedestrian version
         kernel_w, kernel_h = self.kernel_size
-        stride_w, stride_h = self.stride
+        stride_h, stride_w = self.stride
         for k in range(self.channels):
-            for i in range(0, height - kernel_h, stride_h):
-                for j in range(0, width - kernel_w, stride_w):
+            for i in range(0, height - kernel_h + 1, stride_h):
+                for j in range(0, width - kernel_w + 1, stride_w):
                     self.gp_model.addConstr(
                         mixing[:, i, j, k]
                         == (
@@ -304,13 +306,24 @@ class FlattenLayer(AbstractNNLayer):
     def _create_output_vars(self, input_vars):
         assert len(input_vars.shape) >= 2
         output_shape = (input_vars.shape[0], int(np.prod(input_vars.shape[1:])))
+        print(f"Flattening {input_vars.shape} into {output_shape}")
         rval = self.gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="act")
         self.gp_model.update()
         return rval
 
     def _mip_model(self, **kwargs):
-        self.gp_model.addConstr(self.output == self.input.reshape(self.output.shape))
-        self.gp_model.update()
+        # Mark kwargs as used to avoid unused argument warning
+        _ = kwargs
+        # Flatten the input explicitly to match the output shape using a pedestrian approach
+        input_shape = self.input.shape
+        batch_size = input_shape[0]
+        for n in range(batch_size):
+            flat_idx = 0
+            for idx in np.ndindex(input_shape[1:]):
+                self.gp_model.addConstr(
+                    self.output[n, flat_idx] == self.input[(n,) + idx]
+                )
+                flat_idx += 1
 
 
 class MaxPooling2DLayer(AbstractNNLayer):
@@ -335,11 +348,23 @@ class MaxPooling2DLayer(AbstractNNLayer):
     def _create_output_vars(self, input_vars):
         assert len(input_vars.shape) == 4
         pad = 0
-        out_h = (input_vars.shape[1] + 2 * pad - self.pool_size[0]) // self.stride[0] + 1
-        out_w = (input_vars.shape[2] + 2 * pad - self.pool_size[1]) // self.stride[1] + 1
-        output_shape = (input_vars.shape[0], int(out_h), int(out_w), input_vars.shape[3])
-        rval = self.gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="act")
+        out_h = (input_vars.shape[1] + 2 * pad - self.pool_size[0]) // self.stride[
+            0
+        ] + 1
+        out_w = (input_vars.shape[2] + 2 * pad - self.pool_size[1]) // self.stride[
+            1
+        ] + 1
+        output_shape = (
+            input_vars.shape[0],
+            int(out_h),
+            int(out_w),
+            input_vars.shape[3],
+        )
+        rval = self.gp_model.addMVar(output_shape, lb=0, ub=100, name="act")
         self.gp_model.update()
+        print(
+            f"MaxPool2D layer with input shape {input_vars.shape} gives output shape {output_shape}"
+        )
         return rval
 
     def _mip_model(self, **kwargs):
@@ -355,7 +380,9 @@ class MaxPooling2DLayer(AbstractNNLayer):
                     for j in range(out_w):
                         ii = i * sh
                         jj = j * sw
-                        pool_vars = self.input[n, ii : ii + ph, jj : jj + pw, k].reshape(-1)
+                        pool_vars = self.input[
+                            n, ii : ii + ph, jj : jj + pw, k
+                        ].reshape(-1)
                         self.gp_model.addGenConstrMax(
                             self.output[n, i, j, k],
                             pool_vars.tolist(),
