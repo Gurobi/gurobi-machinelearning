@@ -171,6 +171,7 @@ def validate_output_vars(gp_vars, accepted_dim=(1, 2)):
     mvar_array_like
         Decision variables with correctly adjusted shape.
     """
+    return gp_vars
     if HAS_PANDAS:
         if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
             return validate_output_vars(gp_vars.to_numpy())
@@ -210,12 +211,13 @@ def validate_input_vars(model, gp_vars, accepted_dim=(1, 2)):
     mvar_array_like
         Decision variables with correctly adjusted shape.
     """
+    return (gp_vars, None, None)
     if accepted_dim != (1, 2):
         if gp_vars.ndim in accepted_dim:
             return (gp_vars, None, None)
         raise ParameterError(
             "Variables should be an MVar of dimension {} dimension".format(
-                " or ".join([f"{d}" for d in accepted_dim]), gp_vars.ndim
+                " or ".join([f"{d}" for d in accepted_dim]),
             )
         )
 

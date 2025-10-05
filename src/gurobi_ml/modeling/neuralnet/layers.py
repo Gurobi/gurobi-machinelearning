@@ -16,6 +16,7 @@
 """Bases classes for modeling neural network layers."""
 
 import io
+import numpy as np
 
 import gurobipy as gp
 
@@ -291,3 +292,73 @@ class Conv2DLayer(AbstractNNLayer):
             print(f"{out_string[:-1]} {activation_name}", file=file)
             return
         AbstractPredictorConstr.print_stats(self, abbrev=True, file=file)
+
+
+class FlattenLayer(AbstractNNLayer):
+    """Class to flatten the output of a convolutional neural network."""
+
+    def __init__(self, gp_model, output_vars, input_vars, **kwargs):
+        self._default_name = "flatten"
+        super().__init__(gp_model, output_vars, input_vars, Identity(), **kwargs)
+
+    def _create_output_vars(self, input_vars):
+        assert len(input_vars.shape) >= 2
+        output_shape = (input_vars.shape[0], int(np.prod(input_vars.shape[1:])))
+        rval = self.gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="act")
+        self.gp_model.update()
+        return rval
+
+    def _mip_model(self, **kwargs):
+        self.gp_model.addConstr(self.output == self.input.reshape(self.output.shape))
+        self.gp_model.update()
+
+
+class MaxPooling2DLayer(AbstractNNLayer):
+    """Class to model a max pooling 2D layer."""
+
+    def __init__(
+        self,
+        gp_model,
+        output_vars,
+        input_vars,
+        pool_size,
+        stride,
+        padding,
+        **kwargs,
+    ):
+        self.pool_size = pool_size
+        self.stride = stride
+        self.padding = padding
+        self._default_name = "maxpool2d"
+        super().__init__(gp_model, output_vars, input_vars, Identity(), **kwargs)
+
+    def _create_output_vars(self, input_vars):
+        assert len(input_vars.shape) == 4
+        pad = 0
+        out_h = (input_vars.shape[1] + 2 * pad - self.pool_size[0]) // self.stride[0] + 1
+        out_w = (input_vars.shape[2] + 2 * pad - self.pool_size[1]) // self.stride[1] + 1
+        output_shape = (input_vars.shape[0], int(out_h), int(out_w), input_vars.shape[3])
+        rval = self.gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="act")
+        self.gp_model.update()
+        return rval
+
+    def _mip_model(self, **kwargs):
+        assert self.padding == "valid"
+        (_, height, width, channels) = self.input.shape
+        ph, pw = self.pool_size
+        sh, sw = self.stride
+        out_h = self.output.shape[1]
+        out_w = self.output.shape[2]
+        for n in range(self.input.shape[0]):
+            for k in range(channels):
+                for i in range(out_h):
+                    for j in range(out_w):
+                        ii = i * sh
+                        jj = j * sw
+                        pool_vars = self.input[n, ii : ii + ph, jj : jj + pw, k].reshape(-1)
+                        self.gp_model.addGenConstrMax(
+                            self.output[n, i, j, k],
+                            pool_vars.tolist(),
+                            name=self._indexed_name((n, i, j, k), "pool"),
+                        )
+        self.gp_model.update()
