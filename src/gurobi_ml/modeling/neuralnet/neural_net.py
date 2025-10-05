@@ -18,7 +18,13 @@
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
 from .activations import Identity, ReLU
-from .layers import ActivationLayer, Conv2DLayer, DenseLayer
+from .layers import (
+    ActivationLayer,
+    Conv2DLayer,
+    DenseLayer,
+    FlattenLayer,
+    MaxPooling2DLayer,
+)
 
 
 class BaseNNConstr(AbstractPredictorConstr):
@@ -138,6 +144,37 @@ class BaseNNConstr(AbstractPredictorConstr):
             stride,
             padding,
             activation,
+            **kwargs,
+        )
+        self._layers.append(layer)
+        return layer
+
+    def _add_maxpool2d_layer(
+        self,
+        input_vars,
+        pool_size,
+        stride,
+        padding,
+        activation_vars=None,
+        **kwargs,
+    ):
+        layer = MaxPooling2DLayer(
+            self.gp_model,
+            activation_vars,
+            input_vars,
+            pool_size,
+            stride,
+            padding,
+            **kwargs,
+        )
+        self._layers.append(layer)
+        return layer
+
+    def _add_flatten_layer(self, input_vars, activation_vars=None, **kwargs):
+        layer = FlattenLayer(
+            self.gp_model,
+            activation_vars,
+            input_vars,
             **kwargs,
         )
         self._layers.append(layer)

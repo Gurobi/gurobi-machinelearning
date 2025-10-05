@@ -168,6 +168,37 @@ class KerasNetworkConstr(BaseNNConstr):
                     **kwargs,
                 )
                 _input = layer.output
+            elif isinstance(step, keras.layers.MaxPooling2D):
+                config = step.get_config()
+                kwargs["accepted_dim"] = (4,)
+                layer = self._add_maxpool2d_layer(
+                    _input,
+                    config["pool_size"],
+                    config["strides"],
+                    config["padding"],
+                    output,
+                    name=f"maxpool2d{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.Flatten):
+                kwargs["accepted_dim"] = (2,)
+                layer = self._add_flatten_layer(
+                    _input,
+                    output,
+                    name=f"flatten{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.Dropout):
+                layer = self._add_activation_layer(
+                    _input,
+                    self.act_dict["identity"],
+                    output,
+                    name=f"dropout{i}",
+                    **kwargs,
+                )
+                _input = layer.output
         if self._output is None:
             self._output = layer.output
 
