@@ -1,10 +1,11 @@
-gurobipy==12.0.3
+gurobipy==13.0.0beta1
 gurobipy-pandas==1.2.2
 ipykernel==6.30.1
 matplotlib==3.10.1
 matplotlib-inline==0.1.7
 sphinxcontrib_bibtex==2.6.5
-numpy==2.0.2
+numpy==2.2.6
+scipy==1.15.3
 numpydoc==1.9.0
 pandas==2.3.3
 scikit-learn==1.6.1
