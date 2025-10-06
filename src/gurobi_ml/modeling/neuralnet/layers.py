@@ -195,7 +195,7 @@ class Conv2DLayer(AbstractNNLayer):
         self.intercept = layer_intercept
         self.channels = channels
         self.kernel_size = kernel_size
-        self.stride = stride
+        self.strides = stride
         self.padding = padding
         self.zvar = None
         self._default_name = "conv2d"
@@ -214,11 +214,11 @@ class Conv2DLayer(AbstractNNLayer):
         # should be (input + padding)/stride
         padding = 0
         output_shape = input_vars.shape[1] + 2 * padding - self.kernel_size[0]
-        output_shape /= self.stride[0]
+        output_shape /= self.strides[0]
         output_shape += 1
         output_shape_0 = output_shape
         output_shape = input_vars.shape[2] + 2 * padding - self.kernel_size[1]
-        output_shape /= self.stride[1]
+        output_shape /= self.strides[1]
         output_shape += 1
         output_shape_1 = output_shape
         output_shape = (
@@ -229,6 +229,9 @@ class Conv2DLayer(AbstractNNLayer):
         )
         print(
             f"Conv2D layer with input shape {input_vars.shape} gives output shape {output_shape}"
+        )
+        print(
+            f"  kernel size {self.kernel_size}, stride {self.strides}, padding {self.padding}"
         )
         rval = self.gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="act")
         self.gp_model.update()
@@ -254,12 +257,16 @@ class Conv2DLayer(AbstractNNLayer):
         # Here comes the complicated loop...
         # I am sure there is a better way but this is a pedestrian version
         kernel_w, kernel_h = self.kernel_size
-        stride_h, stride_w = self.stride
+        stride_h, stride_w = self.strides
         for k in range(self.channels):
-            for i in range(0, height - kernel_h + 1, stride_h):
-                for j in range(0, width - kernel_w + 1, stride_w):
+            for out_i, i in enumerate(range(0, height - kernel_h + 1, stride_h)):
+                if i + kernel_h > height:
+                    continue
+                for out_j, j in enumerate(range(0, width - kernel_w + 1, stride_w)):
+                    if j + kernel_w > width:
+                        continue
                     self.gp_model.addConstr(
-                        mixing[:, i, j, k]
+                        mixing[:, out_i, out_j, k]
                         == (
                             self.input[:, i : i + kernel_h, j : j + kernel_w, :]
                             * self.coefs[:, :, :, k]
@@ -360,7 +367,7 @@ class MaxPooling2DLayer(AbstractNNLayer):
             int(out_w),
             input_vars.shape[3],
         )
-        rval = self.gp_model.addMVar(output_shape, lb=0, ub=100, name="act")
+        rval = self.gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="act")
         self.gp_model.update()
         print(
             f"MaxPool2D layer with input shape {input_vars.shape} gives output shape {output_shape}"
