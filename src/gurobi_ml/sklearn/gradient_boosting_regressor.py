@@ -95,9 +95,9 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         nex = _input.shape[0]
 
         outdim = output.shape[1]
-        assert (
-            outdim == 1
-        ), "Output dimension of gradient boosting regressor should be 1"
+        assert outdim == 1, (
+            "Output dimension of gradient boosting regressor should be 1"
+        )
 
         estimators = []
         if self._no_debug:

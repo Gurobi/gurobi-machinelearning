@@ -242,9 +242,9 @@ class LGBMConstr(AbstractPredictorConstr):
         nex = _input.shape[0]
         timer = AbstractPredictorConstr._ModelingTimer()
         outdim = output.shape[1]
-        assert (
-            outdim == 1
-        ), "Output dimension of gradient boosting regressor should be 1"
+        assert outdim == 1, (
+            "Output dimension of gradient boosting regressor should be 1"
+        )
 
         lgbm_raw = lgbm_regressor.dump_model()
 
