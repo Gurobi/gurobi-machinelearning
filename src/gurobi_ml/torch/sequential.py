@@ -121,7 +121,11 @@ class SequentialConstr(BaseNNConstr):
                 if isinstance(step, nn.Softmax):
                     raise NoModel(predictor, "Softmax activation is not supported")
                 raise NoModel(predictor, f"Unsupported layer {type(step).__name__}")
-        super().__init__(gp_model, predictor, input_vars, output_vars)
+        # Accept both tabular (1D/2D) and spatial (3D/4D NHWC) inputs at the top level.
+        # validate_input_vars will add a batch dimension for 1D/3D inputs as needed.
+        super().__init__(
+            gp_model, predictor, input_vars, output_vars, accepted_dim=(1, 2, 3, 4)
+        )
 
     def _mip_model(self, **kwargs):
         network = self.predictor
@@ -136,6 +140,8 @@ class SequentialConstr(BaseNNConstr):
             if i == num_layers - 1:
                 output = self._output
             if isinstance(step, nn.ReLU):
+                # Allow activation over both tabular (2D) and spatial (4D) tensors
+                kwargs["accepted_dim"] = (2, 4)
                 layer = self._add_activation_layer(
                     _input, self.act_dict["relu"], output, name=f"relu_{i}", **kwargs
                 )
@@ -257,7 +263,9 @@ class SequentialConstr(BaseNNConstr):
                 )
                 _input = layer.output
             elif isinstance(step, nn.Flatten):
-                kwargs["accepted_dim"] = (2,)
+                # Accept 4D NHWC input and produce 2D output; validators use the
+                # same tuple for input and output checks, so allow both 4 and 2.
+                kwargs["accepted_dim"] = (2, 4)
                 # Record pre-flatten shape if the input is 4D NHWC
                 pre_flat_spatial_shape = (
                     _input.shape if getattr(_input, "ndim", 0) == 4 else None
@@ -271,6 +279,7 @@ class SequentialConstr(BaseNNConstr):
                 _input = layer.output
             elif isinstance(step, nn.Dropout):
                 # Ignore dropout during inference
+                kwargs["accepted_dim"] = (2, 4)
                 layer = self._add_activation_layer(
                     _input,
                     self.act_dict["identity"],
