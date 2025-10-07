@@ -145,7 +145,7 @@ X_test = np.random.random((100, 2)) * 4 - 2
 
 r2_score = metrics.r2_score(peak2d(X_test[:, 0], X_test[:, 1]), pipe.predict(X_test))
 max_error = metrics.max_error(peak2d(X_test[:, 0], X_test[:, 1]), pipe.predict(X_test))
-print("R2 error {}, maximal error {}".format(r2_score, max_error))
+print(f"R2 error {r2_score}, maximal error {max_error}")
 
 
 ######################################################################

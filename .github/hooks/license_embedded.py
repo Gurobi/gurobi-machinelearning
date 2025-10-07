@@ -1,33 +1,97 @@
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 expected_license = Path("copyright.txt").read_text().rstrip()
 
 
+def _allowed_first_line(line: str, base_first_line: str) -> bool:
+    """
+    Allow first line to either be:
+      - a single current year (YYYY), or
+      - a range START-YYYY where START is in [2023, YYYY] and YYYY is the current year.
+
+    The rest of the text (before and after the year section) must match the base template.
+    """
+    import re
+
+    m = re.search(r"\b(\d{4})\b", base_first_line)
+    if not m:
+        # If no year in base, require exact match
+        return line == base_first_line
+
+    pre = base_first_line[: m.start()]
+    post = base_first_line[m.end() :]
+
+    if not (line.startswith(pre) and line.endswith(post)):
+        return False
+
+    middle = line[len(pre) : len(line) - len(post)]
+    current_year = datetime.utcnow().year
+
+    # Accept single current year
+    if re.fullmatch(r"\d{4}", middle):
+        return int(middle) == current_year
+
+    # Accept range START-CURRENT_YEAR
+    m2 = re.fullmatch(r"(\d{4})-(\d{4})", middle)
+    if not m2:
+        return False
+
+    start, end = int(m2.group(1)), int(m2.group(2))
+    if end != current_year:
+        return False
+    if start < 2023 or start > end:
+        return False
+    return True
+
+
+def license_header_matches(text: str) -> bool:
+    base_lines = expected_license.splitlines()
+    lines = text.splitlines()
+    if len(lines) < len(base_lines):
+        return False
+
+    # Compare first line with flexible year
+    if not _allowed_first_line(lines[0], base_lines[0]):
+        return False
+
+    # Compare remaining lines exactly
+    for i in range(1, len(base_lines)):
+        if lines[i] != base_lines[i]:
+            return False
+
+    return True
+
+
 def python_check(content: str, cur_file: str) -> str:
-    if not content.startswith(expected_license):
-        return f"'{cur_file}' did not start with copyright.txt content"
-    else:
-        return ""
+    if not license_header_matches(content):
+        y = datetime.utcnow().year
+        return (
+            f"'{cur_file}' did not start with copyright.txt content. "
+            f"First line must use either '{y}' or 'START-{y}' with START>=2023."
+        )
+    return ""
 
 
 def notebook_check(content: str, cur_file: str) -> str:
     j = json.loads(content)
-    code = 0
     try:
-        if not j["metadata"]["license"]["full_text"] == expected_license:
-            code = 1
+        full_text = j["metadata"]["license"]["full_text"]
     except KeyError:
-        code = 1
-
-    if code == 1:
         return (
             f"'{cur_file}' does not have the copyright.txt content as metadata. "
             f"This should go into metadata.license.full_text"
         )
-    else:
-        return ""
+
+    if not isinstance(full_text, str) or not license_header_matches(full_text):
+        y = datetime.utcnow().year
+        return (
+            f"'{cur_file}' license metadata does not match expected text. "
+            f"First line must use either '{y}' or 'START-{y}' with START>=2023."
+        )
+    return ""
 
 
 def check_file(cur_file: str) -> str:
