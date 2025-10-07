@@ -121,10 +121,10 @@ class SequentialConstr(BaseNNConstr):
                 if isinstance(step, nn.Softmax):
                     raise NoModel(predictor, "Softmax activation is not supported")
                 raise NoModel(predictor, f"Unsupported layer {type(step).__name__}")
-        # Accept both tabular (1D/2D) and spatial (3D/4D NHWC) inputs at the top level.
-        # validate_input_vars will add a batch dimension for 1D/3D inputs as needed.
+        # Accept tabular (1D/2D) and spatial (4D NHWC) inputs at the top level.
+        # 3D inputs are not auto-batched; users should pass 4D for CNNs.
         super().__init__(
-            gp_model, predictor, input_vars, output_vars, accepted_dim=(1, 2, 3, 4)
+            gp_model, predictor, input_vars, output_vars, accepted_dim=(1, 2, 4)
         )
 
     def _mip_model(self, **kwargs):
@@ -169,14 +169,14 @@ class SequentialConstr(BaseNNConstr):
                     )
                     N = H * W * C
                     if layer_weight.shape[0] == N:
-                        pt_index_for_mip = [0] * N
-                        for h in range(H):
-                            for w in range(W):
-                                for c in range(C):
-                                    k_mip = h * (W * C) + w * C + c
-                                    j_pt = c * (H * W) + h * W + w
-                                    pt_index_for_mip[k_mip] = j_pt
-                        layer_weight = layer_weight[np.array(pt_index_for_mip), :]
+                        # Build a vectorized mapping from MIP NHWC row-major order
+                        # (h,w,c) to PyTorch's NCHW flatten order (c,h,w).
+                        # idx has shape (C,H,W) with values 0..N-1 in PyTorch order.
+                        idx = np.arange(N).reshape(C, H, W)
+                        # Transpose to (H,W,C) and ravel to get, for each MIP row k,
+                        # the corresponding PyTorch row j.
+                        pt_index_for_mip = idx.transpose(1, 2, 0).ravel()
+                        layer_weight = layer_weight[pt_index_for_mip, :]
                     pre_flat_spatial_shape = None
                 layer = self._add_dense_layer(
                     _input,

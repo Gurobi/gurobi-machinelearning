@@ -308,15 +308,12 @@ def validate_input_vars(model, gp_vars, accepted_dim=(1, 2)):
             return (mv.reshape(1, -1), None, None)
         if mv.ndim in accepted_dim:
             return (mv, None, None)
-        # Try to add a leading batch dimension if that makes it valid
-        if (mv.ndim + 1) in accepted_dim:
-            if mv.ndim == 1:
-                return (mv.reshape(1, -1), None, None)
-            if mv.ndim == 3:
-                return (mv.reshape((1,) + mv.shape), None, None)
+        # Only allow legacy 1D -> 2D promotion; do not auto-batch 3D to 4D.
+        if (mv.ndim + 1) in accepted_dim and mv.ndim == 1:
+            return (mv.reshape(1, -1), None, None)
         raise ParameterError(
-            "Variables should be an MVar of dimension {} and is dimension {}".format(
-                " or ".join([f"{d}" for d in accepted_dim]), mv.ndim
+            "Variables should be an MVar of dimension {}".format(
+                " or ".join([f"{d}" for d in accepted_dim])
             )
         )
 
@@ -349,11 +346,9 @@ def validate_input_vars(model, gp_vars, accepted_dim=(1, 2)):
             return (mv.reshape(1, -1), None, None)
         if mv.ndim in accepted_dim:
             return (mv, None, None)
-        if (mv.ndim + 1) in accepted_dim:
-            if mv.ndim == 1:
-                return (mv.reshape(1, -1), None, None)
-            if mv.ndim == 3:
-                return (mv.reshape((1,) + mv.shape), None, None)
+        # Only allow legacy 1D -> 2D promotion; do not auto-batch 3D to 4D.
+        if (mv.ndim + 1) in accepted_dim and mv.ndim == 1:
+            return (mv.reshape(1, -1), None, None)
         raise ParameterError(
             "Input variables have dimension {} but expected {}".format(
                 mv.ndim, ", ".join(map(str, accepted_dim))

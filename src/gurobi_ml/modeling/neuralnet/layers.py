@@ -227,12 +227,6 @@ class Conv2DLayer(AbstractNNLayer):
             int(output_shape_1),
             self.channels,
         )
-        print(
-            f"Conv2D layer with input shape {input_vars.shape} gives output shape {output_shape}"
-        )
-        print(
-            f"  kernel size {self.kernel_size}, stride {self.strides}, padding {self.padding}"
-        )
         rval = self.gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="act")
         self.gp_model.update()
         return rval
@@ -242,7 +236,8 @@ class Conv2DLayer(AbstractNNLayer):
         model = self.gp_model
         model.update()
 
-        (_, height, width, _) = self.input.shape
+        (_, height, width, in_c) = self.input.shape
+        out_n, out_h, out_w, out_c = self.output.shape
         mixing = self.gp_model.addMVar(
             self.output.shape,
             lb=-gp.GRB.INFINITY,
@@ -254,25 +249,24 @@ class Conv2DLayer(AbstractNNLayer):
 
         assert self.padding == "valid"
 
-        # Here comes the complicated loop...
-        # I am sure there is a better way but this is a pedestrian version
-        kernel_w, kernel_h = self.kernel_size
-        stride_h, stride_w = self.strides
-        for k in range(self.channels):
-            for out_i, i in enumerate(range(0, height - kernel_h + 1, stride_h)):
-                if i + kernel_h > height:
+        kh, kw = self.kernel_size
+        sh, sw = self.strides
+        # Pre-flatten kernel to (kh*kw*in_c, out_c) for efficient batched matmul
+        coefs_flat = self.coefs.reshape(int(kh * kw * in_c), int(out_c))
+
+        for oi in range(int(out_h)):
+            i = oi * sh
+            if i + kh > height:
+                continue
+            for oj in range(int(out_w)):
+                j = oj * sw
+                if j + kw > width:
                     continue
-                for out_j, j in enumerate(range(0, width - kernel_w + 1, stride_w)):
-                    if j + kernel_w > width:
-                        continue
-                    self.gp_model.addConstr(
-                        mixing[:, out_i, out_j, k]
-                        == (
-                            self.input[:, i : i + kernel_h, j : j + kernel_w, :]
-                            * self.coefs[:, :, :, k]
-                        ).sum()
-                        + self.intercept[k]
-                    )
+                # Extract patch (batch, kh, kw, in_c) and flatten to (batch, kh*kw*in_c)
+                patch = self.input[:, i : i + kh, j : j + kw, :]
+                patch2d = patch.reshape(int(out_n), int(kh * kw * in_c))
+                expr = patch2d @ coefs_flat + self.intercept
+                self.gp_model.addConstr(mixing[:, oi, oj, :] == expr)
 
         if "activation" in kwargs:
             activation = kwargs["activation"]
@@ -313,7 +307,6 @@ class FlattenLayer(AbstractNNLayer):
     def _create_output_vars(self, input_vars):
         assert len(input_vars.shape) >= 2
         output_shape = (input_vars.shape[0], int(np.prod(input_vars.shape[1:])))
-        print(f"Flattening {input_vars.shape} into {output_shape}")
         rval = self.gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="act")
         self.gp_model.update()
         return rval
@@ -370,9 +363,6 @@ class MaxPooling2DLayer(AbstractNNLayer):
         )
         rval = self.gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY, name="act")
         self.gp_model.update()
-        print(
-            f"MaxPool2D layer with input shape {input_vars.shape} gives output shape {output_shape}"
-        )
         return rval
 
     def _mip_model(self, **kwargs):
