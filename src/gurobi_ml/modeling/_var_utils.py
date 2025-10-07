@@ -218,8 +218,14 @@ def validate_output_vars(gp_vars, accepted_dim=(1, 2)):
     """
     # Pass-through if already an MVar of accepted shape
     if isinstance(gp_vars, gp.MVar):
+        # If 1D outputs are acceptable, keep 1D so caller can orient later.
+        if gp_vars.ndim == 1 and 1 in accepted_dim:
+            return gp_vars
         if gp_vars.ndim in accepted_dim:
             return gp_vars
+        # If 1D not accepted but 2D is, promote to row vector
+        if gp_vars.ndim == 1 and 2 in accepted_dim:
+            return gp_vars.reshape(1, -1)
         # Try to add a leading batch dimension if that makes it valid
         if (gp_vars.ndim + 1) in accepted_dim:
             if gp_vars.ndim == 1:
@@ -250,9 +256,13 @@ def validate_output_vars(gp_vars, accepted_dim=(1, 2)):
             mv = mv.reshape(gp_vars.shape)
         else:
             raise TypeError("Output arrays must contain only gp.Var entries")
-        # Adjust shape if needed
+        # Adjust shape if needed: keep 1D if accepted, else promote to 2D if allowed
+        if mv.ndim == 1 and 1 in accepted_dim:
+            return mv
         if mv.ndim in accepted_dim:
             return mv
+        if mv.ndim == 1 and 2 in accepted_dim:
+            return mv.reshape(1, -1)
         if (mv.ndim + 1) in accepted_dim:
             if mv.ndim == 1:
                 return mv.reshape(1, -1)
@@ -293,6 +303,9 @@ def validate_input_vars(model, gp_vars, accepted_dim=(1, 2)):
     # If already an MVar, adjust shape if needed and return
     if isinstance(gp_vars, gp.MVar):
         mv = gp_vars
+        # Prefer adding a batch dimension for 1D when 2D is accepted
+        if mv.ndim == 1 and 2 in accepted_dim:
+            return (mv.reshape(1, -1), None, None)
         if mv.ndim in accepted_dim:
             return (mv, None, None)
         # Try to add a leading batch dimension if that makes it valid
@@ -331,7 +344,9 @@ def validate_input_vars(model, gp_vars, accepted_dim=(1, 2)):
             mv = _array_to_mvar(model, gp_vars)
         else:
             mv = _ndarray_to_mvar_general(model, gp_vars)
-        # Adjust shape for accepted dims
+        # Adjust shape for accepted dims (prefer 2D for 1D when allowed)
+        if mv.ndim == 1 and 2 in accepted_dim:
+            return (mv.reshape(1, -1), None, None)
         if mv.ndim in accepted_dim:
             return (mv, None, None)
         if (mv.ndim + 1) in accepted_dim:
