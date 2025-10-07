@@ -58,8 +58,13 @@ def add_sequential_constr(
 
     Warnings
     --------
-    Only :external+torch:py:class:`torch.nn.Linear` layers and
-    :external+torch:py:class:`torch.nn.ReLU` layers are supported.
+    Supported layers:
+    :external+torch:py:class:`torch.nn.Linear`,
+    :external+torch:py:class:`torch.nn.ReLU`,
+    :external+torch:py:class:`torch.nn.Conv2d`,
+    :external+torch:py:class:`torch.nn.MaxPool2d`,
+    :external+torch:py:class:`torch.nn.Flatten`, and
+    :external+torch:py:class:`torch.nn.Dropout` (treated as identity).
 
     Notes
     -----
@@ -82,7 +87,39 @@ class SequentialConstr(BaseNNConstr):
                 pass
             elif isinstance(step, nn.Linear):
                 pass
+            elif isinstance(step, nn.Conv2d):
+                # Only support padding equivalent to 'valid'
+                pad = step.padding
+                if (
+                    isinstance(pad, str)
+                    or (isinstance(pad, tuple) and any(p != 0 for p in pad))
+                    or (isinstance(pad, int) and pad != 0)
+                ):
+                    raise NoModel(
+                        predictor,
+                        "Only Conv2d with padding=0 ('valid') is supported",
+                    )
+            elif isinstance(step, nn.MaxPool2d):
+                # Only support padding equivalent to 'valid'
+                pad = step.padding
+                if (
+                    isinstance(pad, str)
+                    or (isinstance(pad, tuple) and any(p != 0 for p in pad))
+                    or (isinstance(pad, int) and pad != 0)
+                ):
+                    raise NoModel(
+                        predictor,
+                        "Only MaxPool2d with padding=0 ('valid') is supported",
+                    )
+            elif isinstance(step, nn.Flatten):
+                pass
+            elif isinstance(step, nn.Dropout):
+                # Dropout is ignored at inference time -> identity
+                pass
             else:
+                # Explicitly reject known unsupported activations like Softmax
+                if isinstance(step, nn.Softmax):
+                    raise NoModel(predictor, "Softmax activation is not supported")
                 raise NoModel(predictor, f"Unsupported layer {type(step).__name__}")
         super().__init__(gp_model, predictor, input_vars, output_vars)
 
@@ -122,14 +159,118 @@ class SequentialConstr(BaseNNConstr):
                     **kwargs,
                 )
                 _input = layer.output
+            elif isinstance(step, nn.Conv2d):
+                # Extract weights/bias and map to NHWC + (kh, kw, in_c, out_c)
+                w = step.weight.detach().numpy()  # (out_c, in_c, kh, kw)
+                b = (
+                    step.bias.detach().numpy()
+                    if step.bias is not None
+                    else np.zeros((step.out_channels,), dtype=w.dtype)
+                )
+                # Convert to (kh, kw, in_c, out_c)
+                w = np.transpose(w, (2, 3, 1, 0))
+
+                # Normalize stride and padding
+                stride = (
+                    step.stride
+                    if isinstance(step.stride, tuple)
+                    else (step.stride, step.stride)
+                )
+                padding = step.padding
+                if isinstance(padding, (tuple, list)):
+                    pad_is_zero = all(p == 0 for p in padding)
+                elif isinstance(padding, int):
+                    pad_is_zero = padding == 0
+                else:
+                    # strings like 'same' are not supported
+                    pad_is_zero = False
+
+                kwargs["accepted_dim"] = (4,)
+                layer = self._add_conv2d_layer(
+                    _input,
+                    w,
+                    b,
+                    step.out_channels,
+                    step.kernel_size
+                    if isinstance(step.kernel_size, tuple)
+                    else (step.kernel_size, step.kernel_size),
+                    stride,
+                    "valid" if pad_is_zero else "unsupported",
+                    self.act_dict["identity"],
+                    output,
+                    name=f"conv2d_{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, nn.MaxPool2d):
+                pool_size = (
+                    step.kernel_size
+                    if isinstance(step.kernel_size, tuple)
+                    else (step.kernel_size, step.kernel_size)
+                )
+                stride = (
+                    step.stride
+                    if isinstance(step.stride, tuple)
+                    else (step.stride if step.stride is not None else pool_size)
+                )
+                if not isinstance(stride, tuple):
+                    stride = (stride, stride)
+                padding = step.padding
+                if isinstance(padding, (tuple, list)):
+                    pad_is_zero = all(p == 0 for p in padding)
+                elif isinstance(padding, int):
+                    pad_is_zero = padding == 0
+                else:
+                    pad_is_zero = False
+                kwargs["accepted_dim"] = (4,)
+                layer = self._add_maxpool2d_layer(
+                    _input,
+                    pool_size,
+                    stride,
+                    "valid" if pad_is_zero else "unsupported",
+                    output,
+                    name=f"maxpool2d_{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, nn.Flatten):
+                kwargs["accepted_dim"] = (2,)
+                layer = self._add_flatten_layer(
+                    _input,
+                    output,
+                    name=f"flatten_{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, nn.Dropout):
+                # Ignore dropout during inference
+                layer = self._add_activation_layer(
+                    _input,
+                    self.act_dict["identity"],
+                    output,
+                    name=f"dropout_{i}",
+                    **kwargs,
+                )
+                _input = layer.output
         if self._output is None:
             self._output = layer.output
 
     def get_error(self, eps=None):
         if self._has_solution:
             t_in = torch.from_numpy(self.input_values).float()
+            # If the network contains Conv2d/MaxPool2d, expect PyTorch NCHW; convert from NHWC if needed
+            has_spatial = any(
+                isinstance(s, (nn.Conv2d, nn.MaxPool2d)) for s in self.predictor
+            )
+            if has_spatial and t_in.ndim == 4:
+                # assume input is NHWC -> convert to NCHW
+                t_in = t_in.permute(0, 3, 1, 2)
             t_out = self.predictor.forward(t_in)
-            r_val = np.abs(t_out.detach().numpy() - self.output_values)
+            t_out_np = t_out.detach().numpy()
+            # If output is 4D and came from spatial layers, convert back to NHWC for comparison
+            if has_spatial and t_out_np.ndim == 4:
+                t_out_np = np.transpose(t_out_np, (0, 2, 3, 1))
+            r_val = np.abs(t_out_np - self.output_values)
             if eps is not None and np.max(r_val) > eps:
                 print(f"{t_out} != {self.output_values}")
             return r_val
