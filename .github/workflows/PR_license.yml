@@ -35,22 +35,23 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Setup Python and deps
+      - name: Setup Python
         uses: ./.github/actions/setup-python-and-install
         with:
           python-version: ${{ matrix.python-version }}
-          packages: pytest tox tox-gh-actions
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
       - id: write-license
         name: Write license
         uses: ./.github/actions/write-license
         with:
           license: ${{ secrets.LICENSE }}
-      - name: Test with tox
+      - name: Test with tox (uv)
         env:
           GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
           GUROBI_VERSION: ${{ matrix.gurobi-version }}
         run: |
-          tox
+          uvx tox
 
   examples:
     runs-on: ubuntu-latest
@@ -66,20 +67,21 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Setup Python and deps
+      - name: Setup Python
         uses: ./.github/actions/setup-python-and-install
         with:
           python-version: ${{ matrix.python-version }}
-          packages: pytest tox tox-gh-actions
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
       - id: write-license
         name: Write license
         uses: ./.github/actions/write-license
         with:
           license: ${{ secrets.LICENSE }}
-      - name: Run examples
+      - name: Run examples (uv)
         env:
           GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
           GUROBI_VERSION: ${{ matrix.gurobi-version }}
         run: |
           python_version_no_dot=$(echo "${{ matrix.python-version }}" | tr -d '.')
-          tox -e py${python_version_no_dot}-examples-${{ matrix.gurobi-version }}
+          uvx tox -e py${python_version_no_dot}-examples-${{ matrix.gurobi-version }}

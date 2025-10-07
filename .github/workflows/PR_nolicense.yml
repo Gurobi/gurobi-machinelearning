@@ -40,13 +40,14 @@ jobs:
             gurobi-version: "gurobi11"
     steps:
       - uses: actions/checkout@v5
-      - name: Setup Python and deps
+      - name: Setup Python
         uses: ./.github/actions/setup-python-and-install
         with:
           python-version: ${{ matrix.python-version }}
-          packages: pytest tox tox-gh-actions
-      - name: Test with tox, excluding the examples target
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+      - name: Test with tox (uv), excluding the examples target
         env:
           GUROBI_VERSION: ${{ matrix.gurobi-version }}
         run: |
-          tox
+          uvx tox
