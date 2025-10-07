@@ -158,6 +158,51 @@ def _array_to_mvar(model, data, columns=None, index=None):
     return rval
 
 
+def _ndarray_to_mvar_general(model, data):
+    """Convert an arbitrary-dimensional numpy array mixing gp.Var and constants
+    into a gp.MVar with the same shape.
+
+    For entries that are constants, create fixed variables (lb=ub=value).
+    For entries that are gp.Var, reuse them.
+    The construction is done on a flattened 1D list and reshaped back.
+    """
+    arr = np.asarray(data, dtype=object)
+    flat = arr.ravel().tolist()
+    is_var = [isinstance(x, gp.Var) for x in flat]
+    if all(is_var):
+        mv = gp.MVar.fromlist(flat)
+        return mv.reshape(arr.shape)
+    # Build list of constants (as floats)
+    const_vals = []
+    const_pos = []
+    for idx, x in enumerate(flat):
+        if not is_var[idx]:
+            try:
+                const_vals.append(float(x))
+            except Exception as e:
+                raise ValueError(
+                    f"Entry at position {idx} can't be converted to float: {x}"
+                ) from e
+            const_pos.append(idx)
+    # Create fixed vars for constants
+    if const_vals:
+        const_m = model.addMVar(len(const_vals))
+        const_m.LB = np.array(const_vals, dtype=float)
+        const_m.UB = np.array(const_vals, dtype=float)
+        model.update()
+    # Rebuild the flat gp.Var list in original order
+    rebuilt = []
+    ci = 0
+    for idx, x in enumerate(flat):
+        if is_var[idx]:
+            rebuilt.append(x)
+        else:
+            rebuilt.append(const_m[ci])
+            ci += 1
+    mv = gp.MVar.fromlist(rebuilt)
+    return mv.reshape(arr.shape)
+
+
 def validate_output_vars(gp_vars, accepted_dim=(1, 2)):
     """Put variables into appropriate form (matrix of variable) for the output of a predictor constraint.
 
@@ -171,31 +216,65 @@ def validate_output_vars(gp_vars, accepted_dim=(1, 2)):
     mvar_array_like
         Decision variables with correctly adjusted shape.
     """
-    return gp_vars
-    if HAS_PANDAS:
-        if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
-            return validate_output_vars(gp_vars.to_numpy())
-    if isinstance(gp_vars, np.ndarray):
-        if any(map(lambda i: not isinstance(i, gp.Var), gp_vars.ravel())):
-            raise TypeError("Dataframe can't be converted to an MVar")
-        rval = gp.MVar.fromlist(gp_vars.tolist())
-        return rval
+    # Pass-through if already an MVar of accepted shape
     if isinstance(gp_vars, gp.MVar):
         if gp_vars.ndim in accepted_dim:
             return gp_vars
+        # Try to add a leading batch dimension if that makes it valid
+        if (gp_vars.ndim + 1) in accepted_dim:
+            if gp_vars.ndim == 1:
+                return gp_vars.reshape(1, -1)
+            if gp_vars.ndim == 3:
+                return gp_vars.reshape((1,) + gp_vars.shape)
         raise ParameterError(
             "Variables should be an MVar of dimension {}".format(
                 " or ".join([f"{d}" for d in accepted_dim])
             )
         )
+
+    # Pandas supported only for 1D/2D output (tabular)
+    if HAS_PANDAS and isinstance(gp_vars, (pd.DataFrame, pd.Series)):
+        if not any(d in accepted_dim for d in (1, 2)):
+            raise ParameterError(
+                "Pandas outputs only supported for 1D/2D outputs; got accepted_dim="
+                + f"{accepted_dim}"
+            )
+        return validate_output_vars(gp_vars.to_numpy(), accepted_dim=accepted_dim)
+
+    # Numpy arrays of vars supported for any dimension
+    if isinstance(gp_vars, np.ndarray):
+        if gp_vars.size == 0:
+            raise ParameterError("Empty output variable array is not supported")
+        if all(isinstance(v, gp.Var) for v in gp_vars.ravel()):
+            mv = gp.MVar.fromlist(list(gp_vars.ravel()))
+            mv = mv.reshape(gp_vars.shape)
+        else:
+            raise TypeError("Output arrays must contain only gp.Var entries")
+        # Adjust shape if needed
+        if mv.ndim in accepted_dim:
+            return mv
+        if (mv.ndim + 1) in accepted_dim:
+            if mv.ndim == 1:
+                return mv.reshape(1, -1)
+            if mv.ndim == 3:
+                return mv.reshape((1,) + mv.shape)
+        raise ParameterError(
+            "Output variables have dimension {} but expected {}".format(
+                mv.ndim, ", ".join(map(str, accepted_dim))
+            )
+        )
+
+    # Lists/dicts/Var: treat as 1D and adjust
     if isinstance(gp_vars, dict):
         gp_vars = list(gp_vars.values())
     if isinstance(gp_vars, list):
-        mvar = gp.MVar.fromlist(gp_vars)
-        return validate_output_vars(mvar)
+        mv = gp.MVar.fromlist(gp_vars)
+        return validate_output_vars(mv, accepted_dim=accepted_dim)
     if isinstance(gp_vars, gp.Var):
-        return gp.MVar.fromlist([gp_vars]).reshape(1, 1)
-    raise ParameterError("Could not validate variables")
+        return validate_output_vars(
+            gp.MVar.fromlist([gp_vars]), accepted_dim=accepted_dim
+        )
+    raise ParameterError("Could not validate output variables")
 
 
 def validate_input_vars(model, gp_vars, accepted_dim=(1, 2)):
@@ -211,35 +290,68 @@ def validate_input_vars(model, gp_vars, accepted_dim=(1, 2)):
     mvar_array_like
         Decision variables with correctly adjusted shape.
     """
-    return (gp_vars, None, None)
-    if accepted_dim != (1, 2):
-        if gp_vars.ndim in accepted_dim:
-            return (gp_vars, None, None)
+    # If already an MVar, adjust shape if needed and return
+    if isinstance(gp_vars, gp.MVar):
+        mv = gp_vars
+        if mv.ndim in accepted_dim:
+            return (mv, None, None)
+        # Try to add a leading batch dimension if that makes it valid
+        if (mv.ndim + 1) in accepted_dim:
+            if mv.ndim == 1:
+                return (mv.reshape(1, -1), None, None)
+            if mv.ndim == 3:
+                return (mv.reshape((1,) + mv.shape), None, None)
         raise ParameterError(
-            "Variables should be an MVar of dimension {} dimension".format(
-                " or ".join([f"{d}" for d in accepted_dim]),
+            "Variables should be an MVar of dimension {}".format(
+                " or ".join([f"{d}" for d in accepted_dim])
             )
         )
 
-    if HAS_PANDAS:
-        if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
-            columns = gp_vars.columns
-            index = gp_vars.index
-            gp_vars = _dataframe_to_mvar(model, gp_vars)
-            return (gp_vars, columns, index)
+    # Pandas supported for 1D/2D predictors only
+    if HAS_PANDAS and isinstance(gp_vars, (pd.DataFrame, pd.Series)):
+        if not any(d in accepted_dim for d in (1, 2)):
+            raise ParameterError(
+                "Pandas inputs only supported for 1D/2D predictors; got accepted_dim="
+                + f"{accepted_dim}"
+            )
+        columns = gp_vars.columns
+        index = gp_vars.index
+        mv = _dataframe_to_mvar(model, gp_vars)
+        # Ensure 2D (batch, features)
+        if mv.ndim == 1:
+            mv = mv.reshape(1, -1)
+        if mv.ndim not in (1, 2):
+            raise ParameterError("DataFrame inputs must be 1D or 2D")
+        return (mv, columns, index)
+
+    # Numpy arrays: support any dimensionality
     if isinstance(gp_vars, np.ndarray):
-        return (_array_to_mvar(model, gp_vars), None, None)
-    if isinstance(gp_vars, gp.MVar):
-        if gp_vars.ndim == 1:
-            return (gp_vars.reshape(1, -1), None, None)
-        if gp_vars.ndim == 2:
-            return (gp_vars, None, None)
-        raise ParameterError("Variables should be an MVar of dimension 1 or 2")
+        # For 1D/2D, reuse the optimized conversion to fix constants by columns
+        if gp_vars.ndim in (1, 2):
+            mv = _array_to_mvar(model, gp_vars)
+        else:
+            mv = _ndarray_to_mvar_general(model, gp_vars)
+        # Adjust shape for accepted dims
+        if mv.ndim in accepted_dim:
+            return (mv, None, None)
+        if (mv.ndim + 1) in accepted_dim:
+            if mv.ndim == 1:
+                return (mv.reshape(1, -1), None, None)
+            if mv.ndim == 3:
+                return (mv.reshape((1,) + mv.shape), None, None)
+        raise ParameterError(
+            "Input variables have dimension {} but expected {}".format(
+                mv.ndim, ", ".join(map(str, accepted_dim))
+            )
+        )
+
+    # dict/list/Var fallbacks -> 1D vector
     if isinstance(gp_vars, dict):
         gp_vars = list(gp_vars.values())
     if isinstance(gp_vars, list):
-        mvar = gp.MVar.fromlist(gp_vars)
-        return validate_input_vars(model, mvar)
+        mv = gp.MVar.fromlist(gp_vars)
+        return validate_input_vars(model, mv, accepted_dim=accepted_dim)
     if isinstance(gp_vars, gp.Var):
-        return (gp.MVar.fromlist([gp_vars]).reshape(1, 1), None, None)
-    raise ParameterError("Could not validate variables")
+        mv = gp.MVar.fromlist([gp_vars])
+        return validate_input_vars(model, mv, accepted_dim=accepted_dim)
+    raise ParameterError("Could not validate input variables")

@@ -88,7 +88,6 @@ class KerasNetworkConstr(BaseNNConstr):
                     pass
                 elif activation not in ("relu", "linear"):
                     raise NoModel(predictor, f"Unsupported activation {activation}")
-                kwargs["accepted_dim"] = (4,)
             elif isinstance(
                 step,
                 (keras.layers.MaxPooling2D, keras.layers.Flatten, keras.layers.Dropout),
@@ -112,7 +111,10 @@ class KerasNetworkConstr(BaseNNConstr):
                     predictor, f"Unsupported network layer {type(step).__name__}"
                 )
 
-        super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
+        # Accept both tabular (2D) and spatial (4D NHWC) at entry.
+        super().__init__(
+            gp_model, predictor, input_vars, output_vars, accepted_dim=(2, 4), **kwargs
+        )
 
     def _mip_model(self, **kwargs):
         network = self.predictor
@@ -126,6 +128,8 @@ class KerasNetworkConstr(BaseNNConstr):
             if isinstance(step, keras.layers.InputLayer):
                 pass
             elif isinstance(step, keras.layers.ReLU):
+                # Allow activation over both tabular (2D) and spatial (4D) tensors
+                kwargs["accepted_dim"] = (2, 4)
                 layer = self._add_activation_layer(
                     _input, self.act_dict["relu"], output, name=f"relu{i}", **kwargs
                 )
@@ -182,7 +186,8 @@ class KerasNetworkConstr(BaseNNConstr):
                 )
                 _input = layer.output
             elif isinstance(step, keras.layers.Flatten):
-                kwargs["accepted_dim"] = (2,)
+                # Accept 4D NHWC input and produce 2D output; allow both.
+                kwargs["accepted_dim"] = (2, 4)
                 layer = self._add_flatten_layer(
                     _input,
                     output,
@@ -191,6 +196,7 @@ class KerasNetworkConstr(BaseNNConstr):
                 )
                 _input = layer.output
             elif isinstance(step, keras.layers.Dropout):
+                kwargs["accepted_dim"] = (2, 4)
                 layer = self._add_activation_layer(
                     _input,
                     self.act_dict["identity"],
