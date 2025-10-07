@@ -321,7 +321,8 @@ class FlattenLayer(AbstractNNLayer):
     def _mip_model(self, **kwargs):
         # Mark kwargs as used to avoid unused argument warning
         _ = kwargs
-        # Flatten the input explicitly to match the output shape using a pedestrian approach
+        # Simple row-major flatten of NHWC (or generic N-d) inputs.
+        # This matches TensorFlow/Keras default (channels-last) behavior.
         input_shape = self.input.shape
         batch_size = input_shape[0]
         for n in range(batch_size):

@@ -128,6 +128,9 @@ class SequentialConstr(BaseNNConstr):
         _input = self._input
         output = None
         num_layers = len(network)
+        # If a Flatten follows spatial layers (Conv2d/MaxPool2d), remember the
+        # pre-flatten NHWC shape so we can reorder the next Linear weights.
+        pre_flat_spatial_shape = None
 
         for i, step in enumerate(network):
             if i == num_layers - 1:
@@ -149,6 +152,26 @@ class SequentialConstr(BaseNNConstr):
                     raise NotImplementedError("No weights specified for newwork layer.")
                 if layer_bias is None:
                     layer_bias = 0.0
+                # If we flattened a 4D NHWC tensor coming from spatial layers,
+                # adjust Linear weights from PyTorch's (C,H,W) flatten order to
+                # our NHWC row-major (H,W,C) order used in the MIP.
+                if pre_flat_spatial_shape is not None:
+                    H, W, C = (
+                        pre_flat_spatial_shape[1],
+                        pre_flat_spatial_shape[2],
+                        pre_flat_spatial_shape[3],
+                    )
+                    N = H * W * C
+                    if layer_weight.shape[0] == N:
+                        pt_index_for_mip = [0] * N
+                        for h in range(H):
+                            for w in range(W):
+                                for c in range(C):
+                                    k_mip = h * (W * C) + w * C + c
+                                    j_pt = c * (H * W) + h * W + w
+                                    pt_index_for_mip[k_mip] = j_pt
+                        layer_weight = layer_weight[np.array(pt_index_for_mip), :]
+                    pre_flat_spatial_shape = None
                 layer = self._add_dense_layer(
                     _input,
                     layer_weight,
@@ -235,6 +258,10 @@ class SequentialConstr(BaseNNConstr):
                 _input = layer.output
             elif isinstance(step, nn.Flatten):
                 kwargs["accepted_dim"] = (2,)
+                # Record pre-flatten shape if the input is 4D NHWC
+                pre_flat_spatial_shape = (
+                    _input.shape if getattr(_input, "ndim", 0) == 4 else None
+                )
                 layer = self._add_flatten_layer(
                     _input,
                     output,
