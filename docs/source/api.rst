@@ -68,6 +68,18 @@ PyTorch API
 
    sequential
 
+ONNX API
+********
+
+.. currentmodule:: gurobi_ml.onnx
+
+.. autosummary::
+   :toctree: auto_generated/
+   :caption: ONNX API
+   :template: modeling_object.rst
+
+   onnx_model
+
 XGBoost API
 ***********
 
