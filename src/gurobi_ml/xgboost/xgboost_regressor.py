@@ -168,9 +168,9 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         nex = _input.shape[0]
         timer = AbstractPredictorConstr._ModelingTimer()
         outdim = output.shape[1]
-        assert (
-            outdim == 1
-        ), "Output dimension of gradient boosting regressor should be 1"
+        assert outdim == 1, (
+            "Output dimension of gradient boosting regressor should be 1"
+        )
 
         xgb_raw = json.loads(xgb_regressor.save_raw(raw_format="json"))
         booster_type = xgb_raw["learner"]["gradient_booster"]["name"]

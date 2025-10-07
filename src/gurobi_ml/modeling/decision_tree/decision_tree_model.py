@@ -80,7 +80,7 @@ def _leaf_formulation(
     )
 
     if verbose:
-        timer.timing(f"Added {nex*sum(leafs)} leafs vars")
+        timer.timing(f"Added {nex * sum(leafs)} leafs vars")
     # Get fixed features we don't want to apply the epsilon for them
     feature_is_fixed = (_input.lb == _input.ub).all(axis=0)
 
