@@ -315,8 +315,8 @@ def validate_input_vars(model, gp_vars, accepted_dim=(1, 2)):
             if mv.ndim == 3:
                 return (mv.reshape((1,) + mv.shape), None, None)
         raise ParameterError(
-            "Variables should be an MVar of dimension {}".format(
-                " or ".join([f"{d}" for d in accepted_dim])
+            "Variables should be an MVar of dimension {} and is dimension {}".format(
+                " or ".join([f"{d}" for d in accepted_dim]), mv.ndim
             )
         )
 
