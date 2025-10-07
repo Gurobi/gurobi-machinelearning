@@ -99,27 +99,46 @@ Keras
 They can be formulated in a Gurobi model with the function
 :py:func:`add_keras_constr <gurobi_ml.keras.add_keras_constr>`.
 
-Currently, only two types of layers are supported:
+Supported layers and notes:
 
-    * `Dense layers <https://keras.io/api/layers/core_layers/dense/>`_ (possibly
-      with `relu` activation),
-    * `ReLU layers <https://keras.io/api/layers/activation_layers/relu/>`_ with
-      default settings.
+    - `Dense <https://keras.io/api/layers/core_layers/dense/>`_ with activation
+      ``relu`` or ``linear``.
+    - `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ with default
+      settings (no negative_slope/threshold/max_value variations).
+    - `Conv2D <https://keras.io/api/layers/convolution_layers/convolution2d/>`_
+      with activation ``relu`` or ``linear`` and padding ``valid`` only (no
+      ``same`` padding). Strides are supported.
+    - `MaxPooling2D <https://keras.io/api/layers/pooling_layers/max_pooling2d/>`_
+      with padding ``valid`` only.
+    - `Flatten <https://keras.io/api/layers/reshaping_layers/flatten/>`_.
+    - `Dropout <https://keras.io/api/layers/regularization_layers/dropout/>`_ is
+      accepted but ignored at inference time (treated as identity).
+
+Input tensors for CNNs use channels-last layout (NHWC). Flatten converts 4D
+NHWC tensors to 2D (batch, features).
 
 PyTorch
 -------
 
+In PyTorch, :external+torch:py:class:`torch.nn.Sequential` models are supported
+via :py:func:`add_sequential_constr <gurobi_ml.torch.sequential.add_sequential_constr>`.
 
-In PyTorch, only :external+torch:py:class:`torch.nn.Sequential` objects are
-supported.
+Supported layers and notes:
 
-They can be formulated in a Gurobi model with the function
-:py:func:`add_sequential_constr <gurobi_ml.torch.sequential.add_sequential_constr>`.
+   - :external+torch:py:class:`Linear <torch.nn.Linear>`.
+   - :external+torch:py:class:`ReLU <torch.nn.ReLU>`.
+   - :external+torch:py:class:`Conv2d <torch.nn.Conv2d>` with padding equivalent
+     to ``valid`` only (no non-zero padding or ``same``), strides supported.
+   - :external+torch:py:class:`MaxPool2d <torch.nn.MaxPool2d>` with padding
+     equivalent to ``valid`` only.
+   - :external+torch:py:class:`Flatten <torch.nn.Flatten>`.
+   - :external+torch:py:class:`Dropout <torch.nn.Dropout>` is accepted and
+     ignored at inference time (identity).
 
-Currently, only two types of layers are supported:
-
-   * :external+torch:py:class:`Linear layers <torch.nn.Linear>`,
-   * :external+torch:py:class:`ReLU layers <torch.nn.ReLU>`.
+Input tensors for CNNs are provided as NHWC variables. Internally, inputs are
+converted to NCHW for PyTorch evaluation and converted back for error checks.
+The first Linear after a Flatten layer is adjusted to account for PyTorch’s
+NCHW flatten order so that predictions match exactly.
 
 XGBoost
 -------

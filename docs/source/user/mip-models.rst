@@ -57,29 +57,45 @@ function. By default, the approximation guarantees a maximal error of
 keyword argument when the constraints is added.
 
 
-Neural Networks
-===============
+Sequential Neural Networks
+==========================
 
-The package currently models dense neural network with ReLU activations. For a
-given neuron the relation between its inputs and outputs is given by:
+The package supports sequential neural networks. Layers are added as building
+blocks; the package creates the necessary variables and constraints and wires
+them to match the network structure.
+
+Dense layers (details)
+----------------------
+
+For dense layers with ReLU activations, each neuron applies an affine
+transformation followed by a ReLU. For a neuron with weights
+\(\beta \in \mathbb{R}^{p+1}\), inputs \(x\), and output \(y\):
 
 .. math::
 
-    y = \max(\sum_{i=1}^p \beta_i x_i + \beta_0, 0).
+    y = \max\Big(\sum_{i=1}^p \beta_i x_i + \beta_0,\; 0\Big).
 
-The relationship is formulated in the optimization model by using Gurobi
-:math:`max` `general constraint
-<https://www.gurobi.com/documentation/latest/refman/constraints.html#subsubsection:GeneralConstraints>`_
-with:
+This is modeled using Gurobi general constraints by introducing an auxiliary
+variable \(\omega\) for the affine part and then enforcing the ReLU:
 
 .. math::
 
-    & \omega = \sum_{i=1}^p \beta_i x_i + \beta_0
+    &\omega = \sum_{i=1}^p \beta_i x_i + \beta_0,\\
+    &y = \max(\omega, 0).
 
-    & y = \max(\omega, 0)
+Other layers (summary)
+----------------------
 
-with :math:`\omega` an auxiliary free variable. The neurons are then connected
-according to the topology of the network.
+- Conv2D and MaxPooling2D: supported with padding equivalent to ``valid`` only
+  (no non‑zero or ``same`` padding). Strides are supported. Internally, tensors
+  use channels‑last layout (NHWC) in the optimization model.
+- Flatten: converts a 4D (NHWC) tensor to 2D (batch, features).
+- Dropout: accepted but ignored at inference time (treated as identity).
+
+Notes:
+- Keras models use NHWC throughout. PyTorch models are evaluated in NCHW, but
+  the package handles the necessary internal conversions so predicted values
+  match the framework’s behavior.
 
 
 Decision Tree Regression

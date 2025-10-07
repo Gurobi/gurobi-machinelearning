@@ -154,6 +154,16 @@ For a simple example on how to use the package please refer to
 in the :doc:`../auto_examples/index` section.
 
 
+.. note::
+
+  Variable shapes: For tabular models (scikit-learn, tree ensembles, dense
+  neural nets), inputs are typically 2D MVars with shape ``(batch, features)``
+  and outputs are 1D or 2D (the package orients a 1D output based on the
+  batch size). For convolutional neural networks (Keras/PyTorch), inputs can be
+  4D MVars with shape ``(batch, H, W, C)`` (channels-last). A 3D input of shape
+  ``(H, W, C)`` is automatically interpreted as a single-batch input.
+
+
 .. rubric:: Footnotes
 
 .. [#] Classification models are currently not supported (except binary logistic
