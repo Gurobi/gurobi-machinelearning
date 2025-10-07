@@ -1,4 +1,4 @@
-# Copyright © 2023 Gurobi Optimization, LLC
+# Copyright © 2025 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ PyTorch integrations, which currently handle Dense/Linear + ReLU networks.
 
 from __future__ import annotations
 
-from typing import List, Optional
 
 import numpy as np
 
@@ -82,13 +81,13 @@ class ONNXNetworkConstr(BaseNNConstr):
         if not isinstance(predictor, onnx.ModelProto):
             raise NoModel(predictor, "Expected an onnx.ModelProto model")
 
-        self._layers_spec: List[_ONNXLayer] = self._parse_mlp(predictor)
+        self._layers_spec: list[_ONNXLayer] = self._parse_mlp(predictor)
         if not self._layers_spec:
             raise NoModel(predictor, "Empty or unsupported ONNX graph")
 
         super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
-    def _parse_mlp(self, model: "onnx.ModelProto") -> List[_ONNXLayer]:
+    def _parse_mlp(self, model: onnx.ModelProto) -> list[_ONNXLayer]:
         """Parse a limited subset of ONNX graphs representing MLPs.
 
         We support sequences of: Gemm -> (Relu)? -> Gemm -> (Relu)? ...
@@ -114,8 +113,8 @@ class ONNXNetworkConstr(BaseNNConstr):
             return default
 
         # Iterate nodes gathering dense layers and relus
-        layers: List[_ONNXLayer] = []
-        pending_activation: Optional[str] = None
+        layers: list[_ONNXLayer] = []
+        pending_activation: str | None = None
 
         for node in graph.node:
             op = node.op_type
