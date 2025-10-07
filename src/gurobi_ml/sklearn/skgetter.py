@@ -18,7 +18,7 @@
 import numpy as np
 from sklearn.utils.validation import check_is_fitted, _check_feature_names
 
-from ..exceptions import NoSolution
+from ..exceptions import NoSolutionError
 from ..modeling import AbstractPredictorConstr
 
 
@@ -74,7 +74,7 @@ class SKgetter(AbstractPredictorConstr):
                 print(f"{predicted} != {output_values}")
             return r_val
 
-        raise NoSolution()
+        raise NoSolutionError()
 
 
 class SKtransformer(AbstractPredictorConstr):
@@ -125,4 +125,4 @@ class SKtransformer(AbstractPredictorConstr):
                 print(f"{transformed} != {self.output_values}")
             return r_val
 
-        raise NoSolution()
+        raise NoSolutionError()

@@ -17,7 +17,7 @@
 :external+gurobi:py:class:`Model`.
 """
 
-from ..exceptions import NoModel
+from ..exceptions import ModelConfigurationError
 from ..modeling.neuralnet import BaseNNConstr
 from .skgetter import SKgetter
 
@@ -95,7 +95,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         """Add the prediction constraints to Gurobi."""
         neural_net = self.predictor
         if neural_net.activation not in self.act_dict:
-            raise NoModel(
+            raise ModelConfigurationError(
                 neural_net,
                 f"No implementation for activation function {neural_net.activation}",
             )

@@ -21,7 +21,7 @@ into a :external+gurobi:py:class:`Model`.
 import numpy as np
 from gurobipy import GRB
 
-from ..exceptions import NoSolution
+from ..exceptions import NoSolutionError
 from ..modeling import AbstractPredictorConstr
 from ..modeling.decision_tree import AbstractTreeEstimator
 
@@ -318,4 +318,4 @@ class LGBMConstr(AbstractPredictorConstr):
             if eps is not None and np.max(r_val) > eps:
                 print(f"{self.output.X} != {lgbm_out.reshape(-1, 1)}")
             return r_val
-        raise NoSolution()
+        raise NoSolutionError()

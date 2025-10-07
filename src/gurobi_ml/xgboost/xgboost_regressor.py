@@ -32,7 +32,7 @@ try:
 except ImportError:
     HAS_NLFUNC = False
 
-from ..exceptions import NoModel, NoSolution
+from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling import AbstractPredictorConstr
 from ..modeling.decision_tree import AbstractTreeEstimator
 
@@ -175,7 +175,9 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         xgb_raw = json.loads(xgb_regressor.save_raw(raw_format="json"))
         booster_type = xgb_raw["learner"]["gradient_booster"]["name"]
         if booster_type != "gbtree":
-            raise NoModel(xgb_regressor, f"model not implemented for {booster_type}")
+            raise ModelConfigurationError(
+                xgb_regressor, f"model not implemented for {booster_type}"
+            )
         trees = xgb_raw["learner"]["gradient_booster"]["model"]["trees"]
         n_estimators = len(trees)
 
@@ -239,7 +241,7 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
 
         if objective in ("reg:logistic", "binary:logistic"):
             if gp.gurobi.version()[0] < 11:
-                raise NoModel(
+                raise ModelConfigurationError(
                     xgb_regressor,
                     f"Option objective:{objective} only supported with Gurobi >= 11",
                 )
@@ -264,7 +266,7 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         elif objective == "reg:squarederror":
             model.addConstr(output == learning_rate * tree_vars.sum(axis=1) + constant)
         else:
-            raise NoModel(
+            raise ModelConfigurationError(
                 xgb_regressor, f"objective type '{objective}' not implemented"
             )
 
@@ -297,4 +299,4 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
             if eps is not None and np.max(r_val) > eps:
                 print(f"{self.output.X} != {xgb_out.reshape(-1, 1)}")
             return r_val
-        raise NoSolution()
+        raise NoSolutionError()

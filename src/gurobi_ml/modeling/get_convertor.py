@@ -15,7 +15,7 @@
 
 """Utility function to find function that add a predictor in dictionnary."""
 
-from ..exceptions import NotRegistered
+from ..exceptions import PredictorNotSupportedError
 
 
 def get_convertor(predictor, convertors):
@@ -39,5 +39,5 @@ def get_convertor(predictor, convertors):
         except KeyError:
             pass
     if not convertor:
-        raise NotRegistered(type(predictor).__name__)
+        raise PredictorNotSupportedError(type(predictor).__name__)
     return convertor

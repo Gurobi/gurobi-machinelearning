@@ -19,7 +19,7 @@ Guobi model.
 
 import gurobipy as gp
 
-from ..exceptions import NoModel
+from ..exceptions import ModelConfigurationError
 from .skgetter import SKtransformer
 
 
@@ -110,7 +110,7 @@ class PolynomialFeaturesConstr(SKtransformer):
 
     def __init__(self, gp_model, polynomial_features, input_vars, **kwargs):
         if polynomial_features.degree > 2:
-            raise NoModel(
+            raise ModelConfigurationError(
                 polynomial_features, "Can only handle polynomials of degree < 2"
             )
         self._default_name = "poly_feat"
