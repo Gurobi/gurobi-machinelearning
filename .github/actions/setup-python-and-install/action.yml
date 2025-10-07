@@ -8,18 +8,6 @@ inputs:
     description: Space-separated pip packages to install
     required: false
     default: ""
-  cache:
-    description: Enable setup-python pip cache (set to 'pip' or leave empty)
-    required: false
-    default: pip
-  cache-dependency-path:
-    description: Paths to lock/req files for cache key (newline or comma separated)
-    required: false
-    default: |
-      requirements.txt
-      requirements.*.txt
-      pyproject.toml
-      tox.ini
 runs:
   using: composite
   steps:
@@ -27,8 +15,6 @@ runs:
       uses: actions/setup-python@v6
       with:
         python-version: ${{ inputs.python-version }}
-        cache: ${{ inputs.cache }}
-        cache-dependency-path: ${{ inputs.cache-dependency-path }}
     - name: Install packages
       if: ${{ inputs.packages != '' }}
       shell: bash
