@@ -21,7 +21,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from ..exceptions import NoModel, NoSolution
+from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr
 
 
@@ -83,7 +83,9 @@ class SequentialConstr(BaseNNConstr):
             elif isinstance(step, nn.Linear):
                 pass
             else:
-                raise NoModel(predictor, f"Unsupported layer {type(step).__name__}")
+                raise ModelConfigurationError(
+                    predictor, f"Unsupported layer {type(step).__name__}"
+                )
         super().__init__(gp_model, predictor, input_vars, output_vars)
 
     def _mip_model(self, **kwargs):
@@ -133,4 +135,4 @@ class SequentialConstr(BaseNNConstr):
             if eps is not None and np.max(r_val) > eps:
                 print(f"{t_out} != {self.output_values}")
             return r_val
-        raise NoSolution()
+        raise NoSolutionError()

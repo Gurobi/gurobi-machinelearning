@@ -18,7 +18,7 @@
 import numpy as np
 import keras
 
-from ..exceptions import NoModel, NoSolution
+from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr
 
 
@@ -78,22 +78,26 @@ class KerasNetworkConstr(BaseNNConstr):
                 config = step.get_config()
                 activation = config["activation"]
                 if activation not in ("relu", "linear"):
-                    raise NoModel(predictor, f"Unsupported activation {activation}")
+                    raise ModelConfigurationError(
+                        predictor, f"Unsupported activation {activation}"
+                    )
             elif isinstance(step, keras.layers.ReLU):
                 if step.negative_slope != 0.0:
-                    raise NoModel(
+                    raise ModelConfigurationError(
                         predictor, "Only handle ReLU layers with negative slope 0.0"
                     )
                 if step.threshold != 0.0:
-                    raise NoModel(
+                    raise ModelConfigurationError(
                         predictor, "Only handle ReLU layers with threshold of 0.0"
                     )
                 if step.max_value is not None and step.max_value < float("inf"):
-                    raise NoModel(predictor, "Only handle ReLU layers without maxvalue")
+                    raise ModelConfigurationError(
+                        predictor, "Only handle ReLU layers without maxvalue"
+                    )
             elif isinstance(step, keras.layers.InputLayer):
                 pass
             else:
-                raise NoModel(
+                raise ModelConfigurationError(
                     predictor, f"Unsupported network layer {type(step).__name__}"
                 )
 
@@ -142,4 +146,4 @@ class KerasNetworkConstr(BaseNNConstr):
             if eps is not None and np.max(r_val) > eps:
                 print(f"{self.input_values} != {self.output_values}")
             return r_val
-        raise NoSolution()
+        raise NoSolutionError()

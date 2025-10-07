@@ -24,7 +24,7 @@ import warnings
 import gurobipy as gp
 import numpy as np
 
-from ..exceptions import NoModel, ParameterError
+from ..exceptions import ModelConfigurationError
 from .base_regressions import BaseSKlearnRegressionConstr
 
 
@@ -152,12 +152,12 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         **kwargs,
     ):
         if len(predictor.classes_) > 2:
-            raise NoModel(
-                predictor, "Logistic regression only supported for two classes"
+            raise ModelConfigurationError(
+                predictor, "Logistic regression only supports binary classification"
             )
         if output_type not in ("classification", "probability_1"):
-            raise ParameterError(
-                "output_type should be either 'classification' or 'probability_1'"
+            raise ValueError(
+                "output_type must be either 'classification' or 'probability_1'"
             )
         if output_type == "classification" and pwl_attributes is not None:
             message = """

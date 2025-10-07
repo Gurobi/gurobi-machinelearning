@@ -18,7 +18,6 @@
 import gurobipy as gp
 import numpy as np
 
-from ..exceptions import ParameterError
 
 try:
     import pandas as pd
@@ -182,7 +181,7 @@ def validate_output_vars(gp_vars):
     if isinstance(gp_vars, gp.MVar):
         if gp_vars.ndim in (1, 2):
             return gp_vars
-        raise ParameterError("Variables should be an MVar of dimension 1 or 2")
+        raise ValueError("Variables should be an MVar of dimension 1 or 2")
     if isinstance(gp_vars, dict):
         gp_vars = list(gp_vars.values())
     if isinstance(gp_vars, list):
@@ -190,7 +189,7 @@ def validate_output_vars(gp_vars):
         return validate_output_vars(mvar)
     if isinstance(gp_vars, gp.Var):
         return gp.MVar.fromlist([gp_vars]).reshape(1, 1)
-    raise ParameterError("Could not validate variables")
+    raise ValueError("Could not validate variables")
 
 
 def validate_input_vars(model, gp_vars):
@@ -219,7 +218,7 @@ def validate_input_vars(model, gp_vars):
             return (gp_vars.reshape(1, -1), None, None)
         if gp_vars.ndim == 2:
             return (gp_vars, None, None)
-        raise ParameterError("Variables should be an MVar of dimension 1 or 2")
+        raise ValueError("Variables should be an MVar of dimension 1 or 2")
     if isinstance(gp_vars, dict):
         gp_vars = list(gp_vars.values())
     if isinstance(gp_vars, list):
@@ -227,4 +226,4 @@ def validate_input_vars(model, gp_vars):
         return validate_input_vars(model, mvar)
     if isinstance(gp_vars, gp.Var):
         return (gp.MVar.fromlist([gp_vars]).reshape(1, 1), None, None)
-    raise ParameterError("Could not validate variables")
+    raise ValueError("Could not validate variables")

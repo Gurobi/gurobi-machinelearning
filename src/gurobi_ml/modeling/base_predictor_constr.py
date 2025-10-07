@@ -17,7 +17,6 @@ from abc import ABC, abstractmethod
 
 import gurobipy as gp
 
-from ..exceptions import ParameterError
 from ._submodel import _SubModel
 from ._var_utils import _get_sol_values, validate_input_vars, validate_output_vars
 
@@ -56,7 +55,7 @@ class AbstractPredictorConstr(ABC, _SubModel):
         output_vars = self.output
 
         if hasattr(self, "_input_shape") and input_vars.shape[1] != self._input_shape:
-            raise ParameterError(
+            raise ValueError(
                 "Input variables dimension doesn't conform with modeling object "
                 + f"{type(self)}, input variable dimension: "
                 + f"{self._input_shape} != {input_vars.shape[1]}"
@@ -72,14 +71,14 @@ class AbstractPredictorConstr(ABC, _SubModel):
             hasattr(self, "_output_shape")
             and output_vars.shape[1] != self._output_shape
         ):
-            raise ParameterError(
+            raise ValueError(
                 "Output variables dimension doesn't conform with modeling object "
                 + f"{type(self)}, output variable dimension: "
                 + f"{output_vars.shape[1]}"
             )
 
         if output_vars.shape[0] != input_vars.shape[0]:
-            raise ParameterError(
+            raise ValueError(
                 "Non-conforming dimension between "
                 + "input variable and output variable: "
                 + f"{output_vars.shape[0]} != {input_vars.shape[0]}"
