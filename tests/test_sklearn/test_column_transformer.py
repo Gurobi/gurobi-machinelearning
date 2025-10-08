@@ -11,7 +11,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NotRegistered
+from gurobi_ml.exceptions import PredictorNotSupportedError
 
 
 class TestColumnTransformer(unittest.TestCase):
@@ -84,5 +84,5 @@ class TestColumnTransformer(unittest.TestCase):
 
         x = m.addMVar(example.shape)
 
-        with self.assertRaises(NotRegistered):
+        with self.assertRaises(PredictorNotSupportedError):
             add_predictor_constr(m, mlpreg, x)
