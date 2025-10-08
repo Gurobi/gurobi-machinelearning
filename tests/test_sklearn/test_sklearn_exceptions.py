@@ -58,7 +58,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
         X = data.data
         y = data.target
 
-        mlpreg = MLPRegressor([10] * 2, activation="logistic")
+        mlpreg = MLPRegressor(hidden_layer_sizes=[10] * 2, activation="logistic")
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=ConvergenceWarning)
             mlpreg.fit(X, y)
@@ -77,7 +77,9 @@ class TestUnsuportedSklearn(unittest.TestCase):
         X = data.data
         y = data.target
 
-        mlpreg = make_pipeline(QuantileTransformer(), MLPRegressor([10] * 2))
+        mlpreg = make_pipeline(
+            QuantileTransformer(), MLPRegressor(hidden_layer_sizes=[10] * 2)
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=ConvergenceWarning)
             warnings.simplefilter("ignore", category=UserWarning)
@@ -97,7 +99,9 @@ class TestUnsuportedSklearn(unittest.TestCase):
         X = data.data
         y = data.target
 
-        mlpreg = make_pipeline(PolynomialFeatures(3), MLPRegressor([10] * 2))
+        mlpreg = make_pipeline(
+            PolynomialFeatures(3), MLPRegressor(hidden_layer_sizes=[10] * 2)
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=ConvergenceWarning)
             mlpreg.fit(X, y)

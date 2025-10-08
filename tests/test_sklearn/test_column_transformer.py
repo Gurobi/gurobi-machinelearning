@@ -27,7 +27,7 @@ class TestColumnTransformer(unittest.TestCase):
             (StandardScaler(), [0, 1, 2, 3]),
             ("passthrough", [4, 5, 6, 7, 8, 9]),
         )
-        mlpreg = make_pipeline(coltran, MLPRegressor([10] * 2))
+        mlpreg = make_pipeline(coltran, MLPRegressor(hidden_layer_sizes=[10] * 2))
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=ConvergenceWarning)
             warnings.simplefilter("ignore", category=UserWarning)
@@ -50,7 +50,7 @@ class TestColumnTransformer(unittest.TestCase):
             (StandardScaler(), [0, 1, 2, 3]),
             ("passthrough", [4, 5, 6, 7, 8, 9]),
         )
-        mlpreg = make_pipeline(coltran, MLPRegressor([10] * 2))
+        mlpreg = make_pipeline(coltran, MLPRegressor(hidden_layer_sizes=[10] * 2))
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=ConvergenceWarning)
             warnings.simplefilter("ignore", category=UserWarning)
@@ -73,7 +73,7 @@ class TestColumnTransformer(unittest.TestCase):
             (StandardScaler(), [0, 1, 2, 3]),
             (FunctionTransformer(np.exp), [4, 5, 6, 7, 8, 9]),
         )
-        mlpreg = make_pipeline(coltran, MLPRegressor([10] * 2))
+        mlpreg = make_pipeline(coltran, MLPRegressor(hidden_layer_sizes=[10] * 2))
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=ConvergenceWarning)
             warnings.simplefilter("ignore", category=UserWarning)
