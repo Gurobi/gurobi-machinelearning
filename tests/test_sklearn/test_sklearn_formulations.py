@@ -9,7 +9,7 @@ from sklearn import datasets
 from sklearn.pipeline import Pipeline
 
 from gurobi_ml import add_predictor_constr, register_predictor_constr
-from gurobi_ml.exceptions import NoSolution
+from gurobi_ml.exceptions import NoSolutionError
 from gurobi_ml.sklearn import add_mlp_regressor_constr
 from gurobi_ml.sklearn.pipeline import PipelineConstr
 
@@ -154,7 +154,7 @@ class TestMNIST(unittest.TestCase):
             )
 
             y = pred_constr.output
-            with self.assertRaises(NoSolution):
+            with self.assertRaises(NoSolutionError):
                 pred_constr.get_error()
             with open(os.devnull, "w") as outnull:
                 pred_constr.print_stats(file=outnull)
