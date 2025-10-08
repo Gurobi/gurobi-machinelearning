@@ -7,7 +7,7 @@ import numpy as np
 from gurobipy import GurobiError
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoSolution
+from gurobi_ml.exceptions import NoSolutionError
 
 VERBOSE = False
 
@@ -58,7 +58,7 @@ class FixedRegressionModel(unittest.TestCase):
 
             y = pred_constr.output
 
-            with self.assertRaises(NoSolution):
+            with self.assertRaises(NoSolutionError):
                 pred_constr.get_error()
             with open(os.devnull, "w") as outnull:
                 pred_constr.print_stats(file=outnull)

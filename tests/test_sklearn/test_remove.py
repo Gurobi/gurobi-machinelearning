@@ -6,7 +6,7 @@ import unittest
 import gurobipy as gp
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoSolution, ParameterError
+from gurobi_ml.exceptions import NoSolutionError
 
 from .sklearn_cases import DiabetesCases, IrisCases
 
@@ -49,7 +49,7 @@ class TestAddRemove(unittest.TestCase):
 
             self.check_counts(gp_model, pred_constr, numvars)
 
-            with self.assertRaises(NoSolution):
+            with self.assertRaises(NoSolutionError):
                 pred_constr.get_error()
 
             pred_constr.remove()
@@ -75,7 +75,7 @@ class TestAddRemove(unittest.TestCase):
 
             gp_model.Params.OutputFlag = 0
             # All of these should fail
-            with self.assertRaises(ParameterError):
+            with self.assertRaises(ValueError):
                 # Both dimensions too big
                 add_predictor_constr(gp_model, predictor, x, y)
 
@@ -90,7 +90,7 @@ class TestAddRemove(unittest.TestCase):
             gp_model.Params.OutputFlag = 0
             pred_constr = add_predictor_constr(gp_model, predictor, x)
 
-            with self.assertRaises(NoSolution):
+            with self.assertRaises(NoSolutionError):
                 pred_constr.get_error()
 
             self.assertEqual(pred_constr.output.shape[0], output_shape[0])
@@ -129,7 +129,7 @@ class TestAddRemove(unittest.TestCase):
                 pred_constrs.append(add_predictor_constr(gp_model, predictor, x, y))
 
             for p2g in pred_constrs:
-                with self.assertRaises(NoSolution):
+                with self.assertRaises(NoSolutionError):
                     p2g.get_error()
 
                 p2g.remove()
@@ -155,7 +155,7 @@ class TestAddRemove(unittest.TestCase):
 
             self.check_counts(gp_model, pred_constr, numvars)
 
-            with self.assertRaises(NoSolution):
+            with self.assertRaises(NoSolutionError):
                 pred_constr.get_error()
 
             pred_constr.remove()
@@ -183,7 +183,7 @@ class TestAddRemove(unittest.TestCase):
 
             gp_model.Params.OutputFlag = 0
             # All of these should fail
-            with self.assertRaises(ParameterError):
+            with self.assertRaises(ValueError):
                 # Both dimensions too big
                 add_predictor_constr(gp_model, predictor, x.tolist(), y.tolist())
 

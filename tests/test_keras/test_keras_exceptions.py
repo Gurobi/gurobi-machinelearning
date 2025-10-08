@@ -5,7 +5,7 @@ import numpy as np
 import keras
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoModel
+from gurobi_ml.exceptions import ModelConfigurationError
 
 
 class TestUnsuportedKeras(unittest.TestCase):
@@ -39,7 +39,7 @@ class TestUnsuportedKeras(unittest.TestCase):
 
         x = m.addMVar(example.shape, lb=0.0, ub=1.0, name="x")
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(ModelConfigurationError):
             add_predictor_constr(m, nn, x)
 
     def test_keras_bad_activation(self):
