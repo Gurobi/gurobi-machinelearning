@@ -24,8 +24,8 @@ from gurobi_ml.sklearn import sklearn_predictors, sklearn_transformers
 def init_predictor(name):
     if isinstance(name, str):
         params = {
-            "MLPRegressor": "[20, 20]",
-            "MLPClassifier": "[50, 50]",
+            "MLPRegressor": "hidden_layer_sizes=[20, 20]",
+            "MLPClassifier": "hidden_layer_sizes=[50, 50]",
             "GradientBoostingRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
             "RandomForestRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
             "DecisionTreeRegressor": "max_leaf_nodes=50",

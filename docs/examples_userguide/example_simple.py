@@ -47,7 +47,7 @@ X, y = make_regression(n_features=10, noise=1.0)
 # Now, create the *MLPRegressor* object and fit it.
 #
 
-nn = MLPRegressor([20] * 2, max_iter=10000, random_state=1)
+nn = MLPRegressor(hidden_layer_sizes=[20] * 2, max_iter=10000, random_state=1)
 
 nn.fit(X, y)
 

@@ -2,6 +2,6 @@ gurobipy==12.0.3
 numpy==2.2.6
 scipy==1.15.3
 pandas==2.3.3
-scikit-learn==1.6.1
+scikit-learn==1.7.2
 seaborn==0.13.2
 .
