@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Setup uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
       - name: Test with tox (uv), excluding the examples target
         env:
           GUROBI_VERSION: ${{ matrix.gurobi-version }}
