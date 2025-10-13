@@ -16,8 +16,9 @@
 """Module for formulating an ONNX MLP model into a :external+gurobi:py:class:`Model`.
 
 Supported ONNX models are simple feed-forward networks composed of `Gemm`
-nodes (dense layers) and `Relu` activations. This mirrors the Keras and
-PyTorch integrations, which currently handle Dense/Linear + ReLU networks.
+nodes (dense layers) or `MatMul`+`Add` sequences, along with `Relu` activations.
+This mirrors the Keras and PyTorch integrations, which currently handle
+Dense/Linear + ReLU networks.
 """
 
 from __future__ import annotations
@@ -48,7 +49,7 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
         Target Gurobi model where the predictor submodel is added.
     onnx_model : onnx.ModelProto
         ONNX model, expected to represent a sequential MLP with `Gemm` nodes
-        and `Relu` activations.
+        (or `MatMul`+`Add` sequences) and `Relu` activations.
     input_vars : mvar_array_like
         Decision variables used as input for the model in `gp_model`.
     output_vars : mvar_array_like, optional
@@ -56,9 +57,9 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
 
     Warnings
     --------
-    Only networks composed of `Gemm` and `Relu` nodes are supported. `Gemm`
-    nodes must use default `alpha=1`, `beta=1`. Attribute `transB` is
-    supported.
+    Only networks composed of `Gemm` (or `MatMul`+`Add`) and `Relu` nodes are
+    supported. `Gemm` nodes must use default `alpha=1`, `beta=1`. Attribute
+    `transB` is supported.
     """
     return ONNXNetworkConstr(gp_model, onnx_model, input_vars, output_vars, **kwargs)
 
@@ -90,7 +91,10 @@ class ONNXNetworkConstr(BaseNNConstr):
     def _parse_mlp(self, model: onnx.ModelProto) -> list[_ONNXLayer]:
         """Parse a limited subset of ONNX graphs representing MLPs.
 
-        We support sequences of: Gemm -> (Relu)? -> Gemm -> (Relu)? ...
+        We support sequences of:
+        - Gemm -> (Relu)? -> Gemm -> (Relu)? ...
+        - MatMul -> Add -> (Relu)? -> MatMul -> Add -> (Relu)? ...
+
         Gemm attributes allowed: alpha==1, beta==1, transB in {0,1}.
         """
         graph = model.graph
@@ -112,11 +116,21 @@ class ONNXNetworkConstr(BaseNNConstr):
                         return float(a.f)
             return default
 
+        # Build a map from output name to node for easier traversal
+        output_to_node = {}
+        for node in graph.node:
+            for output in node.output:
+                output_to_node[output] = node
+
         # Iterate nodes gathering dense layers and relus
         layers: list[_ONNXLayer] = []
         pending_activation: str | None = None
+        processed_indices = set()
 
-        for node in graph.node:
+        for node_idx, node in enumerate(graph.node):
+            if node_idx in processed_indices:
+                continue
+
             op = node.op_type
             if op == "Gemm":
                 alpha = _get_attr(node, "alpha", 1.0)
@@ -148,6 +162,60 @@ class ONNXNetworkConstr(BaseNNConstr):
                 act = pending_activation or "identity"
                 layers.append(_ONNXLayer(W=W, b=b, activation=act))
                 pending_activation = None
+                processed_indices.add(node_idx)
+
+            elif op == "MatMul":
+                # MatMul should be followed by Add for bias
+                # Inputs: A, B where B is the weight matrix
+                if len(node.input) != 2:
+                    raise NoModel(model, "MatMul node should have exactly 2 inputs")
+
+                weight_name = node.input[1]
+                if weight_name not in init_map:
+                    raise NoModel(model, "MatMul weights must be an initializer")
+
+                W = init_map[weight_name]  # shape should be (in, out)
+
+                # Look for an Add node that uses the output of this MatMul
+                matmul_output = node.output[0]
+                add_node = None
+                add_node_idx = None
+                for next_idx, next_node in enumerate(graph.node):
+                    if next_node.op_type == "Add" and matmul_output in next_node.input:
+                        add_node = next_node
+                        add_node_idx = next_idx
+                        break
+
+                if add_node is not None:
+                    # Find the bias input (the one that's not the MatMul output)
+                    bias_name = None
+                    for inp in add_node.input:
+                        if inp != matmul_output and inp in init_map:
+                            bias_name = inp
+                            break
+
+                    if bias_name is not None:
+                        b = init_map[bias_name].reshape(-1)
+                        if b.shape[0] != W.shape[1]:
+                            raise NoModel(model, "Add bias has wrong shape")
+                    else:
+                        b = np.zeros((W.shape[1],), dtype=W.dtype)
+
+                    processed_indices.add(add_node_idx)
+                else:
+                    # MatMul without Add - use zero bias
+                    b = np.zeros((W.shape[1],), dtype=W.dtype)
+
+                act = pending_activation or "identity"
+                layers.append(_ONNXLayer(W=W, b=b, activation=act))
+                pending_activation = None
+                processed_indices.add(node_idx)
+
+            elif op == "Add":
+                # Skip if already processed as part of MatMul+Add
+                if node_idx not in processed_indices:
+                    # Standalone Add node - ignore or warn?
+                    processed_indices.add(node_idx)
 
             elif op == "Relu":
                 # Next linear layer will use relu activation; if we have no
@@ -169,8 +237,11 @@ class ONNXNetworkConstr(BaseNNConstr):
                             W=np.zeros((0, 0)), b=np.zeros((0,)), activation="relu"
                         )
                     )
+                processed_indices.add(node_idx)
+
             elif op in ("Identity",):
                 # Ignore
+                processed_indices.add(node_idx)
                 continue
             else:
                 raise NoModel(model, f"Unsupported ONNX op {op}")
