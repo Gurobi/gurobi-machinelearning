@@ -25,13 +25,8 @@ from __future__ import annotations
 
 
 import numpy as np
-
-try:  # Lazy import to avoid hard dependency when not used
-    import onnx
-    from onnx import numpy_helper
-except Exception:  # pragma: no cover - handled by no-deps tests
-    onnx = None  # type: ignore
-    numpy_helper = None  # type: ignore
+import onnx
+from onnx import numpy_helper
 
 from ..exceptions import NoModel, NoSolution
 from ..modeling.neuralnet import BaseNNConstr
@@ -77,8 +72,6 @@ class ONNXNetworkConstr(BaseNNConstr):
     """Formulate a supported ONNX MLP model as a Gurobi predictor constraint."""
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
-        if onnx is None:
-            raise NoModel(predictor, "onnx is not available")
         if not isinstance(predictor, onnx.ModelProto):
             raise NoModel(predictor, "Expected an onnx.ModelProto model")
 
@@ -91,10 +84,7 @@ class ONNXNetworkConstr(BaseNNConstr):
     def _parse_mlp(self, model: onnx.ModelProto) -> list[_ONNXLayer]:
         """Parse a limited subset of ONNX graphs representing MLPs.
 
-        We support sequences of:
-        - Gemm -> (Relu)? -> Gemm -> (Relu)? ...
-        - MatMul -> Add -> (Relu)? -> MatMul -> Add -> (Relu)? ...
-
+        We support sequences of Gemm and MatMul+Add nodes with optional Relu activations.
         Gemm attributes allowed: alpha==1, beta==1, transB in {0,1}.
         """
         graph = model.graph
@@ -285,21 +275,14 @@ class ONNXNetworkConstr(BaseNNConstr):
         if self._output is None:
             self._output = layer.output
 
-    def _forward_numpy(self, X: np.ndarray) -> np.ndarray:
-        out = X
-        for spec in self._layers_spec:
-            if spec.W.size == 0:
-                # Relu activation directly on out
-                out = np.maximum(out, 0.0)
-            else:
-                out = out @ spec.W + spec.b
-                if spec.activation == "relu":
-                    out = np.maximum(out, 0.0)
-        return out
-
     def get_error(self, eps=None):
         if self._has_solution:
-            pred = self._forward_numpy(self.input_values)
+            import onnxruntime as ort
+
+            sess = ort.InferenceSession(self.predictor.SerializeToString())
+            input_name = sess.get_inputs()[0].name
+            pred = sess.run(None, {input_name: self.input_values.astype(np.float32)})[0]
+
             r_val = np.abs(pred - self.output_values)
             if eps is not None and np.max(r_val) > eps:
                 print(f"{pred} != {self.output_values}")
