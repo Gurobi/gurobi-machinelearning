@@ -37,7 +37,7 @@ jobs:
     - name: Build wheel
       run: python -m build
     - name: Store artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: artifact
         path: dist/*
