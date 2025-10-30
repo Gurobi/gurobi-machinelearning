@@ -90,14 +90,20 @@ class AbstractPredictorConstr(ABC, _SubModel):
 
     def _build_submodel(self, gp_model, *args, **kwargs):
         """Predict output from input using predictor or transformer."""
-        self._input, columns, index = validate_input_vars(self.gp_model, self._input)
+        if "accepted_dim" in kwargs:
+            accepted_dim = kwargs["accepted_dim"]
+        else:
+            accepted_dim = (1, 2)
+        self._input, columns, index = validate_input_vars(
+            self.gp_model, self._input, accepted_dim=accepted_dim
+        )
         self._input_index = index
         self._input_columns = columns
 
         if self._output is None:
             self._output = self._create_output_vars(self._input)
         if self._output is not None:
-            self._output = validate_output_vars(self._output)
+            self._output = validate_output_vars(self._output, accepted_dim=accepted_dim)
             self._validate()
         self._mip_model(**kwargs)
         assert self._output is not None
