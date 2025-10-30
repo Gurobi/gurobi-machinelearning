@@ -85,7 +85,8 @@ def build_simple_mlp_onnx(
             initializer=[init_W1, init_b1, init_W2, init_b2],
         )
 
-    model = helper.make_model(graph)
+    model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 18)])
+    model.ir_version = 9
     onnx.checker.check_model(model)
     return model
 
