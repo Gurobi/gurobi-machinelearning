@@ -18,7 +18,8 @@ class TestUnsupportedONNX(unittest.TestCase):
         graph = helper.make_graph(
             nodes=[node], name="BadGraph", inputs=[X], outputs=[Y]
         )
-        model = helper.make_model(graph)
+        model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 18)])
+        model.ir_version = 9
         onnx.checker.check_model(model)
 
         example = np.zeros((1, 4), dtype=float)
