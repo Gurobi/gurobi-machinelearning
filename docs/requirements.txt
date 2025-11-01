@@ -1,6 +1,6 @@
 gurobipy==13.0.0beta1
 gurobipy-pandas==1.2.2
-ipykernel==6.30.1
+ipykernel==7.1.0
 matplotlib==3.10.1
 matplotlib-inline==0.1.7
 sphinxcontrib_bibtex==2.6.5
