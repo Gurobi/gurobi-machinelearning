@@ -222,7 +222,18 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
 
         self.estimators_ = estimators
 
-        constant = float(xgb_raw["learner"]["learner_model_param"]["base_score"])
+        base_score_raw = xgb_raw["learner"]["learner_model_param"]["base_score"]
+        # In XGBoost 3.x, base_score is stored as a string representation of an array
+        # In XGBoost 2.x, base_score is a string but not in array format
+        if isinstance(base_score_raw, str):
+            if base_score_raw.startswith("["):
+                import ast
+
+                constant = float(ast.literal_eval(base_score_raw)[0])
+            else:
+                constant = float(base_score_raw)
+        else:
+            constant = float(base_score_raw)
         learning_rate = 1.0
         objective = xgb_raw["learner"]["objective"]["name"]
 
