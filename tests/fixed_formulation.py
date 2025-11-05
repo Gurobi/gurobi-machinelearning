@@ -99,19 +99,31 @@ class FixedRegressionModel(unittest.TestCase):
                 examples.iloc[0, :] = examples.mean()
                 examples = examples.iloc[:1, :]
             else:
-                examples = (examples.sum(axis=0) / n_sample).reshape(1, -1) - 1e-2
+                # Preserve tensor dimensions for non-tabular inputs (e.g., CNNs)
+                if examples.ndim <= 2:
+                    examples = (examples.sum(axis=0) / n_sample).reshape(1, -1) - 1e-2
+                else:
+                    # Average over batch axis, keep spatial/channel dims, add batch=1
+                    examples = examples.mean(axis=0, keepdims=True) - 1e-2
         elif combine == "pairs":
             # Make pairwise combination of the examples
             if hasattr(X, "columns"):
                 even_rows = examples.iloc[::2, :] / 2.0
                 odd_rows = examples.iloc[1::2, :] / 2.0
                 odd_rows.index = even_rows.index
+                examples = (even_rows + odd_rows) - 1e-2
             else:
-                even_rows = examples[::2, :] / 2.0
-                odd_rows = examples[1::2, :] / 2.0
-            assert odd_rows.shape == even_rows.shape
-            examples = (even_rows + odd_rows) - 1e-2
-            assert examples.shape == even_rows.shape
+                if examples.ndim <= 2:
+                    even_rows = examples[::2, :] / 2.0
+                    odd_rows = examples[1::2, :] / 2.0
+                else:
+                    even_rows = examples[::2] / 2.0
+                    odd_rows = examples[1::2] / 2.0
+                # Align lengths in case of odd number of samples
+                min_len = min(even_rows.shape[0], odd_rows.shape[0])
+                even_rows = even_rows[:min_len]
+                odd_rows = odd_rows[:min_len]
+                examples = (even_rows + odd_rows) - 1e-2
 
         predictor = one_case["predictor"]
         with super().subTest(
