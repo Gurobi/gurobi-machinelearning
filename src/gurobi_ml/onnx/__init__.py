@@ -13,10 +13,17 @@
 # limitations under the License.
 # ==============================================================================
 
-"""ONNX support for formulating simple feed-forward neural networks.
+"""ONNX support for formulating neural networks.
 
-Currently supports sequential MLPs represented with ONNX `Gemm` layers and
-`Relu` activations, matching the capabilities of the Keras and PyTorch
-converters (Dense/Linear + ReLU)."""
+Provides two implementations:
+1. add_onnx_constr: Sequential feed-forward networks only
+2. add_onnx_dag_constr: Supports arbitrary DAG topologies including skip/residual connections
 
+The DAG-based implementation supports:
+- Skip connections (input used by multiple layers)
+- Residual connections (intermediate outputs reused)
+- Multi-branch architectures
+"""
+
+from .onnx_dag_model import add_onnx_dag_constr as add_onnx_dag_constr  # noqa: F401
 from .onnx_model import add_onnx_constr as add_onnx_constr  # noqa: F401
