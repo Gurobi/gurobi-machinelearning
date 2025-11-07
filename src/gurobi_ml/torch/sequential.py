@@ -64,6 +64,64 @@ def add_sequential_constr(
     Notes
     -----
     |VariablesDimensionsWarn|
+    
+    **Models with Skip Connections or Residual Architectures**
+    
+    This function only supports :external+torch:py:class:`torch.nn.Sequential` models
+    (linear chains of layers). For models with more complex architectures such as:
+    
+    - Skip connections (input reused by multiple layers)
+    - Residual connections (intermediate outputs reused)
+    - Custom :external+torch:py:class:`torch.nn.Module` with complex forward() logic
+    - ResNet, DenseNet, or other modern architectures
+    
+    **Use the ONNX export workflow instead:**
+    
+    1. Export your PyTorch model to ONNX format:
+    
+       .. code-block:: python
+       
+           import torch
+           import onnx
+           
+           # Prepare dummy input with correct shape
+           dummy_input = torch.randn(1, input_dim)
+           
+           # Export to ONNX
+           torch.onnx.export(
+               pytorch_model,           # Your model
+               dummy_input,             # Example input
+               "model.onnx",           # Output file
+               export_params=True,     # Store trained weights
+               opset_version=11,       # ONNX version
+               do_constant_folding=True,
+               input_names=['input'],
+               output_names=['output'],
+               dynamic_axes={
+                   'input': {0: 'batch_size'},
+                   'output': {0: 'batch_size'}
+               }
+           )
+           
+           # Verify the exported model
+           onnx_model = onnx.load("model.onnx")
+           onnx.checker.check_model(onnx_model)
+    
+    2. Load and use with Gurobi ML's ONNX DAG support:
+    
+       .. code-block:: python
+       
+           import onnx
+           from gurobi_ml.onnx import add_onnx_dag_constr
+           
+           onnx_model = onnx.load("model.onnx")
+           pred = add_onnx_dag_constr(gp_model, onnx_model, input_vars)
+    
+    For more details on exporting PyTorch models to ONNX, see:
+    
+    - `PyTorch ONNX export tutorial <https://pytorch.org/tutorials/advanced/super_resolution_with_onnxruntime.html>`_
+    - `torch.onnx documentation <https://pytorch.org/docs/stable/onnx.html>`_
+    - `ONNX tutorials <https://onnx.ai/get-started.html>`_
     """
     return SequentialConstr(
         gp_model, sequential_model, input_vars, output_vars, **kwargs

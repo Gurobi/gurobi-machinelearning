@@ -16,13 +16,41 @@
 """ONNX support for formulating neural networks.
 
 Provides two implementations:
-1. add_onnx_constr: Sequential feed-forward networks only
-2. add_onnx_dag_constr: Supports arbitrary DAG topologies including skip/residual connections
 
-The DAG-based implementation supports:
-- Skip connections (input used by multiple layers)
-- Residual connections (intermediate outputs reused)
-- Multi-branch architectures
+1. **add_onnx_constr**: Sequential feed-forward networks only
+   
+   - Validates that models have sequential topology
+   - Rejects models with skip/residual connections
+   - Use for simple feed-forward networks
+
+2. **add_onnx_dag_constr**: Supports arbitrary DAG topologies
+   
+   - Skip connections (input used by multiple layers)
+   - Residual connections (intermediate outputs reused)
+   - Multi-branch architectures
+   - Any valid directed acyclic graph
+   
+**Recommended Workflow for Keras and PyTorch Models:**
+
+For models with complex architectures (ResNet, skip connections, etc.),
+export to ONNX first and use add_onnx_dag_constr:
+
+From Keras:
+    >>> import tf2onnx
+    >>> import onnx
+    >>> spec = (tf.TensorSpec((None, input_dim), tf.float32, name="input"),)
+    >>> model_proto, _ = tf2onnx.convert.from_keras(keras_model, input_signature=spec)
+    >>> onnx.save(model_proto, "model.onnx")
+
+From PyTorch:
+    >>> import torch
+    >>> dummy_input = torch.randn(1, input_dim)
+    >>> torch.onnx.export(pytorch_model, dummy_input, "model.onnx")
+
+Then use with Gurobi ML:
+    >>> onnx_model = onnx.load("model.onnx")
+    >>> from gurobi_ml.onnx import add_onnx_dag_constr
+    >>> pred = add_onnx_dag_constr(gp_model, onnx_model, input_vars)
 """
 
 from .onnx_dag_model import add_onnx_dag_constr as add_onnx_dag_constr  # noqa: F401
