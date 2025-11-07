@@ -81,6 +81,69 @@ class ONNXNetworkConstr(BaseNNConstr):
 
         super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
+    def _validate_sequential_architecture(self, graph, init_map):
+        """Validate that the graph has a sequential architecture.
+
+        Raises NoModel if the graph contains:
+        - Skip connections (same intermediate value used by multiple nodes)
+        - Residual connections (Add nodes combining non-bias values)
+        - Non-sequential topology
+        """
+        # Build usage map: which nodes use each tensor
+        tensor_usage = {}
+        for node in graph.node:
+            for inp in node.input:
+                if inp not in tensor_usage:
+                    tensor_usage[inp] = []
+                tensor_usage[inp].append(node.name)
+
+        # Check 1: Input should only be used by one node (first layer)
+        for graph_input in graph.input:
+            input_name = graph_input.name
+            if input_name in tensor_usage and len(tensor_usage[input_name]) > 1:
+                raise NoModel(
+                    graph,
+                    f"Non-sequential architecture detected: input '{input_name}' is used by multiple nodes {tensor_usage[input_name]}. "
+                    "Skip connections and residual architectures are not supported.",
+                )
+
+        # Check 2: Each intermediate node output should be used by at most one node
+        # (except for the final output which may not be used by any node)
+        for node in graph.node:
+            for output in node.output:
+                if output in tensor_usage and len(tensor_usage[output]) > 1:
+                    raise NoModel(
+                        graph,
+                        f"Non-sequential architecture detected: node '{node.name}' output '{output}' is used by multiple nodes {tensor_usage[output]}. "
+                        "Skip connections and residual architectures are not supported.",
+                    )
+
+        # Check 3: Add nodes should only be used for bias addition (MatMul+Add pattern)
+        # Not for combining two computed branches (residual connections)
+        for node in graph.node:
+            if node.op_type == "Add":
+                # An Add is valid if one of its inputs is an initializer (bias)
+                # and the other is from a MatMul
+                inputs = list(node.input)
+                if len(inputs) != 2:
+                    continue
+
+                # Check if this is a MatMul+Add pattern (one input from MatMul, one is initializer)
+                is_bias_add = False
+                for inp in inputs:
+                    if inp in init_map:
+                        # One input is a constant (bias)
+                        is_bias_add = True
+                        break
+
+                if not is_bias_add:
+                    # Both inputs are computed values - this is a residual connection
+                    raise NoModel(
+                        graph,
+                        f"Non-sequential architecture detected: Add node '{node.name}' combines two computed values {inputs}. "
+                        "Residual connections are not supported.",
+                    )
+
     def _parse_mlp(self, model: onnx.ModelProto) -> list[_ONNXLayer]:
         """Parse a limited subset of ONNX graphs representing MLPs.
 
@@ -105,6 +168,9 @@ class ONNXNetworkConstr(BaseNNConstr):
                     if a.type == onnx.AttributeProto.FLOAT:
                         return float(a.f)
             return default
+
+        # Validate that the graph is sequential (no skip connections or residual adds)
+        self._validate_sequential_architecture(graph, init_map)
 
         # Build a map from output name to node for easier traversal
         output_to_node = {}
