@@ -20,7 +20,6 @@ including skip connections, residual connections, and other non-sequential archi
 """
 
 import gurobipy as gp
-import numpy as np
 
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
@@ -44,7 +43,7 @@ class AddLayer(AbstractPredictorConstr):
         """
         self.input_vars_list = input_vars_list
         self._default_name = "add"
-        
+
         # For AbstractPredictorConstr, we need a single input_vars
         # We'll use the first one as the primary input
         super().__init__(
@@ -66,9 +65,11 @@ class AddLayer(AbstractPredictorConstr):
         result = self.input_vars_list[0]
         for i in range(1, len(self.input_vars_list)):
             result = result + self.input_vars_list[i]
-        
+
         # Constrain output to equal the sum
-        self.gp_model.addConstr(self._output == result, name=f"{self._default_name}_sum")
+        self.gp_model.addConstr(
+            self._output == result, name=f"{self._default_name}_sum"
+        )
         self.gp_model.update()
 
     def get_error(self, eps=None):

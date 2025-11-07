@@ -17,7 +17,7 @@
 
 This module supports ONNX models with arbitrary graph topologies, including:
 - Skip connections
-- Residual connections  
+- Residual connections
 - Multi-branch architectures
 
 Supported ONNX operations:
@@ -28,6 +28,8 @@ Supported ONNX operations:
 """
 
 from __future__ import annotations
+
+import graphlib
 
 import numpy as np
 import onnx
@@ -128,7 +130,7 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
             )
 
     def _topological_sort(self, graph):
-        """Perform topological sort of the graph nodes.
+        """Perform topological sort of the graph nodes using Python's graphlib.
 
         Parameters
         ----------
@@ -139,47 +141,45 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
         -------
         list of onnx.NodeProto
             Nodes in topological order
+            
+        Raises
+        ------
+        NoModel
+            If the graph contains cycles (not a valid DAG)
         """
-        # Use node index as identifier (nodes may not have names)
+        # Build node list and index mapping
         node_list = list(graph.node)
-        node_to_idx = {id(node): i for i, node in enumerate(node_list)}
-        
+
         # Map output tensor name to node index
         outputs_to_idx = {}
         for i, node in enumerate(node_list):
             for out in node.output:
                 outputs_to_idx[out] = i
-        
-        # For each node, determine which other nodes it depends on
-        node_dependencies = {}
+
+        # Use Python's standard library TopologicalSorter
+        ts = graphlib.TopologicalSorter()
+
+        # Add nodes and their dependencies
         for i, node in enumerate(node_list):
-            node_dependencies[i] = set()
+            # Find which nodes this node depends on
+            predecessors = []
             for inp in node.input:
                 # Skip initializers and graph inputs
                 if inp in self._init_map or inp in {gi.name for gi in graph.input}:
                     continue
                 # This input must be an output of another node
                 if inp in outputs_to_idx:
-                    node_dependencies[i].add(outputs_to_idx[inp])
+                    predecessors.append(outputs_to_idx[inp])
 
-        # Kahn's algorithm for topological sort
-        in_degree = {i: len(deps) for i, deps in node_dependencies.items()}
-        queue = [i for i in range(len(node_list)) if in_degree[i] == 0]
-        sorted_indices = []
+            # Add node with its dependencies
+            ts.add(i, *predecessors)
 
-        while queue:
-            current_idx = queue.pop(0)
-            sorted_indices.append(current_idx)
-
-            # Find all nodes that depend on current node
-            for node_idx, deps in node_dependencies.items():
-                if current_idx in deps:
-                    in_degree[node_idx] -= 1
-                    if in_degree[node_idx] == 0:
-                        queue.append(node_idx)
-
-        if len(sorted_indices) != len(node_list):
-            raise NoModel(graph, "Graph contains cycles - not a valid DAG")
+        # Get topological order
+        try:
+            # static_order() returns an iterable in topological order
+            sorted_indices = list(ts.static_order())
+        except graphlib.CycleError as e:
+            raise NoModel(graph, f"Graph contains cycles - not a valid DAG: {e}")
 
         # Convert indices back to node objects
         return [node_list[i] for i in sorted_indices]
@@ -230,7 +230,7 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
         if alpha != 1.0 or beta != 1.0:
             raise NoModel(
                 self._onnx_graph,
-                f"Unsupported Gemm attributes alpha={alpha}, beta={beta}"
+                f"Unsupported Gemm attributes alpha={alpha}, beta={beta}",
             )
 
         # Get inputs: A (data), B (weight), C (bias)
@@ -318,7 +318,9 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
             # For bias addition, we can fold it into the previous layer if it was identity
             # For now, create a simple constraint
             output_vars = self.gp_model.addMVar(
-                computed_vars.shape, lb=-self.gp_model.Params.Infinity, name=f"{node.name}_out"
+                computed_vars.shape,
+                lb=-self.gp_model.Params.Infinity,
+                name=f"{node.name}_out",
             )
             self.gp_model.addConstr(
                 output_vars == computed_vars + bias, name=f"{node.name}_bias"
