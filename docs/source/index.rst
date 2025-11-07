@@ -14,7 +14,7 @@ Gurobi Machine Learning
 A Python package to help use *trained* regression models in
 mathematical optimization models. The package supports a variety of regression models
 (linear, logistic, neural networks, decision trees,...) trained by
-different machine learning frameworks (scikit-learn, LightGBM, XGBoost, Keras and PyTorch).
+different machine learning frameworks (scikit-learn, LightGBM, XGBoost, Keras, PyTorch, and ONNX).
 
 
 .. only:: html
