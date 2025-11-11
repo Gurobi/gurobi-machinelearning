@@ -247,3 +247,79 @@ class TestONNXModel(FixedRegressionModel):
                 1e-5,
                 f"Sample {idx}: max error {max_error} exceeds tolerance",
             )
+
+    def test_onnx_cnn_with_padding(self):
+        """Test ONNX CNN model with Conv2d using padding."""
+        import gurobipy as gp
+        import onnxruntime as ort
+
+        # Create a simple Conv model with padding
+        np.random.seed(42)
+        X = helper.make_tensor_value_info("X", TensorProto.FLOAT, [None, 1, 5, 5])
+        Y = helper.make_tensor_value_info("Y", TensorProto.FLOAT, [None, 2, 5, 5])
+
+        # Conv with padding=1 to maintain spatial dimensions
+        conv_weight = np.random.randn(2, 1, 3, 3).astype(np.float32) * 0.1
+        conv_bias = np.random.randn(2).astype(np.float32) * 0.1
+
+        init_conv_w = helper.make_tensor(
+            name="conv_w",
+            data_type=TensorProto.FLOAT,
+            dims=conv_weight.shape,
+            vals=conv_weight.flatten(),
+        )
+        init_conv_b = helper.make_tensor(
+            name="conv_b",
+            data_type=TensorProto.FLOAT,
+            dims=conv_bias.shape,
+            vals=conv_bias,
+        )
+
+        conv = helper.make_node(
+            "Conv",
+            inputs=["X", "conv_w", "conv_b"],
+            outputs=["Y"],
+            name="conv",
+            kernel_shape=[3, 3],
+            strides=[1, 1],
+            pads=[1, 1, 1, 1],  # Symmetric padding
+        )
+
+        graph = helper.make_graph(
+            nodes=[conv],
+            name="ConvWithPadding",
+            inputs=[X],
+            outputs=[Y],
+            initializer=[init_conv_w, init_conv_b],
+        )
+
+        model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 18)])
+        model.ir_version = 9
+        onnx.checker.check_model(model)
+
+        # Test with ONNX Runtime
+        sess = ort.InferenceSession(model.SerializeToString())
+        test_input_nchw = np.random.randn(1, 1, 5, 5).astype(np.float32)
+        sess.run(None, {"X": test_input_nchw})[0]
+
+        # Test with Gurobi
+        gpm = gp.Model()
+        gpm.setParam("OutputFlag", 0)
+
+        test_input_nhwc = np.transpose(test_input_nchw, (0, 2, 3, 1))
+        x = gpm.addMVar(
+            test_input_nhwc.shape, lb=test_input_nhwc - 1e-4, ub=test_input_nhwc + 1e-4
+        )
+
+        from gurobi_ml.onnx import add_onnx_constr
+
+        pred_constr = add_onnx_constr(gpm, model, x)
+
+        gpm.optimize()
+
+        self.assertEqual(gpm.status, gp.GRB.OPTIMAL)
+
+        # Check error
+        error = pred_constr.get_error()
+        max_error = np.max(np.abs(error))
+        self.assertLess(max_error, 1e-5, f"Max error {max_error} exceeds tolerance")

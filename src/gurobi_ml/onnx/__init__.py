@@ -17,12 +17,15 @@
 
 Supports neural networks represented with:
 - Dense layers: ONNX `Gemm` nodes or `MatMul`+`Add` sequences
-- Convolutional layers: `Conv` nodes (2D, valid padding only)
-- Pooling: `MaxPool` nodes (valid padding only)
+- Convolutional layers: `Conv` nodes (2D, with symmetric padding)
+- Pooling: `MaxPool` nodes (2D, with symmetric padding)
 - `Flatten` nodes
 - `Relu` activations
 
 This mirrors the capabilities of the Keras and PyTorch converters.
+
+Padding support: Conv and MaxPool support symmetric padding where pad_left = pad_right
+and pad_top = pad_bottom. Asymmetric padding is not supported.
 
 Note: For models with convolutional layers, input variables should be provided
 in NHWC format (batch, height, width, channels), even though ONNX models use

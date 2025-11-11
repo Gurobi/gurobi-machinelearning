@@ -210,17 +210,43 @@ class Conv2DLayer(AbstractNNLayer):
     def _create_output_vars(self, input_vars):
         assert len(input_vars.shape) == 4
 
-        # compute shape of output
-        # should be (input + padding)/stride
-        padding = 0
-        output_shape = input_vars.shape[1] + 2 * padding - self.kernel_size[0]
-        output_shape /= self.strides[0]
-        output_shape += 1
-        output_shape_0 = output_shape
-        output_shape = input_vars.shape[2] + 2 * padding - self.kernel_size[1]
-        output_shape /= self.strides[1]
-        output_shape += 1
-        output_shape_1 = output_shape
+        # Parse padding - can be "valid", "same", or a tuple (pad_h, pad_w)
+        if self.padding == "valid":
+            pad_h, pad_w = 0, 0
+        elif self.padding == "same":
+            # "same" padding: output size = input size / stride (rounded up)
+            # Calculate padding needed
+            pad_h = (
+                max(
+                    (input_vars.shape[1] - 1) * self.strides[0]
+                    + self.kernel_size[0]
+                    - input_vars.shape[1],
+                    0,
+                )
+                // 2
+            )
+            pad_w = (
+                max(
+                    (input_vars.shape[2] - 1) * self.strides[1]
+                    + self.kernel_size[1]
+                    - input_vars.shape[2],
+                    0,
+                )
+                // 2
+            )
+        elif isinstance(self.padding, (tuple, list)):
+            pad_h, pad_w = self.padding[0], self.padding[1]
+        else:
+            raise ValueError(f"Unsupported padding type: {self.padding}")
+
+        # Compute shape of output: (input + 2*padding - kernel) / stride + 1
+        output_shape_0 = (
+            input_vars.shape[1] + 2 * pad_h - self.kernel_size[0]
+        ) // self.strides[0] + 1
+        output_shape_1 = (
+            input_vars.shape[2] + 2 * pad_w - self.kernel_size[1]
+        ) // self.strides[1] + 1
+
         output_shape = (
             input_vars.shape[0],
             int(output_shape_0),
@@ -242,7 +268,7 @@ class Conv2DLayer(AbstractNNLayer):
         model = self.gp_model
         model.update()
 
-        (_, height, width, _) = self.input.shape
+        (_, height, width, in_channels) = self.input.shape
         mixing = self.gp_model.addMVar(
             self.output.shape,
             lb=-gp.GRB.INFINITY,
@@ -252,27 +278,57 @@ class Conv2DLayer(AbstractNNLayer):
         self.mixing = mixing
         self.gp_model.update()
 
-        assert self.padding == "valid"
+        # Parse padding
+        if self.padding == "valid":
+            pad_h, pad_w = 0, 0
+        elif self.padding == "same":
+            pad_h = (
+                max((height - 1) * self.strides[0] + self.kernel_size[0] - height, 0)
+                // 2
+            )
+            pad_w = (
+                max((width - 1) * self.strides[1] + self.kernel_size[1] - width, 0) // 2
+            )
+        elif isinstance(self.padding, (tuple, list)):
+            pad_h, pad_w = self.padding[0], self.padding[1]
+        else:
+            raise ValueError(f"Unsupported padding type: {self.padding}")
 
-        # Here comes the complicated loop...
-        # I am sure there is a better way but this is a pedestrian version
+        # Create padded input if needed
+        # Note: Padding is handled implicitly in the convolution loop
+        # by checking bounds and using 0 for out-of-bounds accesses
+
+        # Convolution loop
         kernel_w, kernel_h = self.kernel_size
         stride_h, stride_w = self.strides
+
         for k in range(self.channels):
-            for out_i, i in enumerate(range(0, height - kernel_h + 1, stride_h)):
-                if i + kernel_h > height:
-                    continue
-                for out_j, j in enumerate(range(0, width - kernel_w + 1, stride_w)):
-                    if j + kernel_w > width:
-                        continue
-                    self.gp_model.addConstr(
-                        mixing[:, out_i, out_j, k]
-                        == (
-                            self.input[:, i : i + kernel_h, j : j + kernel_w, :]
-                            * self.coefs[:, :, :, k]
-                        ).sum()
-                        + self.intercept[k]
-                    )
+            for out_i in range(self.output.shape[1]):
+                for out_j in range(self.output.shape[2]):
+                    # Calculate input window position (top-left corner)
+                    in_i = out_i * stride_h - pad_h
+                    in_j = out_j * stride_w - pad_w
+
+                    # Build the convolution expression
+                    conv_expr = self.intercept[k]
+
+                    for kh in range(kernel_h):
+                        for kw in range(kernel_w):
+                            # Input position for this kernel element
+                            h_idx = in_i + kh
+                            w_idx = in_j + kw
+
+                            # Check if within bounds (handle padding)
+                            if 0 <= h_idx < height and 0 <= w_idx < width:
+                                # Within bounds - add contribution
+                                for ic in range(in_channels):
+                                    conv_expr += (
+                                        self.input[:, h_idx, w_idx, ic]
+                                        * self.coefs[kh, kw, ic, k]
+                                    )
+                            # else: out of bounds, contributes 0 (padding)
+
+                    self.gp_model.addConstr(mixing[:, out_i, out_j, k] == conv_expr)
 
         if "activation" in kwargs:
             activation = kwargs["activation"]
@@ -354,13 +410,41 @@ class MaxPooling2DLayer(AbstractNNLayer):
 
     def _create_output_vars(self, input_vars):
         assert len(input_vars.shape) == 4
-        pad = 0
-        out_h = (input_vars.shape[1] + 2 * pad - self.pool_size[0]) // self.stride[
+
+        # Parse padding
+        if self.padding == "valid":
+            pad_h, pad_w = 0, 0
+        elif self.padding == "same":
+            pad_h = (
+                max(
+                    (input_vars.shape[1] - 1) * self.stride[0]
+                    + self.pool_size[0]
+                    - input_vars.shape[1],
+                    0,
+                )
+                // 2
+            )
+            pad_w = (
+                max(
+                    (input_vars.shape[2] - 1) * self.stride[1]
+                    + self.pool_size[1]
+                    - input_vars.shape[2],
+                    0,
+                )
+                // 2
+            )
+        elif isinstance(self.padding, (tuple, list)):
+            pad_h, pad_w = self.padding[0], self.padding[1]
+        else:
+            raise ValueError(f"Unsupported padding type: {self.padding}")
+
+        out_h = (input_vars.shape[1] + 2 * pad_h - self.pool_size[0]) // self.stride[
             0
         ] + 1
-        out_w = (input_vars.shape[2] + 2 * pad - self.pool_size[1]) // self.stride[
+        out_w = (input_vars.shape[2] + 2 * pad_w - self.pool_size[1]) // self.stride[
             1
         ] + 1
+
         output_shape = (
             input_vars.shape[0],
             int(out_h),
@@ -375,24 +459,51 @@ class MaxPooling2DLayer(AbstractNNLayer):
         return rval
 
     def _mip_model(self, **kwargs):
-        assert self.padding == "valid"
         (_, height, width, channels) = self.input.shape
         ph, pw = self.pool_size
         sh, sw = self.stride
         out_h = self.output.shape[1]
         out_w = self.output.shape[2]
+
+        # Parse padding
+        if self.padding == "valid":
+            pad_h, pad_w = 0, 0
+        elif self.padding == "same":
+            pad_h = max((height - 1) * sh + ph - height, 0) // 2
+            pad_w = max((width - 1) * sw + pw - width, 0) // 2
+        elif isinstance(self.padding, (tuple, list)):
+            pad_h, pad_w = self.padding[0], self.padding[1]
+        else:
+            raise ValueError(f"Unsupported padding type: {self.padding}")
+
         for n in range(self.input.shape[0]):
             for k in range(channels):
                 for i in range(out_h):
                     for j in range(out_w):
-                        ii = i * sh
-                        jj = j * sw
-                        pool_vars = self.input[
-                            n, ii : ii + ph, jj : jj + pw, k
-                        ].reshape(-1)
-                        self.gp_model.addGenConstrMax(
-                            self.output[n, i, j, k],
-                            pool_vars.tolist(),
-                            name=self._indexed_name((n, i, j, k), "pool"),
-                        )
+                        # Calculate input window position
+                        in_i = i * sh - pad_h
+                        in_j = j * sw - pad_w
+
+                        # Collect valid pool window values
+                        pool_vars = []
+                        for pi in range(ph):
+                            for pj in range(pw):
+                                h_idx = in_i + pi
+                                w_idx = in_j + pj
+                                # Only include values within bounds
+                                if 0 <= h_idx < height and 0 <= w_idx < width:
+                                    pool_vars.append(self.input[n, h_idx, w_idx, k])
+
+                        if pool_vars:
+                            # Standard max pooling
+                            self.gp_model.addGenConstrMax(
+                                self.output[n, i, j, k],
+                                pool_vars,
+                                name=self._indexed_name((n, i, j, k), "pool"),
+                            )
+                        else:
+                            # Edge case: window entirely outside bounds (shouldn't happen with valid padding calc)
+                            # Set to negative infinity or zero depending on convention
+                            self.gp_model.addConstr(self.output[n, i, j, k] == 0)
+
         self.gp_model.update()

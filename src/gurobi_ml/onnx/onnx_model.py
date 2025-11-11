@@ -61,10 +61,13 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
     --------
     Supported operations:
     - Dense layers: `Gemm` (with alpha=1, beta=1, transB in {0,1}) or `MatMul`+`Add`
-    - Convolutional layers: `Conv` (2D, valid padding only)
-    - Pooling: `MaxPool` (valid padding only)
+    - Convolutional layers: `Conv` (2D, with symmetric padding)
+    - Pooling: `MaxPool` (2D, with symmetric padding)
     - `Flatten` (axis=1)
     - `Relu` activation
+
+    Padding support: Both Conv and MaxPool support symmetric padding where
+    pad_left = pad_right and pad_top = pad_bottom. Asymmetric padding is not supported.
 
     Notes
     -----
@@ -348,14 +351,28 @@ class ONNXNetworkConstr(BaseNNConstr):
 
                 pads = _get_attr(node, "pads", [0, 0, 0, 0])
                 # pads is [x1_begin, x2_begin, x1_end, x2_end] in ONNX
-                # We only support valid padding (all zeros)
-                if isinstance(pads, (list, tuple)):
-                    pad_is_zero = all(p == 0 for p in pads)
+                # For symmetric padding, x1_begin should equal x1_end, x2_begin should equal x2_end
+                if isinstance(pads, (list, tuple)) and len(pads) == 4:
+                    # Check if padding is symmetric
+                    if pads[0] == pads[2] and pads[1] == pads[3]:
+                        # Symmetric padding - use (pad_h, pad_w)
+                        padding_tuple = (pads[0], pads[1])
+                    else:
+                        raise NoModel(
+                            model,
+                            f"Conv with asymmetric padding {pads} is not supported. "
+                            "Only symmetric padding is supported.",
+                        )
+                elif isinstance(pads, int):
+                    padding_tuple = (pads, pads)
                 else:
-                    pad_is_zero = pads == 0
+                    padding_tuple = (0, 0)
 
-                if not pad_is_zero:
-                    raise NoModel(model, "Conv with non-zero padding is not supported")
+                # Use tuple format or "valid" string
+                if padding_tuple == (0, 0):
+                    padding = "valid"
+                else:
+                    padding = padding_tuple
 
                 # Convert ONNX weight format (out_c, in_c, kh, kw) to our format (kh, kw, in_c, out_c)
                 W = np.transpose(W, (2, 3, 1, 0))
@@ -371,7 +388,7 @@ class ONNXNetworkConstr(BaseNNConstr):
                         channels=out_channels,
                         kernel_size=kernel_shape,
                         stride=strides,
-                        padding="valid",
+                        padding=padding,
                     )
                 )
                 pending_activation = None
@@ -391,22 +408,33 @@ class ONNXNetworkConstr(BaseNNConstr):
                     strides = tuple(strides)
 
                 pads = _get_attr(node, "pads", [0, 0, 0, 0])
-                if isinstance(pads, (list, tuple)):
-                    pad_is_zero = all(p == 0 for p in pads)
+                # Parse padding similar to Conv
+                if isinstance(pads, (list, tuple)) and len(pads) == 4:
+                    # Check if padding is symmetric
+                    if pads[0] == pads[2] and pads[1] == pads[3]:
+                        padding_tuple = (pads[0], pads[1])
+                    else:
+                        raise NoModel(
+                            model,
+                            f"MaxPool with asymmetric padding {pads} is not supported. "
+                            "Only symmetric padding is supported.",
+                        )
+                elif isinstance(pads, int):
+                    padding_tuple = (pads, pads)
                 else:
-                    pad_is_zero = pads == 0
+                    padding_tuple = (0, 0)
 
-                if not pad_is_zero:
-                    raise NoModel(
-                        model, "MaxPool with non-zero padding is not supported"
-                    )
+                if padding_tuple == (0, 0):
+                    padding = "valid"
+                else:
+                    padding = padding_tuple
 
                 layers.append(
                     _ONNXLayer(
                         layer_type="maxpool2d",
                         pool_size=kernel_shape,
                         stride=strides,
-                        padding="valid",
+                        padding=padding,
                         activation="identity",
                     )
                 )
@@ -451,8 +479,10 @@ class ONNXNetworkConstr(BaseNNConstr):
             else:
                 raise NoModel(model, f"Unsupported ONNX op {op}")
 
-        # Validate at least one real layer (dense or conv)
-        has_layer = any(layer.layer_type in ("dense", "conv2d") for layer in layers)
+        # Validate at least one real layer (dense, conv, or maxpool)
+        has_layer = any(
+            layer.layer_type in ("dense", "conv2d", "maxpool2d") for layer in layers
+        )
         if not has_layer:
             return []
 
@@ -527,16 +557,34 @@ class ONNXNetworkConstr(BaseNNConstr):
                 batch, height, width, in_channels = current_shape
                 kh, kw = layer.kernel_size
                 sh, sw = layer.stride
-                # Output shape after conv (valid padding)
-                out_h = (height - kh) // sh + 1
-                out_w = (width - kw) // sw + 1
+
+                # Parse padding for shape calculation
+                if layer.padding == "valid":
+                    pad_h, pad_w = 0, 0
+                elif isinstance(layer.padding, (tuple, list)):
+                    pad_h, pad_w = layer.padding[0], layer.padding[1]
+                else:
+                    pad_h, pad_w = 0, 0
+
+                # Output shape after conv with padding
+                out_h = (height + 2 * pad_h - kh) // sh + 1
+                out_w = (width + 2 * pad_w - kw) // sw + 1
                 current_shape = [batch, out_h, out_w, layer.channels]
             elif layer.layer_type == "maxpool2d":
                 batch, height, width, channels = current_shape
                 ph, pw = layer.pool_size
                 sh, sw = layer.stride
-                out_h = (height - ph) // sh + 1
-                out_w = (width - pw) // sw + 1
+
+                # Parse padding for shape calculation
+                if layer.padding == "valid":
+                    pad_h, pad_w = 0, 0
+                elif isinstance(layer.padding, (tuple, list)):
+                    pad_h, pad_w = layer.padding[0], layer.padding[1]
+                else:
+                    pad_h, pad_w = 0, 0
+
+                out_h = (height + 2 * pad_h - ph) // sh + 1
+                out_w = (width + 2 * pad_w - pw) // sw + 1
                 current_shape = [batch, out_h, out_w, channels]
             # activation layers don't change shape
 
@@ -645,23 +693,26 @@ class ONNXNetworkConstr(BaseNNConstr):
         if self._has_solution:
             import onnxruntime as ort
 
-            # Check if model has convolutional layers
-            has_conv = any(layer.layer_type == "conv2d" for layer in self._layers_spec)
+            # Check if model has spatial layers (conv or maxpool)
+            has_spatial = any(
+                layer.layer_type in ("conv2d", "maxpool2d")
+                for layer in self._layers_spec
+            )
 
             sess = ort.InferenceSession(self.predictor.SerializeToString())
             input_name = sess.get_inputs()[0].name
 
-            # If model has Conv layers, input_values are in NHWC format
+            # If model has spatial layers, input_values are in NHWC format
             # but ONNX expects NCHW, so we need to convert
             input_data = self.input_values.astype(np.float32)
-            if has_conv and input_data.ndim == 4:
+            if has_spatial and input_data.ndim == 4:
                 # Convert from NHWC to NCHW for ONNX inference
                 input_data = np.transpose(input_data, (0, 3, 1, 2))
 
             pred = sess.run(None, {input_name: input_data})[0]
 
-            # If output is 4D and model has conv layers, convert back from NCHW to NHWC
-            if has_conv and pred.ndim == 4:
+            # If output is 4D and model has spatial layers, convert back from NCHW to NHWC
+            if has_spatial and pred.ndim == 4:
                 pred = np.transpose(pred, (0, 2, 3, 1))
 
             r_val = np.abs(pred - self.output_values)
