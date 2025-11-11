@@ -264,96 +264,85 @@ class Conv2DLayer(AbstractNNLayer):
         return rval
 
     def _mip_model(self, **kwargs):
-        """Add the layer to model."""
+        """Add the convolutional layer to the Gurobi model efficiently (symbolic-safe)."""
         model = self.gp_model
         model.update()
 
-        (_, height, width, in_channels) = self.input.shape
-        mixing = self.gp_model.addMVar(
+        batch, height, width, in_channels = self.input.shape
+        _, out_h, out_w, out_ch = self.output.shape
+        kernel_h, kernel_w = self.kernel_size
+        stride_h, stride_w = self.strides
+
+        # ---- Create output MVar ----
+        mixing = model.addMVar(
             self.output.shape,
             lb=-gp.GRB.INFINITY,
             vtype=gp.GRB.CONTINUOUS,
             name=self._name_var("mix"),
         )
         self.mixing = mixing
-        self.gp_model.update()
+        model.update()
 
-        # Parse padding
+        # ---- Compute padding ----
         if self.padding == "valid":
-            pad_h, pad_w = 0, 0
+            pad_h = pad_w = 0
         elif self.padding == "same":
-            pad_h = (
-                max((height - 1) * self.strides[0] + self.kernel_size[0] - height, 0)
-                // 2
-            )
-            pad_w = (
-                max((width - 1) * self.strides[1] + self.kernel_size[1] - width, 0) // 2
-            )
+            pad_h = max((out_h - 1) * stride_h + kernel_h - height, 0) // 2
+            pad_w = max((out_w - 1) * stride_w + kernel_w - width, 0) // 2
         elif isinstance(self.padding, (tuple, list)):
-            pad_h, pad_w = self.padding[0], self.padding[1]
+            pad_h, pad_w = self.padding
         else:
             raise ValueError(f"Unsupported padding type: {self.padding}")
 
-        # Convolution loop - using efficient array slicing
-        # For padding, we'll handle it by carefully constructing the input window
-        kernel_w, kernel_h = self.kernel_size
-        stride_h, stride_w = self.strides
+        # ---- Precompute all valid index pairs for convolution ----
+        # These are purely numeric, small, and reusable
+        out_coords = [
+            (out_i, out_j, in_i, in_j)
+            for out_i in range(out_h)
+            for out_j in range(out_w)
+            for in_i, in_j in [(out_i * stride_h - pad_h, out_j * stride_w - pad_w)]
+        ]
 
-        for k in range(self.channels):
-            for out_i in range(self.output.shape[1]):
-                for out_j in range(self.output.shape[2]):
-                    # Calculate input window position (top-left corner before padding adjustment)
-                    in_i_start = out_i * stride_h - pad_h
-                    in_j_start = out_j * stride_w - pad_w
+        # ---- Build all output channels in batch ----
+        for k in range(out_ch):
+            # Precompute coefficient tensor for channel k (kh, kw, ic)
+            bias_k = self.intercept[k]
 
-                    # Calculate actual input region (clipped to valid indices)
-                    h_start = max(0, in_i_start)
-                    h_end = min(height, in_i_start + kernel_h)
-                    w_start = max(0, in_j_start)
-                    w_end = min(width, in_j_start + kernel_w)
+            for out_i, out_j, in_i, in_j in out_coords:
+                # Gather all valid (h_idx, w_idx, ic)
+                h_idx = np.arange(in_i, in_i + kernel_h)
+                w_idx = np.arange(in_j, in_j + kernel_w)
+                valid_h = (h_idx >= 0) & (h_idx < height)
+                valid_w = (w_idx >= 0) & (w_idx < width)
 
-                    # Calculate corresponding kernel region
-                    kh_start = h_start - in_i_start
-                    kh_end = kh_start + (h_end - h_start)
-                    kw_start = w_start - in_j_start
-                    kw_end = kw_start + (w_end - w_start)
+                if not valid_h.any() or not valid_w.any():
+                    model.addConstr(mixing[:, out_i, out_j, k] == bias_k)
+                    continue
 
-                    # Build convolution expression using vectorized operations
-                    if (
-                        kh_start == 0
-                        and kh_end == kernel_h
-                        and kw_start == 0
-                        and kw_end == kernel_w
-                    ):
-                        # No padding needed - full kernel window is within bounds
-                        self.gp_model.addConstr(
-                            mixing[:, out_i, out_j, k]
-                            == (
-                                self.input[:, h_start:h_end, w_start:w_end, :]
-                                * self.coefs[:, :, :, k]
-                            ).sum()
-                            + self.intercept[k]
-                        )
-                    else:
-                        # Partial window - only sum over valid region
-                        # The missing parts contribute 0 (implicit padding)
-                        self.gp_model.addConstr(
-                            mixing[:, out_i, out_j, k]
-                            == (
-                                self.input[:, h_start:h_end, w_start:w_end, :]
-                                * self.coefs[kh_start:kh_end, kw_start:kw_end, :, k]
-                            ).sum()
-                            + self.intercept[k]
-                        )
+                h_idx = h_idx[valid_h]
+                w_idx = w_idx[valid_w]
 
-        if "activation" in kwargs:
-            activation = kwargs["activation"]
-        else:
-            activation = self.activation
+                # Build symbolic vector of input terms
+                terms = []
+                weights = []
+                for kh, h in enumerate(h_idx):
+                    for kw, w in enumerate(w_idx):
+                        for ic in range(in_channels):
+                            coef = self.coefs[kh, kw, ic, k]
+                            weights.append(coef)
+                            terms.append(self.input[:, h, w, ic].item())
 
-        # Do the mip model for the activation in the layer
+                # Stack symbolic vars and weights
+                X = gp.MVar.fromlist(terms)  # shape (num_terms,)
+                W = np.array(weights).reshape(1, -1)
+                expr = X @ W.T + bias_k
+
+                model.addConstr(mixing[:, out_i, out_j, k] == expr)
+
+        # ---- Apply activation ----
+        activation = kwargs.get("activation", self.activation)
         activation.mip_model(self)
-        self.gp_model.update()
+        model.update()
 
     def print_stats(self, abbrev=False, file=None):
         """Print statistics about submodel created.
