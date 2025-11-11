@@ -61,6 +61,51 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
     Notes
     -----
     |VariablesDimensionsWarn|
+
+    **Models with Skip Connections or Residual Architectures**
+
+    This function only supports sequential Keras models (linear chains of layers).
+    For models with more complex architectures such as:
+
+    - Skip connections (input reused by multiple layers)
+    - Residual connections (intermediate outputs reused)
+    - Multi-branch architectures
+    - Keras Functional API models with non-sequential topology
+
+    **Use the ONNX export workflow instead:**
+
+    1. Export your Keras model to ONNX format:
+
+       .. code-block:: python
+
+           import tf2onnx
+           import onnx
+
+           # Method 1: Using tf2onnx (recommended)
+           spec = (tf.TensorSpec((None, input_dim), tf.float32, name="input"),)
+           model_proto, _ = tf2onnx.convert.from_keras(keras_model, input_signature=spec)
+           onnx.save(model_proto, "model.onnx")
+
+           # Method 2: Using keras2onnx (alternative)
+           import keras2onnx
+           onnx_model = keras2onnx.convert_keras(keras_model, keras_model.name)
+           onnx.save_model(onnx_model, "model.onnx")
+
+    2. Load and use with Gurobi ML's ONNX DAG support:
+
+       .. code-block:: python
+
+           import onnx
+           from gurobi_ml.onnx import add_onnx_dag_constr
+
+           onnx_model = onnx.load("model.onnx")
+           pred = add_onnx_dag_constr(gp_model, onnx_model, input_vars)
+
+    For more details on exporting Keras models to ONNX, see:
+
+    - `tf2onnx documentation <https://github.com/onnx/tensorflow-onnx>`_
+    - `keras2onnx documentation <https://github.com/onnx/keras-onnx>`_
+    - `ONNX tutorials <https://onnx.ai/get-started.html>`_
     """
     return KerasNetworkConstr(gp_model, keras_model, input_vars, output_vars, **kwargs)
 

@@ -13,4 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 
+from .dag_neural_net import AddLayer as AddLayer
+from .dag_neural_net import DAGNNConstr as DAGNNConstr
 from .neural_net import BaseNNConstr as BaseNNConstr
