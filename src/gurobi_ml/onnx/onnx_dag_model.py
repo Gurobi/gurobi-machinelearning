@@ -23,8 +23,12 @@ This module supports ONNX models with arbitrary graph topologies, including:
 Supported ONNX operations:
 - Gemm (dense layers)
 - MatMul + Add (dense layers)
+- Conv (2D convolutional layers)
+- MaxPool (2D max pooling)
+- Flatten (flatten operation)
 - Relu (activation)
 - Add (element-wise addition for residual connections)
+- Identity (pass-through)
 """
 
 from __future__ import annotations
@@ -68,7 +72,11 @@ def add_onnx_dag_constr(gp_model, onnx_model, input_vars, output_vars=None, **kw
     - Gemm (with alpha=1, beta=1, transB=0 or 1)
     - MatMul
     - Add (for both bias addition and residual connections)
+    - Conv (2D convolution with symmetric padding)
+    - MaxPool (2D max pooling with symmetric padding)
+    - Flatten (axis=1)
     - Relu
+    - Identity
 
     The implementation handles arbitrary DAG topologies by:
     1. Performing topological sort of the computation graph
@@ -94,6 +102,7 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
         self._onnx_graph = None
         self._init_map = {}
         self._node_output_shapes = {}
+        self._tensor_is_spatial = {}  # Track which tensors have spatial dims (from Conv/MaxPool)
 
         super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
@@ -108,8 +117,12 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
             self._init_map[init.name] = arr
 
         # Register input tensor
+        # Ensure input has batch dimension (reshape 1D to 2D if needed)
         input_name = graph.input[0].name
-        self.set_tensor_vars(input_name, self._input)
+        input_vars = self._input
+        if input_vars.ndim == 1:
+            input_vars = input_vars.reshape((1, -1))
+        self.set_tensor_vars(input_name, input_vars)
 
         # Topologically sort nodes
         sorted_nodes = self._topological_sort(graph)
@@ -121,6 +134,15 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
         # Set output
         output_name = graph.output[0].name
         output_vars = self.get_tensor_vars(output_name)
+
+        # If input was 1D (no batch dimension), reshape output back to 1D
+        if (
+            self._input.ndim == 1
+            and output_vars.ndim == 2
+            and output_vars.shape[0] == 1
+        ):
+            output_vars = output_vars.reshape(-1)
+
         if self._output is None:
             self._output = output_vars
         else:
@@ -141,7 +163,7 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
         -------
         list of onnx.NodeProto
             Nodes in topological order
-            
+
         Raises
         ------
         NoModel
@@ -204,6 +226,14 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
             self._process_relu(node, **kwargs)
         elif op_type == "Identity":
             self._process_identity(node, **kwargs)
+        elif op_type == "Conv":
+            self._process_conv(node, **kwargs)
+        elif op_type == "MaxPool":
+            self._process_maxpool(node, **kwargs)
+        elif op_type == "Flatten":
+            self._process_flatten(node, **kwargs)
+        elif op_type == "Dropout":
+            self._process_dropout(node, **kwargs)
         else:
             raise NoModel(self._onnx_graph, f"Unsupported ONNX op: {op_type}")
 
@@ -215,7 +245,60 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
                     return int(a.i)
                 if a.type == onnx.AttributeProto.FLOAT:
                     return float(a.f)
+                if a.type == onnx.AttributeProto.INTS:
+                    return list(a.ints)
         return default
+
+    def _reorder_weights_if_needed(self, input_tensor_name, W):
+        """Reorder dense layer weights if input comes from flattened spatial data.
+
+        ONNX flattens spatial data (from Conv/MaxPool) in NCHW order, but our
+        internal representation uses NHWC order. This requires reordering the
+        dense layer weights accordingly.
+
+        Parameters
+        ----------
+        input_tensor_name : str
+            Name of the input tensor to the dense layer
+        W : np.ndarray
+            Weight matrix with shape (in_features, out_features)
+
+        Returns
+        -------
+        np.ndarray
+            Reordered weight matrix (if needed) or original W
+        """
+        if input_tensor_name not in self._tensor_is_spatial:
+            return W
+
+        spatial_shape = self._tensor_is_spatial[input_tensor_name]
+        if not isinstance(spatial_shape, tuple):
+            return W
+
+        # spatial_shape is (batch, height, width, channels) in NHWC format
+        if len(spatial_shape) != 4:
+            return W
+
+        batch, height, width, channels = spatial_shape
+        flat_size = height * width * channels
+
+        if W.shape[0] != flat_size:
+            # Shape mismatch, can't reorder safely
+            return W
+
+        # Create index mapping from NCHW to NHWC
+        W_reordered = np.zeros_like(W)
+        for c in range(channels):
+            for h in range(height):
+                for w in range(width):
+                    # NCHW index: channels vary slowest
+                    nchw_idx = c * (height * width) + h * width + w
+                    # NHWC index: channels vary fastest
+                    nhwc_idx = h * (width * channels) + w * channels + c
+                    # Copy the row
+                    W_reordered[nhwc_idx, :] = W[nchw_idx, :]
+
+        return W_reordered
 
     def _process_gemm(self, node, **kwargs):
         """Process a Gemm (dense layer) node.
@@ -242,6 +325,9 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
         W = self._init_map[weight_name]
         if transB == 1:
             W = W.T
+
+        # Check if we need to reorder weights (flatten from spatial data)
+        W = self._reorder_weights_if_needed(input_name, W)
 
         if bias_name and bias_name in self._init_map:
             b = self._init_map[bias_name].reshape(-1)
@@ -274,6 +360,9 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
 
         input_vars = self.get_tensor_vars(input_name)
         W = self._init_map[weight_name]
+
+        # Check if we need to reorder weights (flatten from spatial data)
+        W = self._reorder_weights_if_needed(input_name, W)
 
         # MatMul without bias (bias will be added by subsequent Add node if present)
         b = np.zeros((W.shape[1],), dtype=W.dtype)
@@ -364,6 +453,192 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
         output_name = node.output[0]
         self.set_tensor_vars(output_name, input_vars)
 
+    def _process_conv(self, node, **kwargs):
+        """Process a Conv (2D convolution) node.
+
+        Conv computes 2D convolution with optional padding.
+        ONNX uses NCHW format, but our internal representation uses NHWC.
+        """
+        # Get inputs: X (NCHW), W (out_channels, in_channels, kH, kW), [B]
+        input_name = node.input[0]
+        weight_name = node.input[1]
+
+        input_vars = self.get_tensor_vars(input_name)
+        W = self._init_map[weight_name]  # shape: (out_c, in_c, kh, kw)
+
+        # Get bias if present
+        if len(node.input) > 2:
+            bias_name = node.input[2]
+            if bias_name in self._init_map:
+                b = self._init_map[bias_name].reshape(-1)
+            else:
+                b = np.zeros((W.shape[0],), dtype=W.dtype)
+        else:
+            b = np.zeros((W.shape[0],), dtype=W.dtype)
+
+        # Extract Conv attributes
+        kernel_shape = self._get_attr(node, "kernel_shape", None)
+        if kernel_shape is None:
+            kernel_shape = (W.shape[2], W.shape[3])
+        else:
+            kernel_shape = tuple(kernel_shape)
+
+        strides = self._get_attr(node, "strides", [1, 1])
+        if isinstance(strides, int):
+            strides = (strides, strides)
+        else:
+            strides = tuple(strides)
+
+        pads = self._get_attr(node, "pads", [0, 0, 0, 0])
+        # pads is [x1_begin, x2_begin, x1_end, x2_end] in ONNX
+        # For symmetric padding, x1_begin should equal x1_end, x2_begin should equal x2_end
+        if isinstance(pads, (list, tuple)) and len(pads) == 4:
+            # Check if padding is symmetric
+            if pads[0] == pads[2] and pads[1] == pads[3]:
+                # Symmetric padding - use (pad_h, pad_w)
+                padding_tuple = (pads[0], pads[1])
+            else:
+                raise NoModel(
+                    self._onnx_graph,
+                    f"Conv with asymmetric padding {pads} is not supported. "
+                    "Only symmetric padding is supported.",
+                )
+        elif isinstance(pads, int):
+            padding_tuple = (pads, pads)
+        else:
+            padding_tuple = (0, 0)
+
+        # Use tuple format or "valid" string
+        if padding_tuple == (0, 0):
+            padding = "valid"
+        else:
+            padding = padding_tuple
+
+        # Convert ONNX weight format (out_c, in_c, kh, kw) to our format (kh, kw, in_c, out_c)
+        W = np.transpose(W, (2, 3, 1, 0))
+
+        out_channels = W.shape[3]
+
+        # Create conv2d layer with identity activation
+        # Activation will be fused if next node is Relu
+        kwargs_copy = kwargs.copy()
+        kwargs_copy["accepted_dim"] = (4,)
+        layer = self._add_conv2d_layer(
+            input_vars,
+            W,
+            b,
+            out_channels,
+            kernel_shape,
+            strides,
+            padding,
+            self.act_dict["identity"],
+            name=node.name,
+            **kwargs_copy,
+        )
+
+        # Register output
+        output_name = node.output[0]
+        self.set_tensor_vars(output_name, layer.output)
+        # Mark this tensor as spatial (4D from Conv)
+        self._tensor_is_spatial[output_name] = True
+
+    def _process_maxpool(self, node, **kwargs):
+        """Process a MaxPool (2D max pooling) node."""
+        input_name = node.input[0]
+        input_vars = self.get_tensor_vars(input_name)
+
+        # Extract MaxPool attributes
+        kernel_shape = self._get_attr(node, "kernel_shape", None)
+        if kernel_shape is None:
+            raise NoModel(self._onnx_graph, "MaxPool requires kernel_shape attribute")
+        kernel_shape = tuple(kernel_shape)
+
+        strides = self._get_attr(node, "strides", kernel_shape)
+        if isinstance(strides, int):
+            strides = (strides, strides)
+        else:
+            strides = tuple(strides)
+
+        pads = self._get_attr(node, "pads", [0, 0, 0, 0])
+        # Parse padding similar to Conv
+        if isinstance(pads, (list, tuple)) and len(pads) == 4:
+            # Check if padding is symmetric
+            if pads[0] == pads[2] and pads[1] == pads[3]:
+                padding_tuple = (pads[0], pads[1])
+            else:
+                raise NoModel(
+                    self._onnx_graph,
+                    f"MaxPool with asymmetric padding {pads} is not supported. "
+                    "Only symmetric padding is supported.",
+                )
+        elif isinstance(pads, int):
+            padding_tuple = (pads, pads)
+        else:
+            padding_tuple = (0, 0)
+
+        if padding_tuple == (0, 0):
+            padding = "valid"
+        else:
+            padding = padding_tuple
+
+        kwargs_copy = kwargs.copy()
+        kwargs_copy["accepted_dim"] = (4,)
+        layer = self._add_maxpool2d_layer(
+            input_vars,
+            kernel_shape,
+            strides,
+            padding,
+            name=node.name,
+            **kwargs_copy,
+        )
+
+        output_name = node.output[0]
+        self.set_tensor_vars(output_name, layer.output)
+        # Mark this tensor as spatial (4D from MaxPool)
+        self._tensor_is_spatial[output_name] = True
+
+    def _process_flatten(self, node, **kwargs):
+        """Process a Flatten node."""
+        input_name = node.input[0]
+        input_vars = self.get_tensor_vars(input_name)
+
+        # Default axis=1 means flatten from dimension 1 onwards
+        axis = self._get_attr(node, "axis", 1)
+        if axis != 1:
+            raise NoModel(
+                self._onnx_graph,
+                f"Flatten with axis={axis} is not supported (only axis=1)",
+            )
+
+        kwargs_copy = kwargs.copy()
+        kwargs_copy["accepted_dim"] = (2,)
+        layer = self._add_flatten_layer(
+            input_vars,
+            name=node.name,
+            **kwargs_copy,
+        )
+
+        output_name = node.output[0]
+        self.set_tensor_vars(output_name, layer.output)
+
+        # If input was spatial, mark the flatten output as coming from spatial
+        # This will be used to reorder weights in subsequent dense layers
+        if (
+            input_name in self._tensor_is_spatial
+            and self._tensor_is_spatial[input_name]
+        ):
+            # Store the shape before flattening for weight reordering
+            self._tensor_is_spatial[output_name] = input_vars.shape
+
+    def _process_dropout(self, node, **kwargs):
+        """Process a Dropout node (no-op during inference)."""
+        input_name = node.input[0]
+        input_vars = self.get_tensor_vars(input_name)
+
+        # Dropout is a no-op during inference
+        output_name = node.output[0]
+        self.set_tensor_vars(output_name, input_vars)
+
     def get_error(self, eps=None):
         """Compute prediction error against ONNX Runtime."""
         if self._has_solution:
@@ -371,7 +646,25 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
 
             sess = ort.InferenceSession(self.predictor.SerializeToString())
             input_name = sess.get_inputs()[0].name
-            pred = sess.run(None, {input_name: self.input_values.astype(np.float32)})[0]
+
+            # Check if model has spatial layers (conv or maxpool)
+            # We need to check the graph nodes for Conv or MaxPool operations
+            has_spatial = any(
+                node.op_type in ("Conv", "MaxPool") for node in self._onnx_graph.node
+            )
+
+            # If model has spatial layers, input_values are in NHWC format
+            # but ONNX expects NCHW, so we need to convert
+            input_data = self.input_values.astype(np.float32)
+            if has_spatial and input_data.ndim == 4:
+                # Convert from NHWC to NCHW for ONNX inference
+                input_data = np.transpose(input_data, (0, 3, 1, 2))
+
+            pred = sess.run(None, {input_name: input_data})[0]
+
+            # If output is 4D and model has spatial layers, convert back from NCHW to NHWC
+            if has_spatial and pred.ndim == 4:
+                pred = np.transpose(pred, (0, 2, 3, 1))
 
             r_val = np.abs(pred - self.output_values)
             if eps is not None and np.max(r_val) > eps:

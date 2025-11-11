@@ -24,7 +24,13 @@ import gurobipy as gp
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
 from .activations import Identity, ReLU
-from .layers import ActivationLayer, DenseLayer
+from .layers import (
+    ActivationLayer,
+    Conv2DLayer,
+    DenseLayer,
+    FlattenLayer,
+    MaxPooling2DLayer,
+)
 
 
 class AddLayer(AbstractPredictorConstr):
@@ -255,6 +261,128 @@ class DAGNNConstr(AbstractPredictorConstr):
             self.gp_model,
             output_vars,
             input_vars_list,
+            **kwargs,
+        )
+        self._layers.append(layer)
+        return layer
+
+    def _add_conv2d_layer(
+        self,
+        input_vars,
+        layer_coefs,
+        layer_intercept,
+        channels,
+        kernel_size,
+        stride,
+        padding,
+        activation,
+        activation_vars=None,
+        **kwargs,
+    ):
+        """Add a conv2d layer to the Gurobi model.
+
+        Parameters
+        ----------
+        input_vars : mvar_array_like
+            Decision variables used as input for the layer
+        layer_coefs : np.ndarray
+            Kernel weights for the layer
+        layer_intercept : np.ndarray
+            Bias vector for the layer
+        channels : int
+            Number of output channels
+        kernel_size : tuple
+            Kernel size (height, width)
+        stride : tuple
+            Stride (height, width)
+        padding : str or tuple
+            Padding mode ('valid' or tuple of padding values)
+        activation : Activation
+            Activation function to apply
+        activation_vars : mvar, optional
+            Output variables for the layer
+
+        Returns
+        -------
+        Conv2DLayer
+            The created layer object
+        """
+        layer = Conv2DLayer(
+            self.gp_model,
+            activation_vars,
+            input_vars,
+            layer_coefs,
+            layer_intercept,
+            channels,
+            kernel_size,
+            stride,
+            padding,
+            activation,
+            **kwargs,
+        )
+        self._layers.append(layer)
+        return layer
+
+    def _add_maxpool2d_layer(
+        self,
+        input_vars,
+        pool_size,
+        stride,
+        padding,
+        activation_vars=None,
+        **kwargs,
+    ):
+        """Add a maxpool2d layer to the Gurobi model.
+
+        Parameters
+        ----------
+        input_vars : mvar_array_like
+            Decision variables used as input for the layer
+        pool_size : tuple
+            Pool size (height, width)
+        stride : tuple
+            Stride (height, width)
+        padding : str or tuple
+            Padding mode ('valid' or tuple of padding values)
+        activation_vars : mvar, optional
+            Output variables for the layer
+
+        Returns
+        -------
+        MaxPooling2DLayer
+            The created layer object
+        """
+        layer = MaxPooling2DLayer(
+            self.gp_model,
+            activation_vars,
+            input_vars,
+            pool_size,
+            stride,
+            padding,
+            **kwargs,
+        )
+        self._layers.append(layer)
+        return layer
+
+    def _add_flatten_layer(self, input_vars, activation_vars=None, **kwargs):
+        """Add a flatten layer to the Gurobi model.
+
+        Parameters
+        ----------
+        input_vars : mvar_array_like
+            Decision variables used as input for the layer
+        activation_vars : mvar, optional
+            Output variables for the layer
+
+        Returns
+        -------
+        FlattenLayer
+            The created layer object
+        """
+        layer = FlattenLayer(
+            self.gp_model,
+            activation_vars,
+            input_vars,
             **kwargs,
         )
         self._layers.append(layer)
