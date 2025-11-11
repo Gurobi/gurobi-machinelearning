@@ -13,10 +13,20 @@
 # limitations under the License.
 # ==============================================================================
 
-"""ONNX support for formulating simple feed-forward neural networks.
+"""ONNX support for formulating sequential neural networks.
 
-Currently supports sequential MLPs represented with ONNX `Gemm` layers and
-`Relu` activations, matching the capabilities of the Keras and PyTorch
-converters (Dense/Linear + ReLU)."""
+Supports neural networks represented with:
+- Dense layers: ONNX `Gemm` nodes or `MatMul`+`Add` sequences
+- Convolutional layers: `Conv` nodes (2D, valid padding only)
+- Pooling: `MaxPool` nodes (valid padding only)
+- `Flatten` nodes
+- `Relu` activations
+
+This mirrors the capabilities of the Keras and PyTorch converters.
+
+Note: For models with convolutional layers, input variables should be provided
+in NHWC format (batch, height, width, channels), even though ONNX models use
+NCHW format internally.
+"""
 
 from .onnx_model import add_onnx_constr as add_onnx_constr  # noqa: F401
