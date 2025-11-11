@@ -1,4 +1,4 @@
-# Copyright © 2023 Gurobi Optimization, LLC
+# Copyright © 2023-2025 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ def _leaf_formulation(
     )
 
     if verbose:
-        timer.timing(f"Added {nex*sum(leafs)} leafs vars")
+        timer.timing(f"Added {nex * sum(leafs)} leafs vars")
     # Get fixed features we don't want to apply the epsilon for them
     feature_is_fixed = (_input.lb == _input.ub).all(axis=0)
 

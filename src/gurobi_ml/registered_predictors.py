@@ -1,4 +1,4 @@
-# Copyright © 2023 Gurobi Optimization, LLC
+# Copyright © 2023-2025 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -102,12 +102,26 @@ def keras_convertors():
     return {}
 
 
+def onnx_convertors():
+    """Collect known ONNX objects that can be formulated and the conversion class."""
+    if "onnx" in sys.modules:
+        import onnx  # pylint: disable=import-outside-toplevel
+
+        from .onnx import add_onnx_constr  # pylint: disable=import-outside-toplevel
+
+        return {
+            onnx.ModelProto: add_onnx_constr,
+        }
+    return {}
+
+
 def registered_predictors():
     """Return the list of registered predictors."""
     convertors = {}
     convertors |= sklearn_convertors()
     convertors |= pytorch_convertors()
     convertors |= keras_convertors()
+    convertors |= onnx_convertors()
     convertors |= xgboost_convertors()
     convertors |= lightgbm_convertors()
     convertors |= user_predictors()

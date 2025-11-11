@@ -14,50 +14,77 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build_push:
+  lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
-        gurobi-version: ["gurobi10", "gurobi11","gurobi12"]
-        exclude:
-          - python-version: "3.12"
-            gurobi-version: "gurobi10"
+    timeout-minutes: 10
     steps:
-    - uses: actions/checkout@v5
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest tox tox-gh-actions
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - shell: bash
-      id: write-license
-      env:
-        LICENSE: ${{ secrets.LICENSE   }}
-      run: |
-        echo "$LICENSE" > $PWD/gurobi.lic
-        echo "grb_license_file=$PWD/gurobi.lic" >> $GITHUB_OUTPUT
-    - name: Test with tox
-      env:
-        GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
-        GUROBI_VERSION: ${{matrix.gurobi-version}}
-      run: |
-        tox
-    - name: Run examples with Gurobi 11
-      if: ${{ (matrix.gurobi-version != 'gurobi10') && (matrix.python-version == '3.12') }}
-      env:
-        GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
-        GUROBI_VERSION: ${{ matrix.gurobi-version }}
-      run: |
-        python_version_no_dot=$(echo "${{ matrix.python-version }}" | tr -d '.')
-        tox -e py${python_version_no_dot}-examples-${{matrix.gurobi-version}}
+      - uses: actions/checkout@v5
+      - name: Lint
+        uses: ./.github/actions/lint
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        gurobi-version: ["gurobi11","gurobi12","gurobi13"]
+        exclude:
+          - python-version: "3.13"
+            gurobi-version: "gurobi11"
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-and-install
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+      - id: write-license
+        name: Write license
+        uses: ./.github/actions/write-license
+        with:
+          license: ${{ secrets.LICENSE }}
+      - name: Test with tox (uv)
+        env:
+          GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
+          GUROBI_VERSION: ${{ matrix.gurobi-version }}
+        run: |
+          uvx tox
+
+  examples:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12"]
+        gurobi-version: ["gurobi11","gurobi12","gurobi13"]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-and-install
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+      - id: write-license
+        name: Write license
+        uses: ./.github/actions/write-license
+        with:
+          license: ${{ secrets.LICENSE }}
+      - name: Run examples (uv)
+        env:
+          GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
+          GUROBI_VERSION: ${{ matrix.gurobi-version }}
+        run: |
+          python_version_no_dot=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          uvx tox -e py${python_version_no_dot}-examples-${{ matrix.gurobi-version }}

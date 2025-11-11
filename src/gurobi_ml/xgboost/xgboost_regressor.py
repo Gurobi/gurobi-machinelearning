@@ -1,4 +1,4 @@
-# Copyright © 2023 Gurobi Optimization, LLC
+# Copyright © 2023-2025 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -168,9 +168,9 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         nex = _input.shape[0]
         timer = AbstractPredictorConstr._ModelingTimer()
         outdim = output.shape[1]
-        assert (
-            outdim == 1
-        ), "Output dimension of gradient boosting regressor should be 1"
+        assert outdim == 1, (
+            "Output dimension of gradient boosting regressor should be 1"
+        )
 
         xgb_raw = json.loads(xgb_regressor.save_raw(raw_format="json"))
         booster_type = xgb_raw["learner"]["gradient_booster"]["name"]

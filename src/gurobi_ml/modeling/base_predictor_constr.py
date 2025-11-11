@@ -1,4 +1,4 @@
-# Copyright © 2023 Gurobi Optimization, LLC
+# Copyright © 2023-2025 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ class AbstractPredictorConstr(ABC, _SubModel):
         header = f"{iterations_name:13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
         print("-" * len(header), file=file)
         print(header, file=file)
-        print(f"{' '*41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)
+        print(f"{' ' * 41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)
         print("=" * len(header), file=file)
         for step in iterable:
             step.print_stats(abbrev=True, file=file)

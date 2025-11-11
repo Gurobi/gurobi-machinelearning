@@ -1,4 +1,4 @@
-# Copyright © 2023 Gurobi Optimization, LLC
+# Copyright © 2023-2025 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,6 +38,4 @@ from .register_user_predictor import (
 
 MIN_GRB_VERSION = 10
 if gurobi.version()[0] < MIN_GRB_VERSION:
-    raise ImportError(
-        "Gurobi version should be at least {}.0.0".format(MIN_GRB_VERSION)
-    )
+    raise ImportError(f"Gurobi version should be at least {MIN_GRB_VERSION}.0.0")

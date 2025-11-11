@@ -1,0 +1,13 @@
+name: lint
+description: Run Ruff format check and lint
+runs:
+  using: composite
+  steps:
+    - name: Ruff format check
+      uses: astral-sh/ruff-action@v3
+      with:
+        args: format --check .
+    - name: Ruff lint
+      uses: astral-sh/ruff-action@v3
+      with:
+        args: check .
