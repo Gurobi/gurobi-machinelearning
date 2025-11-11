@@ -21,6 +21,7 @@ Supported ONNX models are sequential neural networks composed of:
 - Pooling layers: `MaxPool` nodes (with valid padding)
 - `Flatten` nodes
 - `Relu` activations
+- `Dropout` layers (treated as identity/no-op during inference)
 
 This mirrors the Keras and PyTorch integrations for neural networks.
 """
@@ -65,6 +66,7 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
     - Pooling: `MaxPool` (2D, with symmetric padding)
     - `Flatten` (axis=1)
     - `Relu` activation
+    - `Dropout` (treated as identity during inference)
 
     Padding support: Both Conv and MaxPool support symmetric padding where
     pad_left = pad_right and pad_top = pad_bottom. Asymmetric padding is not supported.
@@ -471,6 +473,12 @@ class ONNXNetworkConstr(BaseNNConstr):
                         _ONNXLayer(layer_type="activation", activation="relu")
                     )
                 processed_indices.add(node_idx)
+
+            elif op == "Dropout":
+                # Dropout is a no-op during inference (ratio=0 effectively)
+                # Just pass through the input unchanged
+                processed_indices.add(node_idx)
+                continue
 
             elif op in ("Identity",):
                 # Ignore

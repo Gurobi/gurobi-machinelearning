@@ -294,41 +294,57 @@ class Conv2DLayer(AbstractNNLayer):
         else:
             raise ValueError(f"Unsupported padding type: {self.padding}")
 
-        # Create padded input if needed
-        # Note: Padding is handled implicitly in the convolution loop
-        # by checking bounds and using 0 for out-of-bounds accesses
-
-        # Convolution loop
+        # Convolution loop - using efficient array slicing
+        # For padding, we'll handle it by carefully constructing the input window
         kernel_w, kernel_h = self.kernel_size
         stride_h, stride_w = self.strides
 
         for k in range(self.channels):
             for out_i in range(self.output.shape[1]):
                 for out_j in range(self.output.shape[2]):
-                    # Calculate input window position (top-left corner)
-                    in_i = out_i * stride_h - pad_h
-                    in_j = out_j * stride_w - pad_w
+                    # Calculate input window position (top-left corner before padding adjustment)
+                    in_i_start = out_i * stride_h - pad_h
+                    in_j_start = out_j * stride_w - pad_w
 
-                    # Build the convolution expression
-                    conv_expr = self.intercept[k]
+                    # Calculate actual input region (clipped to valid indices)
+                    h_start = max(0, in_i_start)
+                    h_end = min(height, in_i_start + kernel_h)
+                    w_start = max(0, in_j_start)
+                    w_end = min(width, in_j_start + kernel_w)
 
-                    for kh in range(kernel_h):
-                        for kw in range(kernel_w):
-                            # Input position for this kernel element
-                            h_idx = in_i + kh
-                            w_idx = in_j + kw
+                    # Calculate corresponding kernel region
+                    kh_start = h_start - in_i_start
+                    kh_end = kh_start + (h_end - h_start)
+                    kw_start = w_start - in_j_start
+                    kw_end = kw_start + (w_end - w_start)
 
-                            # Check if within bounds (handle padding)
-                            if 0 <= h_idx < height and 0 <= w_idx < width:
-                                # Within bounds - add contribution
-                                for ic in range(in_channels):
-                                    conv_expr += (
-                                        self.input[:, h_idx, w_idx, ic]
-                                        * self.coefs[kh, kw, ic, k]
-                                    )
-                            # else: out of bounds, contributes 0 (padding)
-
-                    self.gp_model.addConstr(mixing[:, out_i, out_j, k] == conv_expr)
+                    # Build convolution expression using vectorized operations
+                    if (
+                        kh_start == 0
+                        and kh_end == kernel_h
+                        and kw_start == 0
+                        and kw_end == kernel_w
+                    ):
+                        # No padding needed - full kernel window is within bounds
+                        self.gp_model.addConstr(
+                            mixing[:, out_i, out_j, k]
+                            == (
+                                self.input[:, h_start:h_end, w_start:w_end, :]
+                                * self.coefs[:, :, :, k]
+                            ).sum()
+                            + self.intercept[k]
+                        )
+                    else:
+                        # Partial window - only sum over valid region
+                        # The missing parts contribute 0 (implicit padding)
+                        self.gp_model.addConstr(
+                            mixing[:, out_i, out_j, k]
+                            == (
+                                self.input[:, h_start:h_end, w_start:w_end, :]
+                                * self.coefs[kh_start:kh_end, kw_start:kw_end, :, k]
+                            ).sum()
+                            + self.intercept[k]
+                        )
 
         if "activation" in kwargs:
             activation = kwargs["activation"]
