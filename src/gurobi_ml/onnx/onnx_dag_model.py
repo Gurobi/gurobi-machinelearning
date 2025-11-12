@@ -26,6 +26,7 @@ Supported ONNX operations:
 - Conv (2D convolutional layers)
 - MaxPool (2D max pooling)
 - Flatten (flatten operation)
+- BatchNormalization (batch normalization)
 - Relu (activation)
 - Add (element-wise addition for residual connections)
 - Identity (pass-through)
@@ -75,6 +76,7 @@ def add_onnx_dag_constr(gp_model, onnx_model, input_vars, output_vars=None, **kw
     - Conv (2D convolution with symmetric padding)
     - MaxPool (2D max pooling with symmetric padding)
     - Flatten (axis=1)
+    - BatchNormalization (all parameters must be initializers)
     - Relu
     - Identity
 
@@ -232,6 +234,8 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
             self._process_maxpool(node, **kwargs)
         elif op_type == "Flatten":
             self._process_flatten(node, **kwargs)
+        elif op_type == "BatchNormalization":
+            self._process_batchnorm(node, **kwargs)
         elif op_type == "Dropout":
             self._process_dropout(node, **kwargs)
         else:
@@ -638,6 +642,72 @@ class ONNXDAGNetworkConstr(DAGNNConstr):
         # Dropout is a no-op during inference
         output_name = node.output[0]
         self.set_tensor_vars(output_name, input_vars)
+
+    def _process_batchnorm(self, node, **kwargs):
+        """Process a BatchNormalization node.
+
+        BatchNormalization: Y = gamma * (X - mean) / sqrt(variance + epsilon) + beta
+        Inputs: X, gamma (scale), beta (bias), mean, variance
+        """
+        input_name = node.input[0]
+        input_vars = self.get_tensor_vars(input_name)
+
+        # Verify we have all required inputs
+        if len(node.input) < 5:
+            raise NoModel(
+                self._onnx_graph,
+                "BatchNormalization node requires 5 inputs: X, scale, bias, mean, var",
+            )
+
+        # Get the parameters from initializers
+        gamma_name = node.input[1]
+        beta_name = node.input[2]
+        mean_name = node.input[3]
+        var_name = node.input[4]
+
+        if gamma_name not in self._init_map:
+            raise NoModel(
+                self._onnx_graph, "BatchNormalization gamma must be an initializer"
+            )
+        if beta_name not in self._init_map:
+            raise NoModel(
+                self._onnx_graph, "BatchNormalization beta must be an initializer"
+            )
+        if mean_name not in self._init_map:
+            raise NoModel(
+                self._onnx_graph, "BatchNormalization mean must be an initializer"
+            )
+        if var_name not in self._init_map:
+            raise NoModel(
+                self._onnx_graph, "BatchNormalization variance must be an initializer"
+            )
+
+        gamma = self._init_map[gamma_name].reshape(-1)
+        beta = self._init_map[beta_name].reshape(-1)
+        mean = self._init_map[mean_name].reshape(-1)
+        variance = self._init_map[var_name].reshape(-1)
+
+        # Get epsilon attribute (default 1e-5 in ONNX)
+        epsilon = self._get_attr(node, "epsilon", 1e-5)
+
+        # Add batch normalization layer
+        layer = self._add_batchnorm_layer(
+            input_vars,
+            gamma,
+            beta,
+            mean,
+            variance,
+            epsilon,
+            name=node.name,
+            **kwargs,
+        )
+
+        output_name = node.output[0]
+        self.set_tensor_vars(output_name, layer.output)
+
+        # Preserve spatial marking if input was spatial
+        if input_name in self._tensor_is_spatial:
+            self._tensor_is_spatial[output_name] = self._tensor_is_spatial[input_name]
 
     def get_error(self, eps=None):
         """Compute prediction error against ONNX Runtime."""

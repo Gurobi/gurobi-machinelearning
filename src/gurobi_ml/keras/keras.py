@@ -54,9 +54,14 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
     Warnings
     --------
 
-      Only `Dense <https://keras.io/api/layers/core_layers/dense/>`_ (possibly
-      with `relu` activation), and `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ with
-      default settings are supported.
+      Supported layers:
+      - `Dense <https://keras.io/api/layers/core_layers/dense/>`_ (with `relu` or `linear` activation)
+      - `Conv2D <https://keras.io/api/layers/convolution_layers/convolution2d/>`_ (with `relu` or `linear` activation)
+      - `MaxPooling2D <https://keras.io/api/layers/pooling_layers/max_pooling2d/>`_
+      - `Flatten <https://keras.io/api/layers/reshaping_layers/flatten/>`_
+      - `BatchNormalization <https://keras.io/api/layers/normalization_layers/batch_normalization/>`_
+      - `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ (with default settings)
+      - `Dropout <https://keras.io/api/layers/regularization_layers/dropout/>`_ (treated as identity during inference)
 
     Notes
     -----
@@ -138,6 +143,9 @@ class KerasNetworkConstr(BaseNNConstr):
                 step,
                 (keras.layers.MaxPooling2D, keras.layers.Flatten, keras.layers.Dropout),
             ):
+                pass
+            elif isinstance(step, keras.layers.BatchNormalization):
+                # BatchNormalization is supported
                 pass
             elif isinstance(step, keras.layers.ReLU):
                 if step.negative_slope != 0.0:
@@ -241,6 +249,30 @@ class KerasNetworkConstr(BaseNNConstr):
                     self.act_dict["identity"],
                     output,
                     name=f"dropout{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.BatchNormalization):
+                # Get batch normalization parameters
+                # During inference, BN applies: y = gamma * (x - mean) / sqrt(var + epsilon) + beta
+                weights = step.get_weights()
+                # weights order: [gamma, beta, moving_mean, moving_variance]
+                gamma = weights[0]
+                beta = weights[1]
+                mean = weights[2]
+                variance = weights[3]
+                config = step.get_config()
+                epsilon = config.get("epsilon", 1e-3)
+
+                layer = self._add_batchnorm_layer(
+                    _input,
+                    gamma,
+                    beta,
+                    mean,
+                    variance,
+                    epsilon,
+                    output,
+                    name=f"batchnorm{i}",
                     **kwargs,
                 )
                 _input = layer.output

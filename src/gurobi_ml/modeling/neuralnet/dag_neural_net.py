@@ -26,6 +26,7 @@ from ..base_predictor_constr import AbstractPredictorConstr
 from .activations import Identity, ReLU
 from .layers import (
     ActivationLayer,
+    BatchNormalizationLayer,
     Conv2DLayer,
     DenseLayer,
     FlattenLayer,
@@ -383,6 +384,55 @@ class DAGNNConstr(AbstractPredictorConstr):
             self.gp_model,
             activation_vars,
             input_vars,
+            **kwargs,
+        )
+        self._layers.append(layer)
+        return layer
+
+    def _add_batchnorm_layer(
+        self,
+        input_vars,
+        gamma,
+        beta,
+        mean,
+        variance,
+        epsilon=1e-5,
+        activation_vars=None,
+        **kwargs,
+    ):
+        """Add a batch normalization layer to the Gurobi model.
+
+        Parameters
+        ----------
+        input_vars : mvar_array_like
+            Decision variables used as input for predictor in model.
+        gamma : np.ndarray
+            Scale parameter
+        beta : np.ndarray
+            Shift parameter
+        mean : np.ndarray
+            Running mean
+        variance : np.ndarray
+            Running variance
+        epsilon : float
+            Small constant for numerical stability
+        activation_vars : mvar_array_like, optional
+            Output variables
+
+        Returns
+        -------
+        BatchNormalizationLayer
+            The created layer object
+        """
+        layer = BatchNormalizationLayer(
+            self.gp_model,
+            activation_vars,
+            input_vars,
+            gamma,
+            beta,
+            mean,
+            variance,
+            epsilon,
             **kwargs,
         )
         self._layers.append(layer)

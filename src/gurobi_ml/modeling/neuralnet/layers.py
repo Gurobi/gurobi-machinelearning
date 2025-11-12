@@ -300,9 +300,7 @@ class Conv2DLayer(AbstractNNLayer):
         out_h, out_w = self.output.shape[1], self.output.shape[2]
 
         # Pre-compute all window positions and group by pattern (one-time cost)
-        window_info = (
-            []
-        )  # List of (out_i, out_j, h_start, h_end, w_start, w_end, kh_start, kh_end, kw_start, kw_end)
+        window_info = []  # List of (out_i, out_j, h_start, h_end, w_start, w_end, kh_start, kh_end, kw_start, kw_end)
 
         for out_i in range(out_h):
             in_i = out_i * stride_h - pad_h
@@ -447,6 +445,105 @@ class FlattenLayer(AbstractNNLayer):
                     self.output[n, flat_idx] == self.input[(n,) + idx]
                 )
                 flat_idx += 1
+
+
+class BatchNormalizationLayer(AbstractNNLayer):
+    """Class to model a batch normalization layer.
+
+    BatchNormalization normalizes the activations using learned parameters.
+    During inference (which is what we model), it applies:
+        y = gamma * (x - mean) / sqrt(variance + epsilon) + beta
+
+    This is equivalent to an affine transformation:
+        y = scale * x + shift
+    where scale = gamma / sqrt(variance + epsilon)
+          shift = beta - mean * scale
+    """
+
+    def __init__(
+        self,
+        gp_model,
+        output_vars,
+        input_vars,
+        gamma,
+        beta,
+        mean,
+        variance,
+        epsilon=1e-5,
+        **kwargs,
+    ):
+        """Initialize a BatchNormalization layer.
+
+        Parameters
+        ----------
+        gp_model : gurobipy.Model
+            The Gurobi model
+        output_vars : mvar_array_like
+            Output variables (created if None)
+        input_vars : mvar_array_like
+            Input variables
+        gamma : np.ndarray
+            Scale parameter (shape matches feature dimension)
+        beta : np.ndarray
+            Shift parameter (shape matches feature dimension)
+        mean : np.ndarray
+            Running mean (shape matches feature dimension)
+        variance : np.ndarray
+            Running variance (shape matches feature dimension)
+        epsilon : float
+            Small constant for numerical stability (default: 1e-5)
+        """
+        self.gamma = gamma
+        self.beta = beta
+        self.mean = mean
+        self.variance = variance
+        self.epsilon = epsilon
+
+        # Precompute the affine transformation parameters
+        self.scale = gamma / np.sqrt(variance + epsilon)
+        self.shift = beta - mean * self.scale
+
+        self._default_name = "batchnorm"
+        super().__init__(gp_model, output_vars, input_vars, Identity(), **kwargs)
+
+    def _create_output_vars(self, input_vars):
+        # Output has the same shape as input
+        rval = self.gp_model.addMVar(input_vars.shape, lb=-gp.GRB.INFINITY, name="bn")
+        self.gp_model.update()
+        return rval
+
+    def _mip_model(self, **kwargs):
+        """Add the batch normalization constraints to the model.
+
+        For each feature dimension, apply: output = scale * input + shift
+        """
+        # BatchNorm applies per-feature normalization
+        # The scale and shift parameters are broadcast across the batch and spatial dimensions
+
+        input_shape = self.input.shape
+
+        if len(input_shape) == 2:
+            # Dense/FC layer: (batch, features)
+            # Apply normalization per feature
+            for j in range(input_shape[1]):
+                self.gp_model.addConstr(
+                    self.output[:, j]
+                    == self.scale[j] * self.input[:, j] + self.shift[j]
+                )
+        elif len(input_shape) == 4:
+            # Conv layer: (batch, height, width, channels)
+            # Apply normalization per channel
+            for k in range(input_shape[3]):
+                self.gp_model.addConstr(
+                    self.output[:, :, :, k]
+                    == self.scale[k] * self.input[:, :, :, k] + self.shift[k]
+                )
+        else:
+            raise ValueError(
+                f"BatchNormalization: unsupported input shape {input_shape}"
+            )
+
+        self.gp_model.update()
 
 
 class MaxPooling2DLayer(AbstractNNLayer):

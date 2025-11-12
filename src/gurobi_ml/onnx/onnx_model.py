@@ -20,6 +20,7 @@ Supported ONNX models are sequential neural networks composed of:
 - Convolutional layers: `Conv` nodes (2D convolution with valid padding)
 - Pooling layers: `MaxPool` nodes (with valid padding)
 - `Flatten` nodes
+- `BatchNormalization` nodes
 - `Relu` activations
 - `Dropout` layers (treated as identity/no-op during inference)
 
@@ -50,7 +51,7 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
     onnx_model : onnx.ModelProto
         ONNX model representing a sequential neural network with supported
         operations (Gemm/MatMul+Add for dense layers, Conv for convolution,
-        MaxPool for pooling, Flatten, and Relu activations).
+        MaxPool for pooling, Flatten, BatchNormalization, and Relu activations).
     input_vars : mvar_array_like
         Decision variables used as input for the model in `gp_model`.
         For convolutional models, variables should be in NHWC format
@@ -65,6 +66,7 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
     - Convolutional layers: `Conv` (2D, with symmetric padding)
     - Pooling: `MaxPool` (2D, with symmetric padding)
     - `Flatten` (axis=1)
+    - `BatchNormalization` (all parameters must be initializers)
     - `Relu` activation
     - `Dropout` (treated as identity during inference)
 
@@ -81,7 +83,7 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
 
 
 class _ONNXLayer:
-    """Internal representation of one layer (dense or conv2d or pooling/flatten)."""
+    """Internal representation of one layer (dense or conv2d or pooling/flatten/batchnorm)."""
 
     def __init__(
         self,
@@ -94,8 +96,16 @@ class _ONNXLayer:
         stride: tuple[int, int] | None = None,
         padding: str = "valid",
         pool_size: tuple[int, int] | None = None,
+        # BatchNormalization specific
+        gamma: np.ndarray | None = None,
+        beta: np.ndarray | None = None,
+        mean: np.ndarray | None = None,
+        variance: np.ndarray | None = None,
+        epsilon: float = 1e-5,
     ):
-        self.layer_type = layer_type  # "dense", "conv2d", "maxpool2d", "flatten"
+        self.layer_type = (
+            layer_type  # "dense", "conv2d", "maxpool2d", "flatten", "batchnorm"
+        )
         self.W = W  # For dense: (in, out); For conv2d: (kh, kw, in_c, out_c)
         self.b = b  # shape (out,) or (channels,)
         self.activation = activation  # "relu" or "identity"
@@ -106,6 +116,12 @@ class _ONNXLayer:
         self.padding = padding
         # MaxPool2d specific
         self.pool_size = pool_size
+        # BatchNormalization specific
+        self.gamma = gamma
+        self.beta = beta
+        self.mean = mean
+        self.variance = variance
+        self.epsilon = epsilon
 
 
 class ONNXNetworkConstr(BaseNNConstr):
@@ -192,10 +208,12 @@ class ONNXNetworkConstr(BaseNNConstr):
         - Conv nodes (2D convolution)
         - MaxPool nodes (2D max pooling)
         - Flatten nodes
+        - BatchNormalization nodes
         - Relu activations
+        - Dropout nodes (treated as identity)
 
         Gemm attributes allowed: alpha==1, beta==1, transB in {0,1}.
-        Conv and MaxPool only support valid padding (pads=0).
+        Conv and MaxPool support symmetric padding.
         """
         graph = model.graph
 
@@ -465,13 +483,71 @@ class ONNXNetworkConstr(BaseNNConstr):
                 # Next linear/conv layer will use relu activation; if we have no
                 # preceding layer, we model it as a pure activation layer
                 # via _add_activation_layer during _mip_model.
-                if layers and layers[-1].activation == "identity":
+                # Note: BatchNormalization should NOT have ReLU merged into it
+                if (
+                    layers
+                    and layers[-1].activation == "identity"
+                    and layers[-1].layer_type != "batchnorm"
+                ):
                     layers[-1].activation = "relu"
                 else:
-                    # No prior layer, store a standalone activation marker
+                    # No prior layer, or layer doesn't support activation, store a standalone activation marker
                     layers.append(
                         _ONNXLayer(layer_type="activation", activation="relu")
                     )
+                processed_indices.add(node_idx)
+
+            elif op == "BatchNormalization":
+                # BatchNormalization: Y = gamma * (X - mean) / sqrt(variance + epsilon) + beta
+                # Inputs: X, gamma (scale), beta (bias), mean, variance
+                if len(node.input) < 5:
+                    raise NoModel(
+                        model,
+                        "BatchNormalization node requires 5 inputs: X, scale, bias, mean, var",
+                    )
+
+                # Get the parameters from initializers
+                gamma_name = node.input[1]
+                beta_name = node.input[2]
+                mean_name = node.input[3]
+                var_name = node.input[4]
+
+                if gamma_name not in init_map:
+                    raise NoModel(
+                        model, "BatchNormalization gamma must be an initializer"
+                    )
+                if beta_name not in init_map:
+                    raise NoModel(
+                        model, "BatchNormalization beta must be an initializer"
+                    )
+                if mean_name not in init_map:
+                    raise NoModel(
+                        model, "BatchNormalization mean must be an initializer"
+                    )
+                if var_name not in init_map:
+                    raise NoModel(
+                        model, "BatchNormalization variance must be an initializer"
+                    )
+
+                gamma = init_map[gamma_name].reshape(-1)
+                beta = init_map[beta_name].reshape(-1)
+                mean = init_map[mean_name].reshape(-1)
+                variance = init_map[var_name].reshape(-1)
+
+                # Get epsilon attribute (default 1e-5 in ONNX)
+                epsilon = _get_attr(node, "epsilon", 1e-5)
+
+                layers.append(
+                    _ONNXLayer(
+                        layer_type="batchnorm",
+                        gamma=gamma,
+                        beta=beta,
+                        mean=mean,
+                        variance=variance,
+                        epsilon=epsilon,
+                        activation="identity",
+                    )
+                )
                 processed_indices.add(node_idx)
 
             elif op == "Dropout":
@@ -487,9 +563,10 @@ class ONNXNetworkConstr(BaseNNConstr):
             else:
                 raise NoModel(model, f"Unsupported ONNX op {op}")
 
-        # Validate at least one real layer (dense, conv, or maxpool)
+        # Validate at least one real layer (dense, conv, maxpool, or batchnorm)
         has_layer = any(
-            layer.layer_type in ("dense", "conv2d", "maxpool2d") for layer in layers
+            layer.layer_type in ("dense", "conv2d", "maxpool2d", "batchnorm")
+            for layer in layers
         )
         if not has_layer:
             return []
@@ -690,6 +767,19 @@ class ONNXNetworkConstr(BaseNNConstr):
                     _input,
                     output,
                     name=f"flatten{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif spec.layer_type == "batchnorm":
+                layer = self._add_batchnorm_layer(
+                    _input,
+                    spec.gamma,
+                    spec.beta,
+                    spec.mean,
+                    spec.variance,
+                    spec.epsilon,
+                    output,
+                    name=f"batchnorm{i}",
                     **kwargs,
                 )
                 _input = layer.output
