@@ -1,14 +1,32 @@
+# Copyright © 2025 Gurobi Optimization, LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
 """
-Simple and maintainable VNNLIB parser using S-expression parsing.
+VNN-LIB parser for neural network verification properties.
 
-This is a cleaner alternative to the custom parser, using standard
-S-expression parsing which handles all VNNLIB constructs correctly.
+This module provides robust parsing of VNN-LIB (SMT-LIB2-based) format files used in
+neural network verification benchmarks and competitions.
 
-Advantages over custom parser:
-- Handles nested structures automatically
-- No complex regex patterns
-- Easier to extend
-- More robust and maintainable
+The parser handles:
+- Input variable declarations and bounds
+- Output variable declarations and bounds
+- Simple conjunctive constraints (AND)
+- Complex disjunctive constraints (OR)
+- Optimized line-by-line parsing for large files (600K+ lines)
+
+References:
+    VNN-LIB format specification: https://www.vnnlib.org/
 """
 
 from typing import Any
@@ -18,9 +36,21 @@ import re
 
 @dataclass
 class VNNLIBProperty:
-    """Represents a parsed VNNLIB property."""
+    """Represents a parsed VNN-LIB property specification.
 
-    input_bounds: list[tuple[float, float]]
+    Attributes:
+        input_bounds: List of (lower, upper) bound tuples for each input variable.
+                     None indicates unbounded in that direction.
+        output_constraints: Dict mapping output index to (lower, upper) bounds.
+                           Used for simple conjunctive constraints.
+        disjunctive_constraints: List of OR clauses, where each clause is a list of
+                                (idx1, operator, idx2) tuples representing Y_idx1 op Y_idx2.
+        property_name: Name or description of the property (from first comment line).
+        num_inputs: Number of input variables.
+        num_outputs: Number of output variables.
+    """
+
+    input_bounds: list[tuple[float | None, float | None]]
     output_constraints: dict[int, tuple[float | None, float | None]]
     disjunctive_constraints: list[list[tuple[int, str, int]]]
     property_name: str
@@ -29,7 +59,14 @@ class VNNLIBProperty:
 
 
 def tokenize(text: str) -> list[str]:
-    """Tokenize VNNLIB/SMT-LIB format."""
+    """Tokenize VNN-LIB/SMT-LIB2 format text.
+
+    Args:
+        text: Raw VNN-LIB text content.
+
+    Returns:
+        List of tokens (strings).
+    """
     # Remove comments
     text = re.sub(r";[^\n]*", "", text)
     # Replace parens with spaced versions for easy splitting
@@ -39,7 +76,17 @@ def tokenize(text: str) -> list[str]:
 
 
 def parse_sexp(tokens: list[str]) -> Any:
-    """Parse S-expression from tokens."""
+    """Parse S-expression from token list.
+
+    Args:
+        tokens: List of tokens (modified in place).
+
+    Returns:
+        Parsed S-expression (nested lists and atoms).
+
+    Raises:
+        SyntaxError: If parentheses are unbalanced or expression is malformed.
+    """
     if not tokens:
         raise SyntaxError("Unexpected EOF")
 
@@ -65,7 +112,15 @@ def parse_sexp(tokens: list[str]) -> Any:
 
 
 def _process_complex_assertion(sexp: Any, disjunctive_constraints: list) -> None:
-    """Helper to process complex assertions (OR/AND clauses)."""
+    """Process complex assertions with OR/AND clauses.
+
+    Extracts disjunctive constraints of the form:
+        (assert (or (and (>= Y_i Y_j)) (and (>= Y_k Y_l)) ...))
+
+    Args:
+        sexp: Parsed S-expression.
+        disjunctive_constraints: List to append extracted constraints to (modified in place).
+    """
     if not isinstance(sexp, list) or len(sexp) < 2:
         return
 
@@ -97,11 +152,26 @@ def _process_complex_assertion(sexp: Any, disjunctive_constraints: list) -> None
 
 
 def parse_vnnlib_simple(filepath: str) -> VNNLIBProperty:
-    """
-    Parse VNNLIB file using optimized line-by-line parsing.
+    """Parse VNN-LIB file using optimized line-by-line parsing.
 
-    For large files (like VGG with 600K+ lines), parsing line-by-line
-    is much faster than tokenizing the entire file at once.
+    This implementation is optimized for large files (e.g., VGG models with 600K+ lines)
+    by parsing line-by-line rather than tokenizing the entire file at once.
+
+    Supports:
+    - Variable declarations: (declare-const X_i Real), (declare-const Y_j Real)
+    - Simple bounds: (assert (>= X_i value)), (assert (<= X_i value))
+    - Output comparisons: (assert (>= Y_i Y_j)), (assert (<= Y_i Y_j))
+    - Complex OR clauses: (assert (or (and ...) (and ...) ...))
+
+    Args:
+        filepath: Path to VNN-LIB file.
+
+    Returns:
+        VNNLIBProperty object with parsed constraints.
+
+    Raises:
+        FileNotFoundError: If file doesn't exist.
+        ValueError: If file has invalid format.
     """
     property_name = "unknown"
     input_vars = set()
@@ -137,32 +207,30 @@ def parse_vnnlib_simple(filepath: str) -> VNNLIBProperty:
 
                 # When we've balanced all parens, process the complete expression
                 if paren_depth == 0:
-                    full_expr = " ".join(multi_line_buffer)
-                    multi_line_buffer = []
-
-                    # Try to parse as S-expression
+                    complete_expr = " ".join(multi_line_buffer)
                     try:
-                        tokens = tokenize(full_expr)
+                        tokens = tokenize(complete_expr)
                         if tokens:
                             sexp = parse_sexp(tokens)
                             _process_complex_assertion(sexp, disjunctive_constraints)
                     except Exception:
                         # Silently skip unparseable expressions
                         pass
+                    multi_line_buffer = []
                 continue
 
-            # Fast path: declare-const
+            # Fast path: variable declaration
             match = declare_pattern.match(line)
             if match:
                 var_type, idx = match.groups()
                 idx = int(idx)
                 if var_type == "X":
                     input_vars.add(idx)
-                else:
+                else:  # 'Y'
                     output_vars.add(idx)
                 continue
 
-            # Fast path: simple assert with bound
+            # Fast path: simple bound assertion
             match = assert_pattern.match(line)
             if match:
                 op, var_type, idx, value = match.groups()
@@ -242,20 +310,20 @@ def parse_vnnlib_simple(filepath: str) -> VNNLIBProperty:
     )
 
 
-def parse_vnnlib(filepath: str, input_dim: int, output_dim: int):
-    """
-    Compatibility function for old interface.
-    Parse VNN-LIB file and return constraints in simple format.
+def parse_vnnlib(filepath: str, input_dim: int = None, output_dim: int = None):
+    """Parse VNN-LIB file and return constraints in legacy format.
+
+    This is a compatibility function for code that expects the old constraint format.
+    New code should use parse_vnnlib_simple() instead.
 
     Args:
-        filepath: Path to VNN-LIB file
-        input_dim: Expected input dimension
-        output_dim: Expected output dimension
+        filepath: Path to VNN-LIB file.
+        input_dim: Expected input dimension (optional, for validation).
+        output_dim: Expected output dimension (optional, for validation).
 
     Returns:
-        (input_constraints, output_constraints)
-        where each constraint is (var_idx, operator, value)
-        operator is ">=" or "<="
+        Tuple of (input_constraints, output_constraints) where each constraint
+        is a tuple of (var_idx, operator, value) with operator being ">=" or "<=".
     """
     prop = parse_vnnlib_simple(filepath)
 
@@ -279,12 +347,12 @@ def parse_vnnlib(filepath: str, input_dim: int, output_dim: int):
     return input_constraints, output_constraints
 
 
-# Example usage
 if __name__ == "__main__":
     import sys
 
     if len(sys.argv) != 2:
-        print("Usage: python vnnlib_simple.py <vnnlib_file>")
+        print("Usage: python parser.py <vnnlib_file>")
+        print("\nParse and display summary of VNN-LIB property file.")
         sys.exit(1)
 
     prop = parse_vnnlib_simple(sys.argv[1])
@@ -298,10 +366,12 @@ if __name__ == "__main__":
     print(f"Disjunctive constraints: {len(prop.disjunctive_constraints)}")
 
     if prop.disjunctive_constraints:
-        print("\nDisjunctive constraints:")
-        for i, or_clause in enumerate(prop.disjunctive_constraints):
+        print("\nDisjunctive constraints (sample):")
+        for i, or_clause in enumerate(prop.disjunctive_constraints[:5]):
             print(f"  OR clause {i}: {len(or_clause)} disjuncts")
             for j, (idx1, op, idx2) in enumerate(or_clause[:3]):
                 print(f"    Y_{idx1} {op} Y_{idx2}")
             if len(or_clause) > 3:
                 print(f"    ... and {len(or_clause) - 3} more")
+        if len(prop.disjunctive_constraints) > 5:
+            print(f"  ... and {len(prop.disjunctive_constraints) - 5} more OR clauses")

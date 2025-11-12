@@ -1,45 +1,58 @@
-#!/usr/bin/env python3
+# Copyright © 2025 Gurobi Optimization, LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+
 """
-Convert ONNX + VNN-LIB to Gurobi MPS file.
+ONNX + VNN-LIB to Gurobi MPS converter.
 
-This script:
-1. Loads an ONNX model
-2. Verifies it has a purely sequential architecture (no residuals/skips)
-3. Parses VNN-LIB property file
-4. Creates Gurobi model with NN constraints + properties
-5. Exports to MPS format
-6. Verifies the model against ONNX Runtime
+This module provides functionality to convert neural network verification problems
+specified as ONNX models with VNN-LIB properties into Gurobi optimization models
+that can be exported to MPS format.
 
-Usage:
-    python onnx_to_mps.py <onnx_file> <vnnlib_file> <output_mps>
+Main features:
+- Loads ONNX models with automatic Dropout removal
+- Parses VNN-LIB property files
+- Creates Gurobi models with neural network and property constraints
+- Optimized handling of disjunctive constraints (MAX/MIN patterns)
+- Optional verification against ONNX Runtime
+- MPS export with automatic compression support
 """
 
-import sys
 import os
-import argparse
 import gzip
+import tempfile
 import onnx
 from onnx import helper
 import numpy as np
 import onnxruntime as ort
 import gurobipy as gp
 from gurobipy import GRB
-from gurobi_ml.onnx import add_onnx_constr
-from vnnlib_simple import parse_vnnlib_simple
+from gurobi_ml.onnx import add_onnx_constr, add_onnx_dag_constr
+from .parser import parse_vnnlib_simple
 
 
 def remove_dropout_nodes(model):
-    """
-    Remove Dropout nodes from ONNX model.
+    """Remove Dropout nodes from ONNX model.
 
     Dropout is a no-op during inference (it only affects training).
-    We remove it by connecting the input directly to the output.
+    This function removes it by connecting inputs directly to outputs.
 
     Args:
-        model: ONNX ModelProto
+        model: ONNX ModelProto.
 
     Returns:
-        Modified ONNX ModelProto with Dropout nodes removed
+        Modified ONNX ModelProto with Dropout nodes removed.
     """
     graph = model.graph
 
@@ -48,8 +61,6 @@ def remove_dropout_nodes(model):
 
     if not dropout_nodes:
         return model
-
-    print(f"  Removing {len(dropout_nodes)} Dropout nodes (no-op during inference)...")
 
     # Build mapping of output -> input for Dropout nodes
     # Dropout has: inputs=[data, (optional)ratio, (optional)training_mode], outputs=[output, (optional)mask]
@@ -86,16 +97,98 @@ def remove_dropout_nodes(model):
     return model
 
 
-def is_max_pattern(or_clause):
-    """
-    Check if OR clause matches MAX pattern: all Y_i >= Y_target with same target.
+def check_model_architecture(onnx_model):
+    """Check ONNX model architecture and determine if it's sequential or DAG.
 
     Args:
-        or_clause: List of (idx1, operator, idx2) tuples
+        onnx_model: ONNX ModelProto.
 
     Returns:
-        (is_pattern, target_idx, other_indices) if pattern matches
-        (False, None, None) otherwise
+        Tuple of (is_supported: bool, is_sequential: bool, message: str).
+        - is_supported: Whether the model can be converted at all
+        - is_sequential: Whether it's purely sequential (vs DAG with skip connections)
+        - message: Description of the result
+    """
+    # Allowed ops for neural networks (same for both sequential and DAG)
+    allowed_ops = {
+        # Fully connected layers
+        "Gemm",
+        "MatMul",
+        "Add",
+        # Activations
+        "Relu",
+        # Shape operations
+        "Flatten",
+        "Reshape",
+        "Transpose",
+        "Constant",
+        # Convolutional layers
+        "Conv",
+        "BatchNormalization",
+        # Pooling
+        "AveragePool",
+        "MaxPool",
+        "GlobalAveragePool",
+        # DAG-specific
+        "Identity",  # Pass-through for skip connections
+        # Note: Dropout is removed by preprocessing
+    }
+
+    # Check all node types
+    node_types = {node.op_type for node in onnx_model.graph.node}
+    unsupported = node_types - allowed_ops
+
+    if unsupported:
+        return False, False, f"Unsupported ops: {unsupported}"
+
+    # Check for residual/skip connections
+    # Track how many times each intermediate value is used
+    value_usage = {}
+
+    # Count initializers (weights/biases) - these can be reused
+    initializer_names = {init.name for init in onnx_model.graph.initializer}
+
+    # Count graph inputs (can be used multiple times)
+    input_names = {input_val.name for input_val in onnx_model.graph.input}
+
+    for node in onnx_model.graph.node:
+        for inp in node.input:
+            # Skip empty inputs
+            if not inp:
+                continue
+            # Skip initializers (weights/biases) - these can be reused
+            if inp in initializer_names:
+                continue
+            # Skip graph inputs - these can be used multiple times
+            if inp in input_names:
+                continue
+            # Skip constants
+            if any(
+                n.op_type == "Constant" and inp in n.output
+                for n in onnx_model.graph.node
+            ):
+                continue
+
+            # Track usage of intermediate values
+            value_usage[inp] = value_usage.get(inp, 0) + 1
+
+    # Check if any intermediate value is used more than once (skip connection)
+    has_skip_connections = any(count > 1 for count in value_usage.values())
+
+    if has_skip_connections:
+        return True, False, "DAG architecture with skip/residual connections detected"
+    else:
+        return True, True, "Sequential architecture verified"
+
+
+def is_max_pattern(or_clause):
+    """Check if OR clause matches MAX pattern: all Y_i >= Y_target with same target.
+
+    Args:
+        or_clause: List of (idx1, operator, idx2) tuples.
+
+    Returns:
+        Tuple of (is_pattern: bool, target_idx: int|None, other_indices: list|None).
     """
     if not or_clause:
         return False, None, None
@@ -121,15 +214,13 @@ def is_max_pattern(or_clause):
 
 
 def is_min_pattern(or_clause):
-    """
-    Check if OR clause matches MIN pattern: all Y_target <= Y_i with same target.
+    """Check if OR clause matches MIN pattern: all Y_target <= Y_i with same target.
 
     Args:
-        or_clause: List of (idx1, operator, idx2) tuples
+        or_clause: List of (idx1, operator, idx2) tuples.
 
     Returns:
-        (is_pattern, target_idx, other_indices) if pattern matches
-        (False, None, None) otherwise
+        Tuple of (is_pattern: bool, target_idx: int|None, other_indices: list|None).
     """
     if not or_clause:
         return False, None, None
@@ -154,71 +245,6 @@ def is_min_pattern(or_clause):
     return True, target_idx, other_indices
 
 
-def verify_sequential_architecture(onnx_model):
-    """
-    Verify ONNX model has purely sequential architecture.
-
-    Returns:
-        (is_sequential, message)
-    """
-    # Allowed ops for neural networks (updated for PR 456)
-    allowed_ops = {
-        # Fully connected layers
-        "Gemm",
-        "MatMul",
-        "Add",
-        # Activations
-        "Relu",
-        # Shape operations
-        "Flatten",
-        "Reshape",
-        "Transpose",
-        "Constant",
-        # Convolutional layers (PR 456)
-        "Conv",
-        "BatchNormalization",
-        # Pooling (PR 456)
-        "AveragePool",
-        "MaxPool",
-        "GlobalAveragePool",
-        # Note: Dropout is removed by preprocessing, not passed to Gurobi
-    }
-
-    # Check all node types
-    node_types = {node.op_type for node in onnx_model.graph.node}
-    unsupported = node_types - allowed_ops
-
-    if unsupported:
-        return False, f"Unsupported ops: {unsupported}"
-
-    # Check for residual/skip connections
-    # Track how many times each intermediate value is used
-    value_usage = {}
-
-    # Count initializers (weights/biases) - these can be reused
-    initializer_names = {init.name for init in onnx_model.graph.initializer}
-
-    for node in onnx_model.graph.node:
-        for inp in node.input:
-            # Skip empty inputs
-            if not inp:
-                continue
-            # Skip initializers (weights/biases)
-            if inp in initializer_names:
-                continue
-            # Skip constants
-            if any(
-                n.op_type == "Constant" and inp in n.output
-                for n in onnx_model.graph.node
-            ):
-                continue
-
-            # Track usage of intermediate values
-            value_usage[inp] = value_usage.get(inp, 0) + 1
-
-    return True, "Architecture verified"
-
-
 def verify_gurobi_model(
     gurobi_model,
     onnx_file,
@@ -230,16 +256,21 @@ def verify_gurobi_model(
     input_var_shape,
     input_shape_nchw,
 ):
-    """
-    Verify Gurobi model matches ONNX Runtime on random inputs.
+    """Verify Gurobi model matches ONNX Runtime on random inputs.
 
     Args:
-        original_bounds: List of (lb, ub) tuples to restore after testing
-        input_var_shape: Shape of input variables in NHWC format (for Gurobi)
-        input_shape_nchw: Shape of input in NCHW format (for ONNX Runtime)
+        gurobi_model: Gurobi Model object.
+        onnx_file: Path to ONNX file.
+        input_vars: Gurobi input variables.
+        output_vars: Gurobi output variables.
+        input_dim: Flattened input dimension.
+        output_dim: Flattened output dimension.
+        original_bounds: List of (lb, ub) tuples to restore after testing.
+        input_var_shape: Shape of input variables in NHWC format (for Gurobi).
+        input_shape_nchw: Shape of input in NCHW format (for ONNX Runtime).
 
     Returns:
-        (success, max_error, message)
+        Tuple of (success: bool, max_error: float, message: str).
     """
     ort_session = ort.InferenceSession(onnx_file)
     input_name = ort_session.get_inputs()[0].name
@@ -326,18 +357,26 @@ def verify_gurobi_model(
 
 
 def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True):
-    """
-    Convert ONNX + VNN-LIB to MPS file.
+    """Convert ONNX + VNN-LIB to Gurobi MPS file.
+
+    This is the main entry point for converting a neural network verification
+    problem into a Gurobi optimization model.
 
     Args:
-        onnx_file: Path to ONNX model
-        vnnlib_file: Path to VNN-LIB property
-        output_mps: Output MPS file path
-        verify: Whether to verify the model
-        verbose: Print progress
+        onnx_file: Path to ONNX model file (can be .onnx or .onnx.gz).
+        vnnlib_file: Path to VNN-LIB property file.
+        output_mps: Output MPS file path (can end with .mps or .mps.bz2).
+        verify: Whether to verify the model against ONNX Runtime (default: True).
+        verbose: Print progress messages (default: True).
 
     Returns:
-        (success, message)
+        Tuple of (success: bool, message: str).
+
+    Example:
+        >>> from gurobi_ml.vnnlib import convert_to_mps
+        >>> success, msg = convert_to_mps('model.onnx', 'prop.vnnlib', 'out.mps')
+        >>> if success:
+        ...     print("Conversion successful!")
     """
     if verbose:
         print("=" * 80)
@@ -359,19 +398,27 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
             print("✓ ONNX model loaded")
 
         # Remove Dropout nodes (no-op during inference)
-        onnx_model = remove_dropout_nodes(onnx_model)
+        original_dropout_count = len(
+            [n for n in onnx_model.graph.node if n.op_type == "Dropout"]
+        )
+        if original_dropout_count > 0:
+            if verbose:
+                print(
+                    f"  Removing {original_dropout_count} Dropout nodes (no-op during inference)..."
+                )
+            onnx_model = remove_dropout_nodes(onnx_model)
     except Exception as e:
         return False, f"Failed to load ONNX: {e}"
 
-    # Verify architecture is sequential
-    is_sequential, arch_msg = verify_sequential_architecture(onnx_model)
+    # Check architecture
+    is_supported, is_sequential, arch_msg = check_model_architecture(onnx_model)
     if verbose:
-        if is_sequential:
+        if is_supported:
             print(f"✓ {arch_msg}")
         else:
             print(f"✗ {arch_msg}")
 
-    if not is_sequential:
+    if not is_supported:
         return False, arch_msg
 
     # Get model dimensions
@@ -381,13 +428,13 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
     input_shape = [d.dim_value for d in input_info.type.tensor_type.shape.dim]
     output_shape = [d.dim_value for d in output_info.type.tensor_type.shape.dim]
 
-    # Fix dynamic batch dimensions (0 or -1) to 1 for verification
+    # Fix dynamic batch dimensions (0 or -1) to 1
     if input_shape[0] <= 0:
         input_shape[0] = 1
     if output_shape[0] <= 0:
         output_shape[0] = 1
 
-    # Calculate total dimensions, excluding batch dimension (dim[0] if <= 0)
+    # Calculate total dimensions, excluding batch dimension
     # For CNNs: [batch, channels, height, width] -> channels * height * width
     # For MLPs: [batch, features] -> features
     input_dim = int(np.prod([d for d in input_shape if d > 0]))
@@ -438,8 +485,6 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
 
         # Add input variables with VNN-LIB bounds
         # Note: gurobi_ml expects variables in NHWC format for Conv layers
-        # For CNN: input_var_shape is (1, H, W, C) after conversion
-        # For MLP: input_var_shape is (1, features) unchanged
         input_vars = model.addMVar(
             shape=input_var_shape, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x"
         )
@@ -487,8 +532,17 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
         return False, f"Failed to create Gurobi variables: {e}"
 
     # Add ONNX neural network constraints
+    # Use DAG formulation if model has skip connections, otherwise use sequential
     try:
-        add_onnx_constr(model, onnx_model, input_vars, output_vars)
+        if is_sequential:
+            add_onnx_constr(model, onnx_model, input_vars, output_vars)
+            if verbose:
+                print("✓ Using sequential formulation")
+        else:
+            add_onnx_dag_constr(model, onnx_model, input_vars, output_vars)
+            if verbose:
+                print("✓ Using DAG formulation for skip/residual connections")
+
         model.update()
 
         if verbose:
@@ -500,7 +554,7 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
 
     # Add VNN-LIB output property constraints (simple bounds)
     try:
-        # Flatten output for easier indexing (output is typically (1, num_classes))
+        # Flatten output for easier indexing
         output_flat = output_vars.reshape(-1)
 
         num_output_constrs = 0
@@ -529,7 +583,7 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
             # or_clause is a list of (var_idx1, operator, var_idx2) tuples
             # We need: at least one of these comparisons must be true
 
-            # Try to match MAX pattern first (optimal for cora_2024)
+            # Try to match MAX pattern first
             is_max, target_idx, other_indices = is_max_pattern(or_clause)
 
             if is_max:
@@ -549,11 +603,9 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
                 num_binary_vars_saved += len(or_clause)
 
                 if verbose:
-                    indices_str = ", ".join(f"Y_{i}" for i in other_indices)
                     print(
-                        f"  ✓ OR clause {or_idx}: MAX({indices_str}) >= Y_{target_idx} (saved {len(or_clause)} binary vars)"
+                        f"  ✓ OR clause {or_idx}: MAX constraint (saved {len(or_clause)} binary vars)"
                     )
-
                 continue
 
             # Try to match MIN pattern
@@ -564,36 +616,33 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
                 min_var = model.addVar(lb=-GRB.INFINITY, name=f"min_or{or_idx}")
                 other_outputs = [output_flat[i] for i in other_indices]
 
-                # min_var = MIN(Y_0, Y_2, ..., Y_n)
+                # min_var = MIN(Y_1, Y_2, ..., Y_n)
                 model.addGenConstrMin(min_var, other_outputs, name=f"min_or{or_idx}")
 
-                # Enforce: Y_target <= min_var (equivalently: min_var >= Y_target)
+                # Enforce: min_var >= Y_target
                 model.addConstr(
-                    min_var >= output_flat[target_idx], name=f"or_property_{or_idx}"
+                    min_var <= output_flat[target_idx], name=f"or_property_{or_idx}"
                 )
 
                 num_disjunctive_constrs += 1
                 num_binary_vars_saved += len(or_clause)
 
                 if verbose:
-                    indices_str = ", ".join(f"Y_{i}" for i in other_indices)
                     print(
-                        f"  ✓ OR clause {or_idx}: Y_{target_idx} <= MIN({indices_str}) (saved {len(or_clause)} binary vars)"
+                        f"  ✓ OR clause {or_idx}: MIN constraint (saved {len(or_clause)} binary vars)"
                     )
-
                 continue
 
-            # Fall back to indicator constraints for general case
+            # General case: Use binary variables and indicator constraints
+            # For OR(C1, C2, ..., Cn), we need: z1 + z2 + ... + zn >= 1
+            # where zi = 1 if Ci is true
             z_vars = []
             for clause_idx, (idx1, op, idx2) in enumerate(or_clause):
-                z = model.addVar(
-                    vtype=GRB.BINARY, name=f"z_or{or_idx}_clause{clause_idx}"
-                )
+                z = model.addVar(vtype=GRB.BINARY, name=f"z_or{or_idx}_c{clause_idx}")
                 z_vars.append(z)
 
-                # Add indicator constraint: if z == 1, then the comparison holds
+                # Add indicator constraint: z = 1 -> Y_idx1 op Y_idx2
                 if op == ">=":
-                    # z == 1 => Y_idx1 >= Y_idx2
                     model.addGenConstrIndicator(
                         z,
                         True,
@@ -601,23 +650,23 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
                         name=f"ind_or{or_idx}_c{clause_idx}",
                     )
                 elif op == "<=":
-                    # z == 1 => Y_idx1 <= Y_idx2
                     model.addGenConstrIndicator(
                         z,
                         True,
                         output_flat[idx1] <= output_flat[idx2],
                         name=f"ind_or{or_idx}_c{clause_idx}",
                     )
+                else:
+                    return False, f"Unsupported operator in disjunction: {op}"
 
-            # At least one indicator must be true (OR constraint)
-            if z_vars:
-                model.addConstr(sum(z_vars) >= 1, name=f"or_constraint_{or_idx}")
-                num_disjunctive_constrs += 1
+            # At least one must be true
+            model.addConstr(sum(z_vars) >= 1, name=f"or_constr_{or_idx}")
+            num_disjunctive_constrs += 1
 
-                if verbose:
-                    print(
-                        f"  ✓ OR clause {or_idx}: General disjunction ({len(z_vars)} binary vars)"
-                    )
+            if verbose:
+                print(
+                    f"  ✓ OR clause {or_idx}: General disjunction ({len(z_vars)} binary vars)"
+                )
 
         model.update()
 
@@ -642,8 +691,6 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
         # Create a temporary uncompressed model if needed
         temp_onnx_file = None
         if onnx_file.endswith(".gz"):
-            import tempfile
-
             temp_onnx_file = tempfile.NamedTemporaryFile(suffix=".onnx", delete=False)
             onnx.save(onnx_model, temp_onnx_file.name)
             temp_onnx_file.close()
@@ -667,7 +714,7 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
         if temp_onnx_file:
             try:
                 os.unlink(temp_onnx_file.name)
-            except Exception as _:
+            except Exception:
                 pass
 
         if verbose:
@@ -705,61 +752,3 @@ def convert_to_mps(onnx_file, vnnlib_file, output_mps, verify=True, verbose=True
         print("=" * 80)
 
     return True, "Success"
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Convert ONNX + VNN-LIB to Gurobi MPS file",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  python onnx_to_mps.py model.onnx prop.vnnlib output.mps
-  python onnx_to_mps.py model.onnx prop.vnnlib output.mps --no-verify
-  python onnx_to_mps.py model.onnx prop.vnnlib output.mps --quiet
-        """,
-    )
-
-    parser.add_argument("onnx_file", help="Path to ONNX model file")
-    parser.add_argument("vnnlib_file", help="Path to VNN-LIB property file")
-    parser.add_argument("output_mps", help="Output MPS file path")
-    parser.add_argument(
-        "--no-verify",
-        action="store_true",
-        help="Skip verification against ONNX Runtime",
-    )
-    parser.add_argument("--quiet", "-q", action="store_true", help="Suppress output")
-
-    args = parser.parse_args()
-
-    # Check input files exist
-    if not os.path.exists(args.onnx_file):
-        print(f"Error: ONNX file not found: {args.onnx_file}", file=sys.stderr)
-        sys.exit(1)
-
-    if not os.path.exists(args.vnnlib_file):
-        print(f"Error: VNN-LIB file not found: {args.vnnlib_file}", file=sys.stderr)
-        sys.exit(1)
-
-    # Create output directory if needed
-    output_dir = os.path.dirname(args.output_mps)
-    if output_dir and not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    # Convert
-    success, message = convert_to_mps(
-        args.onnx_file,
-        args.vnnlib_file,
-        args.output_mps,
-        verify=not args.no_verify,
-        verbose=not args.quiet,
-    )
-
-    if not success:
-        print(f"\n✗ CONVERSION FAILED: {message}", file=sys.stderr)
-        sys.exit(1)
-
-    sys.exit(0)
-
-
-if __name__ == "__main__":
-    main()
