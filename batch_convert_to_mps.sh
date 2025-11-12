@@ -137,6 +137,15 @@ for benchmark_path in "$BENCHMARKS_DIR"/*; do
         benchmark_total=$((benchmark_total + 1))
         total_instances=$((total_instances + 1))
 
+        # Skip remaining instances if we already had a failure in this benchmark
+        if [ "$benchmark_has_failure" = true ]; then
+            benchmark_skipped=$((benchmark_skipped + 1))
+            skipped_instances=$((skipped_instances + 1))
+            echo "SKIP_AFTER_FAILURE,$benchmark_name,$onnx_path,$vnnlib_path" >> "$log_file"
+            echo "SKIP_AFTER_FAILURE,$benchmark_name,$onnx_path,$vnnlib_path" >> "$MASTER_LOG"
+            continue
+        fi
+
         # Build full paths
         full_onnx="$benchmark_path/$onnx_path"
         full_vnnlib="$benchmark_path/$vnnlib_path"
