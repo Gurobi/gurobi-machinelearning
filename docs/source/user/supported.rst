@@ -121,6 +121,21 @@ Currently, only two types of layers are supported:
    * :external+torch:py:class:`Linear layers <torch.nn.Linear>`,
    * :external+torch:py:class:`ReLU layers <torch.nn.ReLU>`.
 
+ONNX
+----
+
+`ONNX <https://onnx.ai/>`_ models for sequential multi-layer perceptrons are
+supported when composed of `Gemm` (dense) operators and `Relu` activations.
+
+They can be formulated in a Gurobi model with the function
+:py:func:`add_onnx_constr <gurobi_ml.onnx.onnx_model.add_onnx_constr>`.
+
+Currently, only the following are supported:
+
+   * `Gemm` nodes with default attributes (`alpha=1`, `beta=1`) and optional
+     `transB` attribute,
+   * `Relu` activations.
+
 XGBoost
 -------
 
