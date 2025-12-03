@@ -54,13 +54,63 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
     Warnings
     --------
 
-      Only `Dense <https://keras.io/api/layers/core_layers/dense/>`_ (possibly
-      with `relu` activation), and `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ with
-      default settings are supported.
+      Supported layers:
+      - `Dense <https://keras.io/api/layers/core_layers/dense/>`_ (with `relu` or `linear` activation)
+      - `Conv2D <https://keras.io/api/layers/convolution_layers/convolution2d/>`_ (with `relu` or `linear` activation)
+      - `MaxPooling2D <https://keras.io/api/layers/pooling_layers/max_pooling2d/>`_
+      - `Flatten <https://keras.io/api/layers/reshaping_layers/flatten/>`_
+      - `BatchNormalization <https://keras.io/api/layers/normalization_layers/batch_normalization/>`_
+      - `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ (with default settings)
+      - `Dropout <https://keras.io/api/layers/regularization_layers/dropout/>`_ (treated as identity during inference)
 
     Notes
     -----
     |VariablesDimensionsWarn|
+
+    **Models with Skip Connections or Residual Architectures**
+
+    This function only supports sequential Keras models (linear chains of layers).
+    For models with more complex architectures such as:
+
+    - Skip connections (input reused by multiple layers)
+    - Residual connections (intermediate outputs reused)
+    - Multi-branch architectures
+    - Keras Functional API models with non-sequential topology
+
+    **Use the ONNX export workflow instead:**
+
+    1. Export your Keras model to ONNX format:
+
+       .. code-block:: python
+
+           import tf2onnx
+           import onnx
+
+           # Method 1: Using tf2onnx (recommended)
+           spec = (tf.TensorSpec((None, input_dim), tf.float32, name="input"),)
+           model_proto, _ = tf2onnx.convert.from_keras(keras_model, input_signature=spec)
+           onnx.save(model_proto, "model.onnx")
+
+           # Method 2: Using keras2onnx (alternative)
+           import keras2onnx
+           onnx_model = keras2onnx.convert_keras(keras_model, keras_model.name)
+           onnx.save_model(onnx_model, "model.onnx")
+
+    2. Load and use with Gurobi ML's ONNX DAG support:
+
+       .. code-block:: python
+
+           import onnx
+           from gurobi_ml.onnx import add_onnx_dag_constr
+
+           onnx_model = onnx.load("model.onnx")
+           pred = add_onnx_dag_constr(gp_model, onnx_model, input_vars)
+
+    For more details on exporting Keras models to ONNX, see:
+
+    - `tf2onnx documentation <https://github.com/onnx/tensorflow-onnx>`_
+    - `keras2onnx documentation <https://github.com/onnx/keras-onnx>`_
+    - `ONNX tutorials <https://onnx.ai/get-started.html>`_
     """
     return KerasNetworkConstr(gp_model, keras_model, input_vars, output_vars, **kwargs)
 
@@ -74,11 +124,29 @@ class KerasNetworkConstr(BaseNNConstr):
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         assert predictor.built
         for step in predictor.layers:
-            if isinstance(step, keras.layers.Dense):
+            if isinstance(step, (keras.layers.Dense)):
                 config = step.get_config()
                 activation = config["activation"]
-                if activation not in ("relu", "linear"):
+                if activation == "softmax":
+                    pass
+                elif activation not in ("relu", "linear"):
                     raise NoModel(predictor, f"Unsupported activation {activation}")
+            elif isinstance(step, (keras.layers.Conv2D)):
+                config = step.get_config()
+                activation = config["activation"]
+                if activation == "softmax":
+                    pass
+                elif activation not in ("relu", "linear"):
+                    raise NoModel(predictor, f"Unsupported activation {activation}")
+                kwargs["accepted_dim"] = (4,)
+            elif isinstance(
+                step,
+                (keras.layers.MaxPooling2D, keras.layers.Flatten, keras.layers.Dropout),
+            ):
+                pass
+            elif isinstance(step, keras.layers.BatchNormalization):
+                # BatchNormalization is supported
+                pass
             elif isinstance(step, keras.layers.ReLU):
                 if step.negative_slope != 0.0:
                     raise NoModel(
@@ -115,12 +183,13 @@ class KerasNetworkConstr(BaseNNConstr):
                     _input, self.act_dict["relu"], output, name=f"relu{i}", **kwargs
                 )
                 _input = layer.output
-            else:
+            elif isinstance(step, keras.layers.Dense):
                 config = step.get_config()
                 activation = config["activation"]
                 if activation == "linear":
                     activation = "identity"
                 weights, bias = step.get_weights()
+                kwargs["accepted_dim"] = (2,)
                 layer = self._add_dense_layer(
                     _input,
                     weights,
@@ -128,6 +197,82 @@ class KerasNetworkConstr(BaseNNConstr):
                     self.act_dict[activation],
                     output,
                     name=f"dense{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.Conv2D):
+                config = step.get_config()
+                activation = config["activation"]
+                if activation == "linear":
+                    activation = "identity"
+                weights, bias = step.get_weights()
+                kwargs["accepted_dim"] = (4,)
+                layer = self._add_conv2d_layer(
+                    _input,
+                    weights,
+                    bias,
+                    config["filters"],
+                    config["kernel_size"],
+                    config["strides"],
+                    config["padding"],
+                    self.act_dict[activation],
+                    output,
+                    name=f"conv2d{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.MaxPooling2D):
+                config = step.get_config()
+                kwargs["accepted_dim"] = (4,)
+                layer = self._add_maxpool2d_layer(
+                    _input,
+                    config["pool_size"],
+                    config["strides"],
+                    config["padding"],
+                    output,
+                    name=f"maxpool2d{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.Flatten):
+                kwargs["accepted_dim"] = (2,)
+                layer = self._add_flatten_layer(
+                    _input,
+                    output,
+                    name=f"flatten{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.Dropout):
+                layer = self._add_activation_layer(
+                    _input,
+                    self.act_dict["identity"],
+                    output,
+                    name=f"dropout{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.BatchNormalization):
+                # Get batch normalization parameters
+                # During inference, BN applies: y = gamma * (x - mean) / sqrt(var + epsilon) + beta
+                weights = step.get_weights()
+                # weights order: [gamma, beta, moving_mean, moving_variance]
+                gamma = weights[0]
+                beta = weights[1]
+                mean = weights[2]
+                variance = weights[3]
+                config = step.get_config()
+                epsilon = config.get("epsilon", 1e-3)
+
+                layer = self._add_batchnorm_layer(
+                    _input,
+                    gamma,
+                    beta,
+                    mean,
+                    variance,
+                    epsilon,
+                    output,
+                    name=f"batchnorm{i}",
                     **kwargs,
                 )
                 _input = layer.output
