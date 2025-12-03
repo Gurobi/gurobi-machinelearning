@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Lint
         uses: ./.github/actions/lint
 
@@ -40,7 +40,7 @@ jobs:
           - python-version: "3.13"
             gurobi-version: "gurobi11"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./.github/actions/setup-python-and-install
         with:
@@ -69,7 +69,7 @@ jobs:
         python-version: ["3.12"]
         gurobi-version: ["gurobi11","gurobi12","gurobi13"]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python
         uses: ./.github/actions/setup-python-and-install
         with:
