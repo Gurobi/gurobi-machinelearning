@@ -18,7 +18,14 @@
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
 from .activations import Identity, ReLU
-from .layers import ActivationLayer, DenseLayer
+from .layers import (
+    ActivationLayer,
+    BatchNormalizationLayer,
+    Conv2DLayer,
+    DenseLayer,
+    FlattenLayer,
+    MaxPooling2DLayer,
+)
 
 
 class BaseNNConstr(AbstractPredictorConstr):
@@ -98,6 +105,82 @@ class BaseNNConstr(AbstractPredictorConstr):
         self._layers.append(layer)
         return layer
 
+    def _add_conv2d_layer(
+        self,
+        input_vars,
+        layer_coefs,
+        layer_intercept,
+        channels,
+        kernel_size,
+        stride,
+        padding,
+        activation,
+        activation_vars=None,
+        **kwargs,
+    ):
+        """Add a conv2d layer to gurobipy model.
+
+        Parameters
+        ----------
+
+        input_vars : mvar_array_like
+            Decision variables used as input for predictor in model.
+        layer_coefs:
+            Coefficient for each node in a layer
+        layer_intercept:
+            Intercept bias
+        activation:
+            Activation function
+        activation_vars : None, optional
+            Output variables
+        """
+        layer = Conv2DLayer(
+            self.gp_model,
+            activation_vars,
+            input_vars,
+            layer_coefs,
+            layer_intercept,
+            channels,
+            kernel_size,
+            stride,
+            padding,
+            activation,
+            **kwargs,
+        )
+        self._layers.append(layer)
+        return layer
+
+    def _add_maxpool2d_layer(
+        self,
+        input_vars,
+        pool_size,
+        stride,
+        padding,
+        activation_vars=None,
+        **kwargs,
+    ):
+        layer = MaxPooling2DLayer(
+            self.gp_model,
+            activation_vars,
+            input_vars,
+            pool_size,
+            stride,
+            padding,
+            **kwargs,
+        )
+        self._layers.append(layer)
+        return layer
+
+    def _add_flatten_layer(self, input_vars, activation_vars=None, **kwargs):
+        layer = FlattenLayer(
+            self.gp_model,
+            activation_vars,
+            input_vars,
+            **kwargs,
+        )
+        self._layers.append(layer)
+        return layer
+
     def _add_activation_layer(
         self, input_vars, activation, activation_vars=None, **kwargs
     ):
@@ -115,6 +198,51 @@ class BaseNNConstr(AbstractPredictorConstr):
         """
         layer = ActivationLayer(
             self.gp_model, activation_vars, input_vars, activation, **kwargs
+        )
+        self._layers.append(layer)
+        return layer
+
+    def _add_batchnorm_layer(
+        self,
+        input_vars,
+        gamma,
+        beta,
+        mean,
+        variance,
+        epsilon=1e-5,
+        activation_vars=None,
+        **kwargs,
+    ):
+        """Add a batch normalization layer to gurobipy model.
+
+        Parameters
+        ----------
+
+        input_vars : mvar_array_like
+            Decision variables used as input for predictor in model.
+        gamma : np.ndarray
+            Scale parameter
+        beta : np.ndarray
+            Shift parameter
+        mean : np.ndarray
+            Running mean
+        variance : np.ndarray
+            Running variance
+        epsilon : float
+            Small constant for numerical stability
+        activation_vars : mvar_array_like, optional
+            Output variables
+        """
+        layer = BatchNormalizationLayer(
+            self.gp_model,
+            activation_vars,
+            input_vars,
+            gamma,
+            beta,
+            mean,
+            variance,
+            epsilon,
+            **kwargs,
         )
         self._layers.append(layer)
         return layer
