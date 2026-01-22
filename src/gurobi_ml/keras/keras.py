@@ -74,11 +74,25 @@ class KerasNetworkConstr(BaseNNConstr):
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         assert predictor.built
         for step in predictor.layers:
-            if isinstance(step, keras.layers.Dense):
+            if isinstance(step, (keras.layers.Dense)):
                 config = step.get_config()
                 activation = config["activation"]
-                if activation not in ("relu", "linear"):
+                if activation == "softmax":
+                    pass
+                elif activation not in ("relu", "linear"):
                     raise NoModel(predictor, f"Unsupported activation {activation}")
+            elif isinstance(step, (keras.layers.Conv2D)):
+                config = step.get_config()
+                activation = config["activation"]
+                if activation == "softmax":
+                    pass
+                elif activation not in ("relu", "linear"):
+                    raise NoModel(predictor, f"Unsupported activation {activation}")
+            elif isinstance(
+                step,
+                (keras.layers.MaxPooling2D, keras.layers.Flatten, keras.layers.Dropout),
+            ):
+                pass
             elif isinstance(step, keras.layers.ReLU):
                 if step.negative_slope != 0.0:
                     raise NoModel(
@@ -97,7 +111,10 @@ class KerasNetworkConstr(BaseNNConstr):
                     predictor, f"Unsupported network layer {type(step).__name__}"
                 )
 
-        super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
+        # Accept both tabular (2D) and spatial (4D NHWC) at entry.
+        super().__init__(
+            gp_model, predictor, input_vars, output_vars, accepted_dim=(2, 4), **kwargs
+        )
 
     def _mip_model(self, **kwargs):
         network = self.predictor
@@ -111,16 +128,19 @@ class KerasNetworkConstr(BaseNNConstr):
             if isinstance(step, keras.layers.InputLayer):
                 pass
             elif isinstance(step, keras.layers.ReLU):
+                # Allow activation over both tabular (2D) and spatial (4D) tensors
+                kwargs["accepted_dim"] = (2, 4)
                 layer = self._add_activation_layer(
                     _input, self.act_dict["relu"], output, name=f"relu{i}", **kwargs
                 )
                 _input = layer.output
-            else:
+            elif isinstance(step, keras.layers.Dense):
                 config = step.get_config()
                 activation = config["activation"]
                 if activation == "linear":
                     activation = "identity"
                 weights, bias = step.get_weights()
+                kwargs["accepted_dim"] = (2,)
                 layer = self._add_dense_layer(
                     _input,
                     weights,
@@ -128,6 +148,60 @@ class KerasNetworkConstr(BaseNNConstr):
                     self.act_dict[activation],
                     output,
                     name=f"dense{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.Conv2D):
+                config = step.get_config()
+                activation = config["activation"]
+                if activation == "linear":
+                    activation = "identity"
+                weights, bias = step.get_weights()
+                kwargs["accepted_dim"] = (4,)
+                layer = self._add_conv2d_layer(
+                    _input,
+                    weights,
+                    bias,
+                    config["filters"],
+                    config["kernel_size"],
+                    config["strides"],
+                    config["padding"],
+                    self.act_dict[activation],
+                    output,
+                    name=f"conv2d{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.MaxPooling2D):
+                config = step.get_config()
+                kwargs["accepted_dim"] = (4,)
+                layer = self._add_maxpool2d_layer(
+                    _input,
+                    config["pool_size"],
+                    config["strides"],
+                    config["padding"],
+                    output,
+                    name=f"maxpool2d{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.Flatten):
+                # Accept 4D NHWC input and produce 2D output; allow both.
+                kwargs["accepted_dim"] = (2, 4)
+                layer = self._add_flatten_layer(
+                    _input,
+                    output,
+                    name=f"flatten{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.Dropout):
+                kwargs["accepted_dim"] = (2, 4)
+                layer = self._add_activation_layer(
+                    _input,
+                    self.act_dict["identity"],
+                    output,
+                    name=f"dropout{i}",
                     **kwargs,
                 )
                 _input = layer.output
