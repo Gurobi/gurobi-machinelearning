@@ -1,4 +1,4 @@
-gurobipy==13.0.0
+gurobipy==13.0.1
 numpy==2.2.6
 scipy==1.15.3
 pandas==2.3.3
