@@ -1,4 +1,4 @@
-# Copyright © 2023-2025 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,4 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
+from .activations import Identity as Identity
+from .activations import ReLU as ReLU
+from .activations import SmoothReLU as SmoothReLU
+from .activations import SoftReLU as SoftReLU
 from .neural_net import BaseNNConstr as BaseNNConstr

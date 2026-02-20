@@ -1,4 +1,4 @@
-# Copyright © 2023-2025 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 """Internal module to make MIP modeling of activation functions."""
 
 import numpy as np
-from gurobipy import GRB
+from gurobipy import GRB, nlfunc
 
 
 class Identity:
@@ -102,4 +102,104 @@ class ReLU:
                 ],
                 constant=0.0,
                 name=layer._indexed_name(index, "relu"),
+            )
+
+
+class SmoothReLU:
+    """Class to apply smooth ReLU activation on a neural network layer.
+
+    Uses the smooth approximation: f(x) = (x + sqrt(x^2)) / 2
+    This formulation is differentiable everywhere and suitable for
+    Gurobi's non-linear barrier solver (Gurobi 13+).
+
+    Mathematically equivalent to ReLU since sqrt(x^2) = |x|.
+    """
+
+    def __init__(self):
+        pass
+
+    def mip_model(self, layer):
+        """Smooth ReLU model for activation on a layer using nonlinear expressions.
+
+        Parameters
+        ----------
+        layer : AbstractNNLayer
+            Layer to which activation is applied.
+        """
+        output = layer.output
+        if hasattr(layer, "coefs"):
+            if not hasattr(layer, "mixing"):
+                mixing = layer.gp_model.addMVar(
+                    output.shape,
+                    lb=-GRB.INFINITY,
+                    vtype=GRB.CONTINUOUS,
+                    name=layer._name_var("mix"),
+                )
+                layer.mixing = mixing
+            layer.gp_model.update()
+
+            layer.gp_model.addConstr(
+                layer.mixing == layer.input @ layer.coefs + layer.intercept
+            )
+        else:
+            mixing = layer._input
+
+        # Use nonlinear expression: output = (x + sqrt(x^2)) / 2
+        for index in np.ndindex(output.shape):
+            layer.gp_model.addConstr(
+                output[index]
+                == 0.5 * (mixing[index] + nlfunc.sqrt(mixing[index] * mixing[index])),
+                name=layer._indexed_name(index, "smooth_relu"),
+            )
+
+
+class SoftReLU:
+    """Class to apply soft ReLU (softplus) activation on a neural network layer.
+
+    Uses the formulation: f(x) = (1/beta) * log(1 + exp(beta * x))
+    This is a smooth approximation of ReLU suitable for Gurobi's
+    non-linear barrier solver (Gurobi 13+).
+
+    Parameters
+    ----------
+    beta : float, optional
+        Smoothness parameter. Default is 1.0. Higher values make it closer to ReLU.
+    """
+
+    def __init__(self, beta=1.0):
+        self.beta = beta
+
+    def mip_model(self, layer):
+        """Soft ReLU model for activation on a layer using nonlinear expressions.
+
+        Parameters
+        ----------
+        layer : AbstractNNLayer
+            Layer to which activation is applied.
+        """
+        output = layer.output
+        if hasattr(layer, "coefs"):
+            if not hasattr(layer, "mixing"):
+                mixing = layer.gp_model.addMVar(
+                    output.shape,
+                    lb=-GRB.INFINITY,
+                    vtype=GRB.CONTINUOUS,
+                    name=layer._name_var("mix"),
+                )
+                layer.mixing = mixing
+            layer.gp_model.update()
+
+            layer.gp_model.addConstr(
+                layer.mixing == layer.input @ layer.coefs + layer.intercept
+            )
+        else:
+            mixing = layer._input
+
+        # Use nonlinear expression: output = (1/beta) * log(1 + exp(beta * x))
+        for index in np.ndindex(output.shape):
+            layer.gp_model.addConstr(
+                output[index]
+                == (1.0 / self.beta)
+                * nlfunc.log(1.0 + nlfunc.exp(self.beta * mixing[index])),
+                name=layer._indexed_name(index, "soft_relu"),
             )

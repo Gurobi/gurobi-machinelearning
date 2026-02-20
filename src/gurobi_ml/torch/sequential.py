@@ -1,4 +1,4 @@
-# Copyright © 2023-2025 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -58,8 +58,9 @@ def add_sequential_constr(
 
     Warnings
     --------
-    Only :external+torch:py:class:`torch.nn.Linear` layers and
-    :external+torch:py:class:`torch.nn.ReLU` layers are supported.
+    Only :external+torch:py:class:`torch.nn.Linear` layers,
+    :external+torch:py:class:`torch.nn.ReLU` layers, and
+    :external+torch:py:class:`torch.nn.Softplus` layers are supported.
 
     Notes
     -----
@@ -80,13 +81,15 @@ class SequentialConstr(BaseNNConstr):
         for step in predictor:
             if isinstance(step, nn.ReLU):
                 pass
+            elif isinstance(step, nn.Softplus):
+                pass
             elif isinstance(step, nn.Linear):
                 pass
             else:
                 raise ModelConfigurationError(
                     predictor, f"Unsupported layer {type(step).__name__}"
                 )
-        super().__init__(gp_model, predictor, input_vars, output_vars)
+        super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
     def _mip_model(self, **kwargs):
         network = self.predictor
@@ -100,6 +103,17 @@ class SequentialConstr(BaseNNConstr):
             if isinstance(step, nn.ReLU):
                 layer = self._add_activation_layer(
                     _input, self.act_dict["relu"], output, name=f"relu_{i}", **kwargs
+                )
+                _input = layer.output
+            elif isinstance(step, nn.Softplus):
+                # Extract beta parameter from Softplus layer
+                beta = step.beta
+                # Create SoftReLU with the same beta
+                from ..modeling.neuralnet import SoftReLU
+
+                softplus_activation = SoftReLU(beta=beta)
+                layer = self._add_activation_layer(
+                    _input, softplus_activation, output, name=f"softplus_{i}", **kwargs
                 )
                 _input = layer.output
             elif isinstance(step, nn.Linear):

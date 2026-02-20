@@ -1,4 +1,4 @@
-# Copyright © 2023-2025 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,8 +55,9 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
     --------
 
       Only `Dense <https://keras.io/api/layers/core_layers/dense/>`_ (possibly
-      with `relu` activation), and `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ with
-      default settings are supported.
+      with `relu`, `linear`, or `softplus` activation),
+      `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ with default settings,
+      and `Softmax <https://keras.io/api/layers/activation_layers/softmax/>`_ are supported.
 
     Notes
     -----
@@ -77,7 +78,7 @@ class KerasNetworkConstr(BaseNNConstr):
             if isinstance(step, keras.layers.Dense):
                 config = step.get_config()
                 activation = config["activation"]
-                if activation not in ("relu", "linear"):
+                if activation not in ("relu", "linear", "softplus"):
                     raise ModelConfigurationError(
                         predictor, f"Unsupported activation {activation}"
                     )
@@ -94,6 +95,9 @@ class KerasNetworkConstr(BaseNNConstr):
                     raise ModelConfigurationError(
                         predictor, "Only handle ReLU layers without maxvalue"
                     )
+            elif isinstance(step, keras.layers.Softmax):
+                # Softmax activation layer (standalone)
+                pass
             elif isinstance(step, keras.layers.InputLayer):
                 pass
             else:

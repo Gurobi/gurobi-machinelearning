@@ -1,4 +1,4 @@
-# Copyright © 2023-2025 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
-from .activations import Identity, ReLU
+from .activations import Identity, ReLU, SmoothReLU, SoftReLU
 from .layers import ActivationLayer, DenseLayer
 
 
@@ -33,10 +33,27 @@ class BaseNNConstr(AbstractPredictorConstr):
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.predictor = predictor
+
+        # Initialize default activations
         self.act_dict = {
             "relu": ReLU(),
             "identity": Identity(),
+            "softplus": SoftReLU(beta=1.0),  # Default softplus with beta=1
         }
+
+        # Support convenient relu_formulation parameter to replace ReLU
+        relu_formulation = kwargs.get("relu_formulation", "mip")
+        if relu_formulation == "smooth":
+            self.act_dict["relu"] = SmoothReLU()
+        elif relu_formulation == "soft":
+            beta = kwargs.get("soft_relu_beta", 1.0)
+            self.act_dict["relu"] = SoftReLU(beta=beta)
+        elif relu_formulation != "mip":
+            raise ValueError(
+                f"relu_formulation must be 'mip', 'smooth', or 'soft', got '{relu_formulation}'"
+            )
+
+        # Allow custom activation_models to override defaults
         try:
             for activation, activation_model in kwargs["activation_models"].items():
                 self.act_dict[activation] = activation_model
