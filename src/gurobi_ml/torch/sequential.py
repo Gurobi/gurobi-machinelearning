@@ -59,8 +59,9 @@ def add_sequential_constr(
 
     Warnings
     --------
-    Only :external+torch:py:class:`torch.nn.Linear` layers and
-    :external+torch:py:class:`torch.nn.ReLU` layers are supported.
+    Only :external+torch:py:class:`torch.nn.Linear` layers,
+    :external+torch:py:class:`torch.nn.ReLU` layers, and
+    :external+torch:py:class:`torch.nn.Softplus` layers are supported.
 
     Notes
     -----
@@ -80,6 +81,8 @@ class SequentialConstr(BaseNNConstr):
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         for step in predictor:
             if isinstance(step, nn.ReLU):
+                pass
+            elif isinstance(step, nn.Softplus):
                 pass
             elif isinstance(step, nn.Linear):
                 pass
@@ -101,6 +104,17 @@ class SequentialConstr(BaseNNConstr):
             if isinstance(step, nn.ReLU):
                 layer = self._add_activation_layer(
                     _input, self.act_dict["relu"], output, name=f"relu_{i}", **kwargs
+                )
+                _input = layer.output
+            elif isinstance(step, nn.Softplus):
+                # Extract beta parameter from Softplus layer
+                beta = step.beta
+                # Create SoftReLU with the same beta
+                from ..modeling.neuralnet import SoftReLU
+
+                softplus_activation = SoftReLU(beta=beta)
+                layer = self._add_activation_layer(
+                    _input, softplus_activation, output, name=f"softplus_{i}", **kwargs
                 )
                 _input = layer.output
             elif isinstance(step, nn.Linear):

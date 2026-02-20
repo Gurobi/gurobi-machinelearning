@@ -13,4 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
+from .activations import Identity as Identity
+from .activations import ReLU as ReLU
+from .activations import SmoothReLU as SmoothReLU
+from .activations import SoftReLU as SoftReLU
 from .neural_net import BaseNNConstr as BaseNNConstr
