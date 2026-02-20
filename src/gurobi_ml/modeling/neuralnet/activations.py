@@ -20,7 +20,7 @@ import numpy as np
 try:
     from gurobipy import GRB, nlfunc
 except ImportError:
-    # Fallback for Gurobi versions that do not provide nlfunc (pre-13.0)
+    # Fallback for Gurobi versions that do not provide nlfunc (pre-12.0)
     from gurobipy import GRB  # type: ignore[misc]
 
     nlfunc = None  # type: ignore[assignment]
@@ -112,14 +112,14 @@ class ReLU:
             )
 
 
-class SmoothReLU:
+class SqrtReLU:
     """Class to apply a ReLU activation using a nonlinear sqrt-based formulation.
 
     Uses the formulation: f(x) = (x + sqrt(x^2)) / 2, which is
     mathematically equivalent to ReLU since sqrt(x^2) = |x|.
 
     This representation can be convenient for modeling ReLU with
-    Gurobi's non-linear barrier solver (Gurobi 13+), but note that
+    Gurobi's non-linear barrier solver (Gurobi 12+), but note that
     it remains non-differentiable at x = 0 and is not a smooth
     approximation of ReLU.
     """
@@ -127,12 +127,12 @@ class SmoothReLU:
     def __init__(self):
         if nlfunc is None:
             raise RuntimeError(
-                "SmoothReLU requires Gurobi 13.0+ with nonlinear function support. "
+                "SqrtReLU requires Gurobi 12.0+ with nonlinear function support. "
                 "Please upgrade Gurobi or use the standard ReLU formulation."
             )
 
     def mip_model(self, layer):
-        """Smooth ReLU model for activation on a layer using nonlinear expressions.
+        """Sqrt-based ReLU model for activation on a layer using nonlinear expressions.
 
         Parameters
         ----------
@@ -171,7 +171,7 @@ class SoftReLU:
 
     Uses the formulation: f(x) = (1/beta) * log(1 + exp(beta * x))
     This is a smooth approximation of ReLU suitable for Gurobi's
-    non-linear barrier solver (Gurobi 13+).
+    non-linear barrier solver (Gurobi 12+).
 
     Parameters
     ----------
@@ -182,14 +182,11 @@ class SoftReLU:
     def __init__(self, beta=1.0):
         if nlfunc is None:
             raise RuntimeError(
-                "SoftReLU requires Gurobi 13.0+ with nonlinear function support. "
+                "SoftReLU requires Gurobi 12.0+ with nonlinear function support. "
                 "Please upgrade Gurobi or use the standard ReLU formulation."
             )
         if beta <= 0.0:
-            raise ValueError(
-                f"SoftReLU beta must be strictly positive to avoid division-by-zero "
-                f"and preserve convexity; got beta={beta!r}."
-            )
+            raise ValueError("beta must be strictly positive")
         self.beta = beta
 
     def mip_model(self, layer):

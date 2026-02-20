@@ -17,7 +17,7 @@
 
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
-from .activations import Identity, ReLU, SmoothReLU, SoftReLU
+from .activations import Identity, ReLU, SqrtReLU, SoftReLU
 from .layers import ActivationLayer, DenseLayer
 
 
@@ -44,7 +44,7 @@ class BaseNNConstr(AbstractPredictorConstr):
         # Support convenient relu_formulation parameter to replace ReLU
         relu_formulation = kwargs.get("relu_formulation", "mip")
         if relu_formulation == "smooth":
-            self.act_dict["relu"] = SmoothReLU()
+            self.act_dict["relu"] = SqrtReLU()
         elif relu_formulation == "soft":
             beta = kwargs.get("soft_relu_beta", 1.0)
             self.act_dict["relu"] = SoftReLU(beta=beta)
