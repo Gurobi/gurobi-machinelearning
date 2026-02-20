@@ -9,6 +9,10 @@ import gurobipy as gp
 from gurobi_ml import add_predictor_constr
 from gurobi_ml.exceptions import NoModel
 
+# Check Gurobi version
+GUROBI_VERSION = gp.gurobi.version()
+HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
+
 
 class TestPyTorchSoftplus:
     """Test PyTorch Softplus layer support."""
@@ -35,6 +39,15 @@ class TestPyTorchSoftplus:
             X_test = np.array([[0.5, 0.3], [1.0, -0.5]])
             x = gpm.addMVar(X_test.shape, lb=X_test - 1e-4, ub=X_test + 1e-4)
 
+            if not HAS_NLFUNC:
+                # Expect RuntimeError on older Gurobi versions
+                with pytest.raises(
+                    RuntimeError,
+                    match="SoftReLU requires Gurobi 12.0\\+ with nonlinear function support",
+                ):
+                    add_predictor_constr(gpm, model, x)
+                return
+
             pred_constr = add_predictor_constr(gpm, model, x)
             gpm.optimize()
 
@@ -47,6 +60,9 @@ class TestPyTorchSoftplus:
 
     def test_softplus_custom_beta(self):
         """Test Softplus with custom beta parameter."""
+        if not HAS_NLFUNC:
+            pytest.skip("Requires Gurobi 12.0+ with nonlinear function support")
+            
         model = nn.Sequential(
             nn.Linear(2, 2), nn.Softplus(beta=2.0, threshold=20), nn.Linear(2, 1)
         )
@@ -93,6 +109,9 @@ class TestPyTorchSoftplus:
 
     def test_softplus_invalid_beta(self):
         """Test that invalid beta (<=0) raises an error."""
+        if not HAS_NLFUNC:
+            pytest.skip("Requires Gurobi 12.0+ with nonlinear function support")
+            
         # This tests the SoftReLU validation
         from gurobi_ml.modeling.neuralnet.activations import SoftReLU
 

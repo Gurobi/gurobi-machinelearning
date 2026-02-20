@@ -104,7 +104,7 @@ class SequentialConstr(BaseNNConstr):
                 output = self._output
             if isinstance(step, nn.ReLU):
                 layer = self._add_activation_layer(
-                    _input, self.act_dict["relu"], output, name=f"relu_{i}", **kwargs
+                    _input, self._get_activation("relu"), output, name=f"relu_{i}", **kwargs
                 )
                 _input = layer.output
             elif isinstance(step, nn.Softplus):
@@ -141,7 +141,7 @@ class SequentialConstr(BaseNNConstr):
                     _input,
                     layer_weight,
                     layer_bias,
-                    self.act_dict["identity"],
+                    self._get_activation("identity"),
                     output,
                     name=f"linear_{i}",
                     **kwargs,

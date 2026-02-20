@@ -35,10 +35,10 @@ class BaseNNConstr(AbstractPredictorConstr):
         self.predictor = predictor
 
         # Initialize default activations
+        # Note: softplus is initialized lazily to avoid breaking older Gurobi versions
         self.act_dict = {
             "relu": ReLU(),
             "identity": Identity(),
-            "softplus": SoftReLU(beta=1.0),  # Default softplus with beta=1
         }
 
         # Support convenient relu_formulation parameter to replace ReLU
@@ -68,6 +68,23 @@ class BaseNNConstr(AbstractPredictorConstr):
             output_vars=output_vars,
             **kwargs,
         )
+
+    def _get_activation(self, activation_name):
+        """Get activation model, initializing softplus lazily if needed.
+        
+        Parameters
+        ----------
+        activation_name : str
+            Name of the activation function
+            
+        Returns
+        -------
+        Activation model object
+        """
+        if activation_name not in self.act_dict and activation_name == "softplus":
+            # Lazy initialization for softplus to support older Gurobi versions
+            self.act_dict["softplus"] = SoftReLU(beta=1.0)
+        return self.act_dict[activation_name]
 
     def __iter__(self):
         """Iterate over layers of neural network"""
