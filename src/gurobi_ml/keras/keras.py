@@ -95,9 +95,7 @@ class KerasNetworkConstr(BaseNNConstr):
                     raise ModelConfigurationError(
                         predictor, "Only handle ReLU layers without maxvalue"
                     )
-            elif isinstance(step, keras.layers.Softmax):
-                # Softmax activation layer (standalone)
-                pass
+                    raise NoModel(predictor, "Only handle ReLU layers without maxvalue")
             elif isinstance(step, keras.layers.InputLayer):
                 pass
             else:

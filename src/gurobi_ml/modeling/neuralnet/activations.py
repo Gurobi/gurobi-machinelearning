@@ -16,7 +16,14 @@
 """Internal module to make MIP modeling of activation functions."""
 
 import numpy as np
-from gurobipy import GRB, nlfunc
+
+try:
+    from gurobipy import GRB, nlfunc
+except ImportError:
+    # Fallback for Gurobi versions that do not provide nlfunc (pre-13.0)
+    from gurobipy import GRB  # type: ignore[misc]
+
+    nlfunc = None  # type: ignore[assignment]
 
 
 class Identity:
@@ -106,17 +113,23 @@ class ReLU:
 
 
 class SmoothReLU:
-    """Class to apply smooth ReLU activation on a neural network layer.
+    """Class to apply a ReLU activation using a nonlinear sqrt-based formulation.
 
-    Uses the smooth approximation: f(x) = (x + sqrt(x^2)) / 2
-    This formulation is differentiable everywhere and suitable for
-    Gurobi's non-linear barrier solver (Gurobi 13+).
+    Uses the formulation: f(x) = (x + sqrt(x^2)) / 2, which is
+    mathematically equivalent to ReLU since sqrt(x^2) = |x|.
 
-    Mathematically equivalent to ReLU since sqrt(x^2) = |x|.
+    This representation can be convenient for modeling ReLU with
+    Gurobi's non-linear barrier solver (Gurobi 13+), but note that
+    it remains non-differentiable at x = 0 and is not a smooth
+    approximation of ReLU.
     """
 
     def __init__(self):
-        pass
+        if nlfunc is None:
+            raise RuntimeError(
+                "SmoothReLU requires Gurobi 13.0+ with nonlinear function support. "
+                "Please upgrade Gurobi or use the standard ReLU formulation."
+            )
 
     def mip_model(self, layer):
         """Smooth ReLU model for activation on a layer using nonlinear expressions.
@@ -167,6 +180,16 @@ class SoftReLU:
     """
 
     def __init__(self, beta=1.0):
+        if nlfunc is None:
+            raise RuntimeError(
+                "SoftReLU requires Gurobi 13.0+ with nonlinear function support. "
+                "Please upgrade Gurobi or use the standard ReLU formulation."
+            )
+        if beta <= 0.0:
+            raise ValueError(
+                f"SoftReLU beta must be strictly positive to avoid division-by-zero "
+                f"and preserve convexity; got beta={beta!r}."
+            )
         self.beta = beta
 
     def mip_model(self, layer):

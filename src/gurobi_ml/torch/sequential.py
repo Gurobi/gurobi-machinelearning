@@ -106,8 +106,19 @@ class SequentialConstr(BaseNNConstr):
                 )
                 _input = layer.output
             elif isinstance(step, nn.Softplus):
-                # Extract beta parameter from Softplus layer
+                # Extract beta and threshold parameters from Softplus layer
                 beta = step.beta
+                threshold = step.threshold
+                # PyTorch's Softplus switches to y=x when beta*x > threshold for numerical stability
+                # We only support the default threshold (20) which is effectively infinite for typical inputs
+                if threshold != 20:
+                    from ..exceptions import NoModel
+
+                    raise NoModel(
+                        self.predictor,
+                        f"PyTorch Softplus with non-default threshold ({threshold}) is not supported. "
+                        f"Only threshold=20 (default) is supported.",
+                    )
                 # Create SoftReLU with the same beta
                 from ..modeling.neuralnet import SoftReLU
 
