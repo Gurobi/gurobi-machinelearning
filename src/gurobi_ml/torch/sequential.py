@@ -22,7 +22,8 @@ import torch
 from torch import nn
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
-from ..modeling.neuralnet import BaseNNConstr
+from ..exceptions import NoModel, NoSolution
+from ..modeling.neuralnet import BaseNNConstr, SoftReLU
 
 
 def add_sequential_constr(
@@ -112,16 +113,12 @@ class SequentialConstr(BaseNNConstr):
                 # PyTorch's Softplus switches to y=x when beta*x > threshold for numerical stability
                 # We only support the default threshold (20) which is effectively infinite for typical inputs
                 if threshold != 20:
-                    from ..exceptions import NoModel
-
                     raise NoModel(
                         self.predictor,
                         f"PyTorch Softplus with non-default threshold ({threshold}) is not supported. "
                         f"Only threshold=20 (default) is supported.",
                     )
                 # Create SoftReLU with the same beta
-                from ..modeling.neuralnet import SoftReLU
-
                 softplus_activation = SoftReLU(beta=beta)
                 layer = self._add_activation_layer(
                     _input, softplus_activation, output, name=f"softplus_{i}", **kwargs
