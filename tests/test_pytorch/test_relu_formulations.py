@@ -7,7 +7,7 @@ import torch.nn as nn
 import gurobipy as gp
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.modeling.neuralnet.activations import SqrtReLU, SoftReLU
+from gurobi_ml.modeling.neuralnet.activations import SqrtReLU, SoftPlus
 
 # Check Gurobi version
 GUROBI_VERSION = gp.gurobi.version()
@@ -91,16 +91,16 @@ class TestReLUFormulations:
 
     def test_soft_relu_class_directly(self):
         """Test SoftReLU class with valid beta."""
-        soft_relu = SoftReLU(beta=1.0)
+        soft_relu = SoftPlus(beta=1.0)
         assert soft_relu.beta == 1.0
 
-        soft_relu2 = SoftReLU(beta=5.0)
+        soft_relu2 = SoftPlus(beta=5.0)
         assert soft_relu2.beta == 5.0
 
     def test_soft_relu_invalid_beta(self):
         """Test SoftReLU rejects invalid beta values."""
         with pytest.raises(ValueError, match="beta must be strictly positive"):
-            SoftReLU(beta=0.0)
+            SoftPlus(beta=0.0)
 
         with pytest.raises(ValueError, match="beta must be strictly positive"):
-            SoftReLU(beta=-1.5)
+            SoftPlus(beta=-1.5)
