@@ -12,14 +12,12 @@ GUROBI_VERSION = gp.gurobi.version()
 HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
 
 
+@pytest.mark.skipif(not HAS_NLFUNC, reason="Requires Gurobi 12.0+ with nlfunc support")
 class TestKerasSoftplus:
     """Test Keras softplus activation support."""
 
     def test_softplus_activation_in_dense(self):
         """Test Dense layer with softplus activation."""
-        if not HAS_NLFUNC:
-            pytest.skip("Requires Gurobi 12.0+ with nonlinear function support")
-            
         model = keras.Sequential(
             [
                 keras.layers.Dense(3, activation="softplus", input_shape=(2,)),
@@ -50,9 +48,6 @@ class TestKerasSoftplus:
 
     def test_softplus_multiple_layers(self):
         """Test model with multiple softplus activations."""
-        if not HAS_NLFUNC:
-            pytest.skip("Requires Gurobi 12.0+ with nonlinear function support")
-            
         model = keras.Sequential(
             [
                 keras.layers.Dense(4, activation="softplus", input_shape=(2,)),

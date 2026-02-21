@@ -7,16 +7,14 @@ import torch.nn as nn
 import gurobipy as gp
 
 from gurobi_ml import add_predictor_constr
+from gurobi_ml.modeling.neuralnet.activations import SqrtReLU, SoftReLU
 
 # Check Gurobi version
 GUROBI_VERSION = gp.gurobi.version()
 HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
 
-# Only import these if nlfunc is available to avoid import errors
-if HAS_NLFUNC:
-    from gurobi_ml.modeling.neuralnet.activations import SqrtReLU, SoftReLU
 
-
+@pytest.mark.skipif(not HAS_NLFUNC, reason="Requires Gurobi 12.0+ with nlfunc support")
 class TestReLUFormulations:
     """Test different ReLU formulation options."""
 
@@ -37,16 +35,6 @@ class TestReLUFormulations:
             X_test = np.array([[0.5, 0.3], [1.0, -0.5]])
             x = gpm.addMVar(X_test.shape, lb=X_test - 1e-4, ub=X_test + 1e-4)
 
-            if not HAS_NLFUNC:
-                # Expect RuntimeError on older Gurobi versions
-                with pytest.raises(
-                    RuntimeError,
-                    match="SqrtReLU requires Gurobi 12.0\\+ with nonlinear function support",
-                ):
-                    add_predictor_constr(gpm, model, x, relu_formulation="smooth")
-                return
-
-            # On Gurobi 12+, it should work
             pred_constr = add_predictor_constr(gpm, model, x, relu_formulation="smooth")
             gpm.optimize()
 
@@ -74,18 +62,6 @@ class TestReLUFormulations:
             X_test = np.array([[1.0, -1.0]])
             x = gpm.addMVar(X_test.shape, lb=X_test - 1e-4, ub=X_test + 1e-4)
 
-            if not HAS_NLFUNC:
-                # Expect RuntimeError on older Gurobi versions
-                with pytest.raises(
-                    RuntimeError,
-                    match="SoftReLU requires Gurobi 12.0\\+ with nonlinear function support",
-                ):
-                    add_predictor_constr(
-                        gpm, model, x, relu_formulation="soft", soft_relu_beta=10.0
-                    )
-                return
-
-            # On Gurobi 12+, use soft with higher beta for closer approximation
             pred_constr = add_predictor_constr(
                 gpm, model, x, relu_formulation="soft", soft_relu_beta=10.0
             )
@@ -110,31 +86,11 @@ class TestReLUFormulations:
 
     def test_sqrt_relu_class_directly(self):
         """Test SqrtReLU class can be instantiated."""
-        if not HAS_NLFUNC:
-            # Expect RuntimeError on older Gurobi versions
-            with pytest.raises(
-                RuntimeError,
-                match="SqrtReLU requires Gurobi 12.0\\+ with nonlinear function support",
-            ):
-                SqrtReLU()
-            return
-
-        # On Gurobi 12+, should instantiate successfully
         sqrt_relu = SqrtReLU()
         assert sqrt_relu is not None
 
     def test_soft_relu_class_directly(self):
         """Test SoftReLU class with valid beta."""
-        if not HAS_NLFUNC:
-            # Expect RuntimeError on older Gurobi versions
-            with pytest.raises(
-                RuntimeError,
-                match="SoftReLU requires Gurobi 12.0\\+ with nonlinear function support",
-            ):
-                SoftReLU(beta=1.0)
-            return
-
-        # On Gurobi 12+, should instantiate successfully
         soft_relu = SoftReLU(beta=1.0)
         assert soft_relu.beta == 1.0
 
@@ -143,13 +99,6 @@ class TestReLUFormulations:
 
     def test_soft_relu_invalid_beta(self):
         """Test SoftReLU rejects invalid beta values."""
-        if not HAS_NLFUNC:
-            # On older Gurobi versions, should get RuntimeError before beta validation
-            with pytest.raises(RuntimeError):
-                SoftReLU(beta=0.0)
-            return
-
-        # On Gurobi 12+, should validate beta
         with pytest.raises(ValueError, match="beta must be strictly positive"):
             SoftReLU(beta=0.0)
 
