@@ -17,7 +17,7 @@
 
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
-from .activations import Identity, ReLU, SqrtReLU, SoftReLU
+from .activations import Identity, ReLU, SqrtReLU, SoftPlus
 from .layers import ActivationLayer, DenseLayer
 
 
@@ -48,7 +48,7 @@ class BaseNNConstr(AbstractPredictorConstr):
             self.act_dict["relu"] = SqrtReLU(epsilon=epsilon)
         elif relu_formulation == "soft":
             beta = kwargs.get("soft_relu_beta", 1.0)
-            self.act_dict["relu"] = SoftReLU(beta=beta)
+            self.act_dict["relu"] = SoftPlus(beta=beta)
         elif relu_formulation != "mip":
             raise ValueError(
                 f"relu_formulation must be 'mip', 'smooth', or 'soft', got '{relu_formulation}'"
@@ -84,7 +84,7 @@ class BaseNNConstr(AbstractPredictorConstr):
         """
         if activation_name not in self.act_dict and activation_name == "softplus":
             # Lazy initialization for softplus to support older Gurobi versions
-            self.act_dict["softplus"] = SoftReLU(beta=1.0)
+            self.act_dict["softplus"] = SoftPlus(beta=1.0)
         return self.act_dict[activation_name]
 
     def __iter__(self):

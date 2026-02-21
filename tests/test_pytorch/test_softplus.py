@@ -8,7 +8,7 @@ import gurobipy as gp
 
 from gurobi_ml import add_predictor_constr
 from gurobi_ml.exceptions import NoModel
-from gurobi_ml.modeling.neuralnet.activations import SoftReLU
+from gurobi_ml.modeling.neuralnet.activations import SoftPlus
 
 # Check Gurobi version
 GUROBI_VERSION = gp.gurobi.version()
@@ -102,7 +102,7 @@ class TestPyTorchSoftplus:
     def test_softplus_invalid_beta(self):
         """Test that invalid beta (<=0) raises an error."""
         with pytest.raises(ValueError, match="beta must be strictly positive"):
-            SoftReLU(beta=0.0)
+            SoftPlus(beta=0.0)
 
         with pytest.raises(ValueError, match="beta must be strictly positive"):
-            SoftReLU(beta=-1.0)
+            SoftPlus(beta=-1.0)

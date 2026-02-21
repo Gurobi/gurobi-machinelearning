@@ -178,7 +178,7 @@ class SqrtReLU:
             )
 
 
-class SoftReLU:
+class SoftPlus:
     """Class to apply soft ReLU (softplus) activation on a neural network layer.
 
     Uses the formulation: f(x) = (1/beta) * log(1 + exp(beta * x))
