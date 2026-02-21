@@ -44,7 +44,8 @@ class BaseNNConstr(AbstractPredictorConstr):
         # Support convenient relu_formulation parameter to replace ReLU
         relu_formulation = kwargs.get("relu_formulation", "mip")
         if relu_formulation == "smooth":
-            self.act_dict["relu"] = SqrtReLU()
+            epsilon = kwargs.get("smooth_relu_epsilon", 1e-6)
+            self.act_dict["relu"] = SqrtReLU(epsilon=epsilon)
         elif relu_formulation == "soft":
             beta = kwargs.get("soft_relu_beta", 1.0)
             self.act_dict["relu"] = SoftReLU(beta=beta)
@@ -71,12 +72,12 @@ class BaseNNConstr(AbstractPredictorConstr):
 
     def _get_activation(self, activation_name):
         """Get activation model, initializing softplus lazily if needed.
-        
+
         Parameters
         ----------
         activation_name : str
             Name of the activation function
-            
+
         Returns
         -------
         Activation model object
