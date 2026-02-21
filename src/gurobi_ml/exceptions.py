@@ -1,4 +1,4 @@
-# Copyright © 2023-2025 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,15 @@
 # limitations under the License.
 # ==============================================================================
 
+
 """Exceptions for gurobi_ml.
 
 This module defines the exception hierarchy used throughout gurobi-ml.
 All exceptions inherit from appropriate Python standard exceptions to provide
 clear semantic meaning and consistent behavior.
 """
+
+import warnings
 
 
 class GurobiMLError(Exception):
@@ -86,4 +89,59 @@ class NoSolutionError(RuntimeError, GurobiMLError):
     def __init__(self, message=None):
         if message is None:
             message = "No solution available from Gurobi model"
+        super().__init__(message)
+
+
+# Backward compatibility aliases with deprecation warnings
+
+
+class NotRegistered(PredictorNotSupportedError):
+    """Deprecated: Use PredictorNotSupportedError instead."""
+
+    def __init__(self, predictor):
+        warnings.warn(
+            "NotRegistered is deprecated and will be removed in a future version. "
+            "Use PredictorNotSupportedError instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(predictor)
+
+
+class NoModel(ModelConfigurationError):
+    """Deprecated: Use ModelConfigurationError instead."""
+
+    def __init__(self, predictor, reason):
+        warnings.warn(
+            "NoModel is deprecated and will be removed in a future version. "
+            "Use ModelConfigurationError instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(predictor, reason)
+
+
+class NoSolution(NoSolutionError):
+    """Deprecated: Use NoSolutionError instead."""
+
+    def __init__(self, message=None):
+        warnings.warn(
+            "NoSolution is deprecated and will be removed in a future version. "
+            "Use NoSolutionError instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(message)
+
+
+class ParameterError(ValueError, GurobiMLError):
+    """Deprecated: Use ValueError instead."""
+
+    def __init__(self, message):
+        warnings.warn(
+            "ParameterError is deprecated and will be removed in a future version. "
+            "Use ValueError instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__(message)
