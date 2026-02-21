@@ -118,7 +118,11 @@ class KerasNetworkConstr(BaseNNConstr):
                 pass
             elif isinstance(step, keras.layers.ReLU):
                 layer = self._add_activation_layer(
-                    _input, self._get_activation("relu"), output, name=f"relu{i}", **kwargs
+                    _input,
+                    self._get_activation("relu"),
+                    output,
+                    name=f"relu{i}",
+                    **kwargs,
                 )
                 _input = layer.output
             else:

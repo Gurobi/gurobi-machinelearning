@@ -1,4 +1,4 @@
-# Copyright © 2023-2025 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -98,6 +98,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
             neural_net.activation not in self.act_dict
             and neural_net.activation != "softplus"
         ):
+            raise NoModel(
             raise ModelConfigurationError(
                 neural_net,
                 f"No implementation for activation function {neural_net.activation}",
