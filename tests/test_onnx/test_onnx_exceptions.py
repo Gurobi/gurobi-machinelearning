@@ -6,7 +6,7 @@ import onnx
 from onnx import helper, TensorProto
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoModel
+from gurobi_ml.exceptions import ModelConfigurationError
 
 
 class TestUnsupportedONNX(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestUnsupportedONNX(unittest.TestCase):
         example = np.zeros((1, 4), dtype=float)
         m = gp.Model()
         x = m.addMVar(example.shape, lb=0.0, ub=1.0, name="x")
-        with self.assertRaises(NoModel):
+        with self.assertRaises(ModelConfigurationError):
             add_predictor_constr(m, model, x)
 
     def test_skip_connection_rejected(self):
@@ -84,7 +84,7 @@ class TestUnsupportedONNX(unittest.TestCase):
 
         m = gp.Model()
         x = m.addMVar((n_in,), lb=-1.0, ub=1.0, name="x")
-        with self.assertRaises(NoModel) as cm:
+        with self.assertRaises(ModelConfigurationError) as cm:
             add_predictor_constr(m, model, x)
 
         # Verify the error message mentions skip connections
@@ -144,7 +144,7 @@ class TestUnsupportedONNX(unittest.TestCase):
 
         m = gp.Model()
         x = m.addMVar((n_in,), lb=-1.0, ub=1.0, name="x")
-        with self.assertRaises(NoModel) as cm:
+        with self.assertRaises(ModelConfigurationError) as cm:
             add_predictor_constr(m, model, x)
 
         # Verify the error message mentions the architecture issue

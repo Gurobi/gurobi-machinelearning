@@ -1,4 +1,4 @@
-# Copyright © 2025 Gurobi Optimization, LLC
+# Copyright © 2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import numpy as np
 import onnx
 from onnx import numpy_helper
 
-from ..exceptions import NoModel, NoSolution
+from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr
 
 
@@ -73,22 +73,27 @@ class ONNXNetworkConstr(BaseNNConstr):
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         if not isinstance(predictor, onnx.ModelProto):
-            raise NoModel(predictor, "Expected an onnx.ModelProto model")
+            raise ModelConfigurationError(
+                predictor,
+                f"Expected an onnx.ModelProto model, got {type(predictor).__name__}",
+            )
 
         self._layers_spec: list[_ONNXLayer] = self._parse_mlp(predictor)
         if not self._layers_spec:
-            raise NoModel(predictor, "Empty or unsupported ONNX graph")
+            raise ModelConfigurationError(predictor, "Empty or unsupported ONNX graph")
 
         super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
-    def _validate_sequential_architecture(self, graph, init_map):
-        """Validate that the graph has a sequential architecture.
+    def _validate_sequential_architecture(self, model: onnx.ModelProto, init_map):
+        """Validate that the model has a sequential architecture.
 
-        Raises NoModel if the graph contains:
+        Raises ModelConfigurationError if the graph contains:
         - Skip connections (same intermediate value used by multiple nodes)
         - Residual connections (Add nodes combining non-bias values)
         - Non-sequential topology
         """
+        graph = model.graph
+
         # Build usage map: which nodes use each tensor
         tensor_usage = {}
         for node in graph.node:
@@ -101,8 +106,8 @@ class ONNXNetworkConstr(BaseNNConstr):
         for graph_input in graph.input:
             input_name = graph_input.name
             if input_name in tensor_usage and len(tensor_usage[input_name]) > 1:
-                raise NoModel(
-                    graph,
+                raise ModelConfigurationError(
+                    model,
                     f"Non-sequential architecture detected: input '{input_name}' is used by multiple nodes {tensor_usage[input_name]}. "
                     "Skip connections and residual architectures are not supported.",
                 )
@@ -112,8 +117,8 @@ class ONNXNetworkConstr(BaseNNConstr):
         for node in graph.node:
             for output in node.output:
                 if output in tensor_usage and len(tensor_usage[output]) > 1:
-                    raise NoModel(
-                        graph,
+                    raise ModelConfigurationError(
+                        model,
                         f"Non-sequential architecture detected: node '{node.name}' output '{output}' is used by multiple nodes {tensor_usage[output]}. "
                         "Skip connections and residual architectures are not supported.",
                     )
@@ -138,8 +143,8 @@ class ONNXNetworkConstr(BaseNNConstr):
 
                 if not is_bias_add:
                     # Both inputs are computed values - this is a residual connection
-                    raise NoModel(
-                        graph,
+                    raise ModelConfigurationError(
+                        model,
                         f"Non-sequential architecture detected: Add node '{node.name}' combines two computed values {inputs}. "
                         "Residual connections are not supported.",
                     )
@@ -169,9 +174,8 @@ class ONNXNetworkConstr(BaseNNConstr):
                         return float(a.f)
             return default
 
-        # Validate that the graph is sequential (no skip connections or residual adds)
-        self._validate_sequential_architecture(graph, init_map)
-
+        # Validate that the model is sequential (no skip connections or residual adds)
+        self._validate_sequential_architecture(model, init_map)
 
         # Iterate nodes gathering dense layers and relus
         layers: list[_ONNXLayer] = []
@@ -188,18 +192,20 @@ class ONNXNetworkConstr(BaseNNConstr):
                 beta = _get_attr(node, "beta", 1.0)
                 transB = _get_attr(node, "transB", 0)
                 if alpha != 1.0 or beta != 1.0:
-                    raise NoModel(
+                    raise ModelConfigurationError(
                         model, f"Unsupported Gemm attributes alpha={alpha}, beta={beta}"
                     )
 
                 # Inputs: A, B, C
                 if len(node.input) < 2:
-                    raise NoModel(model, "Gemm node missing inputs")
+                    raise ModelConfigurationError(model, "Gemm node missing inputs")
                 # B and C should be initializers
                 B_name = node.input[1]
                 C_name = node.input[2] if len(node.input) > 2 else None
                 if B_name not in init_map:
-                    raise NoModel(model, "Gemm weights must be an initializer")
+                    raise ModelConfigurationError(
+                        model, "Gemm weights must be an initializer"
+                    )
                 W = init_map[B_name]
                 if transB == 1:
                     W = W.T  # make it shape (in, out)
@@ -208,7 +214,9 @@ class ONNXNetworkConstr(BaseNNConstr):
                 else:
                     b = init_map[C_name].reshape(-1)
                     if b.shape[0] != W.shape[1]:
-                        raise NoModel(model, "Gemm bias has wrong shape")
+                        raise ModelConfigurationError(
+                            model, "Gemm bias has wrong shape"
+                        )
 
                 act = pending_activation or "identity"
                 layers.append(_ONNXLayer(W=W, b=b, activation=act))
@@ -219,11 +227,15 @@ class ONNXNetworkConstr(BaseNNConstr):
                 # MatMul should be followed by Add for bias
                 # Inputs: A, B where B is the weight matrix
                 if len(node.input) != 2:
-                    raise NoModel(model, "MatMul node should have exactly 2 inputs")
+                    raise ModelConfigurationError(
+                        model, "MatMul node should have exactly 2 inputs"
+                    )
 
                 weight_name = node.input[1]
                 if weight_name not in init_map:
-                    raise NoModel(model, "MatMul weights must be an initializer")
+                    raise ModelConfigurationError(
+                        model, "MatMul weights must be an initializer"
+                    )
 
                 W = init_map[weight_name]  # shape should be (in, out)
 
@@ -248,7 +260,9 @@ class ONNXNetworkConstr(BaseNNConstr):
                     if bias_name is not None:
                         b = init_map[bias_name].reshape(-1)
                         if b.shape[0] != W.shape[1]:
-                            raise NoModel(model, "Add bias has wrong shape")
+                            raise ModelConfigurationError(
+                                model, "Add bias has wrong shape"
+                            )
                     else:
                         b = np.zeros((W.shape[1],), dtype=W.dtype)
 
@@ -265,8 +279,13 @@ class ONNXNetworkConstr(BaseNNConstr):
             elif op == "Add":
                 # Skip if already processed as part of MatMul+Add
                 if node_idx not in processed_indices:
-                    # Standalone Add node - ignore or warn?
-                    processed_indices.add(node_idx)
+                    # Standalone Add node - this is not supported
+                    raise ModelConfigurationError(
+                        model,
+                        f"Unsupported Add node '{node.name}': standalone Add operations "
+                        f"are not supported. Only Add nodes used for bias addition "
+                        f"(MatMul+Add pattern) are allowed.",
+                    )
 
             elif op == "Relu":
                 # Next linear layer will use relu activation; if we have no
@@ -295,7 +314,7 @@ class ONNXNetworkConstr(BaseNNConstr):
                 processed_indices.add(node_idx)
                 continue
             else:
-                raise NoModel(model, f"Unsupported ONNX op {op}")
+                raise ModelConfigurationError(model, f"Unsupported ONNX op {op}")
 
         # Validate at least one real dense layer
         has_dense = any(layer.W.size > 0 for layer in layers)
@@ -348,4 +367,4 @@ class ONNXNetworkConstr(BaseNNConstr):
             if eps is not None and np.max(r_val) > eps:
                 print(f"{pred} != {self.output_values}")
             return r_val
-        raise NoSolution()
+        raise NoSolutionError()

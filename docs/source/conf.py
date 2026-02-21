@@ -162,7 +162,7 @@ html_show_sourcelink = True
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 autodoc_member_order = "groupwise"
-autodoc_mock_imports = ["torch", "keras", "tensorflow", "xgboost"]
+autodoc_mock_imports = ["torch", "keras", "tensorflow", "xgboost", "onnx"]
 html_css_files = [
     "gurobi_ml.css",
 ]
