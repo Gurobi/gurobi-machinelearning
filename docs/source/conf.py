@@ -191,7 +191,7 @@ latex_logo = "_static/gurobi.png"
 latex_elements = {
     "preamble": r"""
     \newcommand\sphinxbackoftitlepage{%
-Copyright(c), 2023, Gurobi Optimization, LLC. All Rights Reserved.
+Copyright(c), 2023-2026, Gurobi Optimization, LLC. All Rights Reserved.
 }
     """,
 }

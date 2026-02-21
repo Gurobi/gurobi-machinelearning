@@ -755,5 +755,5 @@ print(
 
 
 ######################################################################
-# Copyright © 2023 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #

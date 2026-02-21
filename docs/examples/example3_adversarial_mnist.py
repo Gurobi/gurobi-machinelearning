@@ -266,5 +266,5 @@ print(f"Solution is classified as {nn.predict(x.X)}")
 
 
 ######################################################################
-# Copyright © 2023 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
