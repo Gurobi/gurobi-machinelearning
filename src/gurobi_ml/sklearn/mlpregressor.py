@@ -98,7 +98,6 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
             neural_net.activation not in self.act_dict
             and neural_net.activation != "softplus"
         ):
-            raise NoModel(
             raise ModelConfigurationError(
                 neural_net,
                 f"No implementation for activation function {neural_net.activation}",
