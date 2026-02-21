@@ -113,23 +113,30 @@ class ReLU:
 
 
 class SqrtReLU:
-    """Class to apply a ReLU activation using a nonlinear sqrt-based formulation.
+    """Class to apply a smooth ReLU activation using a sqrt-based formulation.
 
-    Uses the formulation: f(x) = (x + sqrt(x^2)) / 2, which is
-    mathematically equivalent to ReLU since sqrt(x^2) = |x|.
+    Uses the formulation: f(x) = (x + sqrt(x^2 + epsilon^2)) / 2
 
-    This representation can be convenient for modeling ReLU with
-    Gurobi's non-linear barrier solver (Gurobi 12+), but note that
-    it remains non-differentiable at x = 0 and is not a smooth
-    approximation of ReLU.
+    This is a smooth approximation of ReLU. When epsilon = 0, this becomes
+    exactly ReLU since sqrt(x^2) = |x|. With epsilon > 0, the function is
+    differentiable everywhere, making it suitable for Gurobi's non-linear
+    barrier solver (Gurobi 12+).
+
+    Parameters
+    ----------
+    epsilon : float, optional
+        Smoothing parameter. Default is 1e-6. Larger values make the
+        approximation smoother but less accurate. epsilon=0 gives exact ReLU
+        but is non-differentiable at x=0.
     """
 
-    def __init__(self):
+    def __init__(self, epsilon=1e-6):
         if nlfunc is None:
             raise RuntimeError(
                 "SqrtReLU requires Gurobi 12.0+ with nonlinear function support. "
                 "Please upgrade Gurobi or use the standard ReLU formulation."
             )
+        self.epsilon = epsilon
 
     def mip_model(self, layer):
         """Sqrt-based ReLU model for activation on a layer using nonlinear expressions.
@@ -157,11 +164,16 @@ class SqrtReLU:
         else:
             mixing = layer._input
 
-        # Use nonlinear expression: output = (x + sqrt(x^2)) / 2
+        # Use smooth nonlinear expression: output = (x + sqrt(x^2 + epsilon^2)) / 2
+        # When epsilon=0, this is exact ReLU. With epsilon>0, it's smooth everywhere.
         for index in np.ndindex(output.shape):
             layer.gp_model.addConstr(
                 output[index]
-                == 0.5 * (mixing[index] + nlfunc.sqrt(mixing[index] * mixing[index])),
+                == 0.5
+                * (
+                    mixing[index]
+                    + nlfunc.sqrt(nlfunc.square(mixing[index]) + self.epsilon**2)
+                ),
                 name=layer._indexed_name(index, "smooth_relu"),
             )
 
