@@ -320,3 +320,43 @@ class TestFrameworkONNXEquivalence(unittest.TestCase):
         print("\nCross-framework results:")
         for key, value in results.items():
             print(f"  {key}: {value:.4f}")
+
+        # Extract direct and ONNX-based results
+        direct_keys = [k for k in results if k.endswith("_direct")]
+        onnx_keys = [k for k in results if k.endswith("_onnx")]
+
+        # Require at least one direct and one ONNX-based result for a meaningful check
+        self.assertGreaterEqual(
+            len(direct_keys),
+            1,
+            "Expected at least one direct framework prediction in cross-framework test.",
+        )
+        self.assertGreaterEqual(
+            len(onnx_keys),
+            1,
+            "Expected at least one ONNX-based prediction in cross-framework test.",
+        )
+
+        # For each framework that has both direct and ONNX results, ensure they match
+        frameworks = set(k.split("_")[0] for k in results)
+        for fw in frameworks:
+            d_key = f"{fw}_direct"
+            o_key = f"{fw}_onnx"
+            if d_key in results and o_key in results:
+                self.assertAlmostEqual(
+                    results[d_key],
+                    results[o_key],
+                    places=5,
+                    msg=f"Direct and ONNX/Gurobi predictions differ for framework '{fw}'.",
+                )
+
+        # Additionally, ensure ONNX-based formulations are consistent across frameworks
+        onnx_values = [results[k] for k in onnx_keys]
+        for i in range(len(onnx_values)):
+            for j in range(i + 1, len(onnx_values)):
+                self.assertAlmostEqual(
+                    onnx_values[i],
+                    onnx_values[j],
+                    places=4,
+                    msg="ONNX/Gurobi predictions differ across frameworks.",
+                )

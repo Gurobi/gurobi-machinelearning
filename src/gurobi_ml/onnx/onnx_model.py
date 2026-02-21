@@ -172,11 +172,6 @@ class ONNXNetworkConstr(BaseNNConstr):
         # Validate that the graph is sequential (no skip connections or residual adds)
         self._validate_sequential_architecture(graph, init_map)
 
-        # Build a map from output name to node for easier traversal
-        output_to_node = {}
-        for node in graph.node:
-            for output in node.output:
-                output_to_node[output] = node
 
         # Iterate nodes gathering dense layers and relus
         layers: list[_ONNXLayer] = []
