@@ -1,4 +1,4 @@
-# Copyright © 2023 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -98,6 +98,13 @@ def max2(
 
 
 def logistic(predictor_model: AbstractPredictorConstr, linear_predictor: gp.MVar):
+    # Validate output shape for binary classification
+    if predictor_model.output.shape[1] < 2:
+        raise ValueError(
+            f"Expected output with at least 2 columns for binary classification, "
+            f"got shape {predictor_model.output.shape}"
+        )
+
     log_result = predictor_model.output[:, 1]
 
     if _HAS_NL_EXPR:
@@ -165,10 +172,6 @@ def softmax(
     """Add the prediction constraints to Gurobi."""
     gp_model: gp.Model = predictor_model.gp_model
     output: gp.MVar = predictor_model.output
-    try:
-        predict_function: str = predictor_model.predict_function
-    except AttributeError:
-        predict_function = "predict_proba"
 
     if "epsilon" in kwargs:
         epsilon = kwargs["epsilon"]
@@ -201,7 +204,6 @@ def softmax(
         predictor_model.linear_predictor = linear_predictor_vars
 
         exponentials = gp_model.addMVar(output.shape)
-        exponentials = exponentials
         denominator = gp_model.addMVar((output.shape[0]), lb=epsilon)
 
         num_gc = gp_model.NumGenConstrs

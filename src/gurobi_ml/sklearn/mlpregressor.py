@@ -50,7 +50,7 @@ def add_mlp_regressor_constr(
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the translation to Gurobi of the activation function for the network is not
         implemented.
 
@@ -96,7 +96,7 @@ def add_mlp_classifier_constr(
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the translation to Gurobi of the activation function for the network is not
         implemented.
 
@@ -104,17 +104,24 @@ def add_mlp_classifier_constr(
     -----
     |VariablesDimensionsWarn|
     """
+    print(f"out activation: {out_activation}")
     if out_activation == "identity":
         kwargs["predict_function"] = "identity"
     elif out_activation == "softmax":
         kwargs["predict_function"] = "predict_proba"
     else:
-        raise NoModel(f"No implementation for output activation {out_activation}")
+        raise ModelConfigurationError(
+            mlp_regressor, f"No implementation for output activation {out_activation}"
+        )
     return MLPClassifierConstr(
         gp_model, mlp_regressor, input_vars, output_vars, **kwargs
     )
 
 
+# Note: MLPConstr provides shared _mip_model implementation for both MLPRegressorConstr
+# and MLPClassifierConstr. The subclasses use multiple inheritance (SKRegressor/SKClassifier
+# + MLPConstr) to combine sklearn interface with neural network formulation logic.
+# Both __init__ methods are called explicitly to properly initialize the diamond inheritance.
 class MLPConstr(BaseNNConstr):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a gurobipy model.
@@ -131,9 +138,8 @@ class MLPConstr(BaseNNConstr):
         clean_predictor=False,
         **kwargs,
     ):
-        assert predictor.activation_ in ("identity", "relu", "logistic")
-        BaseNNConstr.__init__(
-            self,
+        assert predictor.activation in ("identity", "relu", "logistic")
+        super().__init__(
             gp_model,
             predictor,
             input_vars,
@@ -150,7 +156,7 @@ class MLPConstr(BaseNNConstr):
                 neural_net,
                 f"No implementation for activation function {neural_net.activation}",
             )
-        activation = self.act_dict[neural_net.activation]()
+        activation = self.act_dict[neural_net.activation]
 
         input_vars = self._input
         output = None
@@ -161,10 +167,14 @@ class MLPConstr(BaseNNConstr):
 
             # For last layer change activation
             if i == neural_net.n_layers_ - 2:
-                activation = self.act_dict[neural_net.out_activation_]()
                 output = self._output
-                if neural_net.out_activation_ in ("softmax", "logistic"):
-                    kwargs["predict_function"] = self.predict_function
+                out_activation = neural_net.out_activation_
+                if (
+                    out_activation in ("softmax", "logistic")
+                    and self.predict_function == "identity"
+                ):
+                    out_activation = "identity"
+                activation = self.act_dict[out_activation]
 
             layer = self._add_dense_layer(
                 input_vars,
@@ -178,7 +188,7 @@ class MLPConstr(BaseNNConstr):
             self.gp_model.update()
         assert (
             self._output is not None
-        )  # Should never happen since sklearn object defines n_ouputs_
+        )  # Should never happen since sklearn object defines n_outputs_
 
         self.linear_predictor = layer.linear_predictor
 
@@ -206,7 +216,7 @@ class MLPRegressorConstr(SKRegressor, MLPConstr):
             input_vars,
             **kwargs,
         )
-        BaseNNConstr.__init__(
+        MLPConstr.__init__(
             self,
             gp_model,
             predictor,
@@ -242,7 +252,7 @@ class MLPClassifierConstr(SKClassifier, MLPConstr):
             predict_function,
             **kwargs,
         )
-        BaseNNConstr.__init__(
+        MLPConstr.__init__(
             self,
             gp_model,
             predictor,

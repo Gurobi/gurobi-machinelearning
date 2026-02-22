@@ -42,10 +42,6 @@ class SKgetter(AbstractPredictorConstr):
         check_is_fitted(predictor)
         self.predictor = predictor
         _check_feature_names(predictor, input_vars, reset=False)
-        # Raises an error if prediction function is not in predictor
-        if getattr(predictor, predict_function):
-            pass
-        self.predict_function = predict_function
         if hasattr(predictor, "n_features_in_"):
             self._input_shape = predictor.n_features_in_
         if hasattr(predictor, "n_outputs_"):
@@ -85,7 +81,7 @@ class SKRegressor(SKgetter):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         if self._has_solution:
@@ -101,7 +97,7 @@ class SKRegressor(SKgetter):
                 print(f"{predicted} != {output_values}")
             return r_val
 
-        raise NoSolution()
+        raise NoSolutionError()
 
 
 class SKClassifier(SKgetter):
@@ -145,7 +141,7 @@ class SKClassifier(SKgetter):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         if self._has_solution:
@@ -210,7 +206,7 @@ class SKtransformer(AbstractPredictorConstr):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         if self._has_solution:
