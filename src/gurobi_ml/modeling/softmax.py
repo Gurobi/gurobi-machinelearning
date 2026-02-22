@@ -196,7 +196,7 @@ def softmax(
             output == exponentials / denominator[:, np.newaxis], name="multlog"
         )
     else:
-        # How boy that is tedious you don't want not to use Gurobi 12!
+        # Oh boy, that is tedious—you really want to use Gurobi 12!
         linear_predictor_vars = gp_model.addMVar(
             output.shape, lb=-gp.GRB.INFINITY, name="linear_predictor"
         )

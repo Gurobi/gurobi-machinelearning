@@ -114,9 +114,18 @@ class KerasNetworkConstr(BaseNNConstr):
                 output = self._output
             if isinstance(step, keras.layers.InputLayer):
                 pass
-            elif isinstance(step, (keras.layers.ReLU, keras.layers.Softmax)):
+            elif isinstance(step, keras.layers.ReLU):
                 layer = self._add_activation_layer(
                     _input, self.act_dict["relu"], output, name=f"relu{i}", **kwargs
+                )
+                _input = layer.output
+            elif isinstance(step, keras.layers.Softmax):
+                layer = self._add_activation_layer(
+                    _input,
+                    self.act_dict["softmax"],
+                    output,
+                    name=f"softmax{i}",
+                    **kwargs,
                 )
                 _input = layer.output
             else:
