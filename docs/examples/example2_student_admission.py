@@ -139,7 +139,8 @@ pipe.fit(X=historical_data.loc[:, features], y=historical_data.loc[:, target])
 #
 
 # Retrieve new data used to build the optimization problem
-studentsdata = pd.read_csv(janos_data_url + "college_applications6000.csv", index_col=0)
+studentsdata = pd.read_csv(
+    janos_data_url + "college_applications6000.csv", index_col=0)
 
 nstudents = 20
 
@@ -189,7 +190,7 @@ students_opt_data[:10]
 # model.
 #
 pred_constr = add_predictor_constr(
-    m, pipe, students_opt_data, predict_function="predict_proba"
+    m, pipe, students_opt_data, predict_function="decision_function"
 )
 pred_constr.print_stats()
 m.update()
@@ -204,7 +205,7 @@ m.update()
 # model we are only interested in the probability of class 1, i.e.
 # the column of index 1. We store this as a pandas series
 
-y = pd.Series(data=pred_constr.output[:, 1].tolist(), index=x.index)
+y = pd.Series(data=pred_constr.output[:, 0].tolist(), index=x.index)
 
 y
 

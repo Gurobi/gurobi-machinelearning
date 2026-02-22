@@ -105,9 +105,15 @@ def logistic(predictor_model: AbstractPredictorConstr, linear_predictor: gp.MVar
             log_result == nlfunc.logistic(linear_predictor[:, 0])
         )
     else:
+        linear_predictor_vars = predictor_model.gp_model.addMVar(
+            log_result.shape[0], lb=-gp.GRB.INFINITY, name="linear_predictor"
+        )
+        predictor_model.gp_model.addConstr(
+            linear_predictor_vars == linear_predictor[:, 0]
+        )
         for index in np.ndindex(log_result.shape):
             predictor_model.gp_model.addGenConstrLogistic(
-                linear_predictor[index],
+                linear_predictor_vars[index],
                 log_result[index],
                 name=predictor_model._indexed_name(index, "logistic"),
             )
@@ -184,7 +190,7 @@ def softmax(
 
         # Voila!
         gp_model.addConstr(
-            output == exponentials / denominator[:, np.newaxis], name=f"multlog"
+            output == exponentials / denominator[:, np.newaxis], name="multlog"
         )
     else:
         # How boy that is tedious you don't want not to use Gurobi 12!
