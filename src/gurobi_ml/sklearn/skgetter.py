@@ -119,11 +119,16 @@ class SKClassifier(SKgetter):
         self,
         predictor,
         input_vars,
-        predict_function="predict",
+        predict_function=None,
         **kwargs,
     ):
+        if predict_function is None:
+            print("No prediction function specified, defaulting to 'predict_proba'")
+            predict_function = "predict_proba"
         # Raises an error if prediction function is not in predictor
-        if predict_function == "identity" or getattr(predictor, predict_function):
+        if (
+            hasattr(predictor, "out_activation_") and predict_function == "identity"
+        ) or getattr(predictor, predict_function):
             pass
         self.predict_function = predict_function
         SKgetter.__init__(self, predictor=predictor, input_vars=input_vars, **kwargs)

@@ -8,9 +8,8 @@ from gurobipy import GurobiError
 from sklearn import datasets
 from sklearn.pipeline import Pipeline
 
-from gurobi_ml import add_predictor_constr, register_predictor_constr
+from gurobi_ml import add_predictor_constr
 from gurobi_ml.exceptions import NoSolutionError
-from gurobi_ml.sklearn import add_mlp_regressor_constr
 from gurobi_ml.sklearn.pipeline import PipelineConstr
 
 from ..fixed_formulation import FixedRegressionModel
@@ -116,8 +115,10 @@ class TestSklearnModel(FixedRegressionModel):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", predict_function="predict")
-            self.do_one_case(onecase, X, 6, "pairs", predict_function="predict")
+            self.do_one_case(onecase, X, 5, "all", predict_function="decision_function")
+            self.do_one_case(
+                onecase, X, 6, "pairs", predict_function="decision_function"
+            )
 
     def test_iris_pwl_args(self):
         data = datasets.load_iris()

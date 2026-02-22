@@ -64,7 +64,12 @@ def add_mlp_regressor_constr(
 
 
 def add_mlp_classifier_constr(
-    gp_model, mlp_regressor, input_vars, output_vars=None, **kwargs
+    gp_model,
+    mlp_regressor,
+    input_vars,
+    output_vars=None,
+    out_activation="softmax",
+    **kwargs,
 ):
     """Formulate mlp_regressor in gp_model.
 
@@ -99,6 +104,12 @@ def add_mlp_classifier_constr(
     -----
     |VariablesDimensionsWarn|
     """
+    if out_activation == "identity":
+        kwargs["predict_function"] = "identity"
+    elif out_activation == "softmax":
+        kwargs["predict_function"] = "predict_proba"
+    else:
+        raise NoModel(f"No implementation for output activation {out_activation}")
     return MLPClassifierConstr(
         gp_model, mlp_regressor, input_vars, output_vars, **kwargs
     )
@@ -116,10 +127,11 @@ class MLPConstr(BaseNNConstr):
         gp_model,
         predictor,
         input_vars,
-        output_vars=None,
+        output_vars,
         clean_predictor=False,
         **kwargs,
     ):
+        assert predictor.activation_ in ("identity", "relu", "logistic")
         BaseNNConstr.__init__(
             self,
             gp_model,
@@ -129,7 +141,6 @@ class MLPConstr(BaseNNConstr):
             clean_predictor=clean_predictor,
             **kwargs,
         )
-        assert predictor.out_activation_ in ("identity", "relu", "logistic", "softmax")
 
     def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
@@ -152,7 +163,7 @@ class MLPConstr(BaseNNConstr):
             if i == neural_net.n_layers_ - 2:
                 activation = self.act_dict[neural_net.out_activation_]()
                 output = self._output
-                if neural_net.out_activation_ == "softmax":
+                if neural_net.out_activation_ in ("softmax", "logistic"):
                     kwargs["predict_function"] = self.predict_function
 
             layer = self._add_dense_layer(
@@ -184,10 +195,11 @@ class MLPRegressorConstr(SKRegressor, MLPConstr):
         gp_model,
         predictor,
         input_vars,
-        output_vars=None,
+        output_vars,
         clean_predictor=False,
         **kwargs,
     ):
+        assert predictor.out_activation_ in ("identity",)
         SKRegressor.__init__(
             self,
             predictor,
@@ -203,7 +215,6 @@ class MLPRegressorConstr(SKRegressor, MLPConstr):
             clean_predictor=clean_predictor,
             **kwargs,
         )
-        assert predictor.out_activation_ in ("identity", "relu", "logistic", "softmax")
 
 
 class MLPClassifierConstr(SKClassifier, MLPConstr):
@@ -218,11 +229,12 @@ class MLPClassifierConstr(SKClassifier, MLPConstr):
         gp_model,
         predictor,
         input_vars,
-        output_vars=None,
-        predict_function="predict_proba",
+        output_vars,
+        predict_function,
         clean_predictor=False,
         **kwargs,
     ):
+        assert predictor.out_activation_ in ("logistic", "softmax")
         SKClassifier.__init__(
             self,
             predictor,
@@ -239,4 +251,3 @@ class MLPClassifierConstr(SKClassifier, MLPConstr):
             clean_predictor=clean_predictor,
             **kwargs,
         )
-        assert predictor.out_activation_ in ("identity", "relu", "logistic", "softmax")

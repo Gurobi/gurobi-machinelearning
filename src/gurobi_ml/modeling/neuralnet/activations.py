@@ -27,7 +27,7 @@ try:
 except ImportError:
     _HAS_NLEXPR = False
 
-from ..softmax import hardmax, softmax
+from ..softmax import softmax
 
 
 class Identity:
@@ -47,7 +47,7 @@ class Identity:
     def __init__(self):
         pass
 
-    def mip_model(self, layer):
+    def mip_model(self, layer, **kwargs):
         """MIP model for identity activation on a layer.
 
         Parameters
@@ -81,7 +81,7 @@ class ReLU:
     def __init__(self):
         pass
 
-    def mip_model(self, layer):
+    def mip_model(self, layer, **kwargs):
         """MIP model for ReLU activation on a layer.
 
         Parameters
@@ -140,7 +140,7 @@ class Logistic:
         if not _HAS_NLEXPR:
             raise NoModel(self, "Can't use logistic activation without Gurobi ≥ 12.0")
 
-    def mip_model(self, layer):
+    def mip_model(self, layer, predict_function="predict_proba", **kwargs):
         """MIP model for logistic activation on a layer.
 
         Parameters
@@ -154,7 +154,10 @@ class Logistic:
             linear_predictor = layer.linear_predictor
         else:
             linear_predictor = layer._input
-        layer.gp_model.addConstr(layer.output == nlfunc.logistic(linear_predictor))
+        if predict_function == "predict_proba":
+            layer.gp_model.addConstr(layer.output == nlfunc.logistic(linear_predictor))
+        elif predict_function == "identity":
+            layer.gp_model.addConstr(output == linear_predictor)
 
 
 class SoftMax:
@@ -178,7 +181,7 @@ class SoftMax:
     def __init__(self):
         pass
 
-    def mip_model(self, layer):
+    def mip_model(self, layer, predict_function="predict_proba", **kwargs):
         """MIP model for SoftMax activation on a layer.
 
         Parameters
@@ -204,13 +207,7 @@ class SoftMax:
         else:
             linear_predictor = layer._input
 
-        if hasattr(layer, "predict_function"):
-            predict_function = layer.predict_function
-            if predict_function == "predict_proba":
-                softmax(layer, linear_predictor)
-            elif predict_function == "predict":
-                hardmax(layer, linear_predictor)
-            elif predict_function == "identity":
-                layer.gp_model.addConstr(output == linear_predictor)
-        else:
+        if predict_function == "predict_proba":
             softmax(layer, linear_predictor)
+        elif predict_function == "identity":
+            layer.gp_model.addConstr(output == linear_predictor)

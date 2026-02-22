@@ -22,7 +22,8 @@ import warnings
 
 import gurobipy as gp
 
-from ..modeling.softmax import hardmax, logistic, max2, softmax
+from ..modeling.base_predictor_constr import AbstractPredictorConstr
+from ..modeling.softmax import logistic, softmax
 
 try:
     pass
@@ -36,8 +37,6 @@ except ImportError:
         _HAS_NL = True
     _HAS_NL_EXPR = False
 
-from ..exceptions import ModelConfigurationError
-from .base_regressions import BaseSKlearnRegressionConstr
 from .skgetter import SKClassifier
 
 
@@ -46,7 +45,7 @@ def add_logistic_regression_constr(
     logistic_regression,
     input_vars,
     output_vars=None,
-    predict_function="predict",
+    predict_function="predict_proba",
     epsilon=0.0,
     pwl_attributes=None,
     **kwargs,
@@ -146,7 +145,7 @@ def add_logistic_regression_constr(
     )
 
 
-class LogisticRegressionConstr(SKClassifier, BaseSKlearnRegressionConstr):
+class LogisticRegressionConstr(SKClassifier, AbstractPredictorConstr):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` in a gurobipy model.
 
@@ -159,21 +158,21 @@ class LogisticRegressionConstr(SKClassifier, BaseSKlearnRegressionConstr):
         predictor,
         input_vars,
         output_vars=None,
-        predict_function="predict",
+        predict_function="predict_proba",
         epsilon=0.0,
         pwl_attributes=None,
         **kwargs,
     ):
-        if predict_function not in ("predict", "predict_proba", "decision_function"):
+        if predict_function not in ("predict_proba", "decision_function"):
             raise ValueError(
-                "predict_function should be either 'predict', 'predict_proba', or 'decision_function'"
+                "predict_function should be either 'predict_proba' or 'decision_function'"
             )
-        if predict_function == "predict" and pwl_attributes is not None:
+        if predict_function != "predict_proba" and pwl_attributes is not None:
             message = """
 pwl_attributes are not required for classification.  The problem is
 formulated without requiring the non-linear logistic function."""
             warnings.warn(message)
-        elif predict_function != "predict":
+        elif predict_function == "predict_proba":
             self.attributes = (
                 self.default_pwl_attributes()
                 if pwl_attributes is None
@@ -184,10 +183,11 @@ formulated without requiring the non-linear logistic function."""
         self._default_name = "log_reg"
         self.linear_predictor = None
         SKClassifier.__init__(self, predictor, input_vars, predict_function)
-        BaseSKlearnRegressionConstr.__init__(
+        if self._output_shape == 2 and predict_function == "decision_function":
+            self._output_shape = 1
+        AbstractPredictorConstr.__init__(
             self,
             gp_model,
-            predictor,
             input_vars,
             output_vars,
             **kwargs,
@@ -223,30 +223,20 @@ Upgrading to version 12 is recommended when using logistic regressions."""
 
     def _two_classes_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
-        m, _ = self.output.shape
+        coefs = self.predictor.coef_
+        intercept = self.predictor.intercept_
 
-        linear_predictor = self.gp_model.addMVar(
-            (m, 1), lb=-gp.GRB.INFINITY, name="linear_predictor"
-        )
-        self._add_regression_constr(output=linear_predictor)
+        linreg = self.input @ coefs.T + intercept
 
-        self.gp_model.addConstr(self.output.sum(axis=1) == 1)
+        self.linear_predictor = linreg
 
-        self.linear_predictor = linear_predictor
-
-        if self.predict_function == "predict":
-            max2(self, linear_predictor, self.epsilon)
+        if self.predict_function == "predict_proba":
+            self.gp_model.addConstr(self.output.sum(axis=1) == 1)
+            logistic(self, linreg)
         else:
-            logistic(self, linear_predictor)
+            self.gp_model.addConstr(self.output[:, 0] == linreg[:, 0])
 
         self.gp_model.update()
-
-    @property
-    def linear_predictor_variables(self) -> gp.MVar:
-        """Variables that store the result of the linear_predictor
-        (i.e. before applying the logistic function).
-        """
-        return self.linear_predictor
 
     def _multi_class_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
@@ -255,9 +245,7 @@ Upgrading to version 12 is recommended when using logistic regressions."""
 
         linreg = self.input @ coefs.T + intercept
 
-        if self.predict_function == "predict":
-            hardmax(self, linreg, **kwargs)
-        elif self.predict_function == "predict_proba":
+        if self.predict_function == "predict_proba":
             softmax(self, linreg, **kwargs)
         else:
             self.gp_model.addConstr(self.output == linreg)
