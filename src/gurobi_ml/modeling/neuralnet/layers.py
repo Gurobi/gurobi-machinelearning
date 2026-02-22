@@ -34,9 +34,11 @@ class AbstractNNLayer(AbstractPredictorConstr):
         activation_function,
         **kwargs,
     ):
-        self.activation = activation_function()
+        # Ensure predict_function is extracted before activation initialization
+        self.predict_function = None
         if "predict_function" in kwargs:
             self.predict_function = kwargs.pop("predict_function")
+        self.activation = activation_function()
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )

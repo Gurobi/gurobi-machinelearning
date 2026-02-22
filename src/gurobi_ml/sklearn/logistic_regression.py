@@ -204,7 +204,7 @@ formulated without requiring the non-linear logistic function."""
         if not _HAS_NL:
             message = """
 Gurobi ≥ 11 can deal directly with nonlinear functions with 'FuncNonlinear'.
-Upgrading to version 12 is recommended when using logistic regressions."""
+Upgrading to version 11 is recommended when using logistic regressions."""
             warnings.warn(message)
             return {
                 "FuncPieces": -1,

@@ -104,7 +104,6 @@ def add_mlp_classifier_constr(
     -----
     |VariablesDimensionsWarn|
     """
-    print(f"out activation: {out_activation}")
     if out_activation == "identity":
         kwargs["predict_function"] = "identity"
     elif out_activation == "softmax":
@@ -229,7 +228,7 @@ class MLPRegressorConstr(SKRegressor, MLPConstr):
 
 class MLPClassifierConstr(SKClassifier, MLPConstr):
     """Class to formulate a trained
-    :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a gurobipy model.
+    :external+sklearn:py:class:`sklearn.neural_network.MLPClassifier` in a gurobipy model.
 
     |ClassShort|
     """
