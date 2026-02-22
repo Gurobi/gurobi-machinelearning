@@ -82,7 +82,7 @@ StandardScaler and LogisticRegression.
 """
 
 import gurobipy as gp
-import gurobipy_pandas as gppd
+import gurobipy_pandas as gppd  # noqa: F401
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -139,8 +139,7 @@ pipe.fit(X=historical_data.loc[:, features], y=historical_data.loc[:, target])
 #
 
 # Retrieve new data used to build the optimization problem
-studentsdata = pd.read_csv(
-    janos_data_url + "college_applications6000.csv", index_col=0)
+studentsdata = pd.read_csv(janos_data_url + "college_applications6000.csv", index_col=0)
 
 nstudents = 20
 

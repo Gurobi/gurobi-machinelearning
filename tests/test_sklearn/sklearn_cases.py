@@ -250,8 +250,8 @@ class IrisBinaryCases(Cases):
 class IrisMultiCases(Cases):
     """Base class to have cases for testing regression models on iris set
 
-    Transform the iris test set to binary classification.
-    This is appropriate for testing binary classification models."""
+    Transform the iris test set to multi-class classification.
+    This is appropriate for testing multi-class classification models."""
 
     def __init__(self):
         super().__init__("iris", regressors=["LogisticRegression", "MLPClassifier"])
@@ -261,7 +261,6 @@ class IrisMultiCases(Cases):
 
         X = data.data
         y = data.target
-        # Make it a binary classification
         self._data = (X, y)
 
 
