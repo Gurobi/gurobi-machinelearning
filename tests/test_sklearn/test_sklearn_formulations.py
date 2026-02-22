@@ -70,11 +70,7 @@ class TestSklearnModel(FixedRegressionModel):
         data = datasets.load_iris()
 
         X = data.data
-        y = data.target
 
-        # Make it a simple classification
-        X = X[y != 2]
-        y = y[y != 2]
         cases = IrisBinaryCases()
 
         for regressor in cases:
@@ -92,8 +88,6 @@ class TestSklearnModel(FixedRegressionModel):
         data = datasets.load_iris()
 
         X = data.data
-        y = data.target
-
         # Make it a simple classification
         cases = IrisMultiCases()
 
@@ -106,11 +100,7 @@ class TestSklearnModel(FixedRegressionModel):
         data = datasets.load_iris()
 
         X = data.data
-        y = data.target
 
-        # Make it a simple classification
-        X = X[y != 2]
-        y = y[y != 2]
         cases = IrisBinaryCases()
 
         for regressor in cases:
@@ -124,11 +114,7 @@ class TestSklearnModel(FixedRegressionModel):
         data = datasets.load_iris()
 
         X = data.data
-        y = data.target
 
-        # Make it a simple classification
-        X = X[y != 2]
-        y = y[y != 2]
         cases = IrisBinaryCases()
 
         for regressor in cases:
