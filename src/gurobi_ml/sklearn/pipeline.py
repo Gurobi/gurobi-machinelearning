@@ -64,6 +64,11 @@ def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwar
     return PipelineConstr(gp_model, pipeline, input_vars, output_vars, **kwargs)
 
 
+# Note: PipelineConstr inherits from both SKRegressor and SKClassifier to provide
+# both classifier and regressor interfaces, but only one __init__ is called based
+# on the pipeline's capabilities (has predict_proba or not). This creates a diamond
+# inheritance pattern through SKgetter, but it's handled correctly via the conditional
+# initialization.
 class PipelineConstr(SKRegressor, SKClassifier, AbstractPredictorConstr):
     """Class to formulate a trained :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
     in a gurobipy model.

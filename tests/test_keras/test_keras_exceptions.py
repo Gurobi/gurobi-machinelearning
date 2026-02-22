@@ -51,7 +51,7 @@ class TestUnsuportedKeras(unittest.TestCase):
         nn = keras.models.Sequential(
             [
                 keras.layers.InputLayer((28 * 28,)),
-                keras.layers.Dense(50, activation="sigmoid"),
+                keras.layers.Dense(50, activation="softplus"),
                 keras.layers.Dense(50, activation="relu"),
                 keras.layers.Dense(10),
             ]
