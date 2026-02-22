@@ -94,8 +94,6 @@ class PipelineConstr(SKRegressor, SKClassifier, AbstractPredictorConstr):
         self._mip_model(**kwargs)
         assert self.output is not None
         assert self.input is not None
-        # We can call validate only after the model is created
-        self._validate()
         return self
 
     def _mip_model(self, **kwargs):
