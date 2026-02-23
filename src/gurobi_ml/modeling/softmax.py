@@ -13,8 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 
-import math
-
 import gurobipy as gp
 import numpy as np
 
@@ -26,75 +24,6 @@ try:
     _HAS_NL_EXPR = True
 except ImportError:
     _HAS_NL_EXPR = False
-
-
-def max2(
-    predictor_model: AbstractPredictorConstr, linear_predictor: gp.MVar, epsilon: float
-):
-    # For classification we need an extra binary variable
-    bin_output = predictor_model.gp_model.addMVar(
-        (predictor_model.output.shape[0], 1), vtype=gp.GRB.BINARY, name="bin_output"
-    )
-
-    def _addGenConstrIndicatorMvarV10(binvar, binval, lhs, sense, rhs, name):
-        """This function is to work around the lack of MVar compatibility in
-        Gurobi v10 indicator constraints.  Note, it is not as flexible as Model.addGenConstrIndicator
-        in V11+.  If support for v10 is dropped this function can be removed.
-
-        Parameters
-        ----------
-        binvar : MVar
-        binval : {0,1}
-        lhs : MVar or MLinExpr
-        sense : (char)
-            Options are gp.GRB.LESS_EQUAL, gp.GRB.EQUAL, or gp.GRB.GREATER_EQUAL
-        rhs : scalar
-        name : string
-        """
-        assert binvar.shape == lhs.shape
-        total_constraints = np.prod(binvar.shape)
-        binvar = binvar.reshape(total_constraints).tolist()
-        lhs = lhs.reshape(total_constraints).tolist()
-        for index in range(total_constraints):
-            predictor_model.gp_model.addGenConstrIndicator(
-                binvar[index],
-                binval,
-                lhs[index],
-                sense,
-                rhs,
-                name=predictor_model._indexed_name(index, name),
-            )
-
-    # Workaround for MVars in indicator constraints for v10.
-    addGenConstrIndicator = (
-        predictor_model.gp_model.addGenConstrIndicator
-        if gp.gurobi.version()[0] >= 11
-        else _addGenConstrIndicatorMvarV10
-    )
-
-    # The original epsilon is with respect to the range of the logistic function.
-    # We must translate this to the domain of the logistic function.
-    linear_predictor_epsilon = -math.log(1 / (0.5 + epsilon) - 1)
-
-    # For classification it is enough to test result of the linear predictor
-    # and avoid adding logistic curve constraint.  See GH316.
-    addGenConstrIndicator(
-        bin_output,
-        1,
-        linear_predictor,
-        gp.GRB.GREATER_EQUAL,
-        linear_predictor_epsilon,
-        "indicator_linear_predictor_pos",
-    )
-    addGenConstrIndicator(
-        bin_output,
-        0,
-        linear_predictor,
-        gp.GRB.LESS_EQUAL,
-        0,
-        "indicator_linear_predictor_neg",
-    )
-    predictor_model.gp_model.addConstr(bin_output[:, 0] == predictor_model.output[:, 1])
 
 
 def logistic(predictor_model: AbstractPredictorConstr, linear_predictor: gp.MVar):
