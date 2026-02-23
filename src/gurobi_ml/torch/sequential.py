@@ -76,9 +76,15 @@ class SequentialConstr(BaseNNConstr):
     |ClassShort|.
     """
 
+    activations = {
+        nn.ReLU: "relu",
+        nn.Softmax: "softmax",
+        nn.Sigmoid: "logistic",
+    }
+
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         for step in predictor:
-            if isinstance(step, nn.ReLU):
+            if isinstance(step, tuple(self.activations.keys())):
                 pass
             elif isinstance(step, nn.Linear):
                 pass
@@ -97,12 +103,7 @@ class SequentialConstr(BaseNNConstr):
         for i, step in enumerate(network):
             if i == num_layers - 1:
                 output = self._output
-            if isinstance(step, nn.ReLU):
-                layer = self._add_activation_layer(
-                    _input, self.act_dict["relu"], output, name=f"relu_{i}", **kwargs
-                )
-                _input = layer.output
-            elif isinstance(step, nn.Linear):
+            if isinstance(step, nn.Linear):
                 layer_weight = None
                 layer_bias = None
                 for name, param in step.named_parameters():
@@ -121,6 +122,16 @@ class SequentialConstr(BaseNNConstr):
                     self.act_dict["identity"],
                     output,
                     name=f"linear_{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            else:
+                activation = self.activations[type(step)]
+                layer = self._add_activation_layer(
+                    _input,
+                    self.act_dict[activation],
+                    output,
+                    name=f"{activation}_{i}",
                     **kwargs,
                 )
                 _input = layer.output

@@ -77,7 +77,7 @@ class KerasNetworkConstr(BaseNNConstr):
             if isinstance(step, keras.layers.Dense):
                 config = step.get_config()
                 activation = config["activation"]
-                if activation not in ("relu", "linear"):
+                if activation not in ("relu", "softmax", "sigmoid", "linear"):
                     raise ModelConfigurationError(
                         predictor, f"Unsupported activation {activation}"
                     )
@@ -119,11 +119,22 @@ class KerasNetworkConstr(BaseNNConstr):
                     _input, self.act_dict["relu"], output, name=f"relu{i}", **kwargs
                 )
                 _input = layer.output
+            elif isinstance(step, keras.layers.Softmax):
+                layer = self._add_activation_layer(
+                    _input,
+                    self.act_dict["softmax"],
+                    output,
+                    name=f"softmax{i}",
+                    **kwargs,
+                )
+                _input = layer.output
             else:
                 config = step.get_config()
                 activation = config["activation"]
                 if activation == "linear":
                     activation = "identity"
+                if activation == "sigmoid":
+                    activation = "logistic"
                 weights, bias = step.get_weights()
                 layer = self._add_dense_layer(
                     _input,

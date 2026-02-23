@@ -19,7 +19,7 @@
 
 from ..exceptions import ModelConfigurationError
 from ..modeling.neuralnet import BaseNNConstr
-from .skgetter import SKgetter
+from .skgetter import SKClassifier, SKRegressor
 
 
 def add_mlp_regressor_constr(
@@ -50,7 +50,7 @@ def add_mlp_regressor_constr(
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the translation to Gurobi of the activation function for the network is not
         implemented.
 
@@ -63,7 +63,65 @@ def add_mlp_regressor_constr(
     )
 
 
-class MLPRegressorConstr(SKgetter, BaseNNConstr):
+def add_mlp_classifier_constr(
+    gp_model,
+    mlp_regressor,
+    input_vars,
+    output_vars=None,
+    out_activation="softmax",
+    **kwargs,
+):
+    """Formulate mlp_regressor in gp_model.
+
+    The formulation predicts the values of output_vars using input_vars according to
+    mlp_regressor. See our :ref:`Users Guide <Neural Networks>` for details on the mip
+    formulation used.
+
+    Parameters
+    ----------
+    gp_model : :gurobipy:`model`
+        The gurobipy model where the predictor should be inserted.
+    mlpregressor : :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor`
+        The multi-layer perceptron regressor to insert as predictor.
+    input_vars : mvar_array_like
+        Decision variables used as input for regression in model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for regression in model.
+
+    Returns
+    -------
+    MLPRegressorConstr
+        Object containing information about what was added to gp_model to formulate
+        mlp_regressor.
+
+    Raises
+    ------
+    ModelConfigurationError
+        If the translation to Gurobi of the activation function for the network is not
+        implemented.
+
+    Notes
+    -----
+    |VariablesDimensionsWarn|
+    """
+    if out_activation == "identity":
+        kwargs["predict_function"] = "identity"
+    elif out_activation == "softmax":
+        kwargs["predict_function"] = "predict_proba"
+    else:
+        raise ModelConfigurationError(
+            mlp_regressor, f"No implementation for output activation {out_activation}"
+        )
+    return MLPClassifierConstr(
+        gp_model, mlp_regressor, input_vars, output_vars, **kwargs
+    )
+
+
+# Note: MLPConstr provides shared _mip_model implementation for both MLPRegressorConstr
+# and MLPClassifierConstr. The subclasses use multiple inheritance (SKRegressor/SKClassifier
+# + MLPConstr) to combine sklearn interface with neural network formulation logic.
+# Both __init__ methods are called explicitly to properly initialize the diamond inheritance.
+class MLPConstr(BaseNNConstr):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a gurobipy model.
 
@@ -75,13 +133,12 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         gp_model,
         predictor,
         input_vars,
-        output_vars=None,
+        output_vars,
         clean_predictor=False,
         **kwargs,
     ):
-        SKgetter.__init__(self, predictor, input_vars, **kwargs)
-        BaseNNConstr.__init__(
-            self,
+        assert predictor.activation in ("identity", "relu", "logistic")
+        super().__init__(
             gp_model,
             predictor,
             input_vars,
@@ -89,7 +146,6 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
             clean_predictor=clean_predictor,
             **kwargs,
         )
-        assert predictor.out_activation_ in ("identity", "relu")
 
     def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
@@ -110,8 +166,14 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
 
             # For last layer change activation
             if i == neural_net.n_layers_ - 2:
-                activation = self.act_dict[neural_net.out_activation_]
                 output = self._output
+                out_activation = neural_net.out_activation_
+                if (
+                    out_activation in ("softmax", "logistic")
+                    and self.predict_function == "identity"
+                ):
+                    out_activation = "identity"
+                activation = self.act_dict[out_activation]
 
             layer = self._add_dense_layer(
                 input_vars,
@@ -125,4 +187,76 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
             self.gp_model.update()
         assert (
             self._output is not None
-        )  # Should never happen since sklearn object defines n_ouputs_
+        )  # Should never happen since sklearn object defines n_outputs_
+
+        self.linear_predictor = layer.linear_predictor
+
+
+class MLPRegressorConstr(SKRegressor, MLPConstr):
+    """Class to formulate a trained
+    :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a gurobipy model.
+
+    |ClassShort|
+    """
+
+    def __init__(
+        self,
+        gp_model,
+        predictor,
+        input_vars,
+        output_vars,
+        clean_predictor=False,
+        **kwargs,
+    ):
+        assert predictor.out_activation_ in ("identity",)
+        SKRegressor.__init__(
+            self,
+            predictor,
+            input_vars,
+            **kwargs,
+        )
+        MLPConstr.__init__(
+            self,
+            gp_model,
+            predictor,
+            input_vars,
+            output_vars,
+            clean_predictor=clean_predictor,
+            **kwargs,
+        )
+
+
+class MLPClassifierConstr(SKClassifier, MLPConstr):
+    """Class to formulate a trained
+    :external+sklearn:py:class:`sklearn.neural_network.MLPClassifier` in a gurobipy model.
+
+    |ClassShort|
+    """
+
+    def __init__(
+        self,
+        gp_model,
+        predictor,
+        input_vars,
+        output_vars,
+        predict_function,
+        clean_predictor=False,
+        **kwargs,
+    ):
+        assert predictor.out_activation_ in ("logistic", "softmax")
+        SKClassifier.__init__(
+            self,
+            predictor,
+            input_vars,
+            predict_function,
+            **kwargs,
+        )
+        MLPConstr.__init__(
+            self,
+            gp_model,
+            predictor,
+            input_vars,
+            output_vars,
+            clean_predictor=clean_predictor,
+            **kwargs,
+        )

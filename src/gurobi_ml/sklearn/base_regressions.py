@@ -22,10 +22,10 @@ All linear models should work:
 """
 
 from ..modeling import AbstractPredictorConstr
-from .skgetter import SKgetter
+from .skgetter import SKRegressor
 
 
-class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
+class BaseSKlearnRegressionConstr(SKRegressor, AbstractPredictorConstr):
     """Predict a Gurobi variable using a Linear Regression that
     takes another Gurobi matrix variable as input.
     """
@@ -36,11 +36,14 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
         predictor,
         input_vars,
         output_vars=None,
-        output_type="",
         **kwargs,
     ):
-        self._output_shape = 1
-        SKgetter.__init__(self, predictor, input_vars, output_type, **kwargs)
+        coef = predictor.coef_
+        if len(coef.shape) == 1:
+            self._output_shape = 1
+        else:
+            self._output_shape = coef.shape[0]
+        SKRegressor.__init__(self, predictor, input_vars, **kwargs)
         AbstractPredictorConstr.__init__(
             self,
             gp_model,

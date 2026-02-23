@@ -74,7 +74,7 @@ class AbstractPredictorConstr(ABC, _SubModel):
             raise ValueError(
                 "Output variables dimension doesn't conform with modeling object "
                 + f"{type(self)}, output variable dimension: "
-                + f"{output_vars.shape[1]}"
+                + f"{output_vars.shape[1]} != {self._output_shape}"
             )
 
         if output_vars.shape[0] != input_vars.shape[0]:

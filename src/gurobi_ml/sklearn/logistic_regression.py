@@ -18,14 +18,26 @@
 :external+gurobi:py:class:`Model`.
 """
 
-import math
 import warnings
 
 import gurobipy as gp
-import numpy as np
 
-from ..exceptions import ModelConfigurationError
-from .base_regressions import BaseSKlearnRegressionConstr
+from ..modeling.base_predictor_constr import AbstractPredictorConstr
+from ..modeling.softmax import logistic, softmax
+
+try:
+    pass
+
+    _HAS_NL_EXPR = True
+    _HAS_NL = True
+except ImportError:
+    if gp.gurobi.version()[0] < 11:
+        _HAS_NL = False
+    else:
+        _HAS_NL = True
+    _HAS_NL_EXPR = False
+
+from .skgetter import SKClassifier
 
 
 def add_logistic_regression_constr(
@@ -33,7 +45,7 @@ def add_logistic_regression_constr(
     logistic_regression,
     input_vars,
     output_vars=None,
-    output_type="classification",
+    predict_function="predict_proba",
     epsilon=0.0,
     pwl_attributes=None,
     **kwargs,
@@ -70,13 +82,13 @@ def add_logistic_regression_constr(
     output_vars : mvar_array_like, optional
         Decision variables used as output for logistic regression in model.
 
-    output_type : {'classification', 'probability_1'}, default='classification'
-        If the option chosen is 'classification' the output is the class label
+    predict_function: {'predict', 'predict_proba'}, default='predict'
+        If the option chosen is 'predict' the output is the class label
         of either 0 or 1 given by the logistic regression. If the option
-        'probability_1' is chosen the output is the probability of the class 1.
+        'predict_proba' is chosen the output is the probability of each class.
 
     epsilon : float, default=0.0
-        When the `output_type` is 'classification', this tolerance can be set
+        When the `predict_function` is 'predict', this tolerance can be set
         to enforce that class 1 is chosen when the result of the logistic
         function is greater or equal to *0.5 + epsilon*.
 
@@ -115,7 +127,7 @@ def add_logistic_regression_constr(
         If the logistic regression is not a binary label regression
 
     ParameterError
-        If the value of output_type is set to a non-conforming value (see above).
+        If the value of predict_function is set to a non-conforming value (see above).
 
     Notes
     -----
@@ -126,14 +138,14 @@ def add_logistic_regression_constr(
         logistic_regression,
         input_vars,
         output_vars,
-        output_type,
+        predict_function,
         epsilon,
         pwl_attributes=pwl_attributes,
         **kwargs,
     )
 
 
-class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
+class LogisticRegressionConstr(SKClassifier, AbstractPredictorConstr):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression` in a gurobipy model.
 
@@ -146,25 +158,21 @@ class LogisticRegressionConstr(BaseSKlearnRegressionConstr):
         predictor,
         input_vars,
         output_vars=None,
-        output_type="classification",
+        predict_function="predict_proba",
         epsilon=0.0,
         pwl_attributes=None,
         **kwargs,
     ):
-        if len(predictor.classes_) > 2:
-            raise ModelConfigurationError(
-                predictor, "Logistic regression only supports binary classification"
-            )
-        if output_type not in ("classification", "probability_1"):
+        if predict_function not in ("predict_proba", "decision_function"):
             raise ValueError(
-                "output_type must be either 'classification' or 'probability_1'"
+                "predict_function should be either 'predict_proba' or 'decision_function'"
             )
-        if output_type == "classification" and pwl_attributes is not None:
+        if predict_function != "predict_proba" and pwl_attributes is not None:
             message = """
 pwl_attributes are not required for classification.  The problem is
 formulated without requiring the non-linear logistic function."""
             warnings.warn(message)
-        elif output_type != "classification":
+        elif predict_function == "predict_proba":
             self.attributes = (
                 self.default_pwl_attributes()
                 if pwl_attributes is None
@@ -173,14 +181,15 @@ formulated without requiring the non-linear logistic function."""
 
         self.epsilon = epsilon
         self._default_name = "log_reg"
-        self.affinevars = None
-        BaseSKlearnRegressionConstr.__init__(
+        self.linear_predictor = None
+        SKClassifier.__init__(self, predictor, input_vars, predict_function)
+        if self._output_shape == 2 and predict_function == "decision_function":
+            self._output_shape = 1
+        AbstractPredictorConstr.__init__(
             self,
             gp_model,
-            predictor,
             input_vars,
             output_vars,
-            output_type,
             **kwargs,
         )
 
@@ -192,7 +201,7 @@ formulated without requiring the non-linear logistic function."""
         <https://www.gurobi.com/documentation/current/refman/general_constraint_attribu.html>`_
         for the meaning of the attributes.
         """
-        if gp.gurobi.version()[0] < 11:
+        if not _HAS_NL:
             message = """
 Gurobi ≥ 11 can deal directly with nonlinear functions with 'FuncNonlinear'.
 Upgrading to version 11 is recommended when using logistic regressions."""
@@ -202,99 +211,46 @@ Upgrading to version 11 is recommended when using logistic regressions."""
                 "FuncPieceLength": 0.01,
                 "FuncPieceError": 0.01,
                 "FuncPieceRatio": -1.0,
+                "FuncNonlinear": 0,
             }
-        return {"FuncNonlinear": 1}
+        if not _HAS_NL_EXPR:
+            message = """
+Gurobi ≥ 12 can deal directly with nonlinear expressions.
+Upgrading to version 12 is recommended when using logistic regressions."""
+            warnings.warn(message)
+            return {"FuncNonlinear": 1}
+        return {}
 
-    def _addGenConstrIndicatorMvarV10(self, binvar, binval, lhs, sense, rhs, name):
-        """This function is to work around the lack of MVar compatibility in
-        Gurobi v10 indicator constraints.  Note, it is not as flexible as Model.addGenConstrIndicator
-        in V11+.  If support for v10 is dropped this function can be removed.
-
-        Parameters
-        ----------
-        binvar : MVar
-        binval : {0,1}
-        lhs : MVar or MLinExpr
-        sense : (char)
-            Options are gp.GRB.LESS_EQUAL, gp.GRB.EQUAL, or gp.GRB.GREATER_EQUAL
-        rhs : scalar
-        name : string
-        """
-        assert binvar.shape == lhs.shape
-        total_constraints = np.prod(binvar.shape)
-        binvar = binvar.reshape(total_constraints).tolist()
-        lhs = lhs.reshape(total_constraints).tolist()
-        for index in range(total_constraints):
-            self.gp_model.addGenConstrIndicator(
-                binvar[index],
-                binval,
-                lhs[index],
-                sense,
-                rhs,
-                name=self._indexed_name(index, name),
-            )
-
-    def _mip_model(self, **kwargs):
+    def _two_classes_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
-        affinevars = self.gp_model.addMVar(
-            self.output.shape, lb=-gp.GRB.INFINITY, name="affine_trans"
-        )
-        self._add_regression_constr(output=affinevars)
+        coefs = self.predictor.coef_
+        intercept = self.predictor.intercept_
 
-        if self.output_type == "classification":
-            # For classification we need an extra binary variable
-            bin_output = self.gp_model.addMVar(
-                self.output.shape, vtype=gp.GRB.BINARY, name="bin_output"
-            )
+        linreg = self.input @ coefs.T + intercept
 
-            # Workaround for MVars in indicator constraints for v10.
-            addGenConstrIndicator = (
-                self.gp_model.addGenConstrIndicator
-                if gp.gurobi.version()[0] >= 11
-                else self._addGenConstrIndicatorMvarV10
-            )
+        self.linear_predictor = linreg
 
-            # The original epsilon is with respect to the range of the logistic function.
-            # We must translate this to the domain of the logistic function.
-            affine_trans_epsilon = -math.log(1 / (0.5 + self.epsilon) - 1)
-
-            # For classification it is enough to test result of affine transformation
-            # and avoid adding logistic curve constraint.  See GH316.
-            addGenConstrIndicator(
-                bin_output,
-                1,
-                affinevars,
-                gp.GRB.GREATER_EQUAL,
-                affine_trans_epsilon,
-                "indicator_affinevars_pos",
-            )
-            addGenConstrIndicator(
-                bin_output,
-                0,
-                affinevars,
-                gp.GRB.LESS_EQUAL,
-                0,
-                "indicator_affinevars_neg",
-            )
-            self.gp_model.addConstr(bin_output == self.output)
+        if self.predict_function == "predict_proba":
+            self.gp_model.addConstr(self.output.sum(axis=1) == 1)
+            logistic(self, linreg)
         else:
-            log_result = self.output
-            for index in np.ndindex(self.output.shape):
-                self.gp_model.addGenConstrLogistic(
-                    affinevars[index],
-                    log_result[index],
-                    name=self._indexed_name(index, "logistic"),
-                )
-            num_gc = self.gp_model.NumGenConstrs
-            self.gp_model.update()
-            for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
-                for attr, val in self.attributes.items():
-                    gen_constr.setAttr(attr, val)
+            self.gp_model.addConstr(self.output[:, 0] == linreg[:, 0])
+
         self.gp_model.update()
 
-    @property
-    def affine_transformation_variables(self) -> gp.MVar:
-        """Variables that store the result of the affine transformation from the regression coefficient.
-        (intermediate result before applying the logistic function).
-        """
-        return self.affinevars
+    def _multi_class_model(self, **kwargs):
+        """Add the prediction constraints to Gurobi."""
+        coefs = self.predictor.coef_
+        intercept = self.predictor.intercept_
+
+        linreg = self.input @ coefs.T + intercept
+
+        if self.predict_function == "predict_proba":
+            softmax(self, linreg, **kwargs)
+        else:
+            self.gp_model.addConstr(self.output == linreg)
+
+    def _mip_model(self, **kwargs):
+        if self._output_shape > 2:
+            return self._multi_class_model(**kwargs)
+        return self._two_classes_model(**kwargs)
