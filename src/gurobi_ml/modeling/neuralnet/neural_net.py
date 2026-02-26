@@ -17,7 +17,7 @@
 
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
-from .activations import Identity, ReLU
+from .activations import Identity, ReLU, SqrtReLU, SoftPlus
 from .layers import ActivationLayer, DenseLayer
 
 
@@ -33,10 +33,28 @@ class BaseNNConstr(AbstractPredictorConstr):
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.predictor = predictor
+
+        # Initialize default activations
+        # Note: softplus is initialized lazily to avoid breaking older Gurobi versions
         self.act_dict = {
             "relu": ReLU(),
             "identity": Identity(),
         }
+
+        # Support convenient relu_formulation parameter to replace ReLU
+        relu_formulation = kwargs.get("relu_formulation", "mip")
+        if relu_formulation == "smooth":
+            epsilon = kwargs.get("smooth_relu_epsilon", 1e-6)
+            self.act_dict["relu"] = SqrtReLU(epsilon=epsilon)
+        elif relu_formulation == "soft":
+            beta = kwargs.get("soft_relu_beta", 1.0)
+            self.act_dict["relu"] = SoftPlus(beta=beta)
+        elif relu_formulation != "mip":
+            raise ValueError(
+                f"relu_formulation must be 'mip', 'smooth', or 'soft', got '{relu_formulation}'"
+            )
+
+        # Allow custom activation_models to override defaults
         try:
             for activation, activation_model in kwargs["activation_models"].items():
                 self.act_dict[activation] = activation_model
@@ -51,6 +69,23 @@ class BaseNNConstr(AbstractPredictorConstr):
             output_vars=output_vars,
             **kwargs,
         )
+
+    def _get_activation(self, activation_name):
+        """Get activation model, initializing softplus lazily if needed.
+
+        Parameters
+        ----------
+        activation_name : str
+            Name of the activation function
+
+        Returns
+        -------
+        Activation model object
+        """
+        if activation_name not in self.act_dict and activation_name == "softplus":
+            # Lazy initialization for softplus to support older Gurobi versions
+            self.act_dict["softplus"] = SoftPlus(beta=1.0)
+        return self.act_dict[activation_name]
 
     def __iter__(self):
         """Iterate over layers of neural network"""

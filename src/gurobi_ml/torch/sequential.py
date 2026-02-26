@@ -22,7 +22,7 @@ import torch
 from torch import nn
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
-from ..modeling.neuralnet import BaseNNConstr
+from ..modeling.neuralnet import BaseNNConstr, SoftPlus
 
 
 def add_sequential_constr(
@@ -52,14 +52,15 @@ def add_sequential_constr(
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the translation for some of the Pytorch model structure
         (layer or activation) is not implemented.
 
     Warnings
     --------
-    Only :external+torch:py:class:`torch.nn.Linear` layers and
-    :external+torch:py:class:`torch.nn.ReLU` layers are supported.
+    Only :external+torch:py:class:`torch.nn.Linear` layers,
+    :external+torch:py:class:`torch.nn.ReLU` layers, and
+    :external+torch:py:class:`torch.nn.Softplus` layers are supported.
 
     Notes
     -----
@@ -80,13 +81,15 @@ class SequentialConstr(BaseNNConstr):
         for step in predictor:
             if isinstance(step, nn.ReLU):
                 pass
+            elif isinstance(step, nn.Softplus):
+                pass
             elif isinstance(step, nn.Linear):
                 pass
             else:
                 raise ModelConfigurationError(
                     predictor, f"Unsupported layer {type(step).__name__}"
                 )
-        super().__init__(gp_model, predictor, input_vars, output_vars)
+        super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
     def _mip_model(self, **kwargs):
         network = self.predictor
@@ -99,7 +102,29 @@ class SequentialConstr(BaseNNConstr):
                 output = self._output
             if isinstance(step, nn.ReLU):
                 layer = self._add_activation_layer(
-                    _input, self.act_dict["relu"], output, name=f"relu_{i}", **kwargs
+                    _input,
+                    self._get_activation("relu"),
+                    output,
+                    name=f"relu_{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, nn.Softplus):
+                # Extract beta and threshold parameters from Softplus layer
+                beta = step.beta
+                threshold = step.threshold
+                # PyTorch's Softplus switches to y=x when beta*x > threshold for numerical stability
+                # We only support the default threshold (20) which is effectively infinite for typical inputs
+                if threshold != 20:
+                    raise ModelConfigurationError(
+                        self.predictor,
+                        f"PyTorch Softplus with non-default threshold ({threshold}) is not supported. "
+                        f"Only threshold=20 (default) is supported.",
+                    )
+                # Create SoftReLU with the same beta
+                softplus_activation = SoftPlus(beta=beta)
+                layer = self._add_activation_layer(
+                    _input, softplus_activation, output, name=f"softplus_{i}", **kwargs
                 )
                 _input = layer.output
             elif isinstance(step, nn.Linear):
@@ -118,7 +143,7 @@ class SequentialConstr(BaseNNConstr):
                     _input,
                     layer_weight,
                     layer_bias,
-                    self.act_dict["identity"],
+                    self._get_activation("identity"),
                     output,
                     name=f"linear_{i}",
                     **kwargs,
