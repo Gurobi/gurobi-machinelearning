@@ -6,7 +6,7 @@
 [![Documentation Status](https://readthedocs.org/projects/gurobi-machinelearning/badge/?version=stable)](https://gurobi-machinelearning.readthedocs.io/en/stable/?badge=stable)
 [![Gurobi-forum](https://img.shields.io/badge/Help-Gurobi--Forum-red)](https://support.gurobi.com/hc/en-us/community/topics/10373864542609-GitHub-Projects)
 
-[![Gurobi](https://raw.githubusercontent.com/Gurobi/gurobi-machinelearning/main/docs/source/_static/gurobi_light.png)](https://www.gurobi.com)
+[![Gurobi](https://raw.githubusercontent.com/Gurobi/gurobi-machinelearning/main/docs/source/_static/gurobi_light_tagline.svg)](https://www.gurobi.com)
 
 
 # Gurobi Machine Learning
