@@ -130,7 +130,7 @@ class SqrtReLU:
         but is non-differentiable at x=0.
     """
 
-    def __init__(self, epsilon=1e-6):
+    def __init__(self, epsilon=1e-2):
         if nlfunc is None:
             raise RuntimeError(
                 "SqrtReLU requires Gurobi 12.0+ with nonlinear function support. "
