@@ -128,6 +128,7 @@ numpydoc_class_members_toctree = False
 # a list of builtin themes.
 #
 html_theme = "gurobi_sphinxtheme"
+html_favicon = "https://www.gurobi.com/favicon.ico"
 html_title = project + " Manual"
 html_theme_options = {
     "version_warning": False,
@@ -139,7 +140,7 @@ html_theme_options = {
             "name": "Gurobi",
             "url": "https://www.gurobi.com",
             "html": """
-                <svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128.5 127.5"><defs><style>.cls-1{fill:#ed3424;}.cls-2{fill:#c61814;}.cls-3{fill:#22222c;}</style></defs><g id="Layer_2-2"><polygon class="cls-2" points="94.5 6.86 59.08 0 12.07 30.33 74.92 49.88 94.5 6.86"/><polygon class="cls-1" points="9.3 34.11 6.36 53.16 0 94.45 77.03 121.14 95.78 127.64 74.33 54.35 9.3 34.11"/><polygon class="cls-2" points="97.79 10.33 78.49 52.75 100.14 126.74 128.5 98.36 97.79 10.33"/></g></svg>
+                <svg viewBox="0 0 124 124" xmlns="http://www.w3.org/2000/svg"><path d="M0.0996 91.125L9.5744 31.1105L57.4942 0.5641L92.96 7.5927L123.554 94.367L95.125 123.292L0.0996 91.125Z" fill="url(#paint0_radial)"/><defs><radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(-3.0515 -22.71156) rotate(47.5638) scale(213.273 148.473)"><stop offset="0.0384616" stop-color="#CAEBEC"/><stop offset="0.298077" stop-color="#10ECD1"/><stop offset="0.677885" stop-color="#2158A4"/><stop offset="0.975962" stop-color="#1F063D"/></radialGradient></defs></svg>
             """,
             "class": "",
         },
