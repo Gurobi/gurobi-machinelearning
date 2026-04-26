@@ -5,7 +5,7 @@ import numpy as np
 import keras
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoModel
+from gurobi_ml.exceptions import NoModel, ParameterError
 
 
 class TestUnsuportedKeras(unittest.TestCase):
@@ -104,3 +104,39 @@ class TestUnsuportedKeras(unittest.TestCase):
 
     def test_max_value(self):
         self.do_relu_tests(max_value=10.0)
+
+    def test_keras_bad_shape(self):
+        self.x_train = np.reshape(self.x_train, (-1, 28 * 28))
+        self.x_test = np.reshape(self.x_test, (-1, 28 * 28))
+
+        nn = keras.models.Sequential(
+            [
+                keras.layers.InputLayer(shape=(28 * 28,)),
+                keras.layers.Dense(10),
+            ]
+        )
+        nn.compile(optimizer="adam", loss="mse")
+
+        m = gp.Model()
+        x = m.addMVar((1, 28 * 28), name="x")
+        y = m.addMVar((1, 5), name="y")
+
+        with self.assertRaises(ParameterError):
+            add_predictor_constr(m, nn, x, y)
+
+    def test_keras_multi_output(self):
+        inputs = keras.Input(shape=(10,))
+        x = keras.layers.Dense(5)(inputs)
+        out1 = keras.layers.Dense(2)(x)
+        out2 = keras.layers.Dense(3)(x)
+        nn = keras.Model(inputs=inputs, outputs=[out1, out2])
+
+        m = gp.Model()
+        x = m.addMVar((1, 10), name="x")
+
+        with self.assertRaises(NoModel) as context:
+            add_predictor_constr(m, nn, x)
+
+        self.assertIn(
+            "Multi-output keras models are not supported", str(context.exception)
+        )
