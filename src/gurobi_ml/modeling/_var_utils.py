@@ -65,11 +65,14 @@ def _get_sol_values(values, columns=None, index=None):
         ).reshape(values.shape)
     X = values.X
     if columns is not None and HAS_PANDAS:
-        if isinstance(index, (pd.Index, pd.MultiIndex)):
+        if isinstance(index, (pd.Index, pd.MultiIndex)) and X.shape[0] > 1:
             X = pd.DataFrame(data=X, columns=columns, index=index)
         else:
-            X = pd.Series(data=X, columns=columns, name=index)
-            raise NotImplementedError("Input variables as pd.Series is not implemented")
+            X = pd.Series(
+                data=X.ravel(),
+                index=columns,
+                name=index[0] if index is not None else None,
+            )
     return X
 
 
@@ -83,7 +86,9 @@ def _dataframe_to_mvar(model, df):
         columns = df.columns
         index = df.index
     elif isinstance(df, pd.Series):
-        raise NotImplementedError("Input variables as pd.Series is not implemented")
+        data = df.to_numpy().reshape(1, -1)
+        columns = df.index
+        index = pd.Index([df.name]) if df.name is not None else pd.Index([0])
     return _array_to_mvar(model, data, columns, index)
 
 
@@ -172,8 +177,10 @@ def validate_output_vars(gp_vars):
         Decision variables with correctly adjusted shape.
     """
     if HAS_PANDAS:
-        if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
+        if isinstance(gp_vars, pd.DataFrame):
             return validate_output_vars(gp_vars.to_numpy())
+        if isinstance(gp_vars, pd.Series):
+            return validate_output_vars(gp_vars.to_numpy().reshape(1, -1))
     if isinstance(gp_vars, np.ndarray):
         if any(map(lambda i: not isinstance(i, gp.Var), gp_vars.ravel())):
             raise TypeError("Dataframe can't be converted to an MVar")
@@ -207,9 +214,16 @@ def validate_input_vars(model, gp_vars):
         Decision variables with correctly adjusted shape.
     """
     if HAS_PANDAS:
-        if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
+        if isinstance(gp_vars, pd.DataFrame):
             columns = gp_vars.columns
             index = gp_vars.index
+            gp_vars = _dataframe_to_mvar(model, gp_vars)
+            return (gp_vars, columns, index)
+        if isinstance(gp_vars, pd.Series):
+            columns = gp_vars.index
+            index = (
+                pd.Index([gp_vars.name]) if gp_vars.name is not None else pd.Index([0])
+            )
             gp_vars = _dataframe_to_mvar(model, gp_vars)
             return (gp_vars, columns, index)
     if isinstance(gp_vars, np.ndarray):
