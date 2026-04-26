@@ -1,17 +1,17 @@
 .. only:: html
 
-     .. image:: ../_static/gurobi_light.png
+     .. image:: ../_static/gurobi_light.svg
           :width: 220
           :target: https://www.gurobi.com
-          :alt: GUROBI
+          :alt: Gurobi
           :align: right
           :class: float-right, only-light
 
 
-     .. image:: ../_static/gurobi_dark.png
+     .. image:: ../_static/gurobi_dark.svg
           :width: 220
           :target: https://www.gurobi.com
-          :alt: GUROBI
+          :alt: Gurobi
           :align: right
           :class: float-right, only-dark
 
