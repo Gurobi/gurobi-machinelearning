@@ -125,7 +125,7 @@ class PolynomialFeaturesConstr(SKtransformer):
     ):
         if polynomial_features.degree > 2:
             raise NoModel(
-                polynomial_features, "Can only handle polynomials of degree < 2"
+                polynomial_features, "Can only handle polynomials of degree <= 2"
             )
         self._default_name = "poly_feat"
         super().__init__(
