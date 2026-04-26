@@ -15,6 +15,7 @@
 
 """Module for formulating a Keras model into a :external+gurobi:py:class:`Model`."""
 
+import numbers
 import numpy as np
 import keras
 
@@ -104,7 +105,7 @@ class KerasNetworkConstr(BaseNNConstr):
         else:
             self._output_shape = predictor.output_shape[-1]
 
-        if not isinstance(self._output_shape, int):
+        if not isinstance(self._output_shape, numbers.Integral):
             raise NoModel(
                 predictor, f"Unexpected output shape {predictor.output_shape}"
             )
@@ -148,9 +149,12 @@ class KerasNetworkConstr(BaseNNConstr):
 
     def get_error(self, eps=None):
         if self._has_solution:
-            r_val = np.abs(
-                self.predictor.predict(self.input_values) - self.output_values
-            )
+            prediction = self.predictor(self.input_values, training=False)
+            if hasattr(prediction, "numpy"):
+                prediction = prediction.numpy()
+            else:
+                prediction = np.asarray(prediction)
+            r_val = np.abs(prediction - self.output_values)
             if eps is not None and np.max(r_val) > eps:
                 print(f"{self.input_values} != {self.output_values}")
             return r_val
