@@ -111,10 +111,10 @@ def add_logistic_regression_constr(
     Raises
     ------
 
-    NoModel
+    ModelConfigurationError
         If the logistic regression is not a binary label regression
 
-    ParameterError
+    ValueError
         If the value of output_type is set to a non-conforming value (see above).
 
     Notes

@@ -53,7 +53,7 @@ def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwar
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the translation to Gurobi of one of the elements in the pipeline
         is not implemented or recognized.
 

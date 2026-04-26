@@ -52,7 +52,7 @@ def add_sequential_constr(
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the translation for some of the Pytorch model structure
         (layer or activation) is not implemented.
 

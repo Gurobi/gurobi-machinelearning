@@ -65,7 +65,7 @@ def add_lgbmregressor_constr(
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the booster is not of type "gbtree".
     """
     return LGBMConstr(
@@ -116,7 +116,7 @@ def add_lgbm_booster_constr(
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the booster is not of type "gbtree".
     """
     return LGBMConstr(

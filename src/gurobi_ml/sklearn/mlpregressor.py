@@ -50,7 +50,7 @@ def add_mlp_regressor_constr(
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the translation to Gurobi of the activation function for the network is not
         implemented.
 

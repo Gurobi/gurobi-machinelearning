@@ -4,7 +4,7 @@ import gurobipy as gp
 import numpy as np
 
 from gurobi_ml import add_predictor_constr, register_predictor_constr
-from gurobi_ml.exceptions import NoSolution
+from gurobi_ml.exceptions import NoSolutionError
 from gurobi_ml.modeling.neuralnet import BaseNNConstr
 
 
@@ -68,7 +68,7 @@ class MyNNConstr(BaseNNConstr):
     def get_error(self):
         if self._has_solution():
             return np.abs(self.input.X) - self.output.X
-        raise NoSolution()
+        raise NoSolutionError()
 
 
 def abs_model(X, y, nn, inf_bound, registered):

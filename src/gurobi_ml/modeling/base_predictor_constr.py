@@ -186,7 +186,7 @@ class AbstractPredictorConstr(ABC, _SubModel):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         ...
@@ -225,7 +225,7 @@ class AbstractPredictorConstr(ABC, _SubModel):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
 
@@ -241,7 +241,7 @@ class AbstractPredictorConstr(ABC, _SubModel):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         return _get_sol_values(self.output)

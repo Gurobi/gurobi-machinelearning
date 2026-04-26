@@ -76,7 +76,7 @@ def add_xgbregressor_constr(
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the booster is not of type "gbtree".
     """
     return XGBoostRegressorConstr(
@@ -127,7 +127,7 @@ def add_xgboost_regressor_constr(
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the booster is not of type "gbtree".
     """
     return XGBoostRegressorConstr(

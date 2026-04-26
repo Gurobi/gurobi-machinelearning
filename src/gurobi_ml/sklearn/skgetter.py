@@ -55,7 +55,7 @@ class SKgetter(AbstractPredictorConstr):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         if self._has_solution:
@@ -109,7 +109,7 @@ class SKtransformer(AbstractPredictorConstr):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         if self._has_solution:
