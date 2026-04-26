@@ -97,7 +97,18 @@ class KerasNetworkConstr(BaseNNConstr):
                     predictor, f"Unsupported network layer {type(step).__name__}"
                 )
 
-        self._output_shape = predictor.output_shape[-1]
+        if isinstance(predictor.output_shape, list):
+            if len(predictor.output_shape) > 1:
+                raise NoModel(predictor, "Multi-output keras models are not supported")
+            self._output_shape = predictor.output_shape[0][-1]
+        else:
+            self._output_shape = predictor.output_shape[-1]
+
+        if not isinstance(self._output_shape, int):
+            raise NoModel(
+                predictor, f"Unexpected output shape {predictor.output_shape}"
+            )
+
         super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
     def _mip_model(self, **kwargs):
