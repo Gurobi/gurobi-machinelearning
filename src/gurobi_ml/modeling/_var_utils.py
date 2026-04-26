@@ -65,7 +65,7 @@ def _get_sol_values(values, columns=None, index=None):
         ).reshape(values.shape)
     X = values.X
     if columns is not None and HAS_PANDAS:
-        if isinstance(index, (pd.Index, pd.MultiIndex)) and X.shape[0] > 1:
+        if isinstance(index, (pd.Index, pd.MultiIndex)):
             X = pd.DataFrame(data=X, columns=columns, index=index)
         else:
             X = pd.Series(
@@ -177,10 +177,8 @@ def validate_output_vars(gp_vars):
         Decision variables with correctly adjusted shape.
     """
     if HAS_PANDAS:
-        if isinstance(gp_vars, pd.DataFrame):
+        if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
             return validate_output_vars(gp_vars.to_numpy())
-        if isinstance(gp_vars, pd.Series):
-            return validate_output_vars(gp_vars.to_numpy().reshape(1, -1))
     if isinstance(gp_vars, np.ndarray):
         if any(map(lambda i: not isinstance(i, gp.Var), gp_vars.ravel())):
             raise TypeError("Dataframe can't be converted to an MVar")
