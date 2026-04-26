@@ -88,14 +88,14 @@ class SKtransformer(AbstractPredictorConstr):
         Scikit-Learn transformer embedded into Gurobi model.
     """
 
-    def __init__(self, gp_model, transformer, input_vars, **kwargs):
+    def __init__(self, gp_model, transformer, input_vars, output_vars=None, **kwargs):
         self.transformer = transformer
         if hasattr(transformer, "n_features_in_"):
             self._input_shape = transformer.n_features_in_
         if hasattr(transformer, "n_output_features_"):
             self._output_shape = transformer.n_output_features_
         check_is_fitted(transformer)
-        super().__init__(gp_model, input_vars, **kwargs)
+        super().__init__(gp_model, input_vars, output_vars, **kwargs)
 
     def get_error(self, eps=None):
         """Return error in Gurobi's solution with respect to preprocessing from input.

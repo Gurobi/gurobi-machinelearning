@@ -23,7 +23,9 @@ from ..exceptions import ModelConfigurationError
 from .skgetter import SKtransformer
 
 
-def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **kwargs):
+def add_polynomial_features_constr(
+    gp_model, polynomial_features, input_vars, output_vars=None, **kwargs
+):
     """Formulate polynomial_features into gp_model.
 
     Note that this function creates the output variables from
@@ -37,6 +39,8 @@ def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **
         The polynomial features to insert in gp_model.
     input_vars : mvar_array_like
         Decision variables used as input for polynomial features in model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for polynomial features in model.
 
     Returns
     -------
@@ -48,10 +52,14 @@ def add_polynomial_features_constr(gp_model, polynomial_features, input_vars, **
     --------
     Only polynomial features of degree 2 are supported.
     """
-    return PolynomialFeaturesConstr(gp_model, polynomial_features, input_vars, **kwargs)
+    return PolynomialFeaturesConstr(
+        gp_model, polynomial_features, input_vars, output_vars, **kwargs
+    )
 
 
-def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
+def add_standard_scaler_constr(
+    gp_model, standard_scaler, input_vars, output_vars=None, **kwargs
+):
     """Formulate standard_scaler into gp_model.
 
     Note that this function creates the output variables from
@@ -65,6 +73,8 @@ def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
         The standard scaler to insert as predictor.
     input_vars : mvar_array_like
         Decision variables used as input for standard scaler in model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for standard scaler in model.
 
     Returns
     -------
@@ -72,7 +82,9 @@ def add_standard_scaler_constr(gp_model, standard_scaler, input_vars, **kwargs):
         Object containing information about what was added to gp_model to insert the
         standard_scaler in it
     """
-    return StandardScalerConstr(gp_model, standard_scaler, input_vars, **kwargs)
+    return StandardScalerConstr(
+        gp_model, standard_scaler, input_vars, output_vars, **kwargs
+    )
 
 
 class StandardScalerConstr(SKtransformer):
@@ -83,10 +95,10 @@ class StandardScalerConstr(SKtransformer):
     Stores the changes to :external+gurobi:py:class:`Model` when formulating an instance into it.
     """
 
-    def __init__(self, gp_model, scaler, input_vars, **kwargs):
+    def __init__(self, gp_model, scaler, input_vars, output_vars=None, **kwargs):
         self._default_name = "std_scaler"
         self._output_shape = scaler.n_features_in_
-        super().__init__(gp_model, scaler, input_vars, **kwargs)
+        super().__init__(gp_model, scaler, input_vars, output_vars, **kwargs)
 
     def _mip_model(self, **kwargs):
         """Do the transformation on x."""
@@ -108,13 +120,17 @@ class PolynomialFeaturesConstr(SKtransformer):
     gurobipy model.
     """
 
-    def __init__(self, gp_model, polynomial_features, input_vars, **kwargs):
+    def __init__(
+        self, gp_model, polynomial_features, input_vars, output_vars=None, **kwargs
+    ):
         if polynomial_features.degree > 2:
             raise ModelConfigurationError(
-                polynomial_features, "Can only handle polynomials of degree < 2"
+                polynomial_features, "Can only handle polynomials of degree <= 2"
             )
         self._default_name = "poly_feat"
-        super().__init__(gp_model, polynomial_features, input_vars, **kwargs)
+        super().__init__(
+            gp_model, polynomial_features, input_vars, output_vars, **kwargs
+        )
 
     def _mip_model(self, **kwargs):
         """Do the transformation on x."""

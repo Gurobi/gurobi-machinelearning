@@ -15,6 +15,7 @@
 
 """Module for formulating a Keras model into a :external+gurobi:py:class:`Model`."""
 
+import numbers
 import numpy as np
 import keras
 
@@ -47,7 +48,7 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the translation for some of the Keras model structure
         (layer or activation) is not implemented.
 
@@ -101,6 +102,20 @@ class KerasNetworkConstr(BaseNNConstr):
                     predictor, f"Unsupported network layer {type(step).__name__}"
                 )
 
+        if isinstance(predictor.output_shape, list):
+            if len(predictor.output_shape) > 1:
+                raise ModelConfigurationError(
+                    predictor, "Multi-output keras models are not supported"
+                )
+            self._output_shape = predictor.output_shape[0][-1]
+        else:
+            self._output_shape = predictor.output_shape[-1]
+
+        if not isinstance(self._output_shape, numbers.Integral):
+            raise ModelConfigurationError(
+                predictor, f"Unexpected output shape {predictor.output_shape}"
+            )
+
         super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
     def _mip_model(self, **kwargs):
@@ -140,9 +155,12 @@ class KerasNetworkConstr(BaseNNConstr):
 
     def get_error(self, eps=None):
         if self._has_solution:
-            r_val = np.abs(
-                self.predictor.predict(self.input_values) - self.output_values
-            )
+            prediction = self.predictor(self.input_values, training=False)
+            if hasattr(prediction, "numpy"):
+                prediction = prediction.numpy()
+            else:
+                prediction = np.asarray(prediction)
+            r_val = np.abs(prediction - self.output_values)
             if eps is not None and np.max(r_val) > eps:
                 print(f"{self.input_values} != {self.output_values}")
             return r_val

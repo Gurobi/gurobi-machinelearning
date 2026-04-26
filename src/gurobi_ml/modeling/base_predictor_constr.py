@@ -47,6 +47,8 @@ class AbstractPredictorConstr(ABC, _SubModel):
     def __init__(self, gp_model, input_vars, output_vars=None, **kwargs):
         self._input = input_vars
         self._output = output_vars
+        self._input_index = None
+        self._input_columns = None
         _SubModel.__init__(self, gp_model, **kwargs)
 
     def _validate(self):
@@ -62,7 +64,9 @@ class AbstractPredictorConstr(ABC, _SubModel):
             )
 
         if output_vars.ndim == 1:
-            if input_vars.shape[0] == 1:
+            if hasattr(self, "_output_shape") and self._output_shape == 1:
+                output_vars = output_vars.reshape((-1, 1))
+            elif input_vars.shape[0] == 1:
                 output_vars = output_vars.reshape((1, -1))
             else:
                 output_vars = output_vars.reshape((-1, 1))
