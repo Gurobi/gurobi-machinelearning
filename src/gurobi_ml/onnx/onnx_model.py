@@ -16,9 +16,8 @@
 """Module for formulating an ONNX MLP model into a :external+gurobi:py:class:`Model`.
 
 Supported ONNX models are simple feed-forward networks composed of `Gemm`
-nodes (dense layers) or `MatMul`+`Add` sequences, along with `Relu` activations.
-This mirrors the Keras and PyTorch integrations, which currently handle
-Dense/Linear + ReLU networks.
+nodes (dense layers) or `MatMul`+`Add` sequences, along with `Relu` and
+`Softplus` activations. This mirrors the Keras and PyTorch integrations.
 """
 
 from __future__ import annotations
@@ -44,7 +43,7 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
         Target Gurobi model where the predictor submodel is added.
     onnx_model : onnx.ModelProto
         ONNX model, expected to represent a sequential MLP with `Gemm` nodes
-        (or `MatMul`+`Add` sequences) and `Relu` activations.
+        (or `MatMul`+`Add` sequences) and `Relu` or `Softplus` activations.
     input_vars : mvar_array_like
         Decision variables used as input for the model in `gp_model`.
     output_vars : mvar_array_like, optional
@@ -52,9 +51,9 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
 
     Warnings
     --------
-    Only networks composed of `Gemm` (or `MatMul`+`Add`) and `Relu` nodes are
-    supported. `Gemm` nodes must use default `alpha=1`, `beta=1`. Attribute
-    `transB` is supported.
+    Only networks composed of `Gemm` (or `MatMul`+`Add`), `Relu`, and `Softplus`
+    nodes are supported. `Gemm` nodes must use default `alpha=1`, `beta=1`.
+    Attribute `transB` is supported.
     """
     return ONNXNetworkConstr(gp_model, onnx_model, input_vars, output_vars, **kwargs)
 
@@ -65,7 +64,7 @@ class _ONNXLayer:
     def __init__(self, W: np.ndarray, b: np.ndarray, activation: str = "identity"):
         self.W = W  # shape (in, out)
         self.b = b  # shape (out,)
-        self.activation = activation  # "relu" or "identity"
+        self.activation = activation  # "relu", "softplus", or "identity"
 
 
 class ONNXNetworkConstr(BaseNNConstr):
@@ -305,6 +304,21 @@ class ONNXNetworkConstr(BaseNNConstr):
                     layers.append(
                         _ONNXLayer(
                             W=np.zeros((0, 0)), b=np.zeros((0,)), activation="relu"
+                        )
+                    )
+                processed_indices.add(node_idx)
+
+            elif op == "Softplus":
+                # ONNX Softplus: y = log(exp(x) + 1)
+                # This is equivalent to SoftReLU with beta=1.0
+                # Apply to preceding layer if possible
+                if layers and layers[-1].activation == "identity":
+                    layers[-1].activation = "softplus"
+                else:
+                    # Standalone softplus activation
+                    layers.append(
+                        _ONNXLayer(
+                            W=np.zeros((0, 0)), b=np.zeros((0,)), activation="softplus"
                         )
                     )
                 processed_indices.add(node_idx)

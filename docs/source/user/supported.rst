@@ -135,7 +135,8 @@ Currently, only the following are supported:
    * Sequential MLPs with `Gemm` nodes (PyTorch/sklearn style) with default attributes
      (`alpha=1`, `beta=1`) and optional `transB` attribute,
    * Sequential MLPs with `MatMul` + `Add` sequences (TensorFlow/tf2onnx style),
-   * `Relu` activations.
+   * `Relu` activations,
+   * `Softplus` activations.
 
 Models must be strictly sequential with no skip connections or residual blocks.
 Each tensor should be consumed by at most one node. `Add` nodes are only supported
