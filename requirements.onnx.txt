@@ -1,2 +1,2 @@
-onnx>=1.14.0
+onnx>=1.21.0
 onnxruntime>=1.24.3
