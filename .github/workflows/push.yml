@@ -41,6 +41,8 @@ jobs:
             gurobi-version: "gurobi11"
           - python-version: "3.14"
             gurobi-version: "gurobi11"
+          - python-version: "3.14"
+            gurobi-version: "gurobi12"
     steps:
       - uses: actions/checkout@v6
       - name: Setup Python
