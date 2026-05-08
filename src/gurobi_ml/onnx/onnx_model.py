@@ -16,8 +16,8 @@
 """Module for formulating an ONNX MLP model into a :external+gurobi:py:class:`Model`.
 
 Supported ONNX models are simple feed-forward networks composed of `Gemm`
-nodes (dense layers) or `MatMul`+`Add` sequences, along with `Relu` and
-`Softplus` activations. This mirrors the Keras and PyTorch integrations.
+nodes (dense layers) or `MatMul`+`Add` sequences, along with `Relu`,
+`Softplus`, `Sigmoid`, and `Tanh` activations.
 """
 
 from __future__ import annotations
@@ -30,6 +30,14 @@ from onnx import numpy_helper
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr
+
+# Maps ONNX op names to activation registry names used by BaseNNConstr.
+_ONNX_ACTIVATION_OPS = {
+    "Relu": "relu",
+    "Softplus": "softplus",
+    "Sigmoid": "sigmoid",
+    "Tanh": "tanh",
+}
 
 
 def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs):
@@ -287,40 +295,13 @@ class ONNXNetworkConstr(BaseNNConstr):
                         f"(MatMul+Add pattern) are allowed.",
                     )
 
-            elif op == "Relu":
-                # Next linear layer will use relu activation; if we have no
-                # preceding linear layer, we model it as a pure activation layer
-                # via _add_activation_layer during _mip_model.
-                # To keep the implementation simple and in line with Keras/Torch,
-                # we treat Relu as activation for the preceding affine transform
-                # when possible; otherwise mark pending_activation to apply to
-                # the following Dense layer.
+            elif op in _ONNX_ACTIVATION_OPS:
+                act_name = _ONNX_ACTIVATION_OPS[op]
                 if layers and layers[-1].activation == "identity":
-                    layers[-1].activation = "relu"
+                    layers[-1].activation = act_name
                 else:
-                    # No prior dense, remember to insert a standalone activation
-                    # at modeling time by setting a pending flag.
-                    # Here we store a marker layer with zero-sized W to signal
-                    # a standalone activation to the modeler.
                     layers.append(
-                        _ONNXLayer(
-                            W=np.zeros((0, 0)), b=np.zeros((0,)), activation="relu"
-                        )
-                    )
-                processed_indices.add(node_idx)
-
-            elif op == "Softplus":
-                # ONNX Softplus: y = log(exp(x) + 1)
-                # This is equivalent to SoftReLU with beta=1.0
-                # Apply to preceding layer if possible
-                if layers and layers[-1].activation == "identity":
-                    layers[-1].activation = "softplus"
-                else:
-                    # Standalone softplus activation
-                    layers.append(
-                        _ONNXLayer(
-                            W=np.zeros((0, 0)), b=np.zeros((0,)), activation="softplus"
-                        )
+                        _ONNXLayer(W=np.zeros((0, 0)), b=np.zeros((0,)), activation=act_name)
                     )
                 processed_indices.add(node_idx)
 
@@ -348,9 +329,9 @@ class ONNXNetworkConstr(BaseNNConstr):
                 # Standalone activation layer
                 layer = self._add_activation_layer(
                     _input,
-                    self.act_dict[spec.activation],
+                    self._get_activation(spec.activation),
                     output,
-                    name=f"relu{i}",
+                    name=f"{spec.activation}{i}",
                     **kwargs,
                 )
                 _input = layer.output
@@ -359,9 +340,7 @@ class ONNXNetworkConstr(BaseNNConstr):
                     _input,
                     spec.W,
                     spec.b,
-                    self.act_dict[
-                        spec.activation if spec.activation != "identity" else "identity"
-                    ],
+                    self._get_activation(spec.activation),
                     output,
                     name=f"dense{i}",
                     **kwargs,

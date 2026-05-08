@@ -84,7 +84,7 @@ class KerasNetworkConstr(BaseNNConstr):
             if isinstance(step, keras.layers.Dense):
                 config = step.get_config()
                 activation = config["activation"]
-                if activation not in ("relu", "linear", "softplus"):
+                if activation not in ("relu", "linear", "softplus", "sigmoid", "tanh"):
                     raise ModelConfigurationError(
                         predictor, f"Unsupported activation {activation}"
                     )

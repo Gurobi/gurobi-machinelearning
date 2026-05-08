@@ -17,7 +17,15 @@
 
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
-from .activations import Identity, ReLU, SqrtReLU, SoftPlus
+from .activations import Identity, ReLU, Sigmoid, SoftPlus, Tanh
+
+# Factories for smooth activations that require Gurobi 12+ (instantiated lazily
+# so that importing this module on older Gurobi versions doesn't raise).
+_LAZY_ACTIVATION_FACTORIES = {
+    "softplus": lambda: SoftPlus(beta=1.0),
+    "sigmoid": Sigmoid,
+    "tanh": Tanh,
+}
 from .layers import ActivationLayer, DenseLayer
 
 
@@ -41,17 +49,14 @@ class BaseNNConstr(AbstractPredictorConstr):
             "identity": Identity(),
         }
 
-        # Support convenient relu_formulation parameter to replace ReLU
+        # Support convenient relu_formulation parameter to replace ReLU with a smooth approximation
         relu_formulation = kwargs.get("relu_formulation", "mip")
-        if relu_formulation == "smooth":
-            epsilon = kwargs.get("smooth_relu_epsilon", 1e-6)
-            self.act_dict["relu"] = SqrtReLU(epsilon=epsilon)
-        elif relu_formulation == "soft":
+        if relu_formulation == "soft":
             beta = kwargs.get("soft_relu_beta", 1.0)
             self.act_dict["relu"] = SoftPlus(beta=beta)
         elif relu_formulation != "mip":
             raise ValueError(
-                f"relu_formulation must be 'mip', 'smooth', or 'soft', got '{relu_formulation}'"
+                f"relu_formulation must be 'mip' or 'soft', got '{relu_formulation}'"
             )
 
         # Allow custom activation_models to override defaults
@@ -71,20 +76,22 @@ class BaseNNConstr(AbstractPredictorConstr):
         )
 
     def _get_activation(self, activation_name):
-        """Get activation model, initializing softplus lazily if needed.
+        """Return the activation model for *activation_name*, instantiating it lazily if needed.
 
         Parameters
         ----------
         activation_name : str
-            Name of the activation function
+            Name of the activation function (e.g. ``"relu"``, ``"tanh"``).
 
         Returns
         -------
         Activation model object
         """
-        if activation_name not in self.act_dict and activation_name == "softplus":
-            # Lazy initialization for softplus to support older Gurobi versions
-            self.act_dict["softplus"] = SoftPlus(beta=1.0)
+        if activation_name not in self.act_dict:
+            factory = _LAZY_ACTIVATION_FACTORIES.get(activation_name)
+            if factory is None:
+                raise KeyError(f"Unknown activation '{activation_name}'")
+            self.act_dict[activation_name] = factory()
         return self.act_dict[activation_name]
 
     def __iter__(self):

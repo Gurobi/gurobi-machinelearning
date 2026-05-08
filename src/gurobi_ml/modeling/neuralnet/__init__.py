@@ -15,6 +15,7 @@
 
 from .activations import Identity as Identity
 from .activations import ReLU as ReLU
-from .activations import SqrtReLU as SqrtReLU
+from .activations import Sigmoid as Sigmoid
 from .activations import SoftPlus as SoftPlus
+from .activations import Tanh as Tanh
 from .neural_net import BaseNNConstr as BaseNNConstr

@@ -22,8 +22,16 @@ import torch
 import warnings
 from torch import nn
 
-from ..exceptions import ModelConfigurationError, NoSolutionError
+from ..exceptions import ModelConfigurationError, NoModel, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr, SoftPlus
+
+# Map nn.Module activation types to their activation-registry name.
+# nn.Softplus is handled separately because it carries parameters (beta, threshold).
+_NN_ACTIVATION_MAP = {
+    nn.ReLU: "relu",
+    nn.Sigmoid: "sigmoid",
+    nn.Tanh: "tanh",
+}
 
 
 def add_sequential_constr(
@@ -60,7 +68,9 @@ def add_sequential_constr(
     Warnings
     --------
     Only :external+torch:py:class:`torch.nn.Linear` layers,
-    :external+torch:py:class:`torch.nn.ReLU` layers, and
+    :external+torch:py:class:`torch.nn.ReLU`,
+    :external+torch:py:class:`torch.nn.Sigmoid`,
+    :external+torch:py:class:`torch.nn.Tanh`, and
     :external+torch:py:class:`torch.nn.Softplus` layers are supported.
 
     Notes
@@ -79,14 +89,9 @@ class SequentialConstr(BaseNNConstr):
     """
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
+        _supported = (*_NN_ACTIVATION_MAP, nn.Softplus, nn.Linear)
         for step in predictor:
-            if isinstance(step, nn.ReLU):
-                pass
-            elif isinstance(step, nn.Softplus):
-                pass
-            elif isinstance(step, nn.Linear):
-                pass
-            else:
+            if not isinstance(step, _supported):
                 raise ModelConfigurationError(
                     predictor, f"Unsupported layer {type(step).__name__}"
                 )
@@ -101,31 +106,31 @@ class SequentialConstr(BaseNNConstr):
         for i, step in enumerate(network):
             if i == num_layers - 1:
                 output = self._output
-            if isinstance(step, nn.ReLU):
+
+            act_name = _NN_ACTIVATION_MAP.get(type(step))
+            if act_name is not None:
                 layer = self._add_activation_layer(
                     _input,
-                    self._get_activation("relu"),
+                    self._get_activation(act_name),
                     output,
-                    name=f"relu_{i}",
+                    name=f"{act_name}_{i}",
                     **kwargs,
                 )
                 _input = layer.output
             elif isinstance(step, nn.Softplus):
-                # Extract beta and threshold parameters from Softplus layer
-                beta = step.beta
-                threshold = step.threshold
-                # PyTorch's Softplus switches to y=x when beta*x > threshold for numerical stability
-                # We only support the default threshold (20) which is effectively infinite for typical inputs
-                if threshold != 20:
-                    raise ModelConfigurationError(
+                # Softplus carries parameters; validate threshold before constructing.
+                if step.threshold != 20:
+                    raise NoModel(
                         self.predictor,
-                        f"PyTorch Softplus with non-default threshold ({threshold}) is not supported. "
+                        f"PyTorch Softplus with non-default threshold ({step.threshold}) is not supported. "
                         f"Only threshold=20 (default) is supported.",
                     )
-                # Create SoftReLU with the same beta
-                softplus_activation = SoftPlus(beta=beta)
                 layer = self._add_activation_layer(
-                    _input, softplus_activation, output, name=f"softplus_{i}", **kwargs
+                    _input,
+                    SoftPlus(beta=step.beta),
+                    output,
+                    name=f"softplus_{i}",
+                    **kwargs,
                 )
                 _input = layer.output
             elif isinstance(step, nn.Linear):
