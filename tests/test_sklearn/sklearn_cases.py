@@ -25,7 +25,7 @@ def init_predictor(name):
     if isinstance(name, str):
         params = {
             "MLPRegressor": "hidden_layer_sizes=[20, 20]",
-            "MLPClassifier": "hidden_layer_sizes=[50, 50]",
+            "MLPClassifier": "hidden_layer_sizes=[10, 10]",
             "GradientBoostingRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
             "RandomForestRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
             "DecisionTreeRegressor": "max_leaf_nodes=50",
@@ -157,6 +157,10 @@ class Cases(ABC):
         X, y = self.data
         predictor.fit(X, y)
         non_convex = False
+        if hasattr(predictor, "predict_proba"):
+            output_shape = predictor.predict_proba(X).shape
+        else:
+            output_shape = y.shape
         if isinstance(predictor, Pipeline):
             for element in predictor:
                 if isinstance(element, PolynomialFeatures):
@@ -166,7 +170,7 @@ class Cases(ABC):
         rval = {
             "predictor": predictor,
             "input_shape": X.shape,
-            "output_shape": y.shape,
+            "output_shape": output_shape,
             "nonconvex": non_convex,
         }
         if self.saved_training:
@@ -195,7 +199,7 @@ class DiabetesCases(Cases):
     This is appropriate for testing a regression with a single output."""
 
     def __init__(self):
-        excluded = ["LogisticRegression"]
+        excluded = ["LogisticRegression", "MLPClassifier"]
         super().__init__("diabetes", excluded=excluded)
 
     def load_data(self):
@@ -212,7 +216,7 @@ class DiabetesCasesAsFrame(Cases):
     This is appropriate for testing a regression with a single output."""
 
     def __init__(self):
-        excluded = ["LogisticRegression"]
+        excluded = ["LogisticRegression", "MLPClassifier"]
         super().__init__("diabetes_pandas", excluded=excluded)
 
     def load_data(self):
@@ -223,14 +227,14 @@ class DiabetesCasesAsFrame(Cases):
         self._data = (X, y)
 
 
-class IrisCases(Cases):
+class IrisBinaryCases(Cases):
     """Base class to have cases for testing regression models on iris set
 
     Transform the iris test set to binary classification.
     This is appropriate for testing binary classification models."""
 
     def __init__(self):
-        super().__init__("iris", regressors=["LogisticRegression"])
+        super().__init__("iris_binary", regressors=["LogisticRegression"])
 
     def load_data(self):
         data = datasets.load_iris()
@@ -240,6 +244,23 @@ class IrisCases(Cases):
         # Make it a binary classification
         X = X[y != 2]
         y = y[y != 2]
+        self._data = (X, y)
+
+
+class IrisMultiCases(Cases):
+    """Base class to have cases for testing regression models on iris set
+
+    Transform the iris test set to multi-class classification.
+    This is appropriate for testing multi-class classification models."""
+
+    def __init__(self):
+        super().__init__("iris", regressors=["LogisticRegression", "MLPClassifier"])
+
+    def load_data(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        y = data.target
         self._data = (X, y)
 
 
@@ -275,6 +296,7 @@ class MNISTCase(Cases):
             "mnist",
             regressors=[
                 "MLPClassifier",
+                "LogisticRegression",
             ],
             transformers=[],
             saved_training=100,
@@ -311,9 +333,10 @@ class WageCase(Cases):
                 remainder="drop",
             ),
         ]
+        excluded = ["LogisticRegression", "MLPClassifier"]
         super().__init__(
             "wages",
-            excluded=["LogisticRegression"],
+            excluded=excluded,
             transformers=preprocessors,
             need_pipeline=True,
             saved_training=100,

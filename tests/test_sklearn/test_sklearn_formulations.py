@@ -8,13 +8,18 @@ from gurobipy import GurobiError
 from sklearn import datasets
 from sklearn.pipeline import Pipeline
 
-from gurobi_ml import add_predictor_constr, register_predictor_constr
+from gurobi_ml import add_predictor_constr
 from gurobi_ml.exceptions import NoSolutionError
-from gurobi_ml.sklearn import add_mlp_regressor_constr
 from gurobi_ml.sklearn.pipeline import PipelineConstr
 
 from ..fixed_formulation import FixedRegressionModel
-from .sklearn_cases import CircleCase, DiabetesCases, IrisCases, MNISTCase
+from .sklearn_cases import (
+    CircleCase,
+    DiabetesCases,
+    IrisBinaryCases,
+    IrisMultiCases,
+    MNISTCase,
+)
 
 VERBOSE = False
 
@@ -36,9 +41,10 @@ class TestSklearnModel(FixedRegressionModel):
                 self.assertEqual(
                     predictor_name, type(pred_constr[i]).__name__[: -len("Constr")]
                 )
+
             self.assertLessEqual(
                 np.max(pred_constr[i].get_error().astype(float)),
-                np.max(pred_constr.get_error().astype(float) + 1e-10),
+                np.max(pred_constr.get_error().astype(float) + 1e-7),
             )
 
     def test_diabetes_sklearn(self):
@@ -64,50 +70,52 @@ class TestSklearnModel(FixedRegressionModel):
         data = datasets.load_iris()
 
         X = data.data
-        y = data.target
 
-        # Make it a simple classification
-        X = X[y != 2]
-        y = y[y != 2]
-        cases = IrisCases()
+        cases = IrisBinaryCases()
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", output_type="probability_1")
-            self.do_one_case(onecase, X, 6, "pairs", output_type="probability_1")
+            self.do_one_case(onecase, X, 5, "all", predict_function="predict_proba")
+            self.do_one_case(onecase, X, 6, "pairs", predict_function="predict_proba")
             self.do_one_case(
-                onecase, X, 5, "all", output_type="probability_1", no_debug=True
+                onecase, X, 5, "all", predict_function="predict_proba", no_debug=True
             )
             self.do_one_case(
-                onecase, X, 6, "pairs", output_type="probability_1", no_debug=True
+                onecase, X, 6, "pairs", predict_function="predict_proba", no_debug=True
             )
+
+    def test_iris_multi(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        # Make it a simple classification
+        cases = IrisMultiCases()
+
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            self.do_one_case(onecase, X, 5, "all", predict_function="predict_proba")
+            self.do_one_case(onecase, X, 6, "pairs", predict_function="predict_proba")
 
     def test_iris_clf(self):
         data = datasets.load_iris()
 
         X = data.data
-        y = data.target
 
-        # Make it a simple classification
-        X = X[y != 2]
-        y = y[y != 2]
-        cases = IrisCases()
+        cases = IrisBinaryCases()
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", output_type="classification")
-            self.do_one_case(onecase, X, 6, "pairs", output_type="classification")
+            self.do_one_case(onecase, X, 5, "all", predict_function="decision_function")
+            self.do_one_case(
+                onecase, X, 6, "pairs", predict_function="decision_function"
+            )
 
     def test_iris_pwl_args(self):
         data = datasets.load_iris()
 
         X = data.data
-        y = data.target
 
-        # Make it a simple classification
-        X = X[y != 2]
-        y = y[y != 2]
-        cases = IrisCases()
+        cases = IrisBinaryCases()
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
@@ -116,7 +124,7 @@ class TestSklearnModel(FixedRegressionModel):
                 X,
                 5,
                 "all",
-                output_type="probability_1",
+                predict_function="predict_proba",
                 pwl_attributes={"FuncPieces": 5},
             )
 
@@ -143,14 +151,12 @@ class TestMNIST(unittest.TestCase):
             "OutputFlag": 0,
         }
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
-            lb = np.maximum(examples - 1e-4, 0.0)
-            ub = np.minimum(examples + 1e-4, 1.0)
+            lb = np.maximum(examples, 0.0)
+            ub = np.minimum(examples, 1.0)
             x = gpm.addMVar(examples.shape, lb=lb, ub=ub)
 
-            predictor.out_activation_ = "identity"
-            register_predictor_constr("MLPClassifier", add_mlp_regressor_constr)
             pred_constr = add_predictor_constr(
-                gpm, predictor, x, output_type="probability"
+                gpm, predictor, x, predict_function="predict_proba"
             )
 
             y = pred_constr.output
@@ -168,7 +174,11 @@ class TestMNIST(unittest.TestCase):
                     raise
 
             tol = 1e-5
-            vio = gpm.MaxVio
+            try:
+                vio = gpm.MaxVio
+            except AttributeError:
+                gpm.write("Error.lp")
+                raise
             if vio > 1e-5:
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))

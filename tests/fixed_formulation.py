@@ -69,14 +69,19 @@ class FixedRegressionModel(unittest.TestCase):
                     warnings.warn(UserWarning("Limited license"))
                     self.skipTest("Model too large for limited license")
                 else:
+                    gpm.write("Error.lp")
                     raise
 
+            try:
+                vio = gpm.MaxVio
+            except AttributeError:
+                gpm.write("Error.lp")
+                raise
             self.additional_test(predictor, pred_constr)
             if nonconvex:
                 tol = 5e-3
             else:
                 tol = 1e-5
-            vio = gpm.MaxVio
             if vio > 1e-5:
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
