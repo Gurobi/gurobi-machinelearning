@@ -29,7 +29,13 @@ from ..modeling.decision_tree import AbstractTreeEstimator
 
 
 def add_lgbmregressor_constr(
-    gp_model, lgbm_regressor, input_vars, output_vars=None, epsilon=0.0, **kwargs
+    gp_model,
+    lgbm_regressor,
+    input_vars,
+    output_vars=None,
+    epsilon=0.0,
+    formulation="leaf",
+    **kwargs,
 ):
     """Formulate lgbm_regressor into gp_model.
 
@@ -53,6 +59,10 @@ def add_lgbmregressor_constr(
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
+    safety_floor : float, optional
+        Thresholds with absolute value smaller than this will be clamped
+        to this value to avoid numerical issues with Gurobi's tolerance.
+        Only used if formulation is "misic".
 
     Returns
     -------
@@ -79,12 +89,20 @@ def add_lgbmregressor_constr(
         input_vars,
         output_vars,
         epsilon=epsilon,
+        formulation=formulation,
         **kwargs,
     )
 
 
 def add_lgbm_booster_constr(
-    gp_model, lgbm_booster, input_vars, output_vars=None, epsilon=0.0, **kwargs
+    gp_model,
+    lgbm_booster,
+    input_vars,
+    output_vars=None,
+    epsilon=0.0,
+    formulation="leaf",
+    safety_floor=0.0,
+    **kwargs,
 ):
     """Formulate lgbm_booster into gp_model.
 
@@ -107,6 +125,9 @@ def add_lgbm_booster_constr(
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
+    safety_floor : float, optional
+        Thresholds with absolute value smaller than this will be clamped
+        to this value to avoid numerical issues with Gurobi's tolerance.
 
     Returns
     -------
@@ -128,7 +149,14 @@ def add_lgbm_booster_constr(
         If the booster is not of type "gbtree".
     """
     return LGBMConstr(
-        gp_model, lgbm_booster, input_vars, output_vars, epsilon=epsilon, **kwargs
+        gp_model,
+        lgbm_booster,
+        input_vars,
+        output_vars,
+        epsilon=epsilon,
+        formulation=formulation,
+        safety_floor=safety_floor,
+        **kwargs,
     )
 
 
@@ -140,7 +168,15 @@ class LGBMConstr(AbstractPredictorConstr):
     """
 
     def __init__(
-        self, gp_model, lgbm_regressor, input_vars, output_vars, epsilon=0.0, **kwargs
+        self,
+        gp_model,
+        lgbm_regressor,
+        input_vars,
+        output_vars,
+        epsilon=0.0,
+        formulation="leaf",
+        safety_floor=0.0,
+        **kwargs,
     ):
         """Initialize LGBMConstr.
 
@@ -163,6 +199,8 @@ class LGBMConstr(AbstractPredictorConstr):
         self.lgbm_regressor = lgbm_regressor
         self._default_name = "lgbm_reg"
         self.epsilon = epsilon
+        self.formulation = formulation
+        self.safety_floor = safety_floor
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )
@@ -292,8 +330,12 @@ class LGBMConstr(AbstractPredictorConstr):
 
         lgbm_raw = lgbm_regressor.dump_model()
 
-        trees = lgbm_raw["tree_info"]
-        n_estimators = len(trees)
+        trees_raw = lgbm_raw["tree_info"]
+
+        if self._no_debug:
+            kwargs["no_record"] = True
+
+        n_estimators = len(trees_raw)
 
         estimators = []
         if self._no_debug:
@@ -305,7 +347,7 @@ class LGBMConstr(AbstractPredictorConstr):
             name=self._name_var("estimator"),
         )
 
-        for i, tree in enumerate(trees):
+        for i, tree in enumerate(trees_raw):
             if self.verbose:
                 self._timer.timing(f"Estimator {i}")
             flat_tree = self._flat_tree_representation(tree["tree_structure"])
@@ -319,6 +361,8 @@ class LGBMConstr(AbstractPredictorConstr):
                     tree_vars[:, i, :],
                     self.epsilon,
                     timer,
+                    safety_floor=self.safety_floor,
+                    formulation=self.formulation,
                     **kwargs,
                 )
             )

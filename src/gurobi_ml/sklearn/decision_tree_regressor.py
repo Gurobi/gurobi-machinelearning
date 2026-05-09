@@ -28,6 +28,7 @@ def add_decision_tree_regressor_constr(
     input_vars,
     output_vars=None,
     epsilon=0.0,
+    safety_floor=0.0,
     **kwargs,
 ):
     """Formulate decision_tree_regressor into gp_model.
@@ -49,6 +50,9 @@ def add_decision_tree_regressor_constr(
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
+    safety_floor : float, optional
+        Thresholds with absolute value smaller than this will be clamped
+        to this value to avoid numerical issues with Gurobi's tolerance.
     Returns
     -------
     DecisionTreeRegressorConstr
@@ -68,7 +72,13 @@ def add_decision_tree_regressor_constr(
     this point.
     """
     return DecisionTreeRegressorConstr(
-        gp_model, decision_tree_regressor, input_vars, output_vars, epsilon, **kwargs
+        gp_model,
+        decision_tree_regressor,
+        input_vars,
+        output_vars,
+        epsilon,
+        safety_floor=safety_floor,
+        **kwargs,
     )
 
 
@@ -88,6 +98,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
         output_vars=None,
         epsilon=0.0,
         formulation="leafs",
+        safety_floor=0.0,
         **kwargs,
     ):
         """Initialize DecisionTreeRegressorConstr.
@@ -110,7 +121,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
         """
         self._default_name = "tree_reg"
 
-        formulations = ("leafs", "paths")
+        formulations = ("leafs", "leaf", "paths")
         if formulation not in formulations:
             raise ValueError(
                 f"Wrong value for formulation should be one of {formulations}."
@@ -129,5 +140,13 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
             "n_features": tree.n_features,
         }
         AbstractTreeEstimator.__init__(
-            self, gp_model, tree_dict, input_vars, output_vars, epsilon, **kwargs
+            self,
+            gp_model,
+            tree_dict,
+            input_vars,
+            output_vars,
+            epsilon,
+            safety_floor=safety_floor,
+            formulation=formulation,
+            **kwargs,
         )

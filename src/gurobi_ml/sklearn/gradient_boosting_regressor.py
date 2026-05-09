@@ -32,6 +32,7 @@ def add_gradient_boosting_regressor_constr(
     input_vars,
     output_vars=None,
     epsilon=0.0,
+    safety_floor=0.0,
     **kwargs,
 ):
     """Formulate gradient_boosting_regressor into gp_model.
@@ -53,6 +54,9 @@ def add_gradient_boosting_regressor_constr(
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
+    safety_floor : float, optional
+        Thresholds with absolute value smaller than this will be clamped
+        to this value to avoid numerical issues with Gurobi's tolerance.
 
     Returns
     -------
@@ -74,6 +78,7 @@ def add_gradient_boosting_regressor_constr(
         input_vars,
         output_vars,
         epsilon=epsilon,
+        safety_floor=safety_floor,
         **kwargs,
     )
 
@@ -86,10 +91,21 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
     |ClassShort|
     """
 
-    def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
+    def __init__(
+        self,
+        gp_model,
+        predictor,
+        input_vars,
+        output_vars,
+        formulation="leaf",
+        safety_floor=0.0,
+        **kwargs,
+    ):
         self._output_shape = 1
         self.estimators_ = []
         self._default_name = "gbtree_reg"
+        self.formulation = formulation
+        self.safety_floor = safety_floor
         SKgetter.__init__(self, predictor, input_vars)
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
@@ -115,10 +131,10 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
                 "Output dimension of gradient boosting regressor should be 1",
             )
 
-        estimators = []
         if self._no_debug:
             kwargs["no_record"] = True
 
+        estimators = []
         tree_vars = model.addMVar(
             (nex, predictor.n_estimators_, 1),
             lb=-GRB.INFINITY,
@@ -131,7 +147,13 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
                 self._timer.timing(f"Estimator {i}")
             estimators.append(
                 add_decision_tree_regressor_constr(
-                    model, tree[0], _input, tree_vars[:, i, :], **kwargs
+                    model,
+                    tree[0],
+                    _input,
+                    tree_vars[:, i, :],
+                    safety_floor=self.safety_floor,
+                    formulation=self.formulation,
+                    **kwargs,
                 )
             )
         self.estimators_ = estimators

@@ -23,7 +23,7 @@ from gurobipy import GRB
 from ..base_predictor_constr import AbstractPredictorConstr
 
 
-def _compute_leafs_bounds(tree, feature_is_fixed, epsilon):
+def _compute_leafs_bounds(tree, feature_is_fixed, epsilon, safety_floor=0.0):
     """Compute the bounds that define each leaf of the tree
 
     Parameters
@@ -63,18 +63,22 @@ def _compute_leafs_bounds(tree, feature_is_fixed, epsilon):
         node_ub[:, left] = node_ub[:, node]
         node_lb[:, left] = node_lb[:, node]
 
-        node_ub[feature[node], left] = threshold[node]
+        node_threshold = threshold[node]
+        if 0 < abs(node_threshold) < safety_floor:
+            node_threshold = np.sign(node_threshold) * safety_floor
+
+        node_ub[feature[node], left] = node_threshold
         if feature_is_fixed[feature[node]]:
-            node_lb[feature[node], right] = threshold[node]
+            node_lb[feature[node], right] = node_threshold
         else:
-            node_lb[feature[node], right] = threshold[node] + epsilon
+            node_lb[feature[node], right] = node_threshold + epsilon
         stack.append(right)
         stack.append(left)
     return (node_lb, node_ub)
 
 
 def _leaf_formulation(
-    gp_model, _input, output, tree, epsilon, _name_var, verbose, timer
+    gp_model, _input, output, tree, epsilon, _name_var, verbose, timer, safety_floor=0.0
 ):
     """Formulate decision tree using 'leaf' formulation
 
@@ -95,7 +99,9 @@ def _leaf_formulation(
     # Get fixed features we don't want to apply the epsilon for them
     feature_is_fixed = (_input.lb == _input.ub).all(axis=0)
 
-    (node_lb, node_ub) = _compute_leafs_bounds(tree, feature_is_fixed, epsilon)
+    (node_lb, node_ub) = _compute_leafs_bounds(
+        tree, feature_is_fixed, epsilon, safety_floor
+    )
     input_ub = _input.getAttr(GRB.Attr.UB)
     input_lb = _input.getAttr(GRB.Attr.LB)
 
@@ -152,7 +158,9 @@ def _leaf_formulation(
         timer.timing(f"Added {nex} linear constraints")
 
 
-def _paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
+def _paths_formulation(
+    gp_model, _input, output, tree, epsilon, _name_var, safety_floor=0.0
+):
     """
        Path formulation for decision tree
 
@@ -183,7 +191,7 @@ def _paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
     outdim = output.shape[1]
     nex = _input.shape[0]
     nodes = gp_model.addMVar(
-        (nex, tree.capacity), vtype=GRB.BINARY, name=_name_var("node")
+        (nex, tree["capacity"]), vtype=GRB.BINARY, name=_name_var("node")
     )
 
     children_left = tree["children_left"]
@@ -209,6 +217,9 @@ def _paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
         left = children_left[node]
         right = children_right[node]
         node_threshold = threshold[node]
+        if 0 < abs(node_threshold) < safety_floor:
+            node_threshold = np.sign(node_threshold) * safety_floor
+
         # Intermediate node
         node_feature = feature[node]
         feat_var = _input[:, node_feature]
@@ -223,7 +234,7 @@ def _paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
             nodes[fixed_left, right].UB = 0.0
             nodes[~fixed_left, left].UB = 0.0
         else:
-            lhs = _input[:, feature].tolist()
+            lhs = _input[:, node_feature].tolist()
             rhs = nodes[:, left].tolist()
             gp_model.addConstrs(
                 ((rhs[k] == 1) >> (lhs[k] <= node_threshold)) for k in range(nex)
@@ -264,11 +275,22 @@ class AbstractTreeEstimator(AbstractPredictorConstr):
     """
 
     def __init__(
-        self, gp_model, tree, input_vars, output_vars, epsilon, timer=None, **kwargs
+        self,
+        gp_model,
+        tree,
+        input_vars,
+        output_vars,
+        epsilon,
+        timer=None,
+        safety_floor=0.0,
+        formulation="leafs",
+        **kwargs,
     ):
         self._default_name = "tree"
         self._tree = tree
         self._epsilon = epsilon
+        self._safety_floor = safety_floor
+        self._formulation = formulation
         if timer is None:
             self._timer = AbstractPredictorConstr._ModelingTimer()
         else:
@@ -278,16 +300,30 @@ class AbstractTreeEstimator(AbstractPredictorConstr):
         )
 
     def _mip_model(self, **kwargs):
-        _leaf_formulation(
-            self.gp_model,
-            self.input,
-            self.output,
-            self._tree,
-            self._epsilon,
-            self._name_var,
-            self.verbose,
-            self._timer,
-        )
+        if self._formulation in ("leafs", "leaf"):
+            _leaf_formulation(
+                self.gp_model,
+                self.input,
+                self.output,
+                self._tree,
+                self._epsilon,
+                self._name_var,
+                self.verbose,
+                self._timer,
+                self._safety_floor,
+            )
+        elif self._formulation == "paths":
+            _paths_formulation(
+                self.gp_model,
+                self.input,
+                self.output,
+                self._tree,
+                self._epsilon,
+                self._name_var,
+                self._safety_floor,
+            )
+        else:
+            raise ValueError(f"Unknown formulation: {self._formulation}")
 
     def get_error(self, eps):
         """Functions returns an error for an abstract class

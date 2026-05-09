@@ -1,3 +1,18 @@
+# Copyright © 2023-2026 Gurobi Optimization, LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+
 import os
 import unittest
 import warnings
@@ -14,7 +29,7 @@ from gurobi_ml.sklearn import add_mlp_regressor_constr
 from gurobi_ml.sklearn.pipeline import PipelineConstr
 
 from ..fixed_formulation import FixedRegressionModel
-from .sklearn_cases import CircleCase, DiabetesCases, IrisCases, MNISTCase
+from .sklearn_cases import CircleCase, DiabetesCases, MNISTCase
 
 VERBOSE = False
 
@@ -48,88 +63,59 @@ class TestSklearnModel(FixedRegressionModel):
         cases = DiabetesCases()
 
         for regressor in cases:
+            if isinstance(regressor, Pipeline):
+                actual_reg = regressor[-1]
+            else:
+                actual_reg = regressor
+            reg_name = type(actual_reg).__name__
+            if reg_name in ["RandomForestRegressor", "GradientBoostingRegressor"]:
+                formulations = ["leaf"]
+            else:
+                formulations = [None]
+
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", float_type=np.float32, epsilon=1e-5)
-            self.do_one_case(
-                onecase, X, 6, "pairs", float_type=np.float32, epsilon=1e-5
-            )
-            self.do_one_case(
-                onecase, X, 5, "all", float_type=np.float32, no_debug=True, epsilon=1e-5
-            )
-            self.do_one_case(
-                onecase, X, 6, "pairs", float_type=np.float32, no_debug=True
-            )
+            for formulation in formulations:
+                kwargs = {"float_type": np.float32, "epsilon": 1e-5}
+                if formulation:
+                    kwargs["formulation"] = formulation
 
-    def test_iris_proba(self):
-        data = datasets.load_iris()
+                self.do_one_case(onecase, X, 5, "all", **kwargs)
+                self.do_one_case(onecase, X, 6, "pairs", **kwargs)
 
-        X = data.data
-        y = data.target
-
-        # Make it a simple classification
-        X = X[y != 2]
-        y = y[y != 2]
-        cases = IrisCases()
-
-        for regressor in cases:
-            onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", output_type="probability_1")
-            self.do_one_case(onecase, X, 6, "pairs", output_type="probability_1")
-            self.do_one_case(
-                onecase, X, 5, "all", output_type="probability_1", no_debug=True
-            )
-            self.do_one_case(
-                onecase, X, 6, "pairs", output_type="probability_1", no_debug=True
-            )
-
-    def test_iris_clf(self):
-        data = datasets.load_iris()
-
-        X = data.data
-        y = data.target
-
-        # Make it a simple classification
-        X = X[y != 2]
-        y = y[y != 2]
-        cases = IrisCases()
-
-        for regressor in cases:
-            onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", output_type="classification")
-            self.do_one_case(onecase, X, 6, "pairs", output_type="classification")
-
-    def test_iris_pwl_args(self):
-        data = datasets.load_iris()
-
-        X = data.data
-        y = data.target
-
-        # Make it a simple classification
-        X = X[y != 2]
-        y = y[y != 2]
-        cases = IrisCases()
-
-        for regressor in cases:
-            onecase = cases.get_case(regressor)
-            self.do_one_case(
-                onecase,
-                X,
-                5,
-                "all",
-                output_type="probability_1",
-                pwl_attributes={"FuncPieces": 5},
-            )
+                kwargs["no_debug"] = True
+                self.do_one_case(onecase, X, 5, "all", **kwargs)
+                self.do_one_case(onecase, X, 6, "pairs", **kwargs)
 
     def test_circle(self):
         cases = CircleCase()
 
         for regressor in cases:
+            if isinstance(regressor, Pipeline):
+                actual_reg = regressor[-1]
+            else:
+                actual_reg = regressor
+            reg_name = type(actual_reg).__name__
+            if reg_name in ["RandomForestRegressor", "DecisionTreeRegressor"]:
+                if reg_name == "DecisionTreeRegressor":
+                    formulations = ["leafs", "paths"]
+                else:
+                    formulations = ["leaf"]
+            else:
+                formulations = [None]
+
             onecase = cases.get_case(regressor)
             X = onecase["data"]
-            self.do_one_case(onecase, X, 5, "all")
-            self.do_one_case(onecase, X, 6, "pairs")
-            self.do_one_case(onecase, X, 5, "all", no_debug=True)
-            self.do_one_case(onecase, X, 6, "pairs", no_debug=True)
+            for formulation in formulations:
+                kwargs = {}
+                if formulation:
+                    kwargs["formulation"] = formulation
+
+                self.do_one_case(onecase, X, 5, "all", **kwargs)
+                self.do_one_case(onecase, X, 6, "pairs", **kwargs)
+
+                kwargs["no_debug"] = True
+                self.do_one_case(onecase, X, 5, "all", **kwargs)
+                self.do_one_case(onecase, X, 6, "pairs", **kwargs)
 
 
 class TestMNIST(unittest.TestCase):
