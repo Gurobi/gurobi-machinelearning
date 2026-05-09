@@ -47,3 +47,17 @@ class TestLGBMhModel(FixedRegressionModel):
         one_case = {"predictor": lgbm_reg, "nonconvex": 0}
 
         self.do_one_case(one_case, X, 5, "all", epsilon=1e-5)
+
+    def test_diabetes_lightgbm(self):
+        data = datasets.load_diabetes()
+        X = data["data"]
+        y = data["target"]
+
+        lgbm_reg = lgb.sklearn.LGBMRegressor(n_estimators=5, max_depth=3)
+        lgbm_reg.fit(X, y)
+        one_case = {"predictor": lgbm_reg, "nonconvex": 0}
+
+        for formulation in ["leaf"]:
+            self.do_one_case(
+                one_case, X, 3, formulation=formulation, float_type=np.float32
+            )
