@@ -23,7 +23,7 @@ from gurobipy import GRB
 from ..base_predictor_constr import AbstractPredictorConstr
 
 
-def _compute_leafs_bounds(tree, feature_is_fixed, epsilon, safety_floor=0.0):
+def _compute_leafs_bounds(gp_model, tree, feature_is_fixed, epsilon, safety_floor=0.0):
     """Compute the bounds that define each leaf of the tree
 
     Parameters
@@ -50,6 +50,8 @@ def _compute_leafs_bounds(tree, feature_is_fixed, epsilon, safety_floor=0.0):
         0,
     ]
 
+    feas_tol = gp_model.Params.FeasibilityTol
+
     while len(stack) > 0:
         node = stack.pop()
         left = children_left[node]
@@ -66,6 +68,14 @@ def _compute_leafs_bounds(tree, feature_is_fixed, epsilon, safety_floor=0.0):
         node_threshold = threshold[node]
         if 0 < abs(node_threshold) < safety_floor:
             node_threshold = np.sign(node_threshold) * safety_floor
+
+        if 0 < abs(node_threshold) < feas_tol:
+            warn(
+                f"Split threshold {node_threshold} is smaller than Gurobi's "
+                f"feasibility tolerance ({feas_tol}). This may lead to numerical issues. "
+                "Consider setting 'safety_floor' to a higher value (e.g., 1e-5).",
+                UserWarning,
+            )
 
         node_ub[feature[node], left] = node_threshold
         if feature_is_fixed[feature[node]]:
@@ -100,7 +110,7 @@ def _leaf_formulation(
     feature_is_fixed = (_input.lb == _input.ub).all(axis=0)
 
     (node_lb, node_ub) = _compute_leafs_bounds(
-        tree, feature_is_fixed, epsilon, safety_floor
+        gp_model, tree, feature_is_fixed, epsilon, safety_floor
     )
     input_ub = _input.getAttr(GRB.Attr.UB)
     input_lb = _input.getAttr(GRB.Attr.LB)
@@ -212,6 +222,8 @@ def _paths_formulation(
     # The value of the root is always 1
     nodes[:, 0].LB = 1.0
 
+    feas_tol = gp_model.Params.FeasibilityTol
+
     # Node splitting
     for node in not_leafs.nonzero()[0]:
         left = children_left[node]
@@ -219,6 +231,14 @@ def _paths_formulation(
         node_threshold = threshold[node]
         if 0 < abs(node_threshold) < safety_floor:
             node_threshold = np.sign(node_threshold) * safety_floor
+
+        if 0 < abs(node_threshold) < feas_tol:
+            warn(
+                f"Split threshold {node_threshold} is smaller than Gurobi's "
+                f"feasibility tolerance ({feas_tol}). This may lead to numerical issues. "
+                "Consider setting 'safety_floor' to a higher value (e.g., 1e-5).",
+                UserWarning,
+            )
 
         # Intermediate node
         node_feature = feature[node]

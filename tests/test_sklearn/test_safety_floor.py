@@ -67,6 +67,51 @@ class TestSafetyFloor(unittest.TestCase):
             self.assertEqual(m.Status, GRB.OPTIMAL)
             self.assertAlmostEqual(pred.output.X[0, 0], 1.0)
 
+    def test_warning_no_safety_floor(self):
+        # Create a simple decision tree with a threshold close to zero
+        X = np.array([[0.0], [1.0]])
+        y = np.array([0.0, 1.0])
+        dt = DecisionTreeRegressor(max_depth=1)
+        dt.fit(X, y)
+        # Manually set the threshold to a small value below 1e-6
+        dt.tree_.threshold[0] = 1e-9
+
+        # Test without safety_floor (safety_floor=0.0)
+        # We expect a warning because 1e-9 < 1e-6 (default FeasibilityTol)
+        with gp.Env(params={"OutputFlag": 0}) as env, gp.Model(env=env) as m:
+            x_var = m.addMVar((1, 1), lb=0, ub=1)
+            with self.assertWarnsRegex(
+                UserWarning, "smaller than Gurobi's feasibility tolerance"
+            ):
+                add_decision_tree_regressor_constr(m, dt, x_var, epsilon=0.0)
+
+    def test_warning_custom_tolerance(self):
+        # Create a simple decision tree with a threshold
+        X = np.array([[0.0], [1.0]])
+        y = np.array([0.0, 1.0])
+        dt = DecisionTreeRegressor(max_depth=1)
+        dt.fit(X, y)
+        # Set threshold to 1e-4
+        dt.tree_.threshold[0] = 1e-4
+
+        # Test with FeasibilityTol = 1e-3
+        # 1e-4 < 1e-3, so we expect a warning
+        with gp.Env(params={"OutputFlag": 0}) as env, gp.Model(env=env) as m:
+            m.Params.FeasibilityTol = 1e-3
+            x_var = m.addMVar((1, 1), lb=0, ub=1)
+            with self.assertWarnsRegex(
+                UserWarning, "smaller than Gurobi's feasibility tolerance"
+            ):
+                add_decision_tree_regressor_constr(m, dt, x_var, epsilon=0.0)
+
+        # Test with FeasibilityTol = 1e-5
+        # 1e-4 > 1e-5, so we expect NO warning
+        with gp.Env(params={"OutputFlag": 0}) as env, gp.Model(env=env) as m:
+            m.Params.FeasibilityTol = 1e-5
+            x_var = m.addMVar((1, 1), lb=0, ub=1)
+            # This should not raise a warning
+            add_decision_tree_regressor_constr(m, dt, x_var, epsilon=0.0)
+
     def test_safety_floor_negative(self):
         # Create a simple decision tree with a threshold close to zero
         X = np.array([[-1.0], [0.0]])
