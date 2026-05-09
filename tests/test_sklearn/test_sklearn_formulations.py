@@ -29,7 +29,7 @@ from gurobi_ml.sklearn import add_mlp_regressor_constr
 from gurobi_ml.sklearn.pipeline import PipelineConstr
 
 from ..fixed_formulation import FixedRegressionModel
-from .sklearn_cases import CircleCase, DiabetesCases, MNISTCase
+from .sklearn_cases import CircleCase, DiabetesCases, IrisCases, MNISTCase
 
 VERBOSE = False
 
@@ -86,6 +86,66 @@ class TestSklearnModel(FixedRegressionModel):
                 self.do_one_case(onecase, X, 5, "all", **kwargs)
                 self.do_one_case(onecase, X, 6, "pairs", **kwargs)
 
+    def test_iris_proba(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        y = data.target
+
+        # Make it a simple classification
+        X = X[y != 2]
+        y = y[y != 2]
+        cases = IrisCases()
+
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            self.do_one_case(onecase, X, 5, "all", output_type="probability_1")
+            self.do_one_case(onecase, X, 6, "pairs", output_type="probability_1")
+            self.do_one_case(
+                onecase, X, 5, "all", output_type="probability_1", no_debug=True
+            )
+            self.do_one_case(
+                onecase, X, 6, "pairs", output_type="probability_1", no_debug=True
+            )
+
+    def test_iris_clf(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        y = data.target
+
+        # Make it a simple classification
+        X = X[y != 2]
+        y = y[y != 2]
+        cases = IrisCases()
+
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            self.do_one_case(onecase, X, 5, "all", output_type="classification")
+            self.do_one_case(onecase, X, 6, "pairs", output_type="classification")
+
+    def test_iris_pwl_args(self):
+        data = datasets.load_iris()
+
+        X = data.data
+        y = data.target
+
+        # Make it a simple classification
+        X = X[y != 2]
+        y = y[y != 2]
+        cases = IrisCases()
+
+        for regressor in cases:
+            onecase = cases.get_case(regressor)
+            self.do_one_case(
+                onecase,
+                X,
+                5,
+                "all",
+                output_type="probability_1",
+                pwl_attributes={"FuncPieces": 5},
+            )
+
     def test_circle(self):
         cases = CircleCase()
 
@@ -133,7 +193,10 @@ class TestMNIST(unittest.TestCase):
             ub = np.minimum(examples + 1e-4, 1.0)
             x = gpm.addMVar(examples.shape, lb=lb, ub=ub)
 
-            predictor.out_activation_ = "identity"
+            if isinstance(predictor, Pipeline):
+                predictor[-1].out_activation_ = "identity"
+            else:
+                predictor.out_activation_ = "identity"
             register_predictor_constr("MLPClassifier", add_mlp_regressor_constr)
             pred_constr = add_predictor_constr(
                 gpm, predictor, x, output_type="probability"
@@ -182,7 +245,6 @@ class TestMNIST(unittest.TestCase):
             onecase = cases.get_case(regressor)
             X = onecase["data"]
             self.do_one_case(onecase, X, 1)
-            break
             self.do_one_case(onecase, X, 3)
 
 
