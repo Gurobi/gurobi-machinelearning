@@ -16,7 +16,7 @@ def _allowed_first_line(line: str, base_first_line: str) -> bool:
     """
     import re
 
-    m = re.search(r"\b(\d{4})\b", base_first_line)
+    m = re.search(r"\b\d{4}(?:-\d{4})?\b", base_first_line)
     if not m:
         # If no year in base, require exact match
         return line == base_first_line

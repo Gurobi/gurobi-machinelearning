@@ -338,7 +338,7 @@ class TestFrameworkONNXEquivalence(unittest.TestCase):
         )
 
         # For each framework that has both direct and ONNX results, ensure they match
-        frameworks = set(k.split("_")[0] for k in results)
+        frameworks = {k.split("_")[0] for k in results}
         for fw in frameworks:
             d_key = f"{fw}_direct"
             o_key = f"{fw}_onnx"
