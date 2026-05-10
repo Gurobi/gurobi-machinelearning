@@ -1,0 +1,931 @@
+{
+ "X": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "ndarray"
+  }
+ ],
+ "abs_diff": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy._matrixapi",
+   "module_short": "gurobipy",
+   "name": "MVar"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "MVar"
+  }
+ ],
+ "abs_diff.sum": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy._matrixapi",
+   "module_short": "gurobipy",
+   "name": "MVar.sum"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "MVar.sum"
+  }
+ ],
+ "add_mlp_regressor_constr": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "function"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.sklearn",
+   "module_short": "gurobi_ml.sklearn",
+   "name": "add_mlp_regressor_constr"
+  }
+ ],
+ "delta": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "int"
+  }
+ ],
+ "ex_prob": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "ndarray"
+  }
+ ],
+ "ex_prob.shape": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "tuple"
+  }
+ ],
+ "example": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "ndarray"
+  }
+ ],
+ "example.reshape": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "builtin_function_or_method"
+  }
+ ],
+ "example.shape": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "tuple"
+  }
+ ],
+ "exampleno": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "int"
+  }
+ ],
+ "gp.GRB.INFINITY": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "float"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy.GRB",
+   "module_short": "gurobipy.GRB",
+   "name": "INFINITY"
+  }
+ ],
+ "gp.GRB.MAXIMIZE": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "int"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy.GRB",
+   "module_short": "gurobipy.GRB",
+   "name": "MAXIMIZE"
+  }
+ ],
+ "gp.Model": [
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "gurobipy._model",
+   "module_short": "gurobipy",
+   "name": "Model"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "Model"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "Model"
+  }
+ ],
+ "gurobi_ml.add_predictor_constr": [
+  {
+   "is_class": false,
+   "is_explicit": true,
+   "module": "gurobi_ml",
+   "module_short": "gurobi_ml",
+   "name": "add_predictor_constr"
+  }
+ ],
+ "gurobi_ml.sklearn.mlpregressor.add_mlp_regressor_constr": [
+  {
+   "is_class": false,
+   "is_explicit": true,
+   "module": "gurobi_ml.sklearn.mlpregressor",
+   "module_short": "gurobi_ml.sklearn",
+   "name": "add_mlp_regressor_constr"
+  }
+ ],
+ "load": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "function"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "joblib",
+   "module_short": "joblib",
+   "name": "load"
+  }
+ ],
+ "m": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy._model",
+   "module_short": "gurobipy",
+   "name": "Model"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "Model"
+  }
+ ],
+ "m.Params.BestBdStop": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "float"
+  }
+ ],
+ "m.Params.BestObjStop": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "float"
+  }
+ ],
+ "m.addConstr": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy._model",
+   "module_short": "gurobipy",
+   "name": "Model.addConstr"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "Model.addConstr"
+  }
+ ],
+ "m.addMVar": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy._model",
+   "module_short": "gurobipy",
+   "name": "Model.addMVar"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "Model.addMVar"
+  }
+ ],
+ "m.optimize": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy._model",
+   "module_short": "gurobipy",
+   "name": "Model.optimize"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "Model.optimize"
+  }
+ ],
+ "m.setObjective": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy._model",
+   "module_short": "gurobipy",
+   "name": "Model.setObjective"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "Model.setObjective"
+  }
+ ],
+ "m.update": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy._model",
+   "module_short": "gurobipy",
+   "name": "Model.update"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "Model.update"
+  }
+ ],
+ "mnist_data": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "dict"
+  }
+ ],
+ "nn": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.neural_network._multilayer_perceptron",
+   "module_short": "sklearn.neural_network",
+   "name": "MLPClassifier"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.neural_network",
+   "module_short": "sklearn.neural_network",
+   "name": "MLPClassifier"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "MLPClassifier"
+  }
+ ],
+ "nn.out_activation_": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "str"
+  }
+ ],
+ "nn.predict": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.neural_network._multilayer_perceptron",
+   "module_short": "sklearn.neural_network",
+   "name": "MLPClassifier.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.neural_network",
+   "module_short": "sklearn.neural_network",
+   "name": "MLPClassifier.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "MLPClassifier.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.base",
+   "module_short": "sklearn.base",
+   "name": "ClassifierMixin.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "ClassifierMixin.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.neural_network._multilayer_perceptron",
+   "module_short": "sklearn.neural_network._multilayer_perceptron",
+   "name": "BaseMultilayerPerceptron.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.neural_network",
+   "module_short": "sklearn.neural_network",
+   "name": "BaseMultilayerPerceptron.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "BaseMultilayerPerceptron.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.base",
+   "module_short": "sklearn.base",
+   "name": "BaseEstimator.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "BaseEstimator.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils._repr_html.base",
+   "module_short": "sklearn.utils._repr_html.base",
+   "name": "ReprHTMLMixin.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils._repr_html",
+   "module_short": "sklearn.utils._repr_html",
+   "name": "ReprHTMLMixin.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils",
+   "module_short": "sklearn.utils",
+   "name": "ReprHTMLMixin.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "ReprHTMLMixin.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils._repr_html.base",
+   "module_short": "sklearn.utils._repr_html.base",
+   "name": "_HTMLDocumentationLinkMixin.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils._repr_html",
+   "module_short": "sklearn.utils._repr_html",
+   "name": "_HTMLDocumentationLinkMixin.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils",
+   "module_short": "sklearn.utils",
+   "name": "_HTMLDocumentationLinkMixin.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "_HTMLDocumentationLinkMixin.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils._metadata_requests",
+   "module_short": "sklearn.utils._metadata_requests",
+   "name": "_MetadataRequester.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils",
+   "module_short": "sklearn.utils",
+   "name": "_MetadataRequester.predict"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "_MetadataRequester.predict"
+  }
+ ],
+ "nn.predict_proba": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.neural_network._multilayer_perceptron",
+   "module_short": "sklearn.neural_network",
+   "name": "MLPClassifier.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.neural_network",
+   "module_short": "sklearn.neural_network",
+   "name": "MLPClassifier.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "MLPClassifier.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.base",
+   "module_short": "sklearn.base",
+   "name": "ClassifierMixin.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "ClassifierMixin.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.neural_network._multilayer_perceptron",
+   "module_short": "sklearn.neural_network._multilayer_perceptron",
+   "name": "BaseMultilayerPerceptron.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.neural_network",
+   "module_short": "sklearn.neural_network",
+   "name": "BaseMultilayerPerceptron.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "BaseMultilayerPerceptron.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.base",
+   "module_short": "sklearn.base",
+   "name": "BaseEstimator.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "BaseEstimator.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils._repr_html.base",
+   "module_short": "sklearn.utils._repr_html.base",
+   "name": "ReprHTMLMixin.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils._repr_html",
+   "module_short": "sklearn.utils._repr_html",
+   "name": "ReprHTMLMixin.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils",
+   "module_short": "sklearn.utils",
+   "name": "ReprHTMLMixin.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "ReprHTMLMixin.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils._repr_html.base",
+   "module_short": "sklearn.utils._repr_html.base",
+   "name": "_HTMLDocumentationLinkMixin.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils._repr_html",
+   "module_short": "sklearn.utils._repr_html",
+   "name": "_HTMLDocumentationLinkMixin.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils",
+   "module_short": "sklearn.utils",
+   "name": "_HTMLDocumentationLinkMixin.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "_HTMLDocumentationLinkMixin.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils._metadata_requests",
+   "module_short": "sklearn.utils._metadata_requests",
+   "name": "_MetadataRequester.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn.utils",
+   "module_short": "sklearn.utils",
+   "name": "_MetadataRequester.predict_proba"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sklearn",
+   "module_short": "sklearn",
+   "name": "_MetadataRequester.predict_proba"
+  }
+ ],
+ "np.argsort": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "_ArrayFunctionDispatcher"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "argsort"
+  }
+ ],
+ "plt.imshow": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "function"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "matplotlib.pyplot",
+   "module_short": "matplotlib.pyplot",
+   "name": "imshow"
+  }
+ ],
+ "pred_constr": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.sklearn.mlpregressor",
+   "module_short": "gurobi_ml.sklearn.mlpregressor",
+   "name": "MLPRegressorConstr"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.sklearn",
+   "module_short": "gurobi_ml.sklearn",
+   "name": "MLPRegressorConstr"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml",
+   "module_short": "gurobi_ml",
+   "name": "MLPRegressorConstr"
+  }
+ ],
+ "pred_constr.print_stats": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.sklearn.mlpregressor",
+   "module_short": "gurobi_ml.sklearn.mlpregressor",
+   "name": "MLPRegressorConstr.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.sklearn",
+   "module_short": "gurobi_ml.sklearn",
+   "name": "MLPRegressorConstr.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml",
+   "module_short": "gurobi_ml",
+   "name": "MLPRegressorConstr.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.sklearn.skgetter",
+   "module_short": "gurobi_ml.sklearn.skgetter",
+   "name": "SKgetter.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.sklearn",
+   "module_short": "gurobi_ml.sklearn",
+   "name": "SKgetter.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml",
+   "module_short": "gurobi_ml",
+   "name": "SKgetter.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.modeling.neuralnet.neural_net",
+   "module_short": "gurobi_ml.modeling.neuralnet",
+   "name": "BaseNNConstr.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.modeling.neuralnet",
+   "module_short": "gurobi_ml.modeling.neuralnet",
+   "name": "BaseNNConstr.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.modeling",
+   "module_short": "gurobi_ml.modeling",
+   "name": "BaseNNConstr.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml",
+   "module_short": "gurobi_ml",
+   "name": "BaseNNConstr.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.modeling.base_predictor_constr",
+   "module_short": "gurobi_ml.modeling",
+   "name": "AbstractPredictorConstr.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.modeling",
+   "module_short": "gurobi_ml.modeling",
+   "name": "AbstractPredictorConstr.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml",
+   "module_short": "gurobi_ml",
+   "name": "AbstractPredictorConstr.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.modeling._submodel",
+   "module_short": "gurobi_ml.modeling._submodel",
+   "name": "_SubModel.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml.modeling",
+   "module_short": "gurobi_ml.modeling",
+   "name": "_SubModel.print_stats"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobi_ml",
+   "module_short": "gurobi_ml",
+   "name": "_SubModel.print_stats"
+  }
+ ],
+ "right_label": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "int64"
+  }
+ ],
+ "sorted_labels": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "ndarray"
+  }
+ ],
+ "wrong_label": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "int64"
+  }
+ ],
+ "x": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy._matrixapi",
+   "module_short": "gurobipy",
+   "name": "MVar"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "MVar"
+  }
+ ],
+ "x.X": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "ndarray"
+  }
+ ],
+ "x.X.reshape": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "builtin_function_or_method"
+  }
+ ],
+ "y": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy._matrixapi",
+   "module_short": "gurobipy",
+   "name": "MVar"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "gurobipy",
+   "module_short": "gurobipy",
+   "name": "MVar"
+  }
+ ]
+}
