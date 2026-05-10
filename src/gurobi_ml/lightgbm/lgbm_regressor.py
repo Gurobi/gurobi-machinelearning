@@ -288,7 +288,7 @@ class LGBMConstr(AbstractPredictorConstr):
         tree_vars = model.addMVar(
             (nex, n_estimators, 1),
             lb=-GRB.INFINITY,
-            name=self._name_var("esimator"),
+            name=self._name_var("estimator"),
         )
 
         for i, tree in enumerate(trees):
@@ -323,7 +323,7 @@ class LGBMConstr(AbstractPredictorConstr):
         """Print statistics on model additions stored by this class.
 
         This function prints detailed statistics on the variables
-        and constraints that where added to the model.
+        and constraints that were added to the model.
 
         Includes a summary of the estimators that it contains.
 

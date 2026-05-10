@@ -93,7 +93,7 @@ def add_logistic_regression_constr(
 
     pwl_attributes : dict, optional
         Dictionary for non-default attributes for Gurobi to build the piecewise
-        linear approximation of the logistic function. This is only relevent when
+        linear approximation of the logistic function. This is only relevant when
         the output type is regression, not classification. The default values for
         those attributes set in the package can be obtained with
         LogisticRegressionConstr.default_pwl_attributes(). The dictionary keys

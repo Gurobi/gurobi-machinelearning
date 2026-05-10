@@ -376,8 +376,8 @@ class _SubModel:
     def print_stats(self, abbrev=False, file=None):
         """Print statistics about submodel.
 
-        This functions prints detailed statistics on the variables
-        and constraints that where added to the gp_model using this object.
+        This function prints detailed statistics on the variables
+        and constraints that were added to the gp_model using this object.
 
         Usually derived class reimplement this function to provide more
         details about the structure of the additions (type of ML model,

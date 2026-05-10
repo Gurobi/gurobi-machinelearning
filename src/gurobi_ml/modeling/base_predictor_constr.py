@@ -22,7 +22,7 @@ from ._var_utils import _get_sol_values, validate_input_vars, validate_output_va
 
 
 class AbstractPredictorConstr(ABC, _SubModel):
-    """Base class to store addtions for formulating predictor constraints
+    """Base class to store additions for formulating predictor constraints
 
     This class is the base class for formulating the various predictors
     supported by the package. It provides basic functionalities for storing
@@ -126,7 +126,7 @@ class AbstractPredictorConstr(ABC, _SubModel):
         """Print statistics on model additions stored by this class.
 
         This function prints detailed statistics on the variables
-        and constraints that where added to the model.
+        and constraints that were added to the model.
 
         Usually derived classes reimplement this function to provide more
         details about the structure of the additions (type of ML model,
