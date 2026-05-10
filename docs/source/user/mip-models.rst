@@ -4,10 +4,10 @@ Mixed Integer Formulations
 In this page, we give a quick overview of the mixed-integer formulations used to
 represent the various regression models supported by the package.
 
-Our goal is in particular to highlight the cases where the formulation are not
+Our goal is in particular to highlight the cases where the formulations are not
 exact and how to deal with potential errors in the solution. This applies in
-particular to our models for the logistic regression and decision trees (also
-random forest and gradient boosting that are based on decision trees)
+particular to our models for logistic regression and decision trees (also
+random forest and gradient boosting that are based on decision trees).
 
 Throughout,
 we denote by :math:`x` the input of the regression (i.e. the independent variables)
@@ -85,7 +85,7 @@ according to the topology of the network.
 Decision Tree Regression
 ========================
 
-In a decision tree, each leaf :math:`l` is defined by a number of constraints
+In a decision tree, each leaf :math:`l` is defined by a set of constraints
 on the input features of the tree that correspond to the branches taken in the
 path leading to :math:`l`. For a node :math:`v`, we denote by :math:`i_v` the
 feature used for splitting and by :math:`\theta_v` the value at which the split
@@ -160,3 +160,4 @@ the choice of :math:`\epsilon` apply to this case.
 We note additionally that the gradient boosting regressors are often very large
 and generating their representation in Gurobi may take a significant amount of
 time.
+e.

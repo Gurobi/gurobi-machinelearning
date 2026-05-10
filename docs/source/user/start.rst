@@ -65,7 +65,7 @@ We encourage to install the package via pip (or add it to your
   features of Gurobi from later versions are used and some models may perform significantly
   worse with the older versions.
 
-  The following table lists the version of the relevant packages that are
+  The following table lists the versions of the relevant packages that are
   tested and supported in the current version (|version|).
 
   .. _table-versions:
@@ -159,3 +159,4 @@ in the :doc:`../auto_examples/index` section.
 
 .. [#] Classification models are currently not supported (except binary logistic
     regression) but it is planned to add support to some models over time.
+.
