@@ -90,6 +90,24 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
         formulation="leafs",
         **kwargs,
     ):
+        """Initialize DecisionTreeRegressorConstr.
+
+        Parameters
+        ----------
+        gp_model : :external+gurobi:py:class:`Model`
+            The gurobipy model where the predictor should be inserted.
+        predictor : :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
+            The decision tree regressor to insert as predictor.
+        input_vars : mvar_array_like
+            Decision variables used as input for decision tree in model.
+        output_vars : mvar_array_like, optional
+            Decision variables used as output for decision tree in model.
+        epsilon : float, optional
+            Small value used to impose strict inequalities for splitting nodes in
+            MIP formulations.
+        formulation : {'leafs', 'paths'}, default='leafs'
+            Formulation to use for decision tree. 'paths' is deprecated.
+        """
         self._default_name = "tree_reg"
 
         formulations = ("leafs", "paths")

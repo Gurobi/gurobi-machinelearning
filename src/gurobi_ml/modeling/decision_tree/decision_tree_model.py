@@ -24,7 +24,18 @@ from ..base_predictor_constr import AbstractPredictorConstr
 
 
 def _compute_leafs_bounds(tree, feature_is_fixed, epsilon):
-    """Compute the bounds that define each leaf of the tree"""
+    """Compute the bounds that define each leaf of the tree
+
+    Parameters
+    ----------
+    tree : dict
+        The decision tree to model.
+    feature_is_fixed : ndarray
+        Boolean array indicating if a feature is fixed.
+    epsilon : float
+        Small value used to impose strict inequalities for splitting nodes in
+        MIP formulations.
+    """
     capacity = tree["capacity"]
     n_features = tree["n_features"]
     children_left = tree["children_left"]
@@ -148,6 +159,22 @@ def _paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
     We have one variable for each node of the tree and do a formulation
     that reconsistutes paths through the tree. This is inferior to the
     leaf formulation and is deprecated.
+
+    Parameters
+    ----------
+    gp_model : :external+gurobi:py:class:`Model`
+        The gurobipy model where the predictor should be inserted.
+    _input : mvar_array_like
+        Decision variables used as input for decision tree in model.
+    output : mvar_array_like
+        Decision variables used as output for decision tree in model.
+    tree : dict
+        The decision tree to model.
+    epsilon : float
+        Small value used to impose strict inequalities for splitting nodes in
+        MIP formulations.
+    _name_var : function
+        Function to name variables.
     """
 
     warn(

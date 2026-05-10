@@ -44,6 +44,9 @@ def add_random_forest_regressor_constr(
         Decision variables used as input for random forest in model.
     output_vars : mvar_array_like, optional
         Decision variables used as output for random forest in model.
+    epsilon : float, optional
+        Small value used to impose strict inequalities for splitting nodes in
+        MIP formulations.
 
     Returns
     -------
@@ -56,7 +59,7 @@ def add_random_forest_regressor_constr(
     |VariablesDimensionsWarn|
 
     Also see
-    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor`
+    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor_constr`
     for specific parameters to model decision tree estimators.
     """
     return RandomForestRegressorConstr(

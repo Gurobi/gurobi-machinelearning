@@ -48,6 +48,9 @@ def add_lgbmregressor_constr(
         Decision variables used as input for gradient boosting regressor in model.
     output_vars : mvar_array_like, optional
         Decision variables used as output for gradient boosting regressor in model.
+    epsilon : float, optional
+        Small value used to impose strict inequalities for splitting nodes in
+        MIP formulations.
 
     Returns
     -------
@@ -60,7 +63,7 @@ def add_lgbmregressor_constr(
     |VariablesDimensionsWarn|
 
     Also see
-    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor`
+    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor_constr`
     for specific parameters to model decision tree estimators.
 
     Raises
@@ -99,6 +102,9 @@ def add_lgbm_booster_constr(
         Decision variables used as input for gradient boosting regressor in model.
     output_vars : mvar_array_like, optional
         Decision variables used as output for gradient boosting regressor in model.
+    epsilon : float, optional
+        Small value used to impose strict inequalities for splitting nodes in
+        MIP formulations.
 
     Returns
     -------
@@ -111,7 +117,7 @@ def add_lgbm_booster_constr(
     |VariablesDimensionsWarn|
 
     Also see
-    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor`
+    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor_constr`
     for specific parameters to model decision tree estimators.
 
     Raises
@@ -134,6 +140,22 @@ class LGBMConstr(AbstractPredictorConstr):
     def __init__(
         self, gp_model, lgbm_regressor, input_vars, output_vars, epsilon=0.0, **kwargs
     ):
+        """Initialize LGBMConstr.
+
+        Parameters
+        ----------
+        gp_model : :external+gurobi:py:class:`Model`
+            The gurobipy model where the predictor should be inserted.
+        lgbm_regressor : :external+lightgbm:py:class:`lightgbm.Booster`
+            The booster to insert as predictor.
+        input_vars : mvar_array_like
+            Decision variables used as input for gradient boosting regressor in model.
+        output_vars : mvar_array_like, optional
+            Decision variables used as output for gradient boosting regressor in model.
+        epsilon : float, optional
+            Small value used to impose strict inequalities for splitting nodes in
+            MIP formulations.
+        """
         self._output_shape = 1
         self.estimators_ = []
         self.lgbm_regressor = lgbm_regressor

@@ -59,6 +59,9 @@ def add_xgbregressor_constr(
         Decision variables used as input for gradient boosting regressor in model.
     output_vars : mvar_array_like, optional
         Decision variables used as output for gradient boosting regressor in model.
+    epsilon : float, optional
+        Small value used to impose strict inequalities for splitting nodes in
+        MIP formulations.
 
     Returns
     -------
@@ -71,7 +74,7 @@ def add_xgbregressor_constr(
     |VariablesDimensionsWarn|
 
     Also see
-    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor`
+    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor_constr`
     for specific parameters to model decision tree estimators.
 
     Raises
@@ -110,6 +113,9 @@ def add_xgboost_regressor_constr(
         Decision variables used as input for gradient boosting regressor in model.
     output_vars : mvar_array_like, optional
         Decision variables used as output for gradient boosting regressor in model.
+    epsilon : float, optional
+        Small value used to impose strict inequalities for splitting nodes in
+        MIP formulations.
 
     Returns
     -------
@@ -122,7 +128,7 @@ def add_xgboost_regressor_constr(
     |VariablesDimensionsWarn|
 
     Also see
-    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor`
+    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor_constr`
     for specific parameters to model decision tree estimators.
 
     Raises
@@ -145,6 +151,22 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
     def __init__(
         self, gp_model, xgb_regressor, input_vars, output_vars, epsilon=0.0, **kwargs
     ):
+        """Initialize XGBoostRegressorConstr.
+
+        Parameters
+        ----------
+        gp_model : :external+gurobi:py:class:`Model`
+            The gurobipy model where the predictor should be inserted.
+        xgb_regressor : :external+xgb:py:class:`xgboost.Booster`
+            The booster to insert as predictor.
+        input_vars : mvar_array_like
+            Decision variables used as input for gradient boosting regressor in model.
+        output_vars : mvar_array_like, optional
+            Decision variables used as output for gradient boosting regressor in model.
+        epsilon : float, optional
+            Small value used to impose strict inequalities for splitting nodes in
+            MIP formulations.
+        """
         self._output_shape = 1
         self.estimators_ = []
         self.xgb_regressor = xgb_regressor
