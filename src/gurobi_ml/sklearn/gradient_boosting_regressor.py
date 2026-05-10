@@ -109,7 +109,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         tree_vars = model.addMVar(
             (nex, predictor.n_estimators_, 1),
             lb=-GRB.INFINITY,
-            name=self._name_var("esimator"),
+            name=self._name_var("estimator"),
         )
 
         for i in range(predictor.n_estimators_):
@@ -132,7 +132,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         """Print statistics on model additions stored by this class.
 
         This function prints detailed statistics on the variables
-        and constraints that where added to the model.
+        and constraints that were added to the model.
 
         Includes a summary of the estimators that it contains.
 

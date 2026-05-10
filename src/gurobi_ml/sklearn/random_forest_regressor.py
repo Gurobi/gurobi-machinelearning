@@ -128,7 +128,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         """Print statistics on model additions stored by this class.
 
         This function prints detailed statistics on the variables
-        and constraints that where added to the model.
+        and constraints that were added to the model.
 
         Includes a summary of the estimators that it contains.
 

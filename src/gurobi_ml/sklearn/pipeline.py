@@ -122,7 +122,7 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         """Print statistics on model additions stored by this class.
 
         This function prints detailed statistics on the variables
-        and constraints that where added to the model.
+        and constraints that were added to the model.
 
         The pipeline version includes a summary of the steps that it contains.
 
