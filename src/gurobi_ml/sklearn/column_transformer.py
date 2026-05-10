@@ -148,16 +148,16 @@ def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kw
     Parameters
     ----------
     gp_model : :external+gurobi:py:class:`Model`
-        The gurobipy model where polynomial features should be inserted.
+        The gurobipy model where the column transformer should be inserted.
     column_transformer : :external+sklearn:py:class:`sklearn.compose.ColumnTransformer`
         The column transformer to insert in gp_model.
     input_vars : mvar_array_like
-        Decision variables used as input for polynomial features in model.
+        Decision variables used as input for column transformer in model.
 
     Returns
     -------
-    sklearn.preprocessing.ColumnTransformerConstr
+    ColumnTransformerConstr
         Object containing information about what was added to gp_model to insert the
-        polynomial_features in it.
+        column_transformer in it.
     """
     return ColumnTransformerConstr(gp_model, column_transformer, input_vars, **kwargs)

@@ -43,10 +43,10 @@ def add_linear_regression_constr(
          * :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
          * :external+sklearn:py:class:`sklearn.linear_model.Ridge`
          * :external+sklearn:py:class:`sklearn.linear_model.Lasso`
-     input_vars: mvar_array_like
-         Decision variables used as input for random forest in model.
-     output_vars: mvar_array_like, optional
-         Decision variables used as output for random forest in model.
+    input_vars : mvar_array_like
+        Decision variables used as input for linear regression in model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for linear regression in model.
 
     Returns
     -------

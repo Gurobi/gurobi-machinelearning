@@ -130,6 +130,8 @@ class AbstractPredictorConstr(ABC, _SubModel):
         Parameters
         ----------
 
+        abbrev : bool, optional
+            If True, print abbreviated statistics. By default False.
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.
         """
@@ -252,7 +254,7 @@ class AbstractPredictorConstr(ABC, _SubModel):
 
         Returns
         -------
-        output : :external+gurobi:py:class:`MVar`.
+        input : :external+gurobi:py:class:`MVar`.
         """
         return self._input
 
