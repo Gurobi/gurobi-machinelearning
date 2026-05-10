@@ -63,7 +63,7 @@ PyTorch API
 
 .. autosummary::
    :toctree: auto_generated/
-   :caption: Pytorch API
+   :caption: PyTorch API
    :template: modeling_object.rst
 
    sequential
