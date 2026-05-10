@@ -43,7 +43,7 @@ class AbstractNNLayer(AbstractPredictorConstr):
 
     def get_error(self, eps=None):
         # We can't compute externally the error of a layer
-        assert False
+        raise NotImplementedError("get_error is not supported for individual NN layers")
 
     def print_stats(self, abbrev=False, file=None):
         """Print statistics about submodel created.

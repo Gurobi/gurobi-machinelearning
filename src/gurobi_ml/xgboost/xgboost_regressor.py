@@ -19,6 +19,7 @@ into a :external+gurobi:py:class:`Model`.
 """
 
 import json
+import warnings
 
 import gurobipy as gp
 import numpy as np
@@ -190,9 +191,11 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         nex = _input.shape[0]
         timer = AbstractPredictorConstr._ModelingTimer()
         outdim = output.shape[1]
-        assert outdim == 1, (
-            "Output dimension of gradient boosting regressor should be 1"
-        )
+        if outdim != 1:
+            raise ModelConfigurationError(
+                xgb_regressor,
+                "Output dimension of gradient boosting regressor should be 1",
+            )
 
         xgb_raw = json.loads(xgb_regressor.save_raw(raw_format="json"))
         booster_type = xgb_raw["learner"]["gradient_booster"]["name"]
@@ -225,12 +228,6 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
             tree["value"] = tree["threshold"].reshape(-1, 1)
             tree["capacity"] = len(tree["split_conditions"])
             tree["n_features"] = int(tree["tree_param"]["num_feature"])
-
-            def _name_tree_var(name):
-                rval = self._name_var(name)
-                if rval is None:
-                    return None
-                return rval + f"_{i}"
 
             estimators.append(
                 AbstractTreeEstimator(
@@ -319,6 +316,6 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
             xgb_out = self.xgb_regressor.predict(xgb_in)
             r_val = np.abs(xgb_out.reshape(-1, 1) - self.output.X)
             if eps is not None and np.max(r_val) > eps:
-                print(f"{self.output.X} != {xgb_out.reshape(-1, 1)}")
+                warnings.warn(f"get_error: {self.output.X} != {xgb_out.reshape(-1, 1)}")
             return r_val
         raise NoSolutionError()

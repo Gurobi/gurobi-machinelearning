@@ -294,4 +294,4 @@ class AbstractTreeEstimator(AbstractPredictorConstr):
 
         Child classes should implement this.
         """
-        assert False
+        raise NotImplementedError("Child classes must implement get_error")

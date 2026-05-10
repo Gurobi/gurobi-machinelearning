@@ -58,7 +58,10 @@ class ColumnTransformerConstr(SKtransformer):
         if hasattr(self._input, "index"):
             self._input_index = _input.index
         self._mip_model(**kwargs)
-        assert self._output is not None
+        if self._output is None:
+            raise RuntimeError(
+                f"{type(self).__name__}: output was not set after building the MIP model"
+            )
         return self
 
     @staticmethod
@@ -78,7 +81,6 @@ class ColumnTransformerConstr(SKtransformer):
         """Do the transformation on x."""
         column_transform = self.transformer
         _input = self._input
-        {k.lower(): v for k, v in sklearn_transformers().items()}
         transformed = []
         for name, trans, cols in column_transform.transformers_:
             if len(cols) == 0:

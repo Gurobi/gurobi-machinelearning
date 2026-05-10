@@ -139,8 +139,16 @@ class PolynomialFeaturesConstr(SKtransformer):
 
         n_examples, n_feat = _input.shape
         powers = self.transformer.powers_
-        assert powers.shape[0] == self.transformer.n_output_features_
-        assert powers.shape[1] == n_feat
+        if powers.shape[0] != self.transformer.n_output_features_:
+            raise RuntimeError(
+                f"PolynomialFeatures internal inconsistency: powers.shape[0]={powers.shape[0]} "
+                f"!= n_output_features_={self.transformer.n_output_features_}"
+            )
+        if powers.shape[1] != n_feat:
+            raise RuntimeError(
+                f"PolynomialFeatures internal inconsistency: powers.shape[1]={powers.shape[1]} "
+                f"!= n_features={n_feat}"
+            )
 
         for k in range(n_examples):
             for i, power in enumerate(powers):
