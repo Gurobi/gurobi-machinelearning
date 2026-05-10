@@ -26,7 +26,12 @@ from .skgetter import SKgetter
 
 
 def add_random_forest_regressor_constr(
-    gp_model, random_forest_regressor, input_vars, output_vars=None, **kwargs
+    gp_model,
+    random_forest_regressor,
+    input_vars,
+    output_vars=None,
+    epsilon=0.0,
+    **kwargs,
 ):
     """Formulate random_forest_regressor in gp_model.
 
@@ -41,9 +46,9 @@ def add_random_forest_regressor_constr(
     random_forest_regressor : :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor`
         The random forest regressor to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for random forest in model.
+        Decision variables used as input for random forest in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for random forest in model.
+        Decision variables used as output for random forest in gp_model.
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
@@ -63,7 +68,12 @@ def add_random_forest_regressor_constr(
     for specific parameters to model decision tree estimators.
     """
     return RandomForestRegressorConstr(
-        gp_model, random_forest_regressor, input_vars, output_vars, **kwargs
+        gp_model,
+        random_forest_regressor,
+        input_vars,
+        output_vars,
+        epsilon=epsilon,
+        **kwargs,
     )
 
 

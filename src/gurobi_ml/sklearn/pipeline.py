@@ -41,9 +41,9 @@ def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwar
     pipeline : :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
         The pipeline to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for regression in model.
+        Decision variables used as input for pipeline in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for regression in model.
+        Decision variables used as output for pipeline in gp_model.
 
     Returns
     -------

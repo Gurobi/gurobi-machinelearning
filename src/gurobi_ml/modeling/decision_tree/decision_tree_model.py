@@ -165,9 +165,9 @@ def _paths_formulation(gp_model, _input, output, tree, epsilon, _name_var):
     gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     _input : mvar_array_like
-        Decision variables used as input for decision tree in model.
+        Decision variables used as input for decision tree in gp_model.
     output : mvar_array_like
-        Decision variables used as output for decision tree in model.
+        Decision variables used as output for decision tree in gp_model.
     tree : dict
         The decision tree to model.
     epsilon : float

@@ -40,14 +40,14 @@ def add_sequential_constr(
     sequential_model : :external+torch:py:class:`torch.nn.Sequential`
         The sequential model to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for model represented by pytorch object.
+        Decision variables used as input for pytorch model in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for model represented by pytorch object.
+        Decision variables used as output for pytorch model in gp_model.
 
     Returns
     -------
     SequentialConstr
-        Object containing information about what was added to model to insert the
+        Object containing information about what was added to gp_model to insert the
         predictor in it
 
     Raises
