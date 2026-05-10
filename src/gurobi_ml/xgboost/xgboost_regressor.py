@@ -20,10 +20,10 @@ into a :external+gurobi:py:class:`Model`.
 
 import json
 
+import gurobipy as gp
 import numpy as np
 import xgboost as xgb
 from gurobipy import GRB
-import gurobipy as gp
 
 try:
     from gurobipy import nlfunc

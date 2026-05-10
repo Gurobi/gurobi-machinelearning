@@ -96,8 +96,8 @@ def add_logistic_regression_constr(
         linear approximation of the logistic function. This is only relevant when
         the output type is regression, not classification. The default values for
         those attributes set in the package can be obtained with
-        LogisticRegressionConstr.default_pwl_attributes(). The dictionary keys
-        should be the `attributes for modeling piece wise linear functions
+        :meth:`LogisticRegressionConstr.default_pwl_attributes`. The dictionary keys
+        should be the `attributes for modeling piecewise linear functions
         <https://www.gurobi.com/documentation/9.1/refman/general_constraint_attribu.html>`_
         and the values the corresponding value the users wants to pass to
         Gurobi.
