@@ -15,6 +15,8 @@
 
 """Implements some utility tools for all scikit-learn objects."""
 
+import warnings
+
 import numpy as np
 from sklearn.utils.validation import check_is_fitted, _check_feature_names
 
@@ -71,7 +73,7 @@ class SKgetter(AbstractPredictorConstr):
                 predicted = predicted.reshape(-1, 1)
             r_val = np.abs(predicted - output_values)
             if eps is not None and np.max(r_val) > eps:
-                print(f"{predicted} != {output_values}")
+                warnings.warn(f"get_error: {predicted} != {output_values}")
             return r_val
 
         raise NoSolutionError()
@@ -122,7 +124,7 @@ class SKtransformer(AbstractPredictorConstr):
 
             r_val = np.abs(transformed - self.output_values)
             if eps is not None and np.max(r_val) > eps:
-                print(f"{transformed} != {self.output_values}")
+                warnings.warn(f"get_error: {transformed} != {self.output_values}")
             return r_val
 
         raise NoSolutionError()

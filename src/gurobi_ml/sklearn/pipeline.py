@@ -87,8 +87,14 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         do it.
         """
         self._mip_model(**kwargs)
-        assert self.output is not None
-        assert self.input is not None
+        if self.output is None:
+            raise RuntimeError(
+                f"{type(self).__name__}: pipeline output was not set after building the MIP model"
+            )
+        if self.input is None:
+            raise RuntimeError(
+                f"{type(self).__name__}: pipeline input was not set after building the MIP model"
+            )
         # We can call validate only after the model is created
         self._validate()
         return self

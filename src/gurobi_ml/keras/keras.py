@@ -16,6 +16,8 @@
 """Module for formulating a Keras model into a :external+gurobi:py:class:`Model`."""
 
 import numbers
+import warnings
+
 import numpy as np
 import keras
 
@@ -73,7 +75,10 @@ class KerasNetworkConstr(BaseNNConstr):
     """
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
-        assert predictor.built
+        if not predictor.built:
+            raise ModelConfigurationError(
+                predictor, "Keras model must be built before it can be formulated"
+            )
         for step in predictor.layers:
             if isinstance(step, keras.layers.Dense):
                 config = step.get_config()
@@ -162,6 +167,6 @@ class KerasNetworkConstr(BaseNNConstr):
                 prediction = np.asarray(prediction)
             r_val = np.abs(prediction - self.output_values)
             if eps is not None and np.max(r_val) > eps:
-                print(f"{self.input_values} != {self.output_values}")
+                warnings.warn(f"get_error: {prediction} != {self.output_values}")
             return r_val
         raise NoSolutionError()

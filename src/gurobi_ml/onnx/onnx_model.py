@@ -23,6 +23,7 @@ Dense/Linear + ReLU networks.
 
 from __future__ import annotations
 
+import warnings
 
 import numpy as np
 import onnx
@@ -365,6 +366,6 @@ class ONNXNetworkConstr(BaseNNConstr):
 
             r_val = np.abs(pred - self.output_values)
             if eps is not None and np.max(r_val) > eps:
-                print(f"{pred} != {self.output_values}")
+                warnings.warn(f"get_error: {pred} != {self.output_values}")
             return r_val
         raise NoSolutionError()

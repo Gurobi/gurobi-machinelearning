@@ -18,10 +18,12 @@ LightGBM gradient boosting regressor
 into a :external+gurobi:py:class:`Model`.
 """
 
+import warnings
+
 import numpy as np
 from gurobipy import GRB
 
-from ..exceptions import NoSolutionError
+from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling import AbstractPredictorConstr
 from ..modeling.decision_tree import AbstractTreeEstimator
 
@@ -233,8 +235,10 @@ class LGBMConstr(AbstractPredictorConstr):
         while len(heap) > 0:
             node = heap.pop()
             index = node_index(node)
-            assert children_left[index] == -2
-            assert children_right[index] == -2
+            if children_left[index] != -2 or children_right[index] != -2:
+                raise RuntimeError(
+                    f"LightGBM tree traversal error: node index {index} visited more than once"
+                )
             if "split_index" in node.keys():
                 feature[index] = node["split_feature"]
                 threshold[index] = node["threshold"]
@@ -248,8 +252,14 @@ class LGBMConstr(AbstractPredictorConstr):
                 children_right[index] = -1
                 value[index] = node["leaf_value"]
 
-        assert min(children_left) >= -1
-        assert min(children_right) >= -1
+        if min(children_left) < -1:
+            raise RuntimeError(
+                "LightGBM tree flattening error: not all nodes were visited (children_left contains -2)"
+            )
+        if min(children_right) < -1:
+            raise RuntimeError(
+                "LightGBM tree flattening error: not all nodes were visited (children_right contains -2)"
+            )
         flat_tree = {
             "children_left": children_left,
             "children_right": children_right,
@@ -274,9 +284,11 @@ class LGBMConstr(AbstractPredictorConstr):
         nex = _input.shape[0]
         timer = AbstractPredictorConstr._ModelingTimer()
         outdim = output.shape[1]
-        assert outdim == 1, (
-            "Output dimension of gradient boosting regressor should be 1"
-        )
+        if outdim != 1:
+            raise ModelConfigurationError(
+                lgbm_regressor,
+                "Output dimension of gradient boosting regressor should be 1",
+            )
 
         lgbm_raw = lgbm_regressor.dump_model()
 
@@ -298,12 +310,6 @@ class LGBMConstr(AbstractPredictorConstr):
                 self._timer.timing(f"Estimator {i}")
             flat_tree = self._flat_tree_representation(tree["tree_structure"])
             flat_tree["n_features"] = lgbm_raw["max_feature_idx"] + 1
-
-            def _name_tree_var(name):
-                rval = self._name_var(name)
-                if rval is None:
-                    return None
-                return rval + f"_{i}"
 
             estimators.append(
                 AbstractTreeEstimator(
@@ -348,6 +354,8 @@ class LGBMConstr(AbstractPredictorConstr):
             lgbm_out = self.lgbm_regressor.predict(lgbm_in)
             r_val = np.abs(lgbm_out.reshape(-1, 1) - self.output.X)
             if eps is not None and np.max(r_val) > eps:
-                print(f"{self.output.X} != {lgbm_out.reshape(-1, 1)}")
+                warnings.warn(
+                    f"get_error: {self.output.X} != {lgbm_out.reshape(-1, 1)}"
+                )
             return r_val
         raise NoSolutionError()

@@ -220,7 +220,10 @@ Upgrading to version 11 is recommended when using logistic regressions."""
         rhs : scalar
         name : string
         """
-        assert binvar.shape == lhs.shape
+        if binvar.shape != lhs.shape:
+            raise ValueError(
+                f"Shape mismatch in indicator constraint: binvar.shape={binvar.shape} != lhs.shape={lhs.shape}"
+            )
         total_constraints = np.prod(binvar.shape)
         binvar = binvar.reshape(total_constraints).tolist()
         lhs = lhs.reshape(total_constraints).tolist()

@@ -79,6 +79,11 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         clean_predictor=False,
         **kwargs,
     ):
+        if predictor.out_activation_ not in ("identity", "relu"):
+            raise ModelConfigurationError(
+                predictor,
+                f"Unsupported output activation '{predictor.out_activation_}'. Only 'identity' and 'relu' are supported.",
+            )
         SKgetter.__init__(self, predictor, input_vars, **kwargs)
         BaseNNConstr.__init__(
             self,
@@ -89,7 +94,6 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
             clean_predictor=clean_predictor,
             **kwargs,
         )
-        assert predictor.out_activation_ in ("identity", "relu")
 
     def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
@@ -125,4 +129,4 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
             self.gp_model.update()
         assert (
             self._output is not None
-        )  # Should never happen since sklearn object defines n_ouputs_
+        )  # Should never happen since sklearn object defines n_outputs_

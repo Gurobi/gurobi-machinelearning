@@ -20,6 +20,7 @@ into a :external+gurobi:py:class:`Model`.
 
 from gurobipy import GRB
 
+from ..exceptions import ModelConfigurationError
 from ..modeling import AbstractPredictorConstr
 from .decision_tree_regressor import add_decision_tree_regressor_constr
 from .skgetter import SKgetter
@@ -108,9 +109,11 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         nex = _input.shape[0]
 
         outdim = output.shape[1]
-        assert outdim == 1, (
-            "Output dimension of gradient boosting regressor should be 1"
-        )
+        if outdim != 1:
+            raise ModelConfigurationError(
+                self.predictor,
+                "Output dimension of gradient boosting regressor should be 1",
+            )
 
         estimators = []
         if self._no_debug:

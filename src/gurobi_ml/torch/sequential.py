@@ -19,6 +19,7 @@
 
 import numpy as np
 import torch
+import warnings
 from torch import nn
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
@@ -86,7 +87,7 @@ class SequentialConstr(BaseNNConstr):
                 raise ModelConfigurationError(
                     predictor, f"Unsupported layer {type(step).__name__}"
                 )
-        super().__init__(gp_model, predictor, input_vars, output_vars)
+        super().__init__(gp_model, predictor, input_vars, output_vars, **kwargs)
 
     def _mip_model(self, **kwargs):
         network = self.predictor
@@ -133,6 +134,6 @@ class SequentialConstr(BaseNNConstr):
             t_out = self.predictor.forward(t_in)
             r_val = np.abs(t_out.detach().numpy() - self.output_values)
             if eps is not None and np.max(r_val) > eps:
-                print(f"{t_out} != {self.output_values}")
+                warnings.warn(f"get_error: {t_out} != {self.output_values}")
             return r_val
         raise NoSolutionError()
