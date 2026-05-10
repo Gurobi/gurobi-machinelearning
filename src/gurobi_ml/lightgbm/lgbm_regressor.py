@@ -200,8 +200,10 @@ class LGBMConstr(AbstractPredictorConstr):
     def _flat_tree_representation(root_node):
         """Flatten a lightgbm tree.
 
-        This function takes a root node of a lightgbm tree and flattens it into a dictionary representation.
-        The flattened tree contains information about the children nodes, split features, thresholds, and leaf values.
+        This function takes a root node of a lightgbm tree and flattens it
+        into a dictionary representation.
+        The flattened tree contains information about the children nodes,
+        split features, thresholds, and leaf values.
 
         Parameters
         ----------
@@ -260,7 +262,7 @@ class LGBMConstr(AbstractPredictorConstr):
 
     def _mip_model(self, **kwargs):
         """Predict output variables y from input variables X using the
-        decision tree.
+        gradient boosted tree ensemble.
 
         Both X and y should be array or list of variables of conforming dimensions.
         """

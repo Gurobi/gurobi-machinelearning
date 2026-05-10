@@ -44,7 +44,7 @@ def add_polynomial_features_constr(
 
     Returns
     -------
-    sklearn.preprocessing.PolynomialFeaturesConstr
+    PolynomialFeaturesConstr
         Object containing information about what was added to gp_model to insert the
         polynomial_features in it
 
@@ -78,7 +78,7 @@ def add_standard_scaler_constr(
 
     Returns
     -------
-    sklearn.preprocessing.StandardScalerConstr
+    StandardScalerConstr
         Object containing information about what was added to gp_model to insert the
         standard_scaler in it
     """
