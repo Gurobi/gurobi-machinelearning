@@ -159,4 +159,3 @@ in the :doc:`../auto_examples/index` section.
 
 .. [#] Classification models are currently not supported (except binary logistic
     regression) but it is planned to add support to some models over time.
-.

@@ -160,4 +160,3 @@ the choice of :math:`\epsilon` apply to this case.
 We note additionally that the gradient boosting regressors are often very large
 and generating their representation in Gurobi may take a significant amount of
 time.
-e.
