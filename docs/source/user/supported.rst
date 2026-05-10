@@ -85,7 +85,7 @@ to insert it in a Gurobi model.
    * - ColumnTransformer
      - :external:py:class:`ColumnTransformer
        <sklearn.compose.ColumnTransformer>`
-     - :py:mod:`add_column_transformer_constr
+     - :py:func:`add_column_transformer_constr
        <gurobi_ml.sklearn.column_transformer.add_column_transformer_constr>`
 
 Keras

@@ -10,8 +10,8 @@ The main function provided by the package formulates a predictor in
 a Gurobi model. In most cases, it is the only function needed from
 the package.
 
-Some formulations of the predictors can have additional options
-those are documented in the specific functions for each regression model.
+Some formulations of the predictors can have additional options.
+These are documented in the specific functions for each regression model.
 
 .. currentmodule:: gurobi_ml
 
