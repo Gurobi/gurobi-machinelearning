@@ -20,7 +20,7 @@ USER_PREDICTORS = {}
 
 
 def register_predictor_constr(predictor, predictor_constr):
-    """Register a new predictor that can be added using use_predictor_constr.
+    """Register a new predictor that can be added using add_predictor_constr.
 
     Parameters
     ----------

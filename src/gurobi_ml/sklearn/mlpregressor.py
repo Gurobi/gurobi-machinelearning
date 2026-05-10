@@ -35,7 +35,7 @@ def add_mlp_regressor_constr(
     ----------
     gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
-    mlpregressor : :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor`
+    mlp_regressor : :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor`
         The multi-layer perceptron regressor to insert as predictor.
     input_vars : mvar_array_like
         Decision variables used as input for regression in model.

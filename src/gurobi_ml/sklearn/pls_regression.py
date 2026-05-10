@@ -32,13 +32,13 @@ def add_pls_regression_constr(
     gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     pls_regression : :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression`
-     The linear regression to insert. It can be of any of the following types:
+     The PLS regression to insert. It can be of any of the following types:
          * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression`
          * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSCanonical`
-     input_vars: mvar_array_like
-         Decision variables used as input for random forest in model.
-     output_vars: mvar_array_like, optional
-         Decision variables used as output for random forest in model.
+    input_vars : mvar_array_like
+        Decision variables used as input for PLS regression in model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for PLS regression in model.
 
     Returns
     -------

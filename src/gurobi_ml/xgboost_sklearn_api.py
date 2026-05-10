@@ -22,7 +22,7 @@ import sys
 
 
 def xgboost_sklearn_convertors():
-    """Collect known PyTorch objects that can be formulated and the conversion class."""
+    """Collect known XGBoost objects that can be formulated and the conversion class."""
     if "xgboost" in sys.modules:
         import xgboost as xgb  # pylint: disable=import-outside-toplevel
 

@@ -14,7 +14,7 @@
 # ==============================================================================
 
 """Implementation for using sklearn preprocessing object in a
-Guobi model.
+Gurobi model.
 """
 
 import gurobipy as gp

@@ -53,7 +53,7 @@ def add_xgbregressor_constr(
     ----------
     gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
-    xgboost_regressor : :external+xgb:py:class:`xgboost.XGBRFRegressor`
+    xgboost_regressor : :external+xgb:py:class:`xgboost.XGBRegressor`
         The gradient boosting regressor to insert as predictor.
     input_vars : mvar_array_like
         Decision variables used as input for gradient boosting regressor in model.

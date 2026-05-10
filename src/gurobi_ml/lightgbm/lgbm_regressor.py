@@ -96,7 +96,7 @@ def add_lgbm_booster_constr(
     ----------
     gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
-    lgbm_regressor : :external+lightgbm:py:class:`lightgbm.Booster`
+    lgbm_booster : :external+lightgbm:py:class:`lightgbm.Booster`
         The booster to insert as predictor.
     input_vars : mvar_array_like
         Decision variables used as input for gradient boosting regressor in model.

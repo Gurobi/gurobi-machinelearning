@@ -22,7 +22,7 @@ import sys
 
 
 def lightgbm_sklearn_convertors():
-    """Collect known PyTorch objects that can be formulated and the conversion class."""
+    """Collect known LightGBM objects that can be formulated and the conversion class."""
     if "lightgbm" in sys.modules:
         import lightgbm as lgbm  # pylint: disable=import-outside-toplevel
 
