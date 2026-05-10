@@ -152,7 +152,7 @@ def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kw
     column_transformer : :external+sklearn:py:class:`sklearn.compose.ColumnTransformer`
         The column transformer to insert in gp_model.
     input_vars : mvar_array_like
-        Decision variables used as input for column transformer in model.
+        Decision variables used as input for column transformer in gp_model.
 
     Returns
     -------

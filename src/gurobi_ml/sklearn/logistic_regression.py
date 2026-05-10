@@ -66,9 +66,9 @@ def add_logistic_regression_constr(
     logistic_regression : :external+sklearn:py:class:`sklearn.linear_model.LogisticRegression`
         The logistic regression to insert.
     input_vars : mvar_array_like
-        Decision variables used as input for logistic regression in model.
+        Decision variables used as input for logistic regression in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for logistic regression in model.
+        Decision variables used as output for logistic regression in gp_model.
 
     output_type : {'classification', 'probability_1'}, default='classification'
         If the option chosen is 'classification' the output is the class label

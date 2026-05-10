@@ -76,7 +76,7 @@ class BaseNNConstr(AbstractPredictorConstr):
         ----------
 
         input_vars : mvar_array_like
-            Decision variables used as input for predictor in model.
+            Decision variables used as input for predictor in gp_model.
         layer_coefs:
             Coefficient for each node in a layer
         layer_intercept:

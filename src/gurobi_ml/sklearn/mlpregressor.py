@@ -38,9 +38,9 @@ def add_mlp_regressor_constr(
     mlp_regressor : :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor`
         The multi-layer perceptron regressor to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for regression in model.
+        Decision variables used as input for mlp regressor in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for regression in model.
+        Decision variables used as output for mlp regressor in gp_model.
 
     Returns
     -------

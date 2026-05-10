@@ -45,9 +45,9 @@ def add_lgbmregressor_constr(
     lgbm_regressor : :external+lightgbm:py:class:`lightgbm.sklearn.LGBMRegressor`
         The gradient boosting regressor to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for gradient boosting regressor in model.
+        Decision variables used as input for gradient boosting regressor in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for gradient boosting regressor in model.
+        Decision variables used as output for gradient boosting regressor in gp_model.
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
@@ -99,9 +99,9 @@ def add_lgbm_booster_constr(
     lgbm_booster : :external+lightgbm:py:class:`lightgbm.Booster`
         The booster to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for gradient boosting regressor in model.
+        Decision variables used as input for gradient boosting regressor in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for gradient boosting regressor in model.
+        Decision variables used as output for gradient boosting regressor in gp_model.
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
@@ -149,9 +149,9 @@ class LGBMConstr(AbstractPredictorConstr):
         lgbm_regressor : :external+lightgbm:py:class:`lightgbm.Booster`
             The booster to insert as predictor.
         input_vars : mvar_array_like
-            Decision variables used as input for gradient boosting regressor in model.
+            Decision variables used as input for gradient boosting regressor in gp_model.
         output_vars : mvar_array_like, optional
-            Decision variables used as output for gradient boosting regressor in model.
+            Decision variables used as output for gradient boosting regressor in gp_model.
         epsilon : float, optional
             Small value used to impose strict inequalities for splitting nodes in
             MIP formulations.

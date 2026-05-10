@@ -56,9 +56,9 @@ def add_xgbregressor_constr(
     xgboost_regressor : :external+xgb:py:class:`xgboost.XGBRegressor`
         The gradient boosting regressor to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for gradient boosting regressor in model.
+        Decision variables used as input for gradient boosting regressor in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for gradient boosting regressor in model.
+        Decision variables used as output for gradient boosting regressor in gp_model.
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
@@ -110,9 +110,9 @@ def add_xgboost_regressor_constr(
     xgboost_regressor : :external+xgb:py:class:`xgboost.Booster`
         The gradient boosting regressor to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for gradient boosting regressor in model.
+        Decision variables used as input for gradient boosting regressor in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for gradient boosting regressor in model.
+        Decision variables used as output for gradient boosting regressor in gp_model.
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
@@ -160,9 +160,9 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         xgb_regressor : :external+xgb:py:class:`xgboost.Booster`
             The booster to insert as predictor.
         input_vars : mvar_array_like
-            Decision variables used as input for gradient boosting regressor in model.
+            Decision variables used as input for gradient boosting regressor in gp_model.
         output_vars : mvar_array_like, optional
-            Decision variables used as output for gradient boosting regressor in model.
+            Decision variables used as output for gradient boosting regressor in gp_model.
         epsilon : float, optional
             Small value used to impose strict inequalities for splitting nodes in
             MIP formulations.

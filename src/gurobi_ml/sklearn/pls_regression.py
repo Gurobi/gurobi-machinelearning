@@ -36,9 +36,9 @@ def add_pls_regression_constr(
          * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSRegression`
          * :external+sklearn:py:class:`sklearn.cross_decomposition.PLSCanonical`
     input_vars : mvar_array_like
-        Decision variables used as input for PLS regression in model.
+        Decision variables used as input for PLS regression in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for PLS regression in model.
+        Decision variables used as output for PLS regression in gp_model.
 
     Returns
     -------

@@ -26,7 +26,12 @@ from .skgetter import SKgetter
 
 
 def add_gradient_boosting_regressor_constr(
-    gp_model, gradient_boosting_regressor, input_vars, output_vars=None, **kwargs
+    gp_model,
+    gradient_boosting_regressor,
+    input_vars,
+    output_vars=None,
+    epsilon=0.0,
+    **kwargs,
 ):
     """Formulate gradient_boosting_regressor into gp_model.
 
@@ -41,9 +46,9 @@ def add_gradient_boosting_regressor_constr(
     gradient_boosting_regressor : :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
         The gradient boosting regressor to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for gradient boosting regressor in model.
+        Decision variables used as input for gradient boosting regressor in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for gradient boosting regressor in model.
+        Decision variables used as output for gradient boosting regressor in gp_model.
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
@@ -63,7 +68,12 @@ def add_gradient_boosting_regressor_constr(
     for specific parameters to model decision tree estimators.
     """
     return GradientBoostingRegressorConstr(
-        gp_model, gradient_boosting_regressor, input_vars, output_vars, **kwargs
+        gp_model,
+        gradient_boosting_regressor,
+        input_vars,
+        output_vars,
+        epsilon=epsilon,
+        **kwargs,
     )
 
 

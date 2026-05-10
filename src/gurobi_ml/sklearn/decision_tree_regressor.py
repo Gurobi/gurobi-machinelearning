@@ -43,9 +43,9 @@ def add_decision_tree_regressor_constr(
     decision_tree_regressor : :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
         The decision tree regressor to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for decision tree in model.
+        Decision variables used as input for decision tree in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for decision tree in model.
+        Decision variables used as output for decision tree in gp_model.
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
@@ -99,9 +99,9 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
         predictor : :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
             The decision tree regressor to insert as predictor.
         input_vars : mvar_array_like
-            Decision variables used as input for decision tree in model.
+            Decision variables used as input for decision tree in gp_model.
         output_vars : mvar_array_like, optional
-            Decision variables used as output for decision tree in model.
+            Decision variables used as output for decision tree in gp_model.
         epsilon : float, optional
             Small value used to impose strict inequalities for splitting nodes in
             MIP formulations.

@@ -38,9 +38,9 @@ def add_polynomial_features_constr(
     polynomial_features : :external+sklearn:py:class:`sklearn.preprocessing.PolynomialFeatures`
         The polynomial features to insert in gp_model.
     input_vars : mvar_array_like
-        Decision variables used as input for polynomial features in model.
+        Decision variables used as input for polynomial features in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for polynomial features in model.
+        Decision variables used as output for polynomial features in gp_model.
 
     Returns
     -------
@@ -72,9 +72,9 @@ def add_standard_scaler_constr(
     standard_scaler : :external+sklearn:py:class:`sklearn.preprocessing.StandardScaler`
         The standard scaler to insert as predictor.
     input_vars : mvar_array_like
-        Decision variables used as input for standard scaler in model.
+        Decision variables used as input for standard scaler in gp_model.
     output_vars : mvar_array_like, optional
-        Decision variables used as output for standard scaler in model.
+        Decision variables used as output for standard scaler in gp_model.
 
     Returns
     -------
