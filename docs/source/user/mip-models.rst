@@ -31,12 +31,12 @@ regression such as Ridge or Lasso.
 Logistic Regression
 ===================
 
-Denoting by :math:`f(x) = \frac{1}{1 - e^{-x}}` the standard logistic function
+Denoting by :math:`f(x) = \frac{1}{1 + e^{-x}}` the standard logistic function
 and with the same notations as above, the model for logistic regression reads
 
 .. math::
 
-  y = f(\sum_{i=1}^p \beta_i x_i + \beta_0) = \frac{1}{1 - e^{- \sum_{i=1}^p
+  y = f(\sum_{i=1}^p \beta_i x_i + \beta_0) = \frac{1}{1 + e^{- \sum_{i=1}^p
   \beta_i x_i - \beta_0}}
 
 This model is formulated in Gurobi by using the logistic
@@ -54,7 +54,7 @@ created by Gurobi Machine Learning.
 Older versions of Gurobi make a piecewise linear approximation of the logistic
 function. By default, the approximation guarantees a maximal error of
 :math:`10^{-2}`. Those parameters can be tuned by setting the `pwl_attributes`
-keyword argument when the constraints is added.
+keyword argument when the constraint is added.
 
 
 Neural Networks
@@ -102,7 +102,7 @@ We introduce the constraint
 .. math::
    \sum_{l} \delta_l = 1,
 
-imposing that at least one leaf is chosen.
+imposing that exactly one leaf is chosen.
 
 Then for each leaf, the inequalities describing :math:`\mathcal L_l` and :math:`\mathcal R_l`
 are imposed using indicator constraints:

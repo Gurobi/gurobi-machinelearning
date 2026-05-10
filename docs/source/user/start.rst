@@ -27,11 +27,12 @@ The aim of the package is to:
 
 The package currently supports various `scikit-learn
 <https://scikit-learn.org/stable/>`_ objects. It can also formulate
-gradient boosting regression models from `XGboost <https://xgboost.readthedocs.io/en/stable/>`_
+gradient boosting regression models from `XGBoost <https://xgboost.readthedocs.io/en/stable/>`_
 and `LightGBM <https://lightgbm.readthedocs.io/en/stable/>`.
 Finally, it has limited support for
-`Keras <https://keras.io/>`_. Only neural networks with ReLU activation
-can be used with these two packages.
+`Keras <https://keras.io/>`_, `PyTorch <https://pytorch.org/>`_ and
+`ONNX <https://onnx.ai/>`_. Only neural networks with ReLU activation
+can be used with these packages.
 
 The package is actively developed and users are encouraged to :doc:`contact us
 <../meta/contactus>` if they have applications where they use a regression model
@@ -129,12 +130,12 @@ The modeling object can perform a few tasks:
      :py:meth:`remove <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.remove>`
      method.
    * It can print a summary of what it added with the :py:meth:`print_stats
-     <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.print_stats>` method.
+      <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.print_stats>` method.
    * Once Gurobi computed a solution to the optimization problem, it can compute
      the difference between what the regression model predicts from the input
      values and the values of the output variables in Gurobi's solution with the
-     :py:meth:`get_error
-     <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.print_stats>` method.
+      :py:meth:`get_error
+      <gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr.get_error>` method.
 
 
 The function :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` is

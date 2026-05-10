@@ -1,9 +1,9 @@
 Supported Regression models
 ###########################
 
-The package currently support various `scikit-learn
-<https://scikit-learn.org/stable/>`_ objects. It also support
-Gradient Boosting Regreesion from `XGboost <https://xgboost.readthedocs.io/en/stable/>`_ and has limited support for
+The package currently supports various `scikit-learn
+<https://scikit-learn.org/stable/>`_ objects. It also supports
+Gradient Boosting Regression from `XGBoost <https://xgboost.readthedocs.io/en/stable/>`_ and has limited support for
 `Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_. Only
 sequential neural networks with ReLU activation function are currently
 supported. In :ref:`Mixed Integer Formulations`, we briefly outline the formulations used for the various
@@ -144,12 +144,12 @@ for bias addition in the `MatMul` + `Add` pattern, not for combining branches.
 XGBoost
 -------
 
-XGboost's :external+xgb:py:class:`xgboost.Booster` can be formulated in a Gurobi model
+XGBoost's :external+xgb:py:class:`xgboost.Booster` can be formulated in a Gurobi model
 with the function :py:func:`add_xgboost_regressor_constr <gurobi_ml.xgboost.xgboost_regressor.add_xgboost_regressor_constr>`.
 The scikit-learn wrapper :external+xgb:py:class:`xgboost.XGBRegressor` can be formulated
 using :py:func:`add_xgbregressor_constr <gurobi_ml.xgboost.xgboost_regressor.add_xgbregressor_constr>`.
 
-Currently only "gbtree" boosters are supported. Note that all options of "grbtree" may not be supported. In particular,
+Currently only "gbtree" boosters are supported. Note that all options of "gbtree" may not be supported. In particular,
 those that may result in a different prediction function. For the "objective" option, we only support the default `reg:squarederror`
 and `reg:logistic`.
 If you encounter an issue don't hesitate to contact us.
@@ -168,7 +168,7 @@ If you encounter an issue don't hesitate to contact us.
 
 .. rubric:: Footnotes
 
-.. [#] Only binary classification. The logsitic function is approximated by a piece wise linear function.
+.. [#] Only binary classification. The logistic function is approximated by a piecewise linear function.
 .. [#] Only networks with `"relu"` activation for hidden layers and `"identity"`
     for the output layer.
 .. [#] Only polynomial features of degree 2.

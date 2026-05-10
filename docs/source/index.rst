@@ -40,4 +40,4 @@ different machine learning frameworks (scikit-learn, LightGBM, XGBoost, Keras, P
    api
    meta/contactus
    meta/license
-   gurobi.com  ressources <https://www.gurobi.com/features/gurobi-machine-learning/>
+   gurobi.com  resources <https://www.gurobi.com/features/gurobi-machine-learning/>
