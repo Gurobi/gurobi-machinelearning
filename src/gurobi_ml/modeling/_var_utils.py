@@ -167,7 +167,7 @@ def validate_output_vars(gp_vars):
 
     Parameters
     ----------
-    gpvars:
+    gp_vars:
         Decision variables used.
 
     Returns
@@ -202,7 +202,7 @@ def validate_input_vars(model, gp_vars):
 
     Parameters
     ----------
-    gpvars:
+    gp_vars:
         Decision variables used.
 
     Returns

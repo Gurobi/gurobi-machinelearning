@@ -92,7 +92,11 @@ class AbstractPredictorConstr(ABC, _SubModel):
         self._output = output_vars
 
     def _build_submodel(self, gp_model, *args, **kwargs):
-        """Predict output from input using predictor or transformer."""
+        """Internal method to build the sub-model.
+
+        This method is called by the :py:class:`gurobi_ml.modeling._submodel._SubModel`
+        constructor. It validates the input and output variables and calls `_mip_model`.
+        """
         self._input, columns, index = validate_input_vars(self.gp_model, self._input)
         self._input_index = index
         self._input_columns = columns
@@ -107,6 +111,7 @@ class AbstractPredictorConstr(ABC, _SubModel):
         return self
 
     def _print_container_steps(self, iterations_name, iterable, file):
+        """Print statistics for a list of sub-models (e.g. layers, estimators)."""
         header = f"{iterations_name:13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
         print("-" * len(header), file=file)
         print(header, file=file)
@@ -199,10 +204,12 @@ class AbstractPredictorConstr(ABC, _SubModel):
         ...
 
     def _indexed_name(self, index, name):
+        """Return a name for an indexed variable."""
         index = f"{index}".replace(" ", "")
         return self._name_var(f"{name}[{index}]")
 
     def _name_var(self, name):
+        """Return a name for a variable if recording is enabled."""
         if self._name != "" and not self._no_recording:
             return name
         return None

@@ -91,6 +91,17 @@ class _SubModel:
 
     Parameters
     ----------
+    gp_model : :external+gurobi:py:class:`Model`
+        The gurobipy model where the sub-model should be inserted.
+    *args
+        Arguments passed to the model construction function.
+    model_function : callable, optional
+        Function to build the sub-model. If not provided, the method
+        `_build_submodel` must be overridden in a sub-class.
+    name : str, optional
+        Name to use as prefix for modeling objects created in the sub-model.
+    **kwargs
+        Additional keyword arguments passed to the model construction function.
     """
 
     def __init__(

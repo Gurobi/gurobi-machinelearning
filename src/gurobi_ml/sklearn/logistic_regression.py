@@ -86,7 +86,7 @@ def add_logistic_regression_constr(
         either 0 or 1. The optimization model doesn't make a distinction
         between the two values.
 
-        Setting *esilon* to a small value will remove this ambiguity on the
+        Setting *epsilon* to a small value will remove this ambiguity on the
         output but may also make the model infeasible if the problem is very
         constrained: the open interval *(0.5, 0.5 + epsilon)* is excluded from
         the feasible set of the optimization problem.

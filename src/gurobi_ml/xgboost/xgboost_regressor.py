@@ -177,10 +177,10 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         )
 
     def _mip_model(self, **kwargs):
-        """Predict output variables y from input variables X using the
-        decision tree.
+        """Build the MIP model for the XGBoost regressor.
 
-        Both X and y should be array or list of variables of conforming dimensions.
+        The formulation predicts the values of `self.output` using `self.input`
+        according to the XGBoost booster.
         """
         model = self.gp_model
         xgb_regressor = self.xgb_regressor

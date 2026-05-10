@@ -171,6 +171,11 @@ class LGBMConstr(AbstractPredictorConstr):
 
         Traverse the tree and count the number of leaf and split nodes.
 
+        Parameters
+        ----------
+        root_node : dict
+            The root node of the lightgbm tree.
+
         Returns
         -------
         num_leafs : int
@@ -198,12 +203,15 @@ class LGBMConstr(AbstractPredictorConstr):
         This function takes a root node of a lightgbm tree and flattens it into a dictionary representation.
         The flattened tree contains information about the children nodes, split features, thresholds, and leaf values.
 
-        Args:
-            root_node (dict): The root node of the lightgbm tree.
+        Parameters
+        ----------
+        root_node : dict
+            The root node of the lightgbm tree.
 
-        Returns:
-            dict: A dictionary representation of the flattened tree.
-
+        Returns
+        -------
+        dict
+            A dictionary representation of the flattened tree.
         """
         num_leafs, num_split = LGBMConstr._count_nodes(root_node)
 
