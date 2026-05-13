@@ -42,6 +42,26 @@ class AbstractPredictorConstr(ABC, _SubModel):
     Users shouldn't construct objects of this class or one of its derived
     classes directly. Those objects are returned by the :py:func:`gurobi_ml.add_predictor_constr` and
     other functions.
+
+    Parameters
+    ----------
+    gp_model : :external+gurobi:py:class:`Model`
+        The gurobipy model where the predictor should be inserted.
+    input_vars : mvar_array_like
+        Decision variables used as input for predictor in gp_model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for predictor in gp_model.
+    verbose : bool, optional
+        If True, print timing and model statistics while constructing the
+        predictor constraint.
+    no_record : bool, optional
+        If True, disable recording of created variables and constraints in the
+        predictor constraint object.
+    no_debug : bool, optional
+        If True, disable detailed nested debug/statistics output in derived
+        formulations.
+    **kwargs
+        Additional keyword arguments.
     """
 
     def __init__(self, gp_model, input_vars, output_vars=None, **kwargs):

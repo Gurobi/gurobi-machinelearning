@@ -35,6 +35,10 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
         Decision variables used as input for predictor in gp_model.
     output_vars : mvar_array_like, optional
         Decision variables used as output for predictor in gp_model.
+    **kwargs
+        Additional advanced keyword arguments forwarded to internal submodel
+        constructors.
+        See :py:class:`gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr` for details.
 
     Returns
     -------
