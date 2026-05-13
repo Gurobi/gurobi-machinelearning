@@ -13,6 +13,10 @@ the package.
 Some formulations of the predictors can have additional options.
 These are documented in the specific functions for each regression model.
 
+The main entry point :py:func:`gurobi_ml.add_predictor_constr` also accepts
+advanced keyword arguments (``verbose``, ``no_debug``, ``no_record``) that are
+forwarded to internal formulation builders.
+
 .. currentmodule:: gurobi_ml
 
 .. autosummary::

@@ -100,6 +100,15 @@ class _SubModel:
         `_build_submodel` must be overridden in a sub-class.
     name : str, optional
         Name to use as prefix for modeling objects created in the sub-model.
+    verbose : bool, optional
+        If True, print timing and model statistics while constructing the
+        sub-model.
+    no_record : bool, optional
+        If True, disable recording of created variables and constraints in the
+        submodel object.
+    no_debug : bool, optional
+        If True, disable detailed nested debug/statistics output in derived
+        formulations.
     **kwargs
         Additional keyword arguments passed to the model construction function.
     """
