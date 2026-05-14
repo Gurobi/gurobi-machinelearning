@@ -5,9 +5,11 @@ nn.Sigmoid, nn.Tanh, nn.Softplus.  Each test fixes the input to a Gurobi model,
 embeds the network, solves, and verifies the output matches PyTorch's forward pass.
 """
 
+import unittest
+
+import gurobipy as gp
 import torch
 import torch.nn as nn
-import gurobipy as gp
 from sklearn import datasets
 
 from ..fixed_formulation import FixedRegressionModel
@@ -34,9 +36,6 @@ def _case(activation_cls, n_in, seed=0):
     return {"predictor": model, "nonconvex": 1}
 
 
-import unittest
-
-
 @unittest.skipUnless(HAS_NLFUNC, "Requires Gurobi 12.0+ with nlfunc support")
 class TestSmoothActivationFormulations(FixedRegressionModel):
     """Verify smooth-activation network embeddings match PyTorch forward pass."""
@@ -52,9 +51,7 @@ class TestSmoothActivationFormulations(FixedRegressionModel):
         """Wider network (16 neurons) with sigmoid."""
         X = datasets.load_diabetes()["data"]
         torch.manual_seed(2)
-        model = nn.Sequential(
-            nn.Linear(X.shape[1], 16), nn.Sigmoid(), nn.Linear(16, 1)
-        )
+        model = nn.Sequential(nn.Linear(X.shape[1], 16), nn.Sigmoid(), nn.Linear(16, 1))
         model.eval()
         case = {"predictor": model, "nonconvex": 1}
         self.do_one_case(case, X, 5, "all")
@@ -71,9 +68,7 @@ class TestSmoothActivationFormulations(FixedRegressionModel):
         """Wider network (16 neurons) with tanh."""
         X = datasets.load_diabetes()["data"]
         torch.manual_seed(4)
-        model = nn.Sequential(
-            nn.Linear(X.shape[1], 16), nn.Tanh(), nn.Linear(16, 1)
-        )
+        model = nn.Sequential(nn.Linear(X.shape[1], 16), nn.Tanh(), nn.Linear(16, 1))
         model.eval()
         case = {"predictor": model, "nonconvex": 1}
         self.do_one_case(case, X, 5, "all")

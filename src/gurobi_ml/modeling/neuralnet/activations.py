@@ -178,7 +178,6 @@ class _NLActivation:
             )
 
 
-
 class Sigmoid(_NLActivation):
     """Sigmoid activation via ``nlfunc.logistic``: f(x) = 1 / (1 + exp(-x)).
 

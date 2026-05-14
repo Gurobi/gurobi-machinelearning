@@ -56,7 +56,11 @@ class TestPyTorchSigmoid:
     def test_sigmoid_deep_network(self):
         """Two hidden sigmoid layers."""
         model = nn.Sequential(
-            nn.Linear(3, 8), nn.Sigmoid(), nn.Linear(8, 4), nn.Sigmoid(), nn.Linear(4, 1)
+            nn.Linear(3, 8),
+            nn.Sigmoid(),
+            nn.Linear(8, 4),
+            nn.Sigmoid(),
+            nn.Linear(4, 1),
         )
         with torch.no_grad():
             for layer in model:

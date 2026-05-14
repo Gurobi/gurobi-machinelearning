@@ -34,7 +34,10 @@ def _build_onnx_mlp(activation_op: str, n_in=3, n_hidden=4, n_out=1, seed=42):
     gemm2 = helper.make_node("Gemm", ["A1", "W2", "b2"], ["Y"], transB=1)
 
     graph = helper.make_graph(
-        [gemm1, act1, gemm2], "MLP", [X], [Y],
+        [gemm1, act1, gemm2],
+        "MLP",
+        [X],
+        [Y],
         [init_W1, init_b1, init_W2, init_b2],
     )
     model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 18)])

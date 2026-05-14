@@ -26,7 +26,7 @@ _LAZY_ACTIVATION_FACTORIES = {
     "sigmoid": Sigmoid,
     "tanh": Tanh,
 }
-from .layers import ActivationLayer, DenseLayer
+from .layers import ActivationLayer, DenseLayer  # noqa
 
 
 class BaseNNConstr(AbstractPredictorConstr):

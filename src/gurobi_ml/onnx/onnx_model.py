@@ -301,7 +301,9 @@ class ONNXNetworkConstr(BaseNNConstr):
                     layers[-1].activation = act_name
                 else:
                     layers.append(
-                        _ONNXLayer(W=np.zeros((0, 0)), b=np.zeros((0,)), activation=act_name)
+                        _ONNXLayer(
+                            W=np.zeros((0, 0)), b=np.zeros((0,)), activation=act_name
+                        )
                     )
                 processed_indices.add(node_idx)
 

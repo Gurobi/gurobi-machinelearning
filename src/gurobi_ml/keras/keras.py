@@ -18,8 +18,8 @@
 import numbers
 import warnings
 
-import numpy as np
 import keras
+import numpy as np
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr
@@ -101,7 +101,6 @@ class KerasNetworkConstr(BaseNNConstr):
                     raise ModelConfigurationError(
                         predictor, "Only handle ReLU layers without maxvalue"
                     )
-                    raise NoModel(predictor, "Only handle ReLU layers without maxvalue")
             elif isinstance(step, keras.layers.InputLayer):
                 pass
             else:
