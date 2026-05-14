@@ -1,7 +1,8 @@
 # This workflow uses `pull_request_target` which has access to a WLS license. For security reasons, this workflow
-# will only be run for PRs from a fork after it has been assessed by a repository owner and has the "safe to test"
-# label added. Any changes to the PR in need of a retriggering of the workflow require the removal and re-adding of the
-# "safe to test" label.
+# gates access to secrets behind a GitHub environment called "safe-to-test". That environment must be configured
+# in the repository Settings → Environments with one or more required reviewers. When a PR is opened or updated,
+# the workflow starts automatically but pauses at any job that declares `environment: safe-to-test` until a
+# reviewer approves the run. Each new commit to the PR creates a fresh run that requires a new approval.
 #
 # Since a subset of checks already ran in the nolicense workflow, this workflow skips linting here.
 
@@ -9,7 +10,6 @@ name: build and test PR, license required
 
 on:
   pull_request_target:
-    types: [labeled]
 
 permissions:
   contents: read
@@ -21,7 +21,11 @@ concurrency:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'safe to test')
+    # This environment has required reviewers configured in Settings → Environments.
+    # The job pauses here until a maintainer approves the run, preventing untrusted
+    # code from accessing secrets. A new commit to the PR triggers a new run that
+    # requires a fresh approval.
+    environment: safe-to-test
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -55,7 +59,7 @@ jobs:
 
   examples:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'safe to test')
+    environment: safe-to-test
     needs: tests
     timeout-minutes: 45
     strategy:
