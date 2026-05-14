@@ -16,5 +16,5 @@ runs:
       env:
         LICENSE: ${{ inputs.license }}
       run: |
-        echo "$LICENSE" > "$PWD/gurobi.lic"
-        echo "grb_license_file=$PWD/gurobi.lic" >> "$GITHUB_OUTPUT"
+        echo "$LICENSE" > "$RUNNER_TEMP/gurobi.lic"
+        echo "grb_license_file=$RUNNER_TEMP/gurobi.lic" >> "$GITHUB_OUTPUT"
