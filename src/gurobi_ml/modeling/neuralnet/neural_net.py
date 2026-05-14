@@ -15,18 +15,22 @@
 
 """Bases classes for modeling neural network layers."""
 
+import gurobipy as gp
+
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
 from .activations import Identity, ReLU, Sigmoid, SoftPlus, Tanh
+from .layers import ActivationLayer, DenseLayer
 
 # Factories for smooth activations that require Gurobi 12+ (instantiated lazily
 # so that importing this module on older Gurobi versions doesn't raise).
 _LAZY_ACTIVATION_FACTORIES = {
     "softplus": lambda: SoftPlus(beta=1.0),
     "sigmoid": Sigmoid,
-    "tanh": Tanh,
 }
-from .layers import ActivationLayer, DenseLayer  # noqa
+
+if gp.gurobi.version()[0] > 12:
+    _LAZY_ACTIVATION_FACTORIES["tanh"] = Tanh
 
 
 class BaseNNConstr(AbstractPredictorConstr):
