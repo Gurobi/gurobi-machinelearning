@@ -1,5 +1,5 @@
-Further Reading
-###############
+Further Reading and Resources
+#############################
 
 The approach of formulating machine learning models in optimization models has
 received sustained attention in recent years with several publications and
@@ -34,3 +34,15 @@ There is a growing literature on efficient MIP formulation for neural networks.
 :cite:t:`Strong-mixed-integer-programming-formulations-for-trained-FULL`,
 :cite:t:`The-Convex-Relaxation-Barrier-Revisited` and :cite:t:`betweensteps` are
 good starting points.
+
+For a broader survey focused on optimization with embedded trained machine
+learning models, see :cite:t:`Schweidtmann_2022`. For early formulations of deep
+neural networks in mixed-integer optimization, :cite:t:`fischetti_jo_2018` is a
+useful reference point.
+
+Beyond publications, we also recommend the following practical resources:
+
+* `Gurobi Machine Learning overview
+  <https://www.gurobi.com/features/gurobi-machine-learning/>`_
+* `Gurobi events and webinars <https://www.gurobi.com/events/>`_
+* `Gurobi documentation portal <https://docs.gurobi.com/>`_

@@ -103,6 +103,10 @@ intersphinx_mapping = {
     "lightgbm": ("https://lightgbm.readthedocs.io/en/latest/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "gurobi": ("https://docs.gurobi.com/projects/optimizer/en/current/", None),
+    "gurobipy": (
+        "https://docs.gurobi.com/projects/optimizer/en/current/reference/python/",
+        None,
+    ),
     "gppd": ("https://gurobipy-pandas.readthedocs.io/en/stable/", None),
 }
 
