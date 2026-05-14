@@ -7,7 +7,7 @@ contribute directly to this project.
 
 ## How to report bugs or submit feature requests
 If you encounter a bug, or you think there is a need for a new feature, we recommend to
-first add the bug report or feature request to the Gurobi Machine Learning's [GitHub issue
+first add the bug report or feature requests to the Gurobi Machine Learning's [GitHub issue
 tracker](https://github.com/Gurobi/gurobi-machinelearning/issues).
 
 It would be great if you add a minimal reproducible example when reporting a bug, or
@@ -15,7 +15,7 @@ include reasoning on how the new requested feature improves the code.
 
 ## Submitting changes
 We welcome external contributions to Gurobi Machine Learning.
-Note that all contributors should accept the Contributor License Agreement (CLA).
+Note that all contributors should accept the [Contributor License Agreement (CLA)](https://gist.github.com/mattmilten/d1c9640d79bde0ece8c2f46152639011).
 
 To contribute code you should use the GitHub pull request workflow. Once your pull request is ready for review, one
 of the core maintainers of Gurobi Machine Learning will review your pull request.

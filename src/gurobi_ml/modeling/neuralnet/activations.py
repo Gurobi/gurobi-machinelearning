@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -81,7 +81,10 @@ class ReLU:
         if hasattr(layer, "coefs"):
             if not hasattr(layer, "mixing"):
                 mixing = layer.gp_model.addMVar(
-                    output.shape, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="_mix"
+                    output.shape,
+                    lb=-GRB.INFINITY,
+                    vtype=GRB.CONTINUOUS,
+                    name=layer._name_var("mix"),
                 )
                 layer.mixing = mixing
             layer.gp_model.update()

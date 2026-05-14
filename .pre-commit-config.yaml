@@ -1,54 +1,59 @@
 repos:
-    - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.1.0
-      hooks:
-        - id: end-of-file-fixer
-        - id: trailing-whitespace
-        - id: check-docstring-first
-        - id: detect-private-key
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-docstring-first
+      - id: detect-private-key
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-ast
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: mixed-line-ending
 
-    - repo: https://github.com/myint/autoflake
-      rev: v1.4
-      hooks:
-        - id: autoflake
-          files: (^(src|tests)/)|(^[^/]*$)
-          args: [--in-place, --remove-all-unused-imports, --recursive, --ignore-init-module-imports]
+  - repo: https://github.com/myint/autoflake
+    rev: v2.3.1
+    hooks:
+      - id: autoflake
+        files: (^(src|tests)/)|(^[^/]*$)
+        args: [--in-place, --remove-all-unused-imports, --recursive, --ignore-init-module-imports]
 
-    - repo: https://github.com/pycqa/isort
-      rev: 5.10.1
-      hooks:
-        - id: isort
-          args: ["--profile", "black", "--filter-files"]
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
+    hooks:
+      - id: nbstripout
 
-    - repo: https://github.com/kynan/nbstripout
-      rev: 0.5.0
-      hooks:
-        - id: nbstripout
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.13.3
+    hooks:
+      # Run the linter.
+      - id: ruff
+        types_or: [ python, pyi, jupyter ]
+        args: [ --fix ]
+      # Run the formatter.
+      - id: ruff-format
+        types_or: [ python, pyi, jupyter ]
 
-    - repo: https://github.com/pycqa/flake8
-      rev: 5.0.4
-      hooks:
-      - id: flake8
-        args: ["--count", "--select=E9,F63,F7,F82", "--show-source", "--statistics"]
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.19.0
+    hooks:
+      - id: pyupgrade
+        args: ["--py310-plus"]
 
-    - repo: https://github.com/psf/black
-      rev: 22.6.0
-      hooks:
-      - id: black-jupyter
-        language_version: python3.9
-        language: python
-        types: [python]
+  - repo: local
+    hooks:
+      - id: license_embedded
+        name: license_embedded
+        entry: python3 .github/hooks/license_embedded.py
+        language: system
+        files: (src/.*\.py|.*\.ipynb)
 
-    - repo: https://github.com/mwouts/jupytext
-      rev: v1.14.4
-      hooks:
-      - id: jupytext
-        args: ["--sync"]
-
-    - repo: local
-      hooks:
-        - id: license_embedded
-          name: license_embedded
-          entry: python3 .github/hooks/license_embedded.py
-          language: system
-          files: (src/.*\.py|.*\.ipynb)
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint
+        args: [--ignore=B6, --msg-filename]

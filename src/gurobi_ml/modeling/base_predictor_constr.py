@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,31 +17,59 @@ from abc import ABC, abstractmethod
 
 import gurobipy as gp
 
-from ..exceptions import ParameterError
+from ._submodel import _SubModel
 from ._var_utils import _get_sol_values, validate_input_vars, validate_output_vars
-from .submodel import SubModel
 
 
-class AbstractPredictorConstr(ABC, SubModel):
-    """Base class to store sub-model added by :py:func:`gurobi_ml.add_predictor_constr`.
+class AbstractPredictorConstr(ABC, _SubModel):
+    """Base class to store additions for formulating predictor constraints
 
-    This class is the base class to store everything that is added to
-    a Gurobi model when a trained predictor is inserted into it. Depending on
-    the type of the predictor, a class derived from it will be returned
+    This class is the base class for formulating the various predictors
+    supported by the package. It provides basic functionalities for storing
+    the modeling structures (variables, constraints,...) that are added to
+    the gurobipy models in order to formulate the predictor in a MIP.
+
+    It also provides simple functionalities to access the input and output variables
+    and their results.
+
+    The implementation of the formulations of the various models is done in child classes.
+    Depending on the type of the predictor, a class derived from this is returned
     by :py:func:`gurobi_ml.add_predictor_constr`.
 
-    Warning
-    -------
+    Warnings
+    --------
 
-    Users should usually never construct objects of this class or one of its derived
-    classes. They are returned by the :py:func:`gurobi_ml.add_predictor_constr` and other
-    functions.
+    Users shouldn't construct objects of this class or one of its derived
+    classes directly. Those objects are returned by the :py:func:`gurobi_ml.add_predictor_constr` and
+    other functions.
+
+    Parameters
+    ----------
+    gp_model : :external+gurobi:py:class:`Model`
+        The gurobipy model where the predictor should be inserted.
+    input_vars : mvar_array_like
+        Decision variables used as input for predictor in gp_model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for predictor in gp_model.
+    verbose : bool, optional
+        If True, print timing and model statistics while constructing the
+        predictor constraint.
+    no_record : bool, optional
+        If True, disable recording of created variables and constraints in the
+        predictor constraint object.
+    no_debug : bool, optional
+        If True, disable detailed nested debug/statistics output in derived
+        formulations.
+    **kwargs
+        Additional keyword arguments.
     """
 
     def __init__(self, gp_model, input_vars, output_vars=None, **kwargs):
         self._input = input_vars
         self._output = output_vars
-        SubModel.__init__(self, gp_model, **kwargs)
+        self._input_index = None
+        self._input_columns = None
+        _SubModel.__init__(self, gp_model, **kwargs)
 
     def _validate(self):
         """Validate input and output variables (check shapes, reshape if needed)."""
@@ -49,14 +77,16 @@ class AbstractPredictorConstr(ABC, SubModel):
         output_vars = self.output
 
         if hasattr(self, "_input_shape") and input_vars.shape[1] != self._input_shape:
-            raise ParameterError(
+            raise ValueError(
                 "Input variables dimension doesn't conform with modeling object "
                 + f"{type(self)}, input variable dimension: "
                 + f"{self._input_shape} != {input_vars.shape[1]}"
             )
 
         if output_vars.ndim == 1:
-            if input_vars.shape[0] == 1:
+            if hasattr(self, "_output_shape") and self._output_shape == 1:
+                output_vars = output_vars.reshape((-1, 1))
+            elif input_vars.shape[0] == 1:
                 output_vars = output_vars.reshape((1, -1))
             else:
                 output_vars = output_vars.reshape((-1, 1))
@@ -65,14 +95,14 @@ class AbstractPredictorConstr(ABC, SubModel):
             hasattr(self, "_output_shape")
             and output_vars.shape[1] != self._output_shape
         ):
-            raise ParameterError(
+            raise ValueError(
                 "Output variables dimension doesn't conform with modeling object "
                 + f"{type(self)}, output variable dimension: "
                 + f"{output_vars.shape[1]}"
             )
 
         if output_vars.shape[0] != input_vars.shape[0]:
-            raise ParameterError(
+            raise ValueError(
                 "Non-conforming dimension between "
                 + "input variable and output variable: "
                 + f"{output_vars.shape[0]} != {input_vars.shape[0]}"
@@ -82,13 +112,17 @@ class AbstractPredictorConstr(ABC, SubModel):
         self._output = output_vars
 
     def _build_submodel(self, gp_model, *args, **kwargs):
-        """Predict output from input using predictor or transformer."""
-        self._input, columns, index = validate_input_vars(self._gp_model, self._input)
+        """Internal method to build the sub-model.
+
+        This method is called by the :py:class:`gurobi_ml.modeling._submodel._SubModel`
+        constructor. It validates the input and output variables and calls `_mip_model`.
+        """
+        self._input, columns, index = validate_input_vars(self.gp_model, self._input)
         self._input_index = index
         self._input_columns = columns
 
         if self._output is None:
-            self._create_output_vars(self._input)
+            self._output = self._create_output_vars(self._input)
         if self._output is not None:
             self._output = validate_output_vars(self._output)
             self._validate()
@@ -97,10 +131,11 @@ class AbstractPredictorConstr(ABC, SubModel):
         return self
 
     def _print_container_steps(self, iterations_name, iterable, file):
+        """Print statistics for a list of sub-models (e.g. layers, estimators)."""
         header = f"{iterations_name:13} {'Output Shape':>14} {'Variables':>12} {'Constraints':^38}"
         print("-" * len(header), file=file)
         print(header, file=file)
-        print(f"{' '*41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)
+        print(f"{' ' * 41} {'Linear':>12} {'Quadratic':>12} {'General':>12}", file=file)
         print("=" * len(header), file=file)
         for step in iterable:
             step.print_stats(abbrev=True, file=file)
@@ -111,15 +146,17 @@ class AbstractPredictorConstr(ABC, SubModel):
         """Print statistics on model additions stored by this class.
 
         This function prints detailed statistics on the variables
-        and constraints that where added to the model.
+        and constraints that were added to the model.
 
         Usually derived classes reimplement this function to provide more
         details about the structure of the additions (type of ML model,
         layers if it's a neural network,...)
 
-        Arguments
-        ---------
+        Parameters
+        ----------
 
+        abbrev : bool, optional
+            If True, print abbreviated statistics. By default False.
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.
         """
@@ -141,10 +178,17 @@ class AbstractPredictorConstr(ABC, SubModel):
             n_outputs = self._output_shape
         except AttributeError:
             return
-        self._output = self._gp_model.addMVar(
-            (input_vars.shape[0], n_outputs), lb=-gp.GRB.INFINITY, name=name
+        output = self.gp_model.addMVar(
+            (input_vars.shape[0], n_outputs),
+            lb=-gp.GRB.INFINITY,
+            name=self._name_var(name),
         )
-        self._gp_model.update()
+        self.gp_model.update()
+        return output
+
+    def remove(self):
+        """Remove from gp_model everything that was added to embed predictor."""
+        _SubModel.remove(self)
 
     @property
     def _has_solution(self):
@@ -157,7 +201,7 @@ class AbstractPredictorConstr(ABC, SubModel):
         return False
 
     @abstractmethod
-    def get_error(self):
+    def get_error(self, eps):
         """Returns error in Gurobi's solution with respect to prediction from input.
 
         Returns
@@ -169,7 +213,7 @@ class AbstractPredictorConstr(ABC, SubModel):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         ...
@@ -179,10 +223,16 @@ class AbstractPredictorConstr(ABC, SubModel):
         """Makes MIP model for the predictor the sub-class implements."""
         ...
 
-    @staticmethod
-    def _indexed_name(index, name):
+    def _indexed_name(self, index, name):
+        """Return a name for an indexed variable."""
         index = f"{index}".replace(" ", "")
-        return f"{name}[{index}]"
+        return self._name_var(f"{name}[{index}]")
+
+    def _name_var(self, name):
+        """Return a name for a variable if recording is enabled."""
+        if self._name != "" and not self._no_recording:
+            return name
+        return None
 
     @property
     def output(self):
@@ -190,13 +240,13 @@ class AbstractPredictorConstr(ABC, SubModel):
 
         Returns
         -------
-        output : :gurobipy:`MVar`.
+        output : :external+gurobi:py:class:`MVar`.
         """
         return self._output
 
     @property
     def input_values(self):
-        """Returns the values for the input variables if a solution is known.
+        """Values for the input variables if a solution is known.
 
         Returns
         -------
@@ -204,7 +254,7 @@ class AbstractPredictorConstr(ABC, SubModel):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
 
@@ -212,7 +262,7 @@ class AbstractPredictorConstr(ABC, SubModel):
 
     @property
     def output_values(self):
-        """Returns the values for the output variables if a solution is known.
+        """Values for the output variables if a solution is known.
 
         Returns
         -------
@@ -220,18 +270,18 @@ class AbstractPredictorConstr(ABC, SubModel):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         return _get_sol_values(self.output)
 
     @property
     def input(self):
-        """Returns the input variables of embedded predictor.
+        """Input variables of embedded predictor.
 
         Returns
         -------
-        output : :gurobipy:`MVar`.
+        input : :external+gurobi:py:class:`MVar`.
         """
         return self._input
 

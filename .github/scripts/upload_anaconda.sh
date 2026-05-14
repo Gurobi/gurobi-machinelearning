@@ -1,11 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 set -x
 
-export PATH=$CONDA/bin:$PATH
-conda create -n upload -y python=3.10
-source activate upload
-conda install -y anaconda-client
-
-anaconda -t $ANACONDA_STAGING_TOKEN upload --force -u gurobi-machinelearning-wheels-staging dist/artifact/*
+# Install anaconda-client via pip and upload artifacts without requiring conda
+python -m pip install --upgrade anaconda-client
+anaconda -t "$ANACONDA_STAGING_TOKEN" upload --force -u gurobi-machinelearning-wheels-staging dist/*

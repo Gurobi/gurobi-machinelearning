@@ -1,5 +1,5 @@
-# Copyright © 2022 Gurobi Optimization, LLC
-""" Test register_predictor_constr function"""
+# Copyright © 2023-2026 Gurobi Optimization, LLC
+"""Test register_predictor_constr function"""
 
 import unittest
 
@@ -8,7 +8,7 @@ from sklearn.svm import LinearSVC, LinearSVR
 
 from gurobi_ml import register_predictor_constr
 from gurobi_ml.add_predictor import add_predictor_constr
-from gurobi_ml.exceptions import NotRegistered
+from gurobi_ml.exceptions import PredictorNotSupportedError
 from gurobi_ml.modeling import AbstractPredictorConstr
 
 
@@ -48,5 +48,5 @@ class TestDummyConstr(unittest.TestCase):
 
             svr = LinearSVR()
 
-            with self.assertRaises(NotRegistered):
+            with self.assertRaises(PredictorNotSupportedError):
                 add_predictor_constr(m, svr, inp, out)

@@ -5,7 +5,7 @@ import numpy as np
 import torch
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoModel
+from gurobi_ml.exceptions import ModelConfigurationError
 
 
 class TestUnsuportedTorch(unittest.TestCase):
@@ -34,5 +34,5 @@ class TestUnsuportedTorch(unittest.TestCase):
 
         x = m.addMVar(example.shape, lb=0.0, ub=1.0, name="x")
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(ModelConfigurationError):
             add_predictor_constr(m, nn_model, x)

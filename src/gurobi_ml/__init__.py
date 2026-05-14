@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,14 @@ for documentation.
 
 # read version from installed package
 
-from ._version import __version__
-from .add_predictor import add_predictor_constr
-from .register_user_predictor import register_predictor_constr
+from gurobipy import gurobi
+
+from ._version import __version__ as __version__
+from .add_predictor import add_predictor_constr as add_predictor_constr
+from .register_user_predictor import (
+    register_predictor_constr as register_predictor_constr,
+)
+
+MIN_GRB_VERSION = 10
+if gurobi.version()[0] < MIN_GRB_VERSION:
+    raise ImportError(f"Gurobi version should be at least {MIN_GRB_VERSION}.0.0")

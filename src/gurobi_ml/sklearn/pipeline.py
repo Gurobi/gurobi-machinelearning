@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
 # ==============================================================================
 
 """Module for formulating a :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
-in a :gurobipy:`model`.
+in a :external+gurobi:py:class:`Model`.
 """
 
-
-from ..exceptions import NoModel
+from ..lightgbm_sklearn_api import lightgbm_sklearn_convertors
 from ..modeling.base_predictor_constr import AbstractPredictorConstr
 from ..modeling.get_convertor import get_convertor
 from ..register_user_predictor import user_predictors
+from ..xgboost_sklearn_api import xgboost_sklearn_convertors
 from .column_transformer import add_column_transformer_constr
 from .predictors_list import sklearn_predictors
 from .preprocessing import sklearn_transformers
@@ -36,14 +36,14 @@ def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwar
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     pipeline : :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
         The pipeline to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
-        Decision variables used as input for regression in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
-        Decision variables used as output for regression in model.
+    input_vars : mvar_array_like
+        Decision variables used as input for pipeline in gp_model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for pipeline in gp_model.
 
     Returns
     -------
@@ -53,21 +53,22 @@ def add_pipeline_constr(gp_model, pipeline, input_vars, output_vars=None, **kwar
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the translation to Gurobi of one of the elements in the pipeline
         is not implemented or recognized.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
     """
     return PipelineConstr(gp_model, pipeline, input_vars, output_vars, **kwargs)
 
 
 class PipelineConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
-    with gurobipy
-    |ClassShort|.
+    """Class to formulate a trained :external+sklearn:py:class:`sklearn.pipeline.Pipeline`
+    in a gurobipy model.
+
+    |ClassShort|
     """
 
     def __init__(self, gp_model, pipeline, input_vars, output_vars=None, **kwargs):
@@ -86,15 +87,21 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         do it.
         """
         self._mip_model(**kwargs)
-        assert self.output is not None
-        assert self.input is not None
+        if self.output is None:
+            raise RuntimeError(
+                f"{type(self).__name__}: pipeline output was not set after building the MIP model"
+            )
+        if self.input is None:
+            raise RuntimeError(
+                f"{type(self).__name__}: pipeline input was not set after building the MIP model"
+            )
         # We can call validate only after the model is created
         self._validate()
         return self
 
     def _mip_model(self, **kwargs):
         pipeline = self.predictor
-        gp_model = self._gp_model
+        gp_model = self.gp_model
         input_vars = self._input
         output_vars = self._output
         steps = self._steps
@@ -105,22 +112,14 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
 
         for transformer in pipeline[:-1]:
             convertor = get_convertor(transformer, transformers)
-            if convertor is None:
-                raise NoModel(
-                    self.predictor,
-                    f"I don't know how to deal with that object: {transformer}",
-                )
             steps.append(convertor(gp_model, transformer, input_vars, **kwargs))
             input_vars = steps[-1].output
 
         predictor = pipeline[-1]
         predictors = sklearn_predictors() | user_predictors()
+        predictors |= xgboost_sklearn_convertors()
+        predictors |= lightgbm_sklearn_convertors()
         convertor = get_convertor(predictor, predictors)
-        if convertor is None:
-            raise NoModel(
-                self.predictor,
-                f"I don't know how to deal with that object: {predictor}",
-            )
         steps.append(convertor(gp_model, predictor, input_vars, output_vars, **kwargs))
         if self._output is None:
             self._output = steps[-1].output
@@ -129,12 +128,12 @@ class PipelineConstr(SKgetter, AbstractPredictorConstr):
         """Print statistics on model additions stored by this class.
 
         This function prints detailed statistics on the variables
-        and constraints that where added to the model.
+        and constraints that were added to the model.
 
         The pipeline version includes a summary of the steps that it contains.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
 
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.

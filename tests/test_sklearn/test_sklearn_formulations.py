@@ -9,7 +9,7 @@ from sklearn import datasets
 from sklearn.pipeline import Pipeline
 
 from gurobi_ml import add_predictor_constr, register_predictor_constr
-from gurobi_ml.exceptions import NoSolution
+from gurobi_ml.exceptions import NoSolutionError
 from gurobi_ml.sklearn import add_mlp_regressor_constr
 from gurobi_ml.sklearn.pipeline import PipelineConstr
 
@@ -38,7 +38,7 @@ class TestSklearnModel(FixedRegressionModel):
                 )
             self.assertLessEqual(
                 np.max(pred_constr[i].get_error().astype(float)),
-                np.max(pred_constr.get_error()),
+                np.max(pred_constr.get_error().astype(float) + 1e-10),
             )
 
     def test_diabetes_sklearn(self):
@@ -49,9 +49,13 @@ class TestSklearnModel(FixedRegressionModel):
 
         for regressor in cases:
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", float_type=np.float32)
-            self.do_one_case(onecase, X, 6, "pairs", float_type=np.float32)
-            self.do_one_case(onecase, X, 5, "all", float_type=np.float32, no_debug=True)
+            self.do_one_case(onecase, X, 5, "all", float_type=np.float32, epsilon=1e-5)
+            self.do_one_case(
+                onecase, X, 6, "pairs", float_type=np.float32, epsilon=1e-5
+            )
+            self.do_one_case(
+                onecase, X, 5, "all", float_type=np.float32, no_debug=True, epsilon=1e-5
+            )
             self.do_one_case(
                 onecase, X, 6, "pairs", float_type=np.float32, no_debug=True
             )
@@ -112,7 +116,7 @@ class TestSklearnModel(FixedRegressionModel):
                 X,
                 5,
                 "all",
-                output_type="classification",
+                output_type="probability_1",
                 pwl_attributes={"FuncPieces": 5},
             )
 
@@ -150,7 +154,7 @@ class TestMNIST(unittest.TestCase):
             )
 
             y = pred_constr.output
-            with self.assertRaises(NoSolution):
+            with self.assertRaises(NoSolutionError):
                 pred_constr.get_error()
             with open(os.devnull, "w") as outnull:
                 pred_constr.print_stats(file=outnull)

@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ All linear models should work:
    - :external+sklearn:py:class:`sklearn.linear_model.Ridge`
    - :external+sklearn:py:class:`sklearn.linear_model.Lasso`
 """
-
 
 from ..modeling import AbstractPredictorConstr
 from .skgetter import SKgetter
@@ -50,10 +49,10 @@ class BaseSKlearnRegressionConstr(SKgetter, AbstractPredictorConstr):
             **kwargs,
         )
 
-    def add_regression_constr(self):
+    def _add_regression_constr(self, output=None):
         """Add the prediction constraints to Gurobi."""
+        if output is None:
+            output = self.output
         coefs = self.predictor.coef_.reshape(-1, 1)
         intercept = self.predictor.intercept_
-        self.gp_model.addConstr(
-            self.output == self.input @ coefs + intercept, name="linreg"
-        )
+        self.gp_model.addConstr(output == self.input @ coefs + intercept, name="linreg")

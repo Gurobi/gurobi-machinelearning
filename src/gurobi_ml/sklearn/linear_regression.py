@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Module for inserting ordinary Scikit-Learn regression models into a
-:gurobipy:`model`.
+"""Module for formulating ordinary regression models into a
+:external+gurobi:py:class:`Model`.
 
 The following linear models are tested and should work:
    - :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
@@ -36,17 +36,17 @@ def add_linear_regression_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     linear_regression : :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
      The linear regression to insert. It can be of any of the following types:
          * :external+sklearn:py:class:`sklearn.linear_model.LinearRegression`
          * :external+sklearn:py:class:`sklearn.linear_model.Ridge`
          * :external+sklearn:py:class:`sklearn.linear_model.Lasso`
-     input_vars: :gurobipy:`mvar` or :gurobipy:`var` array like
-         Decision variables used as input for random forest in model.
-     output_vars: :gurobipy:`mvar` or :gurobipy:`var` array like, optional
-         Decision variables used as output for random forest in model.
+    input_vars : mvar_array_like
+        Decision variables used as input for linear regression in gp_model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for linear regression in gp_model.
 
     Returns
     -------
@@ -54,8 +54,8 @@ def add_linear_regression_constr(
         Object containing information about what was added to gp_model to formulate
         linear_regression.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
     """
     return LinearRegressionConstr(
@@ -64,8 +64,9 @@ def add_linear_regression_constr(
 
 
 class LinearRegressionConstr(BaseSKlearnRegressionConstr):
-    """Class to model trained
-    :external+sklearn:py:class:`sklearn.linear_model.LinearRegression` with gurobipy
+    """Class to formulate a trained
+    :external+sklearn:py:class:`sklearn.linear_model.LinearRegression` in a gurobipy model.
+
     |ClassShort|.
     """
 
@@ -82,4 +83,4 @@ class LinearRegressionConstr(BaseSKlearnRegressionConstr):
 
     def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
-        self.add_regression_constr()
+        self._add_regression_constr()

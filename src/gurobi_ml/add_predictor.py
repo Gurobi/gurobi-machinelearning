@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 
 """Define generic function that can add any known trained predictor."""
 
-from .exceptions import NotRegistered
 from .modeling.get_convertor import get_convertor
 from .registered_predictors import registered_predictors
 
@@ -28,7 +27,7 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
             The gurobipy model where the predictor should be inserted.
     predictor:
         The predictor to insert.
@@ -36,6 +35,10 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
         Decision variables used as input for predictor in gp_model.
     output_vars : mvar_array_like, optional
         Decision variables used as output for predictor in gp_model.
+    **kwargs
+        Additional advanced keyword arguments forwarded to internal submodel
+        constructors.
+        See :py:class:`gurobi_ml.modeling.base_predictor_constr.AbstractPredictorConstr` for details.
 
     Returns
     -------
@@ -43,14 +46,14 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
         Object containing information about what was added to gp_model to insert the
         predictor in it
 
-    Note
-    ----
+    Notes
+    -----
     The parameters `input_vars` and `output_vars` can be either
 
-     * Gurobipy matrix variables :gurobipy:`mvar`
+     * gurobipy matrix variables :external+gurobi:py:class:`MVar`
      * Pandas data frames containing columns of variables or constants
-     * Lists of variables
-     * Dictionaries of variables
+     * Lists of gurobipy :external+gurobi:py:class:`Var`
+     * Dictionaries of gurobipy :external+gurobi:py:class:`Var`
 
     For internal use in the package they are cast into matrix variables.
 
@@ -71,11 +74,9 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
 
     If they are lists or dictionaries, `input_vars` should have length `n_features` and
     `output_vars` should have length `n_output`.
-    List and dictionaries can have bad performances in particular if particular adding
-    many predictor constraints in a for loop is significantly slower.
+
+    Rectangular list of lists of variables that can be converted to a matrix shape can also be used.
     """
     convertors = registered_predictors()
     convertor = get_convertor(predictor, convertors)
-    if convertor is None:
-        raise NotRegistered(type(predictor).__name__)
     return convertor(gp_model, predictor, input_vars, output_vars, **kwargs)

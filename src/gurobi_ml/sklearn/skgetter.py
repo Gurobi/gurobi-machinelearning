@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
 
 """Implements some utility tools for all scikit-learn objects."""
 
-import numpy as np
-from sklearn.utils.validation import check_is_fitted
+import warnings
 
-from ..exceptions import NoSolution
+import numpy as np
+from sklearn.utils.validation import check_is_fitted, _check_feature_names
+
+from ..exceptions import NoSolutionError
 from ..modeling import AbstractPredictorConstr
 
 
@@ -36,14 +38,14 @@ class SKgetter(AbstractPredictorConstr):
     def __init__(self, predictor, input_vars, output_type="regular", **kwargs):
         check_is_fitted(predictor)
         self.predictor = predictor
-        predictor._check_feature_names(input_vars, reset=False)
+        _check_feature_names(predictor, input_vars, reset=False)
         self.output_type = output_type
         if hasattr(predictor, "n_features_in_"):
             self._input_shape = predictor.n_features_in_
         if hasattr(predictor, "n_outputs_"):
             self._output_shape = predictor.n_outputs_
 
-    def get_error(self):
+    def get_error(self, eps=None):
         """Return error in Gurobi's solution with respect to prediction from input.
 
         Returns
@@ -55,7 +57,7 @@ class SKgetter(AbstractPredictorConstr):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         if self._has_solution:
@@ -69,8 +71,12 @@ class SKgetter(AbstractPredictorConstr):
             output_values = self.output_values
             if len(predicted.shape) == 1 and len(output_values.shape) == 2:
                 predicted = predicted.reshape(-1, 1)
-            return np.abs(predicted - output_values)
-        raise NoSolution()
+            r_val = np.abs(predicted - output_values)
+            if eps is not None and np.max(r_val) > eps:
+                warnings.warn(f"get_error: {predicted} != {output_values}")
+            return r_val
+
+        raise NoSolutionError()
 
 
 class SKtransformer(AbstractPredictorConstr):
@@ -84,16 +90,16 @@ class SKtransformer(AbstractPredictorConstr):
         Scikit-Learn transformer embedded into Gurobi model.
     """
 
-    def __init__(self, gp_model, transformer, input_vars, **kwargs):
+    def __init__(self, gp_model, transformer, input_vars, output_vars=None, **kwargs):
         self.transformer = transformer
         if hasattr(transformer, "n_features_in_"):
             self._input_shape = transformer.n_features_in_
         if hasattr(transformer, "n_output_features_"):
             self._output_shape = transformer.n_output_features_
         check_is_fitted(transformer)
-        super().__init__(gp_model, input_vars, **kwargs)
+        super().__init__(gp_model, input_vars, output_vars, **kwargs)
 
-    def get_error(self):
+    def get_error(self, eps=None):
         """Return error in Gurobi's solution with respect to preprocessing from input.
 
         Returns
@@ -105,7 +111,7 @@ class SKtransformer(AbstractPredictorConstr):
 
         Raises
         ------
-        NoSolution
+        NoSolutionError
             If the Gurobi model has no solution (either was not optimized or is infeasible).
         """
         if self._has_solution:
@@ -115,5 +121,10 @@ class SKtransformer(AbstractPredictorConstr):
             transformed = transformer.transform(input_values)
             if len(transformed.shape) == 1:
                 transformed = transformed.reshape(-1, 1)
-            return np.abs(transformed - self.output_values)
-        raise NoSolution()
+
+            r_val = np.abs(transformed - self.output_values)
+            if eps is not None and np.max(r_val) > eps:
+                warnings.warn(f"get_error: {transformed} != {self.output_values}")
+            return r_val
+
+        raise NoSolutionError()

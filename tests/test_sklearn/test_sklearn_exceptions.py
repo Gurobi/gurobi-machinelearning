@@ -11,7 +11,7 @@ from sklearn.preprocessing import PolynomialFeatures, QuantileTransformer
 from sklearn.svm import LinearSVR
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoModel, ParameterError
+from gurobi_ml.exceptions import ModelConfigurationError, PredictorNotSupportedError
 
 
 class TestUnsuportedSklearn(unittest.TestCase):
@@ -31,7 +31,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
 
         x = m.addMVar(example.shape, name="x")
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(ModelConfigurationError):
             add_predictor_constr(m, logreg, x)
 
     def test_logistic_wrongarg(self):
@@ -49,7 +49,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
 
         x = m.addMVar(example.shape, name="x")
 
-        with self.assertRaises(ParameterError):
+        with self.assertRaises(ValueError):
             add_predictor_constr(m, logreg, x, output_type="proba")
 
     def test_mlpregressor_wrong_act(self):
@@ -58,7 +58,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
         X = data.data
         y = data.target
 
-        mlpreg = MLPRegressor([10] * 2, activation="logistic")
+        mlpreg = MLPRegressor(hidden_layer_sizes=[10] * 2, activation="logistic")
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=ConvergenceWarning)
             mlpreg.fit(X, y)
@@ -68,7 +68,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
 
         x = m.addMVar(example.shape, name="x")
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(ModelConfigurationError):
             add_predictor_constr(m, mlpreg, x)
 
     def test_pipeline_fail_transformer(self):
@@ -77,7 +77,9 @@ class TestUnsuportedSklearn(unittest.TestCase):
         X = data.data
         y = data.target
 
-        mlpreg = make_pipeline(QuantileTransformer(), MLPRegressor([10] * 2))
+        mlpreg = make_pipeline(
+            QuantileTransformer(), MLPRegressor(hidden_layer_sizes=[10] * 2)
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=ConvergenceWarning)
             warnings.simplefilter("ignore", category=UserWarning)
@@ -88,7 +90,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
 
         x = m.addMVar(example.shape, name="x")
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(PredictorNotSupportedError):
             add_predictor_constr(m, mlpreg, x)
 
     def test_polynomial_feature_degree3(self):
@@ -97,7 +99,9 @@ class TestUnsuportedSklearn(unittest.TestCase):
         X = data.data
         y = data.target
 
-        mlpreg = make_pipeline(PolynomialFeatures(3), MLPRegressor([10] * 2))
+        mlpreg = make_pipeline(
+            PolynomialFeatures(3), MLPRegressor(hidden_layer_sizes=[10] * 2)
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=ConvergenceWarning)
             mlpreg.fit(X, y)
@@ -107,7 +111,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
 
         x = m.addMVar(example.shape, name="x")
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(ModelConfigurationError):
             add_predictor_constr(m, mlpreg, x)
 
     def test_pipeline_fail_regression(self):
@@ -116,7 +120,7 @@ class TestUnsuportedSklearn(unittest.TestCase):
         X = data.data
         y = data.target
 
-        mlpreg = make_pipeline(LinearSVR())
+        mlpreg = make_pipeline(LinearSVR(dual="auto"))
         mlpreg.fit(X, y)
         example = X[10, :]
 
@@ -124,5 +128,5 @@ class TestUnsuportedSklearn(unittest.TestCase):
 
         x = m.addMVar(example.shape, name="x")
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(PredictorNotSupportedError):
             add_predictor_constr(m, mlpreg, x)

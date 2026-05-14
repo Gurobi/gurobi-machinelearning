@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,19 +13,23 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Module for formulating a column transformer in a :gurobipy:`gurobipy model <Model>`."""
+"""Module for formulating a :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` in a :external+gurobi:py:class:`gurobipy model <Model>`."""
+
+import warnings
 
 import gurobipy as gp
+from sklearn.preprocessing import FunctionTransformer
 
+from ..modeling.get_convertor import get_convertor
 from .preprocessing import sklearn_transformers
 from .skgetter import SKtransformer
 
 
 class ColumnTransformerConstr(SKtransformer):
-    """Class to model a fitted :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` with gurobipy.
+    """Class to formulate a fitted :external+sklearn:py:class:`sklearn.compose.ColumnTransformer` in a gurobipy model.
 
-    Note
-    ----
+    Notes
+    -----
     This object differs from all the other object in the Gurobi Machine Learning package in
     that it may not be possible to write all of its input with Gurobi variables. Specifically
     some input may consist of categorical features to be encoded using the column transformer.
@@ -54,32 +58,90 @@ class ColumnTransformerConstr(SKtransformer):
         if hasattr(self._input, "index"):
             self._input_index = _input.index
         self._mip_model(**kwargs)
-        assert self._output is not None
+        if self._output is None:
+            raise RuntimeError(
+                f"{type(self).__name__}: output was not set after building the MIP model"
+            )
         return self
+
+    @staticmethod
+    def is_passthrough(trans):
+        """Check if transformation is passthrough
+
+        Before scikilearn 1.4 was the string passthrough, after
+        it is a function transformer object with None function.
+        """
+        if trans == "passthrough":
+            return True
+        if type(trans) is FunctionTransformer and trans.func is None:
+            return True
+        return False
 
     def _mip_model(self, **kwargs):
         """Do the transformation on x."""
         column_transform = self.transformer
         _input = self._input
-        transformers = {k.lower(): v for k, v in sklearn_transformers().items()}
         transformed = []
         for name, trans, cols in column_transform.transformers_:
-            if trans == "passthrough":
-                transformed.append(_input.loc[:, cols])
+            if len(cols) == 0:
+                # If there are no columns to transform nothing to do
+                continue
+            if self.is_passthrough(trans):
+                if isinstance(cols, str) or isinstance(cols[0], str):
+                    transformed.append(_input.loc[:, cols])
+                else:
+                    if hasattr(_input, "iloc"):
+                        transformed.append(_input.iloc[:, cols])
+                    else:
+                        data = _input
+                        if data.ndim == 1:
+                            # If we have a one-dimensional numpy array reshape it.
+                            # By definition pandas dataframe should be 2-dimensional
+                            data = data.reshape(1, -1)
+                        if isinstance(data, gp.MVar):
+                            transformed.append(data[:, cols].tolist())
+                        else:
+                            transformed.append(data[:, cols])
             elif trans == "drop":
                 pass
             else:
-                data = _input.loc[:, cols]
-                anyvar = any(
-                    map(lambda i: isinstance(i, gp.Var), data.to_numpy().ravel())
-                )
-                if anyvar:
-                    if name in transformers:
-                        trans_constr = transformers[name](self._gp_model, trans, data)
+                if isinstance(cols, str) or isinstance(cols[0], str):
+                    data = _input.loc[:, cols]
+                    any_var = any(
+                        map(lambda i: isinstance(i, gp.Var), data.to_numpy().ravel())
+                    )
+                else:
+                    if hasattr(_input, "iloc"):
+                        data = _input.iloc[:, cols]
+                        any_var = any(
+                            map(
+                                lambda i: isinstance(i, gp.Var), data.to_numpy().ravel()
+                            )
+                        )
+                    else:
+                        data = _input
+                        if data.ndim == 1:
+                            # If we have a one-dimensional numpy array reshape it.
+                            # By definition pandas dataframe should be 2-dimensional
+                            data = data.reshape(1, -1)
+                        data = data[:, cols]
+                        any_var = True
+                if any_var:
+                    trans_constr = get_convertor(trans, sklearn_transformers())(
+                        self.gp_model, trans, data
+                    )
                     transformed.append(trans_constr.output.tolist())
                 else:
                     transformed.append(trans.transform(_input.loc[:, cols]))
-        self._output = column_transform._hstack(transformed)
+        # Hack for sklearn 1.4.1 that takes a new argument
+        # Should remove it sometime
+        try:
+            self._output = column_transform._hstack(
+                transformed, n_samples=_input.shape[0]
+            )
+        except TypeError:
+            warnings.warn("Scikit-learn version < 1.4.1", DeprecationWarning)
+            self._output = column_transform._hstack(transformed)
 
 
 def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kwargs):
@@ -87,17 +149,17 @@ def add_column_transformer_constr(gp_model, column_transformer, input_vars, **kw
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
-        The gurobipy model where polynomial features should be inserted.
+    gp_model : :external+gurobi:py:class:`Model`
+        The gurobipy model where the column transformer should be inserted.
     column_transformer : :external+sklearn:py:class:`sklearn.compose.ColumnTransformer`
         The column transformer to insert in gp_model.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
-        Decision variables used as input for polynomial features in model.
+    input_vars : mvar_array_like
+        Decision variables used as input for column transformer in gp_model.
 
     Returns
     -------
-    sklearn.preprocessing.ColumnTransformerConstr
+    ColumnTransformerConstr
         Object containing information about what was added to gp_model to insert the
-        polynomial_features in it.
+        column_transformer in it.
     """
     return ColumnTransformerConstr(gp_model, column_transformer, input_vars, **kwargs)

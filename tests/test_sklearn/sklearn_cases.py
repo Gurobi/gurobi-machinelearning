@@ -24,8 +24,8 @@ from gurobi_ml.sklearn import sklearn_predictors, sklearn_transformers
 def init_predictor(name):
     if isinstance(name, str):
         params = {
-            "MLPRegressor": "[20, 20]",
-            "MLPClassifier": "[50, 50]",
+            "MLPRegressor": "hidden_layer_sizes=[20, 20]",
+            "MLPClassifier": "hidden_layer_sizes=[50, 50]",
             "GradientBoostingRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
             "RandomForestRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
             "DecisionTreeRegressor": "max_leaf_nodes=50",
@@ -179,7 +179,7 @@ class Cases(ABC):
         """Build all the predictor for this case.
         (Done when we have a new sklearn version)"""
         for predictor in self:
-            rval = self.build_predictor(predictor)
+            self.build_predictor(predictor)
 
     def get_case(self, predictor):
         filename = self.predictor_file(predictor)
@@ -250,7 +250,9 @@ class CircleCase(Cases):
 
     def __init__(self):
         super().__init__(
-            "circle", regressors=["DecisionTreeRegressor", "RandomForestRegressor"]
+            "circle",
+            regressors=["DecisionTreeRegressor", "RandomForestRegressor"],
+            saved_training=-1,
         )
 
     def load_data(self):
@@ -279,11 +281,11 @@ class MNISTCase(Cases):
         )
 
     def load_data(self):
-        mnist = datasets.fetch_openml("mnist_784", parser="auto")
+        mnist = datasets.fetch_openml("mnist_784", parser="liac-arff", as_frame=False)
         X, y = mnist.data, mnist.target
 
-        X = X.to_numpy().astype(np.float64)
-        y = y.to_numpy()
+        X = X.astype(np.float64)
+        y = y
         X /= 255.0  # scaling
         self._data = (X, y)
 
@@ -291,19 +293,20 @@ class MNISTCase(Cases):
 class WageCase(Cases):
     """Wage case
 
-    We use it for testing column_transformer and OneHotEncoding of fixed categorical features."""
+    We use it for testing column_transformer and OneHotEncoding of fixed categorical features.
+    """
 
     def __init__(self):
         self.categorical_features = ["OCCUPATION", "SECTOR"]
         self.numerical_features = ["EDUCATION", "EXPERIENCE", "AGE"]
         preprocessors = [
             make_column_transformer(
-                (OneHotEncoder(), self.categorical_features),
+                (OneHotEncoder(drop="first"), self.categorical_features),
                 (StandardScaler(), self.numerical_features),
                 remainder="drop",
             ),
             make_column_transformer(
-                (OneHotEncoder(), self.categorical_features),
+                (OneHotEncoder(drop="first"), self.categorical_features),
                 ("passthrough", self.numerical_features),
                 remainder="drop",
             ),

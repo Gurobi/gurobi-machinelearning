@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 if [[ $# -eq 0 ]] ; then
     echo "Missing '_version.py' input argument"
     exit 1

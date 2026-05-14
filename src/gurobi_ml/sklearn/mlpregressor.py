@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
 # ==============================================================================
 
 """Module for formulating a :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a
-:gurobipy:`model`.
+:external+gurobi:py:class:`Model`.
 """
-from ..exceptions import NoModel
+
+from ..exceptions import ModelConfigurationError
 from ..modeling.neuralnet import BaseNNConstr
 from .skgetter import SKgetter
 
@@ -32,14 +33,14 @@ def add_mlp_regressor_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
-    mlpregressor : :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor`
+    mlp_regressor : :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor`
         The multi-layer perceptron regressor to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
-        Decision variables used as input for regression in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
-        Decision variables used as output for regression in model.
+    input_vars : mvar_array_like
+        Decision variables used as input for mlp regressor in gp_model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for mlp regressor in gp_model.
 
     Returns
     -------
@@ -49,12 +50,12 @@ def add_mlp_regressor_constr(
 
     Raises
     ------
-    NoModel
+    ModelConfigurationError
         If the translation to Gurobi of the activation function for the network is not
         implemented.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
     """
     return MLPRegressorConstr(
@@ -63,8 +64,8 @@ def add_mlp_regressor_constr(
 
 
 class MLPRegressorConstr(SKgetter, BaseNNConstr):
-    """Class to model trained
-    :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` with gurobipy.
+    """Class to formulate a trained
+    :external+sklearn:py:class:`sklearn.neural_network.MLPRegressor` in a gurobipy model.
 
     |ClassShort|
     """
@@ -78,6 +79,11 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         clean_predictor=False,
         **kwargs,
     ):
+        if predictor.out_activation_ not in ("identity", "relu"):
+            raise ModelConfigurationError(
+                predictor,
+                f"Unsupported output activation '{predictor.out_activation_}'. Only 'identity' and 'relu' are supported.",
+            )
         SKgetter.__init__(self, predictor, input_vars, **kwargs)
         BaseNNConstr.__init__(
             self,
@@ -88,14 +94,12 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
             clean_predictor=clean_predictor,
             **kwargs,
         )
-        assert predictor.out_activation_ in ("identity", "relu")
 
     def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
         neural_net = self.predictor
         if neural_net.activation not in self.act_dict:
-            print(self.act_dict)
-            raise NoModel(
+            raise ModelConfigurationError(
                 neural_net,
                 f"No implementation for activation function {neural_net.activation}",
             )
@@ -113,7 +117,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
                 activation = self.act_dict[neural_net.out_activation_]
                 output = self._output
 
-            layer = self.add_dense_layer(
+            layer = self._add_dense_layer(
                 input_vars,
                 layer_coefs,
                 layer_intercept,
@@ -122,7 +126,7 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
                 **kwargs,
             )
             input_vars = layer._output  # pylint: disable=W0212
-            self._gp_model.update()
+            self.gp_model.update()
         assert (
             self._output is not None
-        )  # Should never happen since sklearn object defines n_ouputs_
+        )  # Should never happen since sklearn object defines n_outputs_

@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,14 +15,10 @@
 
 """Module for formulating a
 :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
-in a :gurobipy:`model`.
+in a :external+gurobi:py:class:`Model`.
 """
 
-
-import numpy as np
-from gurobipy import GRB
-
-from ..modeling import AbstractPredictorConstr
+from ..modeling.decision_tree import AbstractTreeEstimator
 from .skgetter import SKgetter
 
 
@@ -42,14 +38,14 @@ def add_decision_tree_regressor_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     decision_tree_regressor : :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
         The decision tree regressor to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
-        Decision variables used as input for decision tree in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
-        Decision variables used as output for decision tree in model.
+    input_vars : mvar_array_like
+        Decision variables used as input for decision tree in gp_model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for decision tree in gp_model.
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
@@ -59,13 +55,13 @@ def add_decision_tree_regressor_constr(
         Object containing information about what was added to gp_model to
         formulate decision_tree_regressor
 
-    Note
-    ----
+    Notes
+    -----
 
     |VariablesDimensionsWarn|
 
-    Warning
-    -------
+    Warnings
+    --------
 
     Although decision trees with multiple outputs are tested they were never
     used in a non-trivial optimization model. It should be used with care at
@@ -76,10 +72,10 @@ def add_decision_tree_regressor_constr(
     )
 
 
-class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained
-    :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor` with
-    gurobipy.
+class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
+    """Class to formulate a trained
+    :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor` in a
+    gurobipy model.
 
     |ClassShort|
     """
@@ -91,260 +87,47 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractPredictorConstr):
         input_vars,
         output_vars=None,
         epsilon=0.0,
-        scale=1.0,
-        float_type=np.float32,
         formulation="leafs",
-        big_m=1e6,
         **kwargs,
     ):
-        self.epsilon = epsilon
-        self.scale = scale
-        self.float_type = float_type
+        """Initialize DecisionTreeRegressorConstr.
+
+        Parameters
+        ----------
+        gp_model : :external+gurobi:py:class:`Model`
+            The gurobipy model where the predictor should be inserted.
+        predictor : :external+sklearn:py:class:`sklearn.tree.DecisionTreeRegressor`
+            The decision tree regressor to insert as predictor.
+        input_vars : mvar_array_like
+            Decision variables used as input for decision tree in gp_model.
+        output_vars : mvar_array_like, optional
+            Decision variables used as output for decision tree in gp_model.
+        epsilon : float, optional
+            Small value used to impose strict inequalities for splitting nodes in
+            MIP formulations.
+        formulation : {'leafs', 'paths'}, default='leafs'
+            Formulation to use for decision tree. 'paths' is deprecated.
+        """
         self._default_name = "tree_reg"
-        self.big_m = big_m
 
         formulations = ("leafs", "paths")
         if formulation not in formulations:
             raise ValueError(
-                "Wrong value for formulation should be one of {}.".format(formulations)
+                f"Wrong value for formulation should be one of {formulations}."
             )
         self._formulation = formulation
         SKgetter.__init__(self, predictor, input_vars)
-        AbstractPredictorConstr.__init__(
-            self, gp_model, input_vars, output_vars, **kwargs
+        tree = self.predictor.tree_
+
+        tree_dict = {
+            "children_left": tree.children_left,
+            "children_right": tree.children_right,
+            "feature": tree.feature,
+            "threshold": tree.threshold,
+            "value": tree.value[:, :, 0],
+            "capacity": tree.capacity,
+            "n_features": tree.n_features,
+        }
+        AbstractTreeEstimator.__init__(
+            self, gp_model, tree_dict, input_vars, output_vars, epsilon, **kwargs
         )
-
-    def _compute_leafs_bounds(self):
-
-        tree = self.predictor.tree_
-
-        node_lb = -np.ones((tree.n_features, tree.capacity)) * GRB.INFINITY
-        node_ub = np.ones((tree.n_features, tree.capacity)) * GRB.INFINITY
-
-        children_left = tree.children_left
-        children_right = tree.children_right
-        feature = tree.feature
-        threshold = tree.threshold
-
-        stack = [
-            0,
-        ]
-        while len(stack):
-            node = stack.pop()
-            left = children_left[node]
-            if left < 0:
-                continue
-            right = children_right[node]
-            assert left not in stack
-            assert right not in stack
-            node_ub[:, right] = node_ub[:, node]
-            node_lb[:, right] = node_lb[:, node]
-            node_ub[:, left] = node_ub[:, node]
-            node_lb[:, left] = node_lb[:, node]
-
-            node_ub[feature[node], left] = threshold[node]
-            node_lb[feature[node], right] = threshold[node] + self.epsilon
-            stack.append(right)
-            stack.append(left)
-        return (node_lb, node_ub)
-
-    def _leaf_mip_model(self, **kwargs):
-        tree = self.predictor.tree_
-        model = self._gp_model
-
-        _input = self._input
-        output = self._output
-        nex = _input.shape[0]
-
-        verbose = self.verbose
-
-        timer = AbstractPredictorConstr._ModelingTimer()
-
-        # Collect leaf nodes
-        leafs = tree.children_left < 0
-        if self._name is None or self._no_recording:
-            name = None
-        else:
-            name = "leafs"
-        leafs_vars = model.addMVar((nex, sum(leafs)), vtype=GRB.BINARY, name=name)
-
-        if verbose:
-            timer.timing(f"Added {nex*sum(leafs)} leafs vars")
-        (node_lb, node_ub) = self._compute_leafs_bounds()
-        input_ub = _input.getAttr(GRB.Attr.UB)
-        input_lb = _input.getAttr(GRB.Attr.LB)
-
-        output_lb = np.min(tree.value[leafs, :, 0])
-        output_ub = np.max(tree.value[leafs, :, 0])
-        output.setAttr(GRB.Attr.LB, output_lb)
-        output.setAttr(GRB.Attr.UB, output_ub)
-
-        for i, node in enumerate(leafs.nonzero()[0]):
-            values = tree.value[node, :, 0]
-            reachable = (
-                (input_ub >= node_lb[:, node]).all(axis=1)
-                & (input_lb <= node_ub[:, node]).all(axis=1)
-                & (output_lb <= values).all()
-                & (output_ub >= values).all()
-            )
-            # Non reachable nodes
-            leafs_vars[~reachable, i].setAttr(GRB.Attr.UB, 0.0)
-
-            n_indicators = sum(reachable)
-            # Leaf node:
-            if self.big_m < GRB.INFINITY:
-                model.addConstrs(
-                    (
-                        output[reachable, k]
-                        >= output_lb
-                        + (values - output_lb)[k] * leafs_vars[reachable, i]
-                    )
-                    for k in range(len(values))
-                )
-                model.addConstrs(
-                    (
-                        output[reachable, k]
-                        <= output_ub
-                        + (values - output_ub)[k] * leafs_vars[reachable, i]
-                    )
-                    for k in range(len(values))
-                )
-            else:
-                rhs = output[reachable, :].tolist()
-                lhs = leafs_vars[reachable, i].tolist()
-                values = tree.value[node, :, 0]
-                for l_var, r_vars in zip(lhs, rhs):
-                    for r_var, value in zip(r_vars, values):
-                        model.addGenConstrIndicator(l_var, 1, r_var, GRB.EQUAL, value)
-
-            for feature in range(tree.n_features):
-                lb = node_lb[feature, node]
-                ub = node_ub[feature, node]
-
-                if lb > -GRB.INFINITY:
-                    tight = (input_lb[:, feature] < lb) & reachable
-                    n_indicators += sum(tight)
-                    if sum(tight) == 0:
-                        continue
-                    big_m = input_lb[tight, feature]
-                    if np.max(np.abs(big_m)) <= self.big_m:
-                        model.addConstr(
-                            _input[tight, feature]
-                            >= big_m + (lb - big_m) * leafs_vars[tight, i]
-                        )
-                    else:
-                        lhs = leafs_vars[tight, i].tolist()
-                        rhs = _input[tight, feature].tolist()
-                        for l_var, r_var in zip(lhs, rhs):
-                            model.addGenConstrIndicator(
-                                l_var, 1, r_var, GRB.GREATER_EQUAL, lb
-                            )
-
-                if ub < GRB.INFINITY:
-                    tight = (input_ub[:, feature] > ub) & reachable
-                    n_indicators += sum(tight)
-                    if sum(tight) == 0:
-                        continue
-                    big_m = input_ub[tight, feature]
-                    if np.max(np.abs(big_m)) <= self.big_m:
-                        model.addConstr(
-                            _input[tight, feature]
-                            <= big_m + (ub - big_m) * leafs_vars[tight, i]
-                        )
-                    else:
-                        lhs = leafs_vars[tight, i].tolist()
-                        rhs = _input[tight, feature].tolist()
-
-                        for l_var, r_var in zip(lhs, rhs):
-                            model.addGenConstrIndicator(
-                                l_var, 1, r_var, GRB.LESS_EQUAL, ub
-                            )
-            if verbose:
-                timer.timing(f"Added leaf {node} using {n_indicators} indicators")
-
-        # We should attain 1 leaf
-        model.addConstr(leafs_vars.sum(axis=1) == 1)
-
-        if verbose:
-            timer.timing(f"Added {nex} linear constraints")
-
-    def _paths_mip_model(self, **kwargs):
-        tree = self.predictor.tree_
-        model = self._gp_model
-
-        _input = self._input
-        output = self._output
-        outdim = output.shape[1]
-        nex = _input.shape[0]
-        if self._name is None or self._no_recording:
-            name = None
-        else:
-            name = "node"
-        nodes = model.addMVar((nex, tree.capacity), vtype=GRB.BINARY, name=name)
-
-        # Collect leafs and non-leafs nodes
-        notleafs = tree.children_left >= 0
-        leafs = tree.children_left < 0
-
-        # Connectivity constraint
-        model.addConstr(
-            nodes[:, notleafs]
-            == nodes[:, tree.children_right[notleafs]]
-            + nodes[:, tree.children_left[notleafs]]
-        )
-
-        # The value of the root is always 1
-        nodes[:, 0].LB = 1.0
-
-        # Node splitting
-        for node in notleafs.nonzero()[0]:
-            left = tree.children_left[node]
-            right = tree.children_right[node]
-            threshold = tree.threshold[node]
-            threshold = self.float_type(threshold)
-            scale = max(abs(1 / threshold), self.scale)
-            # Intermediate node
-            feature = tree.feature[node]
-            feat_var = _input[:, feature]
-
-            fixed_input = (feat_var.UB == feat_var.LB).all()
-
-            if fixed_input:
-                # Special case where we have an MVarPlusConst object
-                # If that feature is a constant we can directly fix it.
-                value = _input[:, feature].LB
-                fixed_left = value <= threshold
-                nodes[fixed_left, right].UB = 0.0
-                nodes[~fixed_left, left].UB = 0.0
-            else:
-                lhs = _input[:, feature].tolist()
-                rhs = nodes[:, left].tolist()
-                threshold *= scale
-                model.addConstrs(
-                    ((rhs[k] == 1) >> (scale * lhs[k] <= threshold)) for k in range(nex)
-                )
-                rhs = nodes[:, right].tolist()
-                model.addConstrs(
-                    ((rhs[k] == 1) >> (scale * lhs[k] >= threshold + self.epsilon))
-                    for k in range(nex)
-                )
-
-        for node in leafs.nonzero()[0]:
-            # Leaf node:
-            lhs = output.tolist()
-            rhs = nodes[:, node].tolist()
-            value = tree.value[node, :, 0]
-            model.addConstrs(
-                (rhs[k] == 1) >> (lhs[k][i] == value[i])
-                for k in range(nex)
-                for i in range(outdim)
-            )
-
-        output.LB = np.min(tree.value)
-        output.UB = np.max(tree.value)
-
-    def _mip_model(self, **kwargs):
-        if self._formulation == "leafs":
-            return self._leaf_mip_model(**kwargs)
-        else:
-            return self._paths_mip_model(**kwargs)

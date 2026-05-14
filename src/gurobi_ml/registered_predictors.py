@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 # ==============================================================================
 
 """Define generic function that can add any known trained predictor."""
+
 import sys
 
 from .register_user_predictor import user_predictors
@@ -28,7 +29,9 @@ def sklearn_convertors():
         from .sklearn.predictors_list import (  # pylint: disable=import-outside-toplevel
             sklearn_predictors,
         )
-        from .sklearn.preprocessing import sklearn_transformers
+        from .sklearn.preprocessing import (
+            sklearn_transformers,  # pylint: disable-import-outside-toplevel
+        )
 
         return (
             sklearn_predictors()
@@ -53,23 +56,61 @@ def pytorch_convertors():
     return {}
 
 
+def xgboost_convertors():
+    """Collect known XGBoost objects that can be formulated and the conversion class."""
+    if "xgboost" in sys.modules:
+        import xgboost as xgb  # pylint: disable=import-outside-toplevel
+
+        from .xgboost import (  # pylint: disable=import-outside-toplevel
+            add_xgboost_regressor_constr,
+            add_xgbregressor_constr,
+        )
+
+        return {
+            xgb.core.Booster: add_xgboost_regressor_constr,
+            xgb.XGBRegressor: add_xgbregressor_constr,
+        }
+    return {}
+
+
+def lightgbm_convertors():
+    """Collect known LightGBM objects that can be formulated and the conversion class."""
+    if "lightgbm" in sys.modules:
+        import lightgbm as lgb  # pylint: disable=import-outside-toplevel
+
+        from .lightgbm import (  # pylint: disable=import-outside-toplevel
+            add_lgbmregressor_constr,
+        )
+
+        return {
+            lgb.sklearn.LGBMRegressor: add_lgbmregressor_constr,
+        }
+    return {}
+
+
 def keras_convertors():
     """Collect known Keras objects that can be embedded and the conversion class."""
-    if "tensorflow" in sys.modules:
-        from keras.engine.functional import (  # pylint: disable=import-outside-toplevel
-            Functional,
-        )
-        from keras.engine.training import (  # pylint: disable=import-outside-toplevel
-            Model,
-        )
-        from tensorflow import keras  # pylint: disable=import-outside-toplevel
+    if "keras" in sys.modules:
+        import keras  # pylint: disable=import-outside-toplevel
 
         from .keras import add_keras_constr  # pylint: disable=import-outside-toplevel
 
         return {
             keras.Sequential: add_keras_constr,
-            Functional: add_keras_constr,
-            Model: add_keras_constr,
+            keras.Model: add_keras_constr,
+        }
+    return {}
+
+
+def onnx_convertors():
+    """Collect known ONNX objects that can be formulated and the conversion class."""
+    if "onnx" in sys.modules:
+        import onnx  # pylint: disable=import-outside-toplevel
+
+        from .onnx import add_onnx_constr  # pylint: disable=import-outside-toplevel
+
+        return {
+            onnx.ModelProto: add_onnx_constr,
         }
     return {}
 
@@ -80,5 +121,8 @@ def registered_predictors():
     convertors |= sklearn_convertors()
     convertors |= pytorch_convertors()
     convertors |= keras_convertors()
+    convertors |= onnx_convertors()
+    convertors |= xgboost_convertors()
+    convertors |= lightgbm_convertors()
     convertors |= user_predictors()
     return convertors

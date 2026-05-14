@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,18 +15,24 @@
 
 """Module for formulating a
 :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
-into a :gurobipy:`model`.
+into a :external+gurobi:py:class:`Model`.
 """
 
 from gurobipy import GRB
 
+from ..exceptions import ModelConfigurationError
 from ..modeling import AbstractPredictorConstr
 from .decision_tree_regressor import add_decision_tree_regressor_constr
 from .skgetter import SKgetter
 
 
 def add_gradient_boosting_regressor_constr(
-    gp_model, gradient_boosting_regressor, input_vars, output_vars=None, **kwargs
+    gp_model,
+    gradient_boosting_regressor,
+    input_vars,
+    output_vars=None,
+    epsilon=0.0,
+    **kwargs,
 ):
     """Formulate gradient_boosting_regressor into gp_model.
 
@@ -36,14 +42,17 @@ def add_gradient_boosting_regressor_constr(
 
     Parameters
     ----------
-    gp_model : :gurobipy:`model`
+    gp_model : :external+gurobi:py:class:`Model`
         The gurobipy model where the predictor should be inserted.
     gradient_boosting_regressor : :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
         The gradient boosting regressor to insert as predictor.
-    input_vars : :gurobipy:`mvar` or :gurobipy:`var` array like
-        Decision variables used as input for gradient boosting regressor in model.
-    output_vars : :gurobipy:`mvar` or :gurobipy:`var` array like, optional
-        Decision variables used as output for gradient boosting regressor in model.
+    input_vars : mvar_array_like
+        Decision variables used as input for gradient boosting regressor in gp_model.
+    output_vars : mvar_array_like, optional
+        Decision variables used as output for gradient boosting regressor in gp_model.
+    epsilon : float, optional
+        Small value used to impose strict inequalities for splitting nodes in
+        MIP formulations.
 
     Returns
     -------
@@ -51,23 +60,28 @@ def add_gradient_boosting_regressor_constr(
         Object containing information about what was added to gp_model to formulate
         gradient_boosting_regressor.
 
-    Note
-    ----
+    Notes
+    -----
     |VariablesDimensionsWarn|
 
     Also see
-    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor`
+    :py:func:`gurobi_ml.sklearn.decision_tree_regressor.add_decision_tree_regressor_constr`
     for specific parameters to model decision tree estimators.
     """
     return GradientBoostingRegressorConstr(
-        gp_model, gradient_boosting_regressor, input_vars, output_vars, **kwargs
+        gp_model,
+        gradient_boosting_regressor,
+        input_vars,
+        output_vars,
+        epsilon=epsilon,
+        **kwargs,
     )
 
 
 class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
-    """Class to model trained
+    """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
-    with gurobipy.
+    in a gurobipy model.
 
     |ClassShort|
     """
@@ -87,7 +101,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
 
         Both X and y should be array or list of variables of conforming dimensions.
         """
-        model = self._gp_model
+        model = self.gp_model
         predictor = self.predictor
 
         _input = self._input
@@ -95,23 +109,21 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         nex = _input.shape[0]
 
         outdim = output.shape[1]
-        assert (
-            outdim == 1
-        ), "Output dimension of gradient boosting regressor should be 1"
+        if outdim != 1:
+            raise ModelConfigurationError(
+                self.predictor,
+                "Output dimension of gradient boosting regressor should be 1",
+            )
 
         estimators = []
         if self._no_debug:
             kwargs["no_record"] = True
 
-        if self._name is None or self._no_recording:
-            name = None
-        else:
-            name = "estimator"
-
         tree_vars = model.addMVar(
-            (nex, predictor.n_estimators_, 1), lb=-GRB.INFINITY, name=name
+            (nex, predictor.n_estimators_, 1),
+            lb=-GRB.INFINITY,
+            name=self._name_var("estimator"),
         )
-        model.update()
 
         for i in range(predictor.n_estimators_):
             tree = predictor.estimators_[i]
@@ -133,12 +145,12 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         """Print statistics on model additions stored by this class.
 
         This function prints detailed statistics on the variables
-        and constraints that where added to the model.
+        and constraints that were added to the model.
 
         Includes a summary of the estimators that it contains.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
 
         file: None, optional
             Text stream to which output should be redirected. By default sys.stdout.

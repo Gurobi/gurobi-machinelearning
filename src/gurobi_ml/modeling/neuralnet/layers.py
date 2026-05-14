@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,8 +41,9 @@ class AbstractNNLayer(AbstractPredictorConstr):
             self, gp_model, input_vars, output_vars, **kwargs
         )
 
-    def get_error(self):
-        assert False
+    def get_error(self, eps=None):
+        # We can't compute externally the error of a layer
+        raise NotImplementedError("get_error is not supported for individual NN layers")
 
     def print_stats(self, abbrev=False, file=None):
         """Print statistics about submodel created.
@@ -78,9 +79,9 @@ class ActivationLayer(AbstractNNLayer):
         )
 
     def _create_output_vars(self, input_vars):
-        rval = self._gp_model.addMVar(input_vars.shape, lb=-gp.GRB.INFINITY, name="act")
-        self._gp_model.update()
-        self._output = rval
+        rval = self.gp_model.addMVar(input_vars.shape, lb=-gp.GRB.INFINITY, name="act")
+        self.gp_model.update()
+        return rval
 
     def _mip_model(self, **kwargs):
         """Add the layer to model."""
@@ -93,7 +94,7 @@ class ActivationLayer(AbstractNNLayer):
 
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
-        self._gp_model.update()
+        self.gp_model.update()
 
 
 class DenseLayer(AbstractNNLayer):
@@ -122,11 +123,11 @@ class DenseLayer(AbstractNNLayer):
         )
 
     def _create_output_vars(self, input_vars):
-        rval = self._gp_model.addMVar(
+        rval = self.gp_model.addMVar(
             (input_vars.shape[0], self.coefs.shape[1]), lb=-gp.GRB.INFINITY, name="act"
         )
-        self._gp_model.update()
-        self._output = rval
+        self.gp_model.update()
+        return rval
 
     def _mip_model(self, **kwargs):
         """Add the layer to model."""
@@ -139,7 +140,7 @@ class DenseLayer(AbstractNNLayer):
 
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
-        self._gp_model.update()
+        self.gp_model.update()
 
     def print_stats(self, abbrev=False, file=None):
         """Print statistics about submodel created.

@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,36 +13,135 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Exceptions for gurobi_ml."""
+
+"""Exceptions for gurobi_ml.
+
+This module defines the exception hierarchy used throughout gurobi-ml.
+All exceptions inherit from appropriate Python standard exceptions to provide
+clear semantic meaning and consistent behavior.
+"""
+
+import warnings
 
 
-class NotRegistered(Exception):
-    """Predictor is not supported by gurobi_ml."""
+class GurobiMLError(Exception):
+    """Base class for all gurobi-ml exceptions."""
+
+
+class PredictorNotSupportedError(NotImplementedError, GurobiMLError):
+    """Predictor type is not supported by gurobi-ml.
+
+    Raised when attempting to use a predictor type that hasn't been registered
+    or implemented in gurobi-ml.
+
+    Parameters
+    ----------
+    predictor : str or object
+        The predictor type that is not supported
+    """
 
     def __init__(self, predictor):
+        predictor_name = (
+            predictor if isinstance(predictor, str) else type(predictor).__name__
+        )
         super().__init__(
-            f"Object of type {predictor} is not registered/supported with gurobi_ml"
+            f"Predictor type '{predictor_name}' is not supported by gurobi-ml. "
+            f"Check the documentation for supported predictor types or consider "
+            f"registering a custom converter."
         )
 
 
-class NoModel(Exception):
-    """No model is known for some structure."""
+class ModelConfigurationError(ValueError, GurobiMLError):
+    """Predictor configuration cannot be converted to optimization model.
+
+    Raised when a predictor's structure, parameters, or configuration
+    prevents it from being formulated as a mathematical optimization model.
+
+    Parameters
+    ----------
+    predictor : str or object
+        The predictor that has the configuration issue
+    reason : str
+        Description of why the configuration is not supported
+    """
 
     def __init__(self, predictor, reason):
-        if not isinstance(predictor, str):
-            predictor = type(predictor).__name__
-        super().__init__(f"Can't do model for {predictor}: {reason}")
+        predictor_name = (
+            predictor if isinstance(predictor, str) else type(predictor).__name__
+        )
+        super().__init__(
+            f"Cannot create optimization model for {predictor_name}: {reason}"
+        )
 
 
-class NoSolution(Exception):
-    """Gurobi doesn't have a solution."""
+class NoSolutionError(RuntimeError, GurobiMLError):
+    """Gurobi model has no solution available.
 
-    def __init__(self):
-        super().__init__("No solution available")
+    Raised when attempting to retrieve solution values from a Gurobi model
+    that doesn't have a solution (not optimized, infeasible, unbounded, etc.).
+
+    Parameters
+    ----------
+    message : str, optional
+        Custom error message. If not provided, uses a default message.
+    """
+
+    def __init__(self, message=None):
+        if message is None:
+            message = "No solution available from Gurobi model"
+        super().__init__(message)
 
 
-class ParameterError(Exception):
-    """Wrong parameter to a function."""
+# Backward compatibility aliases with deprecation warnings
+
+
+class NotRegistered(PredictorNotSupportedError):
+    """Deprecated: Use PredictorNotSupportedError instead."""
+
+    def __init__(self, predictor):
+        warnings.warn(
+            "NotRegistered is deprecated and will be removed in a future version. "
+            "Use PredictorNotSupportedError instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(predictor)
+
+
+class NoModel(ModelConfigurationError):
+    """Deprecated: Use ModelConfigurationError instead."""
+
+    def __init__(self, predictor, reason):
+        warnings.warn(
+            "NoModel is deprecated and will be removed in a future version. "
+            "Use ModelConfigurationError instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(predictor, reason)
+
+
+class NoSolution(NoSolutionError):
+    """Deprecated: Use NoSolutionError instead."""
+
+    def __init__(self, message=None):
+        warnings.warn(
+            "NoSolution is deprecated and will be removed in a future version. "
+            "Use NoSolutionError instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(message)
+
+
+class ParameterError(ValueError, GurobiMLError):
+    """Deprecated: Use ValueError instead."""
 
     def __init__(self, message):
+        warnings.warn(
+            "ParameterError is deprecated and will be removed in a future version. "
+            "Use ValueError instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__(message)

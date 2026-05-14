@@ -1,0 +1,20 @@
+name: write-license
+description: Write LICENSE secret into a gurobi.lic file and output its path
+inputs:
+  license:
+    description: The contents of the license file
+    required: true
+outputs:
+  grb_license_file:
+    description: Path to the written license file
+    value: ${{ steps.write.outputs.grb_license_file }}
+runs:
+  using: composite
+  steps:
+    - id: write
+      shell: bash
+      env:
+        LICENSE: ${{ inputs.license }}
+      run: |
+        echo "$LICENSE" > "$PWD/gurobi.lic"
+        echo "grb_license_file=$PWD/gurobi.lic" >> "$GITHUB_OUTPUT"

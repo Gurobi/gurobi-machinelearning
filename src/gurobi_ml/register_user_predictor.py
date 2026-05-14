@@ -1,4 +1,4 @@
-# Copyright © 2022 Gurobi Optimization, LLC
+# Copyright © 2023-2026 Gurobi Optimization, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
 
 
 """Module for user to register a predictor for the function add_predictor_constr."""
+
 USER_PREDICTORS = {}
 
 
 def register_predictor_constr(predictor, predictor_constr):
-    """Register a new predictor that can be added using use_predictor_constr.
+    """Register a new predictor that can be added using add_predictor_constr.
 
     Parameters
     ----------
@@ -27,7 +28,7 @@ def register_predictor_constr(predictor, predictor_constr):
         Class of the predictor
     predictor_constr:
         Class implementing the MIP formulation of a trained object of class predictor
-        in a gurobi :gurobipy:`Model`.
+        in a gurobi :external+gurobi:py:class:`Model`.
     """
     USER_PREDICTORS[predictor] = predictor_constr
 

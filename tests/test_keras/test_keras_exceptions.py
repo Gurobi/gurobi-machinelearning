@@ -2,11 +2,10 @@ import unittest
 
 import gurobipy as gp
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
+import keras
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoModel
+from gurobi_ml.exceptions import ModelConfigurationError
 
 
 class TestUnsuportedKeras(unittest.TestCase):
@@ -22,9 +21,9 @@ class TestUnsuportedKeras(unittest.TestCase):
 
     def do_test(self, nn):
         nn.compile(
-            optimizer=tf.keras.optimizers.Adam(0.001),
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-            metrics=[tf.keras.metrics.SparseCategoricalAccuracy()],
+            optimizer=keras.optimizers.Adam(0.001),
+            loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            metrics=[keras.metrics.SparseCategoricalAccuracy()],
         )
 
         nn.fit(
@@ -40,7 +39,7 @@ class TestUnsuportedKeras(unittest.TestCase):
 
         x = m.addMVar(example.shape, lb=0.0, ub=1.0, name="x")
 
-        with self.assertRaises(NoModel):
+        with self.assertRaises(ModelConfigurationError):
             add_predictor_constr(m, nn, x)
 
     def test_keras_bad_activation(self):
@@ -49,12 +48,12 @@ class TestUnsuportedKeras(unittest.TestCase):
         self.x_train = np.reshape(self.x_train, (-1, 28 * 28))
         self.x_test = np.reshape(self.x_test, (-1, 28 * 28))
 
-        nn = tf.keras.models.Sequential(
+        nn = keras.models.Sequential(
             [
-                tf.keras.layers.InputLayer(28 * 28),
-                tf.keras.layers.Dense(50, activation="sigmoid"),
-                tf.keras.layers.Dense(50, activation="relu"),
-                tf.keras.layers.Dense(10),
+                keras.layers.InputLayer((28 * 28,)),
+                keras.layers.Dense(50, activation="sigmoid"),
+                keras.layers.Dense(50, activation="relu"),
+                keras.layers.Dense(10),
             ]
         )
         self.do_test(nn)
@@ -65,19 +64,19 @@ class TestUnsuportedKeras(unittest.TestCase):
         self.x_train = np.reshape(self.x_train, (-1, 28, 28, 1))
         self.x_test = np.reshape(self.x_test, (-1, 28, 28, 1))
 
-        nn = tf.keras.models.Sequential(
+        nn = keras.models.Sequential(
             [
-                tf.keras.layers.InputLayer((28, 28, 1)),
-                tf.keras.layers.BatchNormalization(),
-                tf.keras.layers.Conv2D(32, (3, 3), padding="same"),
-                tf.keras.layers.ReLU(),
-                tf.keras.layers.MaxPooling2D((2, 2)),
-                tf.keras.layers.Conv2D(64, (3, 3), padding="same"),
-                tf.keras.layers.ReLU(),
-                tf.keras.layers.MaxPooling2D((2, 2)),
-                tf.keras.layers.Flatten(),
-                tf.keras.layers.Dense(100, activation="relu"),
-                tf.keras.layers.Dense(10, activation="softmax"),
+                keras.layers.InputLayer((28, 28, 1)),
+                keras.layers.BatchNormalization(),
+                keras.layers.Conv2D(32, (3, 3), padding="same"),
+                keras.layers.ReLU(),
+                keras.layers.MaxPooling2D((2, 2)),
+                keras.layers.Conv2D(64, (3, 3), padding="same"),
+                keras.layers.ReLU(),
+                keras.layers.MaxPooling2D((2, 2)),
+                keras.layers.Flatten(),
+                keras.layers.Dense(100, activation="relu"),
+                keras.layers.Dense(10, activation="softmax"),
             ]
         )
         self.do_test(nn)
@@ -87,12 +86,12 @@ class TestUnsuportedKeras(unittest.TestCase):
         self.x_train = np.reshape(self.x_train, (-1, 28 * 28))
         self.x_test = np.reshape(self.x_test, (-1, 28 * 28))
 
-        nn = tf.keras.models.Sequential(
+        nn = keras.models.Sequential(
             [
-                tf.keras.layers.InputLayer(28 * 28),
-                tf.keras.layers.Dense(50),
-                tf.keras.layers.ReLU(**kwargs),
-                tf.keras.layers.Dense(10),
+                keras.layers.InputLayer((28 * 28,)),
+                keras.layers.Dense(50),
+                keras.layers.ReLU(**kwargs),
+                keras.layers.Dense(10),
             ]
         )
         self.do_test(nn)
@@ -105,3 +104,39 @@ class TestUnsuportedKeras(unittest.TestCase):
 
     def test_max_value(self):
         self.do_relu_tests(max_value=10.0)
+
+    def test_keras_bad_shape(self):
+        self.x_train = np.reshape(self.x_train, (-1, 28 * 28))
+        self.x_test = np.reshape(self.x_test, (-1, 28 * 28))
+
+        nn = keras.models.Sequential(
+            [
+                keras.layers.InputLayer(shape=(28 * 28,)),
+                keras.layers.Dense(10),
+            ]
+        )
+        nn.compile(optimizer="adam", loss="mse")
+
+        m = gp.Model()
+        x = m.addMVar((1, 28 * 28), name="x")
+        y = m.addMVar((1, 5), name="y")
+
+        with self.assertRaises(ValueError):
+            add_predictor_constr(m, nn, x, y)
+
+    def test_keras_multi_output(self):
+        inputs = keras.Input(shape=(10,))
+        x = keras.layers.Dense(5)(inputs)
+        out1 = keras.layers.Dense(2)(x)
+        out2 = keras.layers.Dense(3)(x)
+        nn = keras.Model(inputs=inputs, outputs=[out1, out2])
+
+        m = gp.Model()
+        x = m.addMVar((1, 10), name="x")
+
+        with self.assertRaises(ModelConfigurationError) as context:
+            add_predictor_constr(m, nn, x)
+
+        self.assertIn(
+            "Multi-output keras models are not supported", str(context.exception)
+        )

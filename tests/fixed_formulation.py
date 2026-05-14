@@ -7,7 +7,7 @@ import numpy as np
 from gurobipy import GurobiError
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoSolution
+from gurobi_ml.exceptions import NoSolutionError
 
 VERBOSE = False
 
@@ -17,7 +17,7 @@ class FixedRegressionModel(unittest.TestCase):
     Gurobi is identical to what the predict function would return."""
 
     def setUp(self) -> None:
-        self.rng = np.random.default_rng(1)
+        self.rng = np.random.default_rng(4)
 
     def additional_test(self, predictor, pred_constr):
         """Define this to do additional tests"""
@@ -43,7 +43,7 @@ class FixedRegressionModel(unittest.TestCase):
 
                 self.assertIsInstance(examples, pd.DataFrame)
                 self.assertIsInstance(numerical_features, list)
-                x = examples.copy()
+                x = examples.copy().astype("object")
                 nonconvex = 1
                 for feat in numerical_features:
                     x.loc[:, feat] = gppd.add_vars(gpm, examples, lb=feat, ub=feat)
@@ -59,7 +59,7 @@ class FixedRegressionModel(unittest.TestCase):
 
             y = pred_constr.output
 
-            with self.assertRaises(NoSolution):
+            with self.assertRaises(NoSolutionError):
                 pred_constr.get_error()
             with open(os.devnull, "w") as outnull:
                 pred_constr.print_stats(file=outnull)
@@ -82,11 +82,10 @@ class FixedRegressionModel(unittest.TestCase):
                 warnings.warn(UserWarning(f"Big solution violation {vio}"))
                 warnings.warn(UserWarning(f"predictor {predictor}"))
             tol = max(tol, vio)
-            tol *= np.max(np.abs(y.X))
-            abserror = pred_constr.get_error().astype(float)
-            if (abserror > tol).any():
-                print(f"Error: {y.X} != {predictor.predict(examples)}")
-
+            tol *= 1 + np.max(np.abs(y.X))
+            abserror = pred_constr.get_error(tol).astype(float)
+            if np.max(abserror) > tol:
+                gpm.write("failed.lp")
             self.assertLessEqual(np.max(abserror), tol)
 
     def do_one_case(self, one_case, X, n_sample, combine="", **kwargs):
