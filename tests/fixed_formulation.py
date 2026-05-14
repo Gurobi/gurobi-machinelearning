@@ -70,7 +70,7 @@ class FixedRegressionModel(unittest.TestCase):
                     self.skipTest("Model too large for limited license")
                 else:
                     raise
-            gpm.write("model.lp")
+
             self.additional_test(predictor, pred_constr)
             if nonconvex:
                 tol = 5e-3

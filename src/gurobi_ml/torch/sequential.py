@@ -21,17 +21,24 @@ import numpy as np
 import torch
 import warnings
 from torch import nn
+import gurobipy as gp
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr, SoftPlus
+
+
+# Check Gurobi version
+GUROBI_VERSION = gp.gurobi.version()
+HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
 
 # Map nn.Module activation types to their activation-registry name.
 # nn.Softplus is handled separately because it carries parameters (beta, threshold).
 _NN_ACTIVATION_MAP = {
     nn.ReLU: "relu",
     nn.Sigmoid: "sigmoid",
-    nn.Tanh: "tanh",
 }
+if HAS_NLFUNC:
+    _NN_ACTIVATION_MAP[nn.Tanh] = "tanh"
 
 
 def add_sequential_constr(

@@ -52,7 +52,7 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
         Target Gurobi model where the predictor submodel is added.
     onnx_model : onnx.ModelProto
         ONNX model, expected to represent a sequential MLP with `Gemm` nodes
-        (or `MatMul`+`Add` sequences) and `Relu` or `Softplus` activations.
+        (or `MatMul`+`Add` sequences) and `Relu`, `Sigmoid`, `Tanh`, or `Softplus` activations.
     input_vars : mvar_array_like
         Decision variables used as input for the model in `gp_model`.
     output_vars : mvar_array_like, optional

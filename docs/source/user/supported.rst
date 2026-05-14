@@ -136,6 +136,8 @@ Currently, only the following are supported:
      (`alpha=1`, `beta=1`) and optional `transB` attribute,
    * Sequential MLPs with `MatMul` + `Add` sequences (TensorFlow/tf2onnx style),
    * `Relu` activations,
+   * `Sigmoid` activations,
+   * `Tanh` activations,
    * `Softplus` activations.
 
 Models must be strictly sequential with no skip connections or residual blocks.

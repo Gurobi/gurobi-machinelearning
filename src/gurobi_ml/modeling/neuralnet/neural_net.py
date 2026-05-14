@@ -15,6 +15,7 @@
 
 """Bases classes for modeling neural network layers."""
 
+from build.lib.gurobi_ml.exceptions import ModelConfigurationError
 import gurobipy as gp
 
 from .._var_utils import _default_name
@@ -96,7 +97,20 @@ class BaseNNConstr(AbstractPredictorConstr):
         if activation_name not in self.act_dict:
             factory = _LAZY_ACTIVATION_FACTORIES.get(activation_name)
             if factory is None:
-                raise KeyError(f"Unknown activation '{activation_name}'")
+                if activation_name in ("sigmoid", "softplus"):
+                    raise ModelConfigurationError(
+                        self.predictor,
+                        f"Activation '{activation_name}' requires Gurobi 12.0+ with nlfunc support",
+                    )
+                elif activation_name == "tanh":
+                    raise ModelConfigurationError(
+                        self.predictor,
+                        "Activation 'tanh' requires Gurobi 13.0+",
+                    )
+                else:
+                    raise ModelConfigurationError(
+                        self.predictor, f"Unsupported activation '{activation_name}'"
+                    )
             self.act_dict[activation_name] = factory()
         return self.act_dict[activation_name]
 
