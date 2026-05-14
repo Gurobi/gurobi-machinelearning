@@ -1,8 +1,9 @@
 # This workflow uses `pull_request_target` which has access to a WLS license. For security reasons, this workflow
 # gates access to secrets behind a GitHub environment called "safe-to-test". That environment must be configured
 # in the repository Settings → Environments with one or more required reviewers. When a PR is opened or updated,
-# the workflow starts automatically but pauses at any job that declares `environment: safe-to-test` until a
-# reviewer approves the run. Each new commit to the PR creates a fresh run that requires a new approval.
+# the workflow starts automatically but pauses at a dedicated approval gate job that declares
+# `environment: safe-to-test` until a reviewer approves the run. Each new commit to the PR creates a
+# fresh run that requires a new approval.
 #
 # Since a subset of checks already ran in the nolicense workflow, this workflow skips linting here.
 
@@ -19,13 +20,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests:
+  approval_gate:
     runs-on: ubuntu-latest
     # This environment has required reviewers configured in Settings → Environments.
-    # The job pauses here until a maintainer approves the run, preventing untrusted
-    # code from accessing secrets. A new commit to the PR triggers a new run that
-    # requires a fresh approval.
+    # Using a single gate job keeps approvals/emails to one per workflow run.
     environment: safe-to-test
+    timeout-minutes: 5
+    steps:
+      - run: echo "Approved to run licensed jobs"
+
+  tests:
+    needs: approval_gate
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -59,7 +65,6 @@ jobs:
 
   examples:
     runs-on: ubuntu-latest
-    environment: safe-to-test
     needs: tests
     timeout-minutes: 45
     strategy:
