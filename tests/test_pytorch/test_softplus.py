@@ -83,7 +83,7 @@ class TestPyTorchSoftplus:
         not HAS_NLFUNC, reason="Requires Gurobi 12.0+ with nlfunc support"
     )
     def test_softplus_invalid_threshold(self):
-        """Test that non-default threshold raises NoModel."""
+        """Test that non-default threshold raises ModelConfigurationError."""
         model = nn.Sequential(
             nn.Linear(2, 2),
             nn.Softplus(beta=1.0, threshold=10),  # Non-default threshold
