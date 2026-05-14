@@ -1,26 +1,27 @@
-# This workflow uses `pull_request_target` which has access to a WLS license. For security reasons, this workflow
-# gates access to secrets behind a GitHub environment called "safe-to-test". That environment must be configured
-# in the repository Settings → Environments with one or more required reviewers. When a PR is opened or updated,
-# the workflow starts automatically but pauses at a dedicated approval gate job that declares
-# `environment: safe-to-test` until a reviewer approves the run. Each new commit to the PR creates a
-# fresh run that requires a new approval.
-#
-# Since a subset of checks already ran in the nolicense workflow, this workflow skips linting here.
+# This workflow runs after the "build and test PR, no license" workflow completes successfully.
+# It has access to a WLS license. For security reasons, access to secrets is gated behind a
+# GitHub environment called "safe-to-test" configured with one or more required reviewers.
+# The approval is requested only once per run via a dedicated gate job, and only when the
+# no-license checks have already passed.
 
 name: build and test PR, license required
 
 on:
-  pull_request_target:
+  workflow_run:
+    workflows: ["build and test PR, no license"]
+    types: [completed]
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_sha }}
   cancel-in-progress: true
 
 jobs:
   approval_gate:
+    # Only proceed when the triggering no-license workflow succeeded.
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     # This environment has required reviewers configured in Settings → Environments.
     # Using a single gate job keeps approvals/emails to one per workflow run.
@@ -44,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Setup Python
         uses: ./.github/actions/setup-python-and-install
         with:
@@ -75,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Setup Python
         uses: ./.github/actions/setup-python-and-install
         with:
