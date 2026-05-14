@@ -7,10 +7,7 @@ import torch.nn as nn
 import gurobipy as gp
 
 from gurobi_ml import add_predictor_constr
-
-GUROBI_VERSION = gp.gurobi.version()
-HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
-HAS_TANH = GUROBI_VERSION >= (13, 0, 0)
+from gurobi_ml._grb_version import HAS_NLFUNC, HAS_TANH
 
 # Fixed weights reused across tests
 _W0 = torch.tensor([[1.0, 0.5], [0.5, 1.0], [0.3, 0.7]])

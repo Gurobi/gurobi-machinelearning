@@ -7,7 +7,6 @@ embeds the network, solves, and verifies the output matches PyTorch's forward pa
 
 import unittest
 
-import gurobipy as gp
 import numpy as np
 import torch
 import torch.nn as nn
@@ -15,6 +14,7 @@ import requests
 from functools import lru_cache
 
 from ..fixed_formulation import FixedRegressionModel
+from gurobi_ml._grb_version import HAS_NLFUNC, HAS_TANH
 
 
 @lru_cache(maxsize=1)
@@ -26,11 +26,6 @@ def fetch_diabetes_data(url):
         return response.content
     except requests.RequestException as e:
         raise RuntimeError(f"Failed to fetch diabetes dataset: {e}")
-
-
-GUROBI_VERSION = gp.gurobi.version()
-HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
-HAS_TANH = GUROBI_VERSION >= (13, 0, 0)
 
 
 def _make_smooth_mlp(activation_cls, n_in, hidden=8, seed=0):

@@ -15,9 +15,8 @@
 
 """Bases classes for modeling neural network layers."""
 
-from build.lib.gurobi_ml.exceptions import ModelConfigurationError
-import gurobipy as gp
-
+from ..._grb_version import HAS_TANH
+from ...exceptions import ModelConfigurationError
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
 from .activations import Identity, ReLU, Sigmoid, SoftPlus, Tanh
@@ -29,8 +28,6 @@ _LAZY_ACTIVATION_FACTORIES = {
     "softplus": lambda: SoftPlus(beta=1.0),
     "sigmoid": Sigmoid,
 }
-GUROBI_VERSION = gp.gurobi.version()
-HAS_TANH = GUROBI_VERSION >= (13, 0, 0)
 
 if HAS_TANH:
     _LAZY_ACTIVATION_FACTORIES["tanh"] = Tanh

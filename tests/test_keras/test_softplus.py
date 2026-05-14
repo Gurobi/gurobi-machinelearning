@@ -6,10 +6,7 @@ import keras
 import gurobipy as gp
 
 from gurobi_ml import add_predictor_constr
-
-# Check Gurobi version
-GUROBI_VERSION = gp.gurobi.version()
-HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
+from gurobi_ml._grb_version import HAS_NLFUNC
 
 
 @pytest.mark.skipif(not HAS_NLFUNC, reason="Requires Gurobi 12.0+ with nlfunc support")

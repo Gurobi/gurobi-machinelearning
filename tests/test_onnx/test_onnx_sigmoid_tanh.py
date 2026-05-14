@@ -8,10 +8,7 @@ from onnx import helper, TensorProto
 
 import gurobipy as gp
 from gurobi_ml import add_predictor_constr
-
-GUROBI_VERSION = gp.gurobi.version()
-HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
-HAS_TANH = GUROBI_VERSION >= (13, 0, 0)
+from gurobi_ml._grb_version import HAS_NLFUNC, HAS_TANH
 
 
 def _build_onnx_mlp(activation_op: str, n_in=3, n_hidden=4, n_out=1, seed=42):
