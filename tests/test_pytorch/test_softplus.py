@@ -7,7 +7,7 @@ import torch.nn as nn
 import gurobipy as gp
 
 from gurobi_ml import add_predictor_constr
-from gurobi_ml.exceptions import NoModel
+from gurobi_ml.exceptions import ModelConfigurationError
 from gurobi_ml.modeling.neuralnet.activations import SoftPlus
 
 # Check Gurobi version
@@ -79,10 +79,11 @@ class TestPyTorchSoftplus:
             actual = pred_constr.output.X
             np.testing.assert_allclose(actual, expected, rtol=1e-3, atol=1e-3)
 
+    @pytest.mark.skipif(
+        not HAS_NLFUNC, reason="Requires Gurobi 12.0+ with nlfunc support"
+    )
     def test_softplus_invalid_threshold(self):
         """Test that non-default threshold raises NoModel."""
-        if not HAS_NLFUNC:
-            pytest.skip("Requires Gurobi 12.0+ with nonlinear function support")
         model = nn.Sequential(
             nn.Linear(2, 2),
             nn.Softplus(beta=1.0, threshold=10),  # Non-default threshold
@@ -96,7 +97,7 @@ class TestPyTorchSoftplus:
             X_test = np.array([[1.0, -1.0]])
             x = gpm.addMVar(X_test.shape, lb=X_test - 1e-4, ub=X_test + 1e-4)
 
-            with pytest.raises(NoModel, match="non-default threshold"):
+            with pytest.raises(ModelConfigurationError, match="non-default threshold"):
                 add_predictor_constr(gpm, model, x)
 
     def test_softplus_invalid_beta(self):

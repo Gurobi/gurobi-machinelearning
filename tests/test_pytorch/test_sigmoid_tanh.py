@@ -10,6 +10,7 @@ from gurobi_ml import add_predictor_constr
 
 GUROBI_VERSION = gp.gurobi.version()
 HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
+HAS_TANH = GUROBI_VERSION >= (13, 0, 0)
 
 # Fixed weights reused across tests
 _W0 = torch.tensor([[1.0, 0.5], [0.5, 1.0], [0.3, 0.7]])
@@ -80,6 +81,7 @@ class TestPyTorchSigmoid:
 
 
 @pytest.mark.skipif(not HAS_NLFUNC, reason="Requires Gurobi 12.0+ with nlfunc support")
+@pytest.mark.skipif(not HAS_TANH, reason="Requires Gurobi 13.0+ with tanh support")
 class TestPyTorchTanh:
     def test_tanh_matches_pytorch(self):
         _check_against_torch(nn.Tanh)
@@ -113,7 +115,7 @@ class TestPyTorchTanh:
             np.testing.assert_allclose(pc.output.X, expected, rtol=1e-3, atol=1e-3)
 
 
-@pytest.mark.skipif(not HAS_NLFUNC, reason="Requires Gurobi 12.0+ with nlfunc support")
+@pytest.mark.skipif(not HAS_TANH, reason="Requires Gurobi 13.0+ with tanh support")
 class TestPyTorchMixedActivations:
     def test_sigmoid_then_tanh(self):
         model = nn.Sequential(

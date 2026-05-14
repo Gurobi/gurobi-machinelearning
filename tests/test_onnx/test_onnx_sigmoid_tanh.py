@@ -11,6 +11,7 @@ from gurobi_ml import add_predictor_constr
 
 GUROBI_VERSION = gp.gurobi.version()
 HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
+HAS_TANH = GUROBI_VERSION >= (13, 0, 0)
 
 
 def _build_onnx_mlp(activation_op: str, n_in=3, n_hidden=4, n_out=1, seed=42):
@@ -85,7 +86,7 @@ class TestONNXSigmoid:
             np.testing.assert_allclose(pc.output.X, expected, rtol=1e-3, atol=1e-3)
 
 
-@pytest.mark.skipif(not HAS_NLFUNC, reason="Requires Gurobi 12.0+ with nlfunc support")
+@pytest.mark.skipif(not HAS_TANH, reason="Requires Gurobi 13.0+ with tanh support")
 class TestONNXTanh:
     def test_tanh_gemm(self):
         _check_onnx_activation("Tanh")

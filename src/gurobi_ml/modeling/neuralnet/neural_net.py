@@ -28,8 +28,10 @@ _LAZY_ACTIVATION_FACTORIES = {
     "softplus": lambda: SoftPlus(beta=1.0),
     "sigmoid": Sigmoid,
 }
+GUROBI_VERSION = gp.gurobi.version()
+HAS_TANH = GUROBI_VERSION >= (13, 0, 0)
 
-if gp.gurobi.version()[0] > 12:
+if HAS_TANH:
     _LAZY_ACTIVATION_FACTORIES["tanh"] = Tanh
 
 

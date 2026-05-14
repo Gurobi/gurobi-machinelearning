@@ -22,7 +22,7 @@ import torch
 import warnings
 from torch import nn
 
-from ..exceptions import ModelConfigurationError, NoModel, NoSolutionError
+from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr, SoftPlus
 
 # Map nn.Module activation types to their activation-registry name.
@@ -120,7 +120,7 @@ class SequentialConstr(BaseNNConstr):
             elif isinstance(step, nn.Softplus):
                 # Softplus carries parameters; validate threshold before constructing.
                 if step.threshold != 20:
-                    raise NoModel(
+                    raise ModelConfigurationError(
                         self.predictor,
                         f"PyTorch Softplus with non-default threshold ({step.threshold}) is not supported. "
                         f"Only threshold=20 (default) is supported.",
