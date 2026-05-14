@@ -43,9 +43,9 @@ jobs:
           - python-version: "3.13"
             gurobi-version: "gurobi11"
     steps:
+      # Check out the base branch first so that local reusable actions are
+      # loaded from trusted code, not from the (potentially untrusted) PR branch.
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Setup Python
         uses: ./.github/actions/setup-python-and-install
         with:
@@ -57,6 +57,10 @@ jobs:
         uses: ./.github/actions/write-license
         with:
           license: ${{ secrets.LICENSE }}
+      # Now check out the PR code for test execution.
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Test with tox (uv)
         env:
           GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
@@ -74,9 +78,9 @@ jobs:
         python-version: ["3.12"]
         gurobi-version: ["gurobi11","gurobi12","gurobi13"]
     steps:
+      # Check out the base branch first so that local reusable actions are
+      # loaded from trusted code, not from the (potentially untrusted) PR branch.
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Setup Python
         uses: ./.github/actions/setup-python-and-install
         with:
@@ -88,6 +92,10 @@ jobs:
         uses: ./.github/actions/write-license
         with:
           license: ${{ secrets.LICENSE }}
+      # Now check out the PR code for test execution.
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Run examples (uv)
         env:
           GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
