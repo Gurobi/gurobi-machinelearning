@@ -4,9 +4,8 @@ Supported Regression models
 The package currently supports various `scikit-learn
 <https://scikit-learn.org/stable/>`_ objects. It also supports
 Gradient Boosting Regression from `XGBoost <https://xgboost.readthedocs.io/en/stable/>`_ and has limited support for
-`Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_. Only
-sequential neural networks with ReLU activation function are currently
-supported. In :ref:`Mixed Integer Formulations`, we briefly outline the formulations used for the various
+`Keras <https://keras.io/>`_ and `PyTorch <https://pytorch.org/>`_.
+In :ref:`Mixed Integer Formulations`, we briefly outline the formulations used for the various
 regression models.
 
 The versions of those packages tested with the current version (|version|) are
@@ -99,12 +98,14 @@ Keras
 They can be formulated in a Gurobi model with the function
 :py:func:`add_keras_constr <gurobi_ml.keras.add_keras_constr>`.
 
-Currently, only two types of layers are supported:
+Currently, the following layers and activations are supported:
 
-    * `Dense layers <https://keras.io/api/layers/core_layers/dense/>`_ (possibly
-      with `relu` activation),
+    * `Dense layers <https://keras.io/api/layers/core_layers/dense/>`_,
     * `ReLU layers <https://keras.io/api/layers/activation_layers/relu/>`_ with
-      default settings.
+      default settings,
+    * `Sigmoid activations <https://keras.io/api/layers/activations/#sigmoid-function>`_ (requires Gurobi 12.0+),
+    * `Tanh activations <https://keras.io/api/layers/activations/#tanh-function>`_ (requires Gurobi 13.0+),
+    * `Softplus activations <https://keras.io/api/layers/activations/#softplus-function>`_ (requires Gurobi 12.0+).
 
 PyTorch
 -------
@@ -116,10 +117,13 @@ supported.
 They can be formulated in a Gurobi model with the function
 :py:func:`add_sequential_constr <gurobi_ml.torch.sequential.add_sequential_constr>`.
 
-Currently, only two types of layers are supported:
+Currently, the following layers and activations are supported:
 
    * :external+torch:py:class:`Linear layers <torch.nn.Linear>`,
-   * :external+torch:py:class:`ReLU layers <torch.nn.ReLU>`.
+   * :external+torch:py:class:`ReLU layers <torch.nn.ReLU>`,
+   * :external+torch:py:class:`Sigmoid layers <torch.nn.Sigmoid>` (requires Gurobi 12.0+),
+   * :external+torch:py:class:`Tanh layers <torch.nn.Tanh>` (requires Gurobi 13.0+),
+   * :external+torch:py:class:`Softplus layers <torch.nn.Softplus>` (requires Gurobi 12.0+).
 
 ONNX
 ----
@@ -136,9 +140,9 @@ Currently, only the following are supported:
      (`alpha=1`, `beta=1`) and optional `transB` attribute,
    * Sequential MLPs with `MatMul` + `Add` sequences (TensorFlow/tf2onnx style),
    * `Relu` activations,
-   * `Sigmoid` activations,
-   * `Tanh` activations,
-   * `Softplus` activations.
+   * `Sigmoid` activations (requires Gurobi 12.0+),
+   * `Tanh` activations (requires Gurobi 13.0+),
+   * `Softplus` activations (requires Gurobi 12.0+).
 
 Models must be strictly sequential with no skip connections or residual blocks.
 Each tensor should be consumed by at most one node. `Add` nodes are only supported
@@ -154,7 +158,7 @@ using :py:func:`add_xgbregressor_constr <gurobi_ml.xgboost.xgboost_regressor.add
 
 Currently only "gbtree" boosters are supported. Note that all options of "gbtree" may not be supported. In particular,
 those that may result in a different prediction function. For the "objective" option, we only support the default `reg:squarederror`
-and `reg:logistic`.
+and `reg:logistic` (requires Gurobi 11.0+).
 If you encounter an issue don't hesitate to contact us.
 
 LightGBM
@@ -171,7 +175,8 @@ If you encounter an issue don't hesitate to contact us.
 
 .. rubric:: Footnotes
 
-.. [#] Only binary classification. The logistic function is approximated by a piecewise linear function.
-.. [#] Only networks with `"relu"` activation for hidden layers and `"identity"`
+.. [#] Only binary classification. The logistic function is approximated by a piecewise linear function (default) or by the logistic function (Gurobi 11.0+).
+.. [#] Only networks with `"relu"`, `"logistic"` (Gurobi 12.0+), `"tanh"` (Gurobi 13.0+), or `"identity"`
+    activation for hidden layers and `"relu"` or `"identity"`
     for the output layer.
 .. [#] Only polynomial features of degree 2.

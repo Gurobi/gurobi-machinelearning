@@ -17,19 +17,15 @@
 :external+gurobi:py:class:`Model`.
 """
 
+import warnings
+
 import numpy as np
 import torch
-import warnings
 from torch import nn
-import gurobipy as gp
 
+from .._grb_version import HAS_TANH
 from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr, SoftPlus
-
-
-# Check Gurobi version
-GUROBI_VERSION = gp.gurobi.version()
-HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
 
 # Map nn.Module activation types to their activation-registry name.
 # nn.Softplus is handled separately because it carries parameters (beta, threshold).
@@ -37,7 +33,8 @@ _NN_ACTIVATION_MAP = {
     nn.ReLU: "relu",
     nn.Sigmoid: "sigmoid",
 }
-if HAS_NLFUNC:
+
+if HAS_TANH:
     _NN_ACTIVATION_MAP[nn.Tanh] = "tanh"
 
 
@@ -76,9 +73,9 @@ def add_sequential_constr(
     --------
     Only :external+torch:py:class:`torch.nn.Linear` layers,
     :external+torch:py:class:`torch.nn.ReLU`,
-    :external+torch:py:class:`torch.nn.Sigmoid`,
-    :external+torch:py:class:`torch.nn.Tanh`, and
-    :external+torch:py:class:`torch.nn.Softplus` layers are supported.
+    :external+torch:py:class:`torch.nn.Sigmoid` (Gurobi 12.0+),
+    :external+torch:py:class:`torch.nn.Tanh` (Gurobi 13.0+), and
+    :external+torch:py:class:`torch.nn.Softplus` (Gurobi 12.0+) layers are supported.
 
     Notes
     -----

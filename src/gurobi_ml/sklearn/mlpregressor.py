@@ -98,15 +98,13 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
     def _mip_model(self, **kwargs):
         """Add the prediction constraints to Gurobi."""
         neural_net = self.predictor
-        if (
-            neural_net.activation not in self.act_dict
-            and neural_net.activation != "softplus"
-        ):
-            raise ModelConfigurationError(
-                neural_net,
-                f"No implementation for activation function {neural_net.activation}",
-            )
-        activation = self._get_activation(neural_net.activation)
+
+        # Map sklearn activation names to our internal names
+        activation_name = neural_net.activation
+        if activation_name == "logistic":
+            activation_name = "sigmoid"
+
+        activation = self._get_activation(activation_name)
 
         input_vars = self._input
         output = None

@@ -28,7 +28,7 @@ from gurobipy import GRB
 try:
     from gurobipy import nlfunc
 except ImportError:
-    pass
+    nlfunc = None
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
 from .._grb_version import HAS_FUNCNONLINEAR, HAS_NLFUNC
@@ -263,7 +263,7 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
                     f"Option objective:{objective} only supported with Gurobi >= 11",
                 )
 
-            if HAS_NLFUNC:
+            if HAS_NLFUNC and nlfunc is not None:
                 model.addConstr(
                     output == nlfunc.logistic(learning_rate * tree_vars.sum(axis=1))
                 )
