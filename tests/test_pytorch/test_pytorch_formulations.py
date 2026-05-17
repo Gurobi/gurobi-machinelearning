@@ -7,8 +7,12 @@ from ..fixed_formulation import FixedRegressionModel
 
 
 class TestPytorchModel(FixedRegressionModel):
-    """Test that if we fix the input of the predictor the feasible solution from
-    Gurobi is identical to what the predict function would return."""
+    """Test the default MIP (bigm) ReLU formulation using a pre-saved model.
+
+    Unlike test_pytorch_activations.py (which always uses NonConvex=2), this
+    test uses nonconvex=0 — exercising the LP/MIP embedding path for ReLU
+    that does not require the NonConvex solver parameter.
+    """
 
     basedir = os.path.join(os.path.dirname(__file__), "..", "predictors")
 

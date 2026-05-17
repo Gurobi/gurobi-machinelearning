@@ -13,9 +13,17 @@
 # limitations under the License.
 # ==============================================================================
 
-from .activations import Identity as Identity
-from .activations import ReLU as ReLU
-from .activations import Sigmoid as Sigmoid
-from .activations import SoftPlus as SoftPlus
-from .activations import Tanh as Tanh
-from .neural_net import BaseNNConstr as BaseNNConstr
+"""Centralized Gurobi version capability flags."""
+
+import gurobipy as gp
+
+GUROBI_VERSION = gp.gurobi.version()
+
+# Gurobi 11+: FuncNonlinear general constraint attribute and MVar-compatible indicator constraints
+HAS_FUNCNONLINEAR = GUROBI_VERSION >= (11, 0, 0)
+
+# Gurobi 12+: gurobipy.nlfunc module for smooth nonlinear activations (sigmoid, softplus, …)
+HAS_NLFUNC = GUROBI_VERSION >= (12, 0, 0)
+
+# Gurobi 13+: tanh support via gurobipy.nlfunc
+HAS_TANH = GUROBI_VERSION >= (13, 0, 0)

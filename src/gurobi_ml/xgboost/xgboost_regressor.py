@@ -21,19 +21,17 @@ into a :external+gurobi:py:class:`Model`.
 import json
 import warnings
 
-import gurobipy as gp
 import numpy as np
 import xgboost as xgb
 from gurobipy import GRB
 
 try:
     from gurobipy import nlfunc
-
-    HAS_NLFUNC = True
 except ImportError:
-    HAS_NLFUNC = False
+    nlfunc = None
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
+from .._grb_version import HAS_FUNCNONLINEAR, HAS_NLFUNC
 from ..modeling import AbstractPredictorConstr
 from ..modeling.decision_tree import AbstractTreeEstimator
 
@@ -259,13 +257,13 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         objective = xgb_raw["learner"]["objective"]["name"]
 
         if objective in ("reg:logistic", "binary:logistic"):
-            if gp.gurobi.version()[0] < 11:
+            if not HAS_FUNCNONLINEAR:
                 raise ModelConfigurationError(
                     xgb_regressor,
                     f"Option objective:{objective} only supported with Gurobi >= 11",
                 )
 
-            if HAS_NLFUNC:
+            if HAS_NLFUNC and nlfunc is not None:
                 model.addConstr(
                     output == nlfunc.logistic(learning_rate * tree_vars.sum(axis=1))
                 )

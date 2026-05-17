@@ -15,10 +15,23 @@
 
 """Bases classes for modeling neural network layers."""
 
+from ..._grb_version import HAS_NLFUNC, HAS_TANH
+from ...exceptions import ModelConfigurationError
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
-from .activations import Identity, ReLU
+from .activations import Identity, ReLU, Sigmoid, SoftPlus, Tanh
 from .layers import ActivationLayer, DenseLayer
+
+# Factories for smooth activations that require Gurobi 12+ (instantiated lazily
+# so that importing this module on older Gurobi versions doesn't raise).
+_LAZY_ACTIVATION_FACTORIES = {}
+
+if HAS_NLFUNC:
+    _LAZY_ACTIVATION_FACTORIES["softplus"] = lambda: SoftPlus(beta=1.0)
+    _LAZY_ACTIVATION_FACTORIES["sigmoid"] = Sigmoid
+
+if HAS_TANH:
+    _LAZY_ACTIVATION_FACTORIES["tanh"] = Tanh
 
 
 class BaseNNConstr(AbstractPredictorConstr):
@@ -33,10 +46,30 @@ class BaseNNConstr(AbstractPredictorConstr):
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.predictor = predictor
+
+        # Initialize default activations
+        # Note: softplus is initialized lazily to avoid breaking older Gurobi versions
         self.act_dict = {
             "relu": ReLU(),
             "identity": Identity(),
         }
+
+        # Support convenient relu_formulation parameter to replace ReLU with a smooth approximation
+        relu_formulation = kwargs.get("relu_formulation", "mip")
+        if relu_formulation == "soft":
+            if not HAS_NLFUNC:
+                raise ModelConfigurationError(
+                    self.predictor,
+                    "relu_formulation='soft' requires Gurobi 12.0+ with nlfunc support",
+                )
+            beta = kwargs.get("soft_relu_beta", 1.0)
+            self.act_dict["relu"] = SoftPlus(beta=beta)
+        elif relu_formulation != "mip":
+            raise ValueError(
+                f"relu_formulation must be 'mip' or 'soft', got '{relu_formulation}'"
+            )
+
+        # Allow custom activation_models to override defaults
         try:
             for activation, activation_model in kwargs["activation_models"].items():
                 self.act_dict[activation] = activation_model
@@ -51,6 +84,41 @@ class BaseNNConstr(AbstractPredictorConstr):
             output_vars=output_vars,
             **kwargs,
         )
+
+    def _get_activation(self, activation_name):
+        """Return the activation model for *activation_name*, instantiating it lazily if needed.
+
+        Parameters
+        ----------
+        activation_name : str
+            Name of the activation function (e.g. ``"relu"``, ``"tanh"``).
+
+        Returns
+        -------
+        Activation model object
+        """
+        if activation_name not in self.act_dict:
+            factory = _LAZY_ACTIVATION_FACTORIES.get(activation_name)
+            if factory is None:
+                if activation_name in ("sigmoid", "softplus"):
+                    raise ModelConfigurationError(
+                        self.predictor,
+                        f"Activation '{activation_name}' requires Gurobi 12.0+ with nlfunc support",
+                    )
+                elif activation_name == "tanh":
+                    raise ModelConfigurationError(
+                        self.predictor,
+                        "Activation 'tanh' requires Gurobi 13.0+",
+                    )
+                else:
+                    raise ModelConfigurationError(
+                        self.predictor, f"Unsupported activation '{activation_name}'"
+                    )
+            try:
+                self.act_dict[activation_name] = factory()
+            except RuntimeError as e:
+                raise ModelConfigurationError(self.predictor, str(e)) from e
+        return self.act_dict[activation_name]
 
     def __iter__(self):
         """Iterate over layers of neural network"""

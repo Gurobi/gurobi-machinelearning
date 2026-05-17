@@ -25,6 +25,7 @@ import gurobipy as gp
 import numpy as np
 
 from ..exceptions import ModelConfigurationError
+from .._grb_version import HAS_FUNCNONLINEAR
 from .base_regressions import BaseSKlearnRegressionConstr
 
 
@@ -192,7 +193,7 @@ formulated without requiring the non-linear logistic function."""
         <https://www.gurobi.com/documentation/current/refman/general_constraint_attribu.html>`_
         for the meaning of the attributes.
         """
-        if gp.gurobi.version()[0] < 11:
+        if not HAS_FUNCNONLINEAR:
             message = """
 Gurobi ≥ 11 can deal directly with nonlinear functions with 'FuncNonlinear'.
 Upgrading to version 11 is recommended when using logistic regressions."""
@@ -253,7 +254,7 @@ Upgrading to version 11 is recommended when using logistic regressions."""
             # Workaround for MVars in indicator constraints for v10.
             addGenConstrIndicator = (
                 self.gp_model.addGenConstrIndicator
-                if gp.gurobi.version()[0] >= 11
+                if HAS_FUNCNONLINEAR
                 else self._addGenConstrIndicatorMvarV10
             )
 
