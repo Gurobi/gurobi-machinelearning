@@ -98,7 +98,6 @@ class BaseNNConstr(AbstractPredictorConstr):
             **kwargs,
         )
 
-
     def _get_activation(self, activation_name):
         """Return the activation model for *activation_name*, instantiating it lazily if needed.
 

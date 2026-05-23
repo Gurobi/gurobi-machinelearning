@@ -352,7 +352,6 @@ class ONNXNetworkConstr(BaseNNConstr):
         if self._output is None:
             self._output = layer.output
 
-
     def get_error(self, eps=None):
         if self._has_solution:
             import onnxruntime as ort

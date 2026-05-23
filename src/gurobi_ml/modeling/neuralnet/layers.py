@@ -51,7 +51,6 @@ class AbstractNNLayer(AbstractPredictorConstr):
             return self
         return super()._build_submodel(gp_model, *args, **kwargs)
 
-
     def get_error(self, eps=None):
         # We can't compute externally the error of a layer
         raise NotImplementedError("get_error is not supported for individual NN layers")
@@ -106,7 +105,8 @@ class ActivationLayer(AbstractNNLayer):
                 shape = self._output.shape
                 for index in np.ndindex(shape):
                     self.gp_model.addConstr(
-                        self._output[index] == self.activation._nl_expr(self._input[index]),
+                        self._output[index]
+                        == self.activation._nl_expr(self._input[index]),
                         name=self._indexed_name(index, "full_net"),
                     )
             else:
@@ -127,7 +127,6 @@ class ActivationLayer(AbstractNNLayer):
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
         self.gp_model.update()
-
 
 
 class DenseLayer(AbstractNNLayer):
@@ -175,7 +174,8 @@ class DenseLayer(AbstractNNLayer):
                 shape = self._output.shape
                 for index in np.ndindex(shape):
                     self.gp_model.addConstr(
-                        self._output[index] == self.activation._nl_expr(linear_expr[index]),
+                        self._output[index]
+                        == self.activation._nl_expr(linear_expr[index]),
                         name=self._indexed_name(index, "full_net"),
                     )
             else:
@@ -196,7 +196,6 @@ class DenseLayer(AbstractNNLayer):
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
         self.gp_model.update()
-
 
     def print_stats(self, abbrev=False, file=None):
         """Print statistics about submodel created.

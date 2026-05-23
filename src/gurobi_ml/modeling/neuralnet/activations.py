@@ -59,7 +59,6 @@ class Identity:
         layer.gp_model.addConstr(output == layer.input @ layer.coefs + layer.intercept)
 
 
-
 class ReLU:
     """Class to apply the ReLU activation on a neural network layer.
 

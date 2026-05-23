@@ -163,7 +163,6 @@ class KerasNetworkConstr(BaseNNConstr):
         if self._output is None:
             self._output = layer.output
 
-
     def get_error(self, eps=None):
         if self._has_solution:
             prediction = self.predictor(self.input_values, training=False)

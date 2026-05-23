@@ -17,7 +17,6 @@
 :external+gurobi:py:class:`Model`.
 """
 
-
 from ..exceptions import ModelConfigurationError
 from ..modeling.neuralnet import BaseNNConstr
 from .skgetter import SKgetter
@@ -132,4 +131,3 @@ class MLPRegressorConstr(SKgetter, BaseNNConstr):
         assert (
             self._output is not None
         )  # Should never happen since sklearn object defines n_outputs_
-
