@@ -112,6 +112,7 @@ def add_xgboost_regressor_constr(
     output_vars=None,
     epsilon=0.0,
     formulation="leaf",
+    safety_floor=0.0,
     **kwargs,
 ):
     """Formulate xgboost_regressor into gp_model.
@@ -138,7 +139,6 @@ def add_xgboost_regressor_constr(
     safety_floor : float, optional
         Thresholds with absolute value smaller than this will be clamped
         to this value to avoid numerical issues with Gurobi's tolerance.
-        Only used if formulation is "misic".
 
     Returns
     -------
@@ -166,6 +166,7 @@ def add_xgboost_regressor_constr(
         output_vars,
         epsilon=epsilon,
         formulation=formulation,
+        safety_floor=safety_floor,
         **kwargs,
     )
 
