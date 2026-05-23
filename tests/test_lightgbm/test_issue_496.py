@@ -37,52 +37,15 @@ class TestIssue496(unittest.TestCase):
 
     def test_numerical_issue_leaf_formulation(self):
         """Verify that the leaf formulation can exhibit numerical discrepancies."""
-        env = gp.Env()
-        m = gp.Model(env=env)
-        m.Params.OutputFlag = 0
-        x_vars = m.addMVar(shape=5, lb=-10.0, ub=10.0, name="x")
-        y_var = m.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, name="score")
-        add_lgbm_booster_constr(m, self.model, x_vars, y_var, formulation="leaf")
-        m.update()
+        with gp.Env(params={"OutputFlag": 0}) as env, gp.Model(env=env) as m:
+            x_vars = m.addMVar(shape=5, lb=-10.0, ub=10.0, name="x")
+            y_var = m.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, name="score")
+            add_lgbm_booster_constr(m, self.model, x_vars, y_var, formulation="leaf")
+            m.update()
 
-        # The threshold is likely around 1e-35. x = 1e-10 should be > threshold.
-        # But Gurobi's FeasibilityTol (default 1e-6) treats 1e-10 as <= 1e-35.
-        x0 = 1e-10
-        x_test = np.array([x0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
-        lgbm_score = float(self.model.predict(x_test.reshape(1, -1), raw_score=True)[0])
-
-        for j in range(5):
-            x_vars[j].LB = float(x_test[j])
-            x_vars[j].UB = float(x_test[j])
-
-        m.optimize()
-        if m.Status == GRB.OPTIMAL:
-            mip_score = float(y_var.X)
-            # We expect a mismatch here with the standard leaf formulation
-            # as reported in the issue.
-            diff = abs(lgbm_score - mip_score)
-            if diff > 1e-5:
-                print(f"Confirmed numerical issue in leaf formulation: diff={diff:.2e}")
-            else:
-                # If we don't see it here, it might depend on the specific threshold chosen by LightGBM
-                pass
-
-    def test_leaf_formulation_fix(self):
-        """Verify that the leaf formulation with safety_floor fixes the numerical issue."""
-        env = gp.Env()
-        m = gp.Model(env=env)
-        m.Params.OutputFlag = 0
-        x_vars = m.addMVar(shape=5, lb=-10.0, ub=10.0, name="x")
-        y_var = m.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, name="score")
-
-        # Use leaf formulation with safety_floor to avoid the issue
-        add_lgbm_booster_constr(
-            m, self.model, x_vars, y_var, formulation="leaf", safety_floor=1e-5
-        )
-        m.update()
-
-        # Test points: 0.0 should be "zero", 1e-3 should be "non-zero" (well above safety_floor=1e-5)
-        for x0 in [0.0, 1e-3, 1.0, 5.0]:
+            # The threshold is likely around 1e-35. x = 1e-10 should be > threshold.
+            # But Gurobi's FeasibilityTol (default 1e-6) treats 1e-10 as <= 1e-35.
+            x0 = 1e-10
             x_test = np.array([x0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
             lgbm_score = float(
                 self.model.predict(x_test.reshape(1, -1), raw_score=True)[0]
@@ -93,12 +56,44 @@ class TestIssue496(unittest.TestCase):
                 x_vars[j].UB = float(x_test[j])
 
             m.optimize()
-            self.assertEqual(m.Status, GRB.OPTIMAL)
-            mip_score = float(y_var.X)
+            if m.Status == GRB.OPTIMAL:
+                mip_score = float(y_var.X)
+                diff = abs(lgbm_score - mip_score)
+                if diff > 1e-5:
+                    print(
+                        f"Confirmed numerical issue in leaf formulation: diff={diff:.2e}"
+                    )
 
-            self.assertAlmostEqual(
-                lgbm_score,
-                mip_score,
-                places=5,
-                msg=f"Mismatch at x0={x0}: lgbm={lgbm_score}, mip={mip_score}",
+    def test_leaf_formulation_fix(self):
+        """Verify that the leaf formulation with safety_floor fixes the numerical issue."""
+        with gp.Env(params={"OutputFlag": 0}) as env, gp.Model(env=env) as m:
+            x_vars = m.addMVar(shape=5, lb=-10.0, ub=10.0, name="x")
+            y_var = m.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, name="score")
+
+            # Use leaf formulation with safety_floor to avoid the issue
+            add_lgbm_booster_constr(
+                m, self.model, x_vars, y_var, formulation="leaf", safety_floor=1e-5
             )
+            m.update()
+
+            # Test points: 0.0 should be "zero", 1e-3 should be "non-zero" (well above safety_floor=1e-5)
+            for x0 in [0.0, 1e-3, 1.0, 5.0]:
+                x_test = np.array([x0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+                lgbm_score = float(
+                    self.model.predict(x_test.reshape(1, -1), raw_score=True)[0]
+                )
+
+                for j in range(5):
+                    x_vars[j].LB = float(x_test[j])
+                    x_vars[j].UB = float(x_test[j])
+
+                m.optimize()
+                self.assertEqual(m.Status, GRB.OPTIMAL)
+                mip_score = float(y_var.X)
+
+                self.assertAlmostEqual(
+                    lgbm_score,
+                    mip_score,
+                    places=5,
+                    msg=f"Mismatch at x0={x0}: lgbm={lgbm_score}, mip={mip_score}",
+                )

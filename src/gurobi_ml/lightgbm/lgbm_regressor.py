@@ -34,7 +34,6 @@ def add_lgbmregressor_constr(
     input_vars,
     output_vars=None,
     epsilon=0.0,
-    formulation="leaf",
     safety_floor=0.0,
     **kwargs,
 ):
@@ -89,7 +88,6 @@ def add_lgbmregressor_constr(
         input_vars,
         output_vars,
         epsilon=epsilon,
-        formulation=formulation,
         safety_floor=safety_floor,
         **kwargs,
     )
@@ -101,14 +99,13 @@ def add_lgbm_booster_constr(
     input_vars,
     output_vars=None,
     epsilon=0.0,
-    formulation="leaf",
     safety_floor=0.0,
     **kwargs,
 ):
     """Formulate lgbm_booster into gp_model.
 
     The formulation predicts the values of output_vars using input_vars
-    according to lgbm_regressor. See our :ref:`User's Guide
+    according to lgbm_booster. See our :ref:`User's Guide
     <Gradient Boosting Regression>` for details on the mip formulation used.
 
     Note that only "gbtree" regressors are supported at this point.
@@ -155,7 +152,6 @@ def add_lgbm_booster_constr(
         input_vars,
         output_vars,
         epsilon=epsilon,
-        formulation=formulation,
         safety_floor=safety_floor,
         **kwargs,
     )
@@ -175,7 +171,6 @@ class LGBMConstr(AbstractPredictorConstr):
         input_vars,
         output_vars,
         epsilon=0.0,
-        formulation="leaf",
         safety_floor=0.0,
         **kwargs,
     ):
@@ -194,13 +189,15 @@ class LGBMConstr(AbstractPredictorConstr):
         epsilon : float, optional
             Small value used to impose strict inequalities for splitting nodes in
             MIP formulations.
+        safety_floor : float, optional
+            Thresholds with absolute value smaller than this will be clamped
+            to this value to avoid numerical issues with Gurobi's tolerance.
         """
         self._output_shape = 1
         self.estimators_ = []
         self.lgbm_regressor = lgbm_regressor
         self._default_name = "lgbm_reg"
         self.epsilon = epsilon
-        self.formulation = formulation
         self.safety_floor = safety_floor
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
@@ -333,9 +330,6 @@ class LGBMConstr(AbstractPredictorConstr):
 
         trees_raw = lgbm_raw["tree_info"]
 
-        if self._no_debug:
-            kwargs["no_record"] = True
-
         n_estimators = len(trees_raw)
 
         estimators = []
@@ -363,7 +357,6 @@ class LGBMConstr(AbstractPredictorConstr):
                     self.epsilon,
                     timer,
                     safety_floor=self.safety_floor,
-                    formulation=self.formulation,
                     **kwargs,
                 )
             )

@@ -87,10 +87,10 @@ def _compute_leafs_bounds(gp_model, tree, feature_is_fixed, epsilon, safety_floo
     return (node_lb, node_ub)
 
 
-def _leaf_formulation(
+def _leafs_formulation(
     gp_model, _input, output, tree, epsilon, _name_var, verbose, timer, safety_floor=0.0
 ):
-    """Formulate decision tree using 'leaf' formulation
+    """Formulate decision tree using 'leafs' formulation
 
     We have one variable per leaf of the tree and a series of indicator to
     define when that leaf is reached.
@@ -303,14 +303,14 @@ class AbstractTreeEstimator(AbstractPredictorConstr):
         epsilon,
         timer=None,
         safety_floor=0.0,
-        formulation="leafs",
         **kwargs,
     ):
         self._default_name = "tree"
         self._tree = tree
         self._epsilon = epsilon
         self._safety_floor = safety_floor
-        self._formulation = formulation
+
+        self._formulation = kwargs.get("formulation", "leaf")
         if timer is None:
             self._timer = AbstractPredictorConstr._ModelingTimer()
         else:
@@ -321,7 +321,7 @@ class AbstractTreeEstimator(AbstractPredictorConstr):
 
     def _mip_model(self, **kwargs):
         if self._formulation in ("leafs", "leaf"):
-            _leaf_formulation(
+            _leafs_formulation(
                 self.gp_model,
                 self.input,
                 self.output,
