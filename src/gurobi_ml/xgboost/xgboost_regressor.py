@@ -44,7 +44,6 @@ def add_xgbregressor_constr(
     input_vars,
     output_vars=None,
     epsilon=0.0,
-    formulation="leaf",
     safety_floor=0.0,
     **kwargs,
 ):
@@ -99,7 +98,6 @@ def add_xgbregressor_constr(
         input_vars,
         output_vars,
         epsilon=epsilon,
-        formulation=formulation,
         safety_floor=safety_floor,
         **kwargs,
     )
@@ -111,7 +109,6 @@ def add_xgboost_regressor_constr(
     input_vars,
     output_vars=None,
     epsilon=0.0,
-    formulation="leaf",
     safety_floor=0.0,
     **kwargs,
 ):
@@ -165,7 +162,6 @@ def add_xgboost_regressor_constr(
         input_vars,
         output_vars,
         epsilon=epsilon,
-        formulation=formulation,
         safety_floor=safety_floor,
         **kwargs,
     )
@@ -185,7 +181,6 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         input_vars,
         output_vars,
         epsilon=0.0,
-        formulation="leaf",
         safety_floor=0.0,
         **kwargs,
     ):
@@ -204,13 +199,15 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         epsilon : float, optional
             Small value used to impose strict inequalities for splitting nodes in
             MIP formulations.
+        safety_floor : float, optional
+            Thresholds with absolute value smaller than this will be clamped
+            to this value to avoid numerical issues with Gurobi's tolerance.
         """
         self._output_shape = 1
         self.estimators_ = []
         self.xgb_regressor = xgb_regressor
         self._default_name = "xgb_reg"
         self.epsilon = epsilon
-        self.formulation = formulation
         self.safety_floor = safety_floor
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
@@ -250,8 +247,6 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         n_estimators = len(trees)
 
         estimators = []
-        if self._no_debug:
-            kwargs["no_record"] = True
 
         tree_vars = model.addMVar(
             (nex, n_estimators, 1),
@@ -286,7 +281,6 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
                     self.epsilon,
                     timer,
                     safety_floor=self.safety_floor,
-                    formulation=self.formulation,
                     **kwargs,
                 )
             )

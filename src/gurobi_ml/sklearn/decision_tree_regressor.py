@@ -118,10 +118,13 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
             MIP formulations.
         formulation : {'leafs', 'paths'}, default='leafs'
             Formulation to use for decision tree. 'paths' is deprecated.
+        safety_floor : float, optional
+            Thresholds with absolute value smaller than this will be clamped
+            to this value to avoid numerical issues with Gurobi's tolerance.
         """
         self._default_name = "tree_reg"
 
-        formulations = ("leafs", "leaf", "paths")
+        formulations = ("leafs", "paths")
         if formulation not in formulations:
             raise ValueError(
                 f"Wrong value for formulation should be one of {formulations}."
