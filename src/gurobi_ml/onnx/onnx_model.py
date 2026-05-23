@@ -323,6 +323,7 @@ class ONNXNetworkConstr(BaseNNConstr):
     def _mip_model(self, **kwargs):
         _input = self._input
         output = None
+
         # Build Gurobi layers according to parsed spec
         for i, spec in enumerate(self._layers_spec):
             if i == len(self._layers_spec) - 1:
@@ -350,6 +351,7 @@ class ONNXNetworkConstr(BaseNNConstr):
                 _input = layer.output
         if self._output is None:
             self._output = layer.output
+
 
     def get_error(self, eps=None):
         if self._has_solution:

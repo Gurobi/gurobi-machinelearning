@@ -43,6 +43,10 @@ class Identity:
     def __init__(self):
         pass
 
+    def _nl_expr(self, x):
+        """Return the nonlinear nlfunc expression for scalar pre-activation ``x``."""
+        return x
+
     def mip_model(self, layer):
         """MIP model for identity activation on a layer.
 
@@ -53,6 +57,7 @@ class Identity:
         """
         output = layer.output
         layer.gp_model.addConstr(output == layer.input @ layer.coefs + layer.intercept)
+
 
 
 class ReLU:

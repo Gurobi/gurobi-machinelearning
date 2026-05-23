@@ -77,6 +77,19 @@ class BaseNNConstr(AbstractPredictorConstr):
             pass
         self._layers = []
 
+        self.layer_decomposition = kwargs.pop("layer_decomposition", True)
+
+        if not hasattr(self, "_output_shape"):
+            # Check if self has _layers_spec (ONNX)
+            if hasattr(self, "_layers_spec") and self._layers_spec:
+                self._output_shape = self._layers_spec[-1].b.shape[0]
+            # Check if self.predictor is a PyTorch Sequential
+            elif hasattr(predictor, "__iter__"):
+                for step in reversed(predictor):
+                    if hasattr(step, "out_features"):
+                        self._output_shape = step.out_features
+                        break
+
         self._default_name = _default_name(predictor)
         super().__init__(
             gp_model=gp_model,
@@ -84,6 +97,7 @@ class BaseNNConstr(AbstractPredictorConstr):
             output_vars=output_vars,
             **kwargs,
         )
+
 
     def _get_activation(self, activation_name):
         """Return the activation model for *activation_name*, instantiating it lazily if needed.
@@ -161,6 +175,7 @@ class BaseNNConstr(AbstractPredictorConstr):
             layer_coefs,
             layer_intercept,
             activation,
+            layer_decomposition=self.layer_decomposition,
             **kwargs,
         )
         self._layers.append(layer)
@@ -182,7 +197,12 @@ class BaseNNConstr(AbstractPredictorConstr):
             Output variables
         """
         layer = ActivationLayer(
-            self.gp_model, activation_vars, input_vars, activation, **kwargs
+            self.gp_model,
+            activation_vars,
+            input_vars,
+            activation,
+            layer_decomposition=self.layer_decomposition,
+            **kwargs,
         )
         self._layers.append(layer)
         return layer
