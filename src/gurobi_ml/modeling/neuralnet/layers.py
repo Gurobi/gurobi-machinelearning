@@ -18,9 +18,11 @@
 import io
 
 import gurobipy as gp
+import numpy as np
 
 from gurobi_ml.modeling.neuralnet.activations import Identity
 
+from ...exceptions import ModelConfigurationError
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
 
@@ -37,9 +39,17 @@ class AbstractNNLayer(AbstractPredictorConstr):
         **kwargs,
     ):
         self.activation = activation_function
+        self.layer_decomposition = kwargs.get("layer_decomposition", True)
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )
+
+    def _build_submodel(self, gp_model, *args, **kwargs):
+        self.layer_decomposition = kwargs.get("layer_decomposition", True)
+        if not self.layer_decomposition:
+            self._mip_model(**kwargs)
+            return self
+        return super()._build_submodel(gp_model, *args, **kwargs)
 
     def get_error(self, eps=None):
         # We can't compute externally the error of a layer
@@ -85,6 +95,28 @@ class ActivationLayer(AbstractNNLayer):
 
     def _mip_model(self, **kwargs):
         """Add the layer to model."""
+        if not self.layer_decomposition:
+            if not hasattr(self.activation, "_nl_expr"):
+                raise ModelConfigurationError(
+                    self.activation,
+                    f"layer_decomposition=False is not supported with activation '{type(self.activation).__name__}'.",
+                )
+            if self._output is not None:
+                shape = self._output.shape
+                for index in np.ndindex(shape):
+                    self.gp_model.addConstr(
+                        self._output[index]
+                        == self.activation._nl_expr(self._input[index]),
+                        name=self._indexed_name(index, "full_net"),
+                    )
+            else:
+                shape = self._input.shape
+                next_expr = np.empty(shape, dtype=object)
+                for index in np.ndindex(shape):
+                    next_expr[index] = self.activation._nl_expr(self._input[index])
+                self._output = next_expr
+            return
+
         model = self.gp_model
         model.update()
         if "activation" in kwargs:
@@ -131,6 +163,29 @@ class DenseLayer(AbstractNNLayer):
 
     def _mip_model(self, **kwargs):
         """Add the layer to model."""
+        if not self.layer_decomposition:
+            if not hasattr(self.activation, "_nl_expr"):
+                raise ModelConfigurationError(
+                    self.activation,
+                    f"layer_decomposition=False is not supported with activation '{type(self.activation).__name__}'.",
+                )
+            linear_expr = self._input @ self.coefs + self.intercept
+            if self._output is not None:
+                shape = self._output.shape
+                for index in np.ndindex(shape):
+                    self.gp_model.addConstr(
+                        self._output[index]
+                        == self.activation._nl_expr(linear_expr[index]),
+                        name=self._indexed_name(index, "full_net"),
+                    )
+            else:
+                shape = linear_expr.shape
+                next_expr = np.empty(shape, dtype=object)
+                for index in np.ndindex(shape):
+                    next_expr[index] = self.activation._nl_expr(linear_expr[index])
+                self._output = next_expr
+            return
+
         model = self.gp_model
         model.update()
         if "activation" in kwargs:

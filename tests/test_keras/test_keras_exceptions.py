@@ -43,15 +43,14 @@ class TestUnsuportedKeras(unittest.TestCase):
             add_predictor_constr(m, nn, x)
 
     def test_keras_bad_activation(self):
-        """Do a dense network with a bad activation"""
-        # Make sure images have shape (28, 28, 1)
+        """Dense network with a genuinely unsupported activation (elu) should raise."""
         self.x_train = np.reshape(self.x_train, (-1, 28 * 28))
         self.x_test = np.reshape(self.x_test, (-1, 28 * 28))
 
         nn = keras.models.Sequential(
             [
                 keras.layers.InputLayer((28 * 28,)),
-                keras.layers.Dense(50, activation="sigmoid"),
+                keras.layers.Dense(50, activation="elu"),
                 keras.layers.Dense(50, activation="relu"),
                 keras.layers.Dense(10),
             ]

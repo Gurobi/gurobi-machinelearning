@@ -18,8 +18,8 @@
 import numbers
 import warnings
 
-import numpy as np
 import keras
+import numpy as np
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr
@@ -58,8 +58,9 @@ def add_keras_constr(gp_model, keras_model, input_vars, output_vars=None, **kwar
     --------
 
       Only `Dense <https://keras.io/api/layers/core_layers/dense/>`_ (possibly
-      with `relu` activation), and `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ with
-      default settings are supported.
+      with `relu`, `linear`, `sigmoid`, `tanh`, or `softplus` activation) and
+      `ReLU <https://keras.io/api/layers/activation_layers/relu/>`_ with default settings
+      are supported.
 
     Notes
     -----
@@ -83,7 +84,7 @@ class KerasNetworkConstr(BaseNNConstr):
             if isinstance(step, keras.layers.Dense):
                 config = step.get_config()
                 activation = config["activation"]
-                if activation not in ("relu", "linear"):
+                if activation not in ("relu", "linear", "softplus", "sigmoid", "tanh"):
                     raise ModelConfigurationError(
                         predictor, f"Unsupported activation {activation}"
                     )
@@ -136,7 +137,11 @@ class KerasNetworkConstr(BaseNNConstr):
                 pass
             elif isinstance(step, keras.layers.ReLU):
                 layer = self._add_activation_layer(
-                    _input, self.act_dict["relu"], output, name=f"relu{i}", **kwargs
+                    _input,
+                    self._get_activation("relu"),
+                    output,
+                    name=f"relu{i}",
+                    **kwargs,
                 )
                 _input = layer.output
             else:
@@ -149,7 +154,7 @@ class KerasNetworkConstr(BaseNNConstr):
                     _input,
                     weights,
                     bias,
-                    self.act_dict[activation],
+                    self._get_activation(activation),
                     output,
                     name=f"dense{i}",
                     **kwargs,

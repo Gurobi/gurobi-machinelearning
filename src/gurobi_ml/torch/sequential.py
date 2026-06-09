@@ -17,13 +17,25 @@
 :external+gurobi:py:class:`Model`.
 """
 
+import warnings
+
 import numpy as np
 import torch
-import warnings
 from torch import nn
 
+from .._grb_version import HAS_TANH
 from ..exceptions import ModelConfigurationError, NoSolutionError
-from ..modeling.neuralnet import BaseNNConstr
+from ..modeling.neuralnet import BaseNNConstr, SoftPlus
+
+# Map nn.Module activation types to their activation-registry name.
+# nn.Softplus is handled separately because it carries parameters (beta, threshold).
+_NN_ACTIVATION_MAP = {
+    nn.ReLU: "relu",
+    nn.Sigmoid: "sigmoid",
+}
+
+if HAS_TANH:
+    _NN_ACTIVATION_MAP[nn.Tanh] = "tanh"
 
 
 def add_sequential_constr(
@@ -59,8 +71,11 @@ def add_sequential_constr(
 
     Warnings
     --------
-    Only :external+torch:py:class:`torch.nn.Linear` layers and
-    :external+torch:py:class:`torch.nn.ReLU` layers are supported.
+    Only :external+torch:py:class:`torch.nn.Linear` layers,
+    :external+torch:py:class:`torch.nn.ReLU`,
+    :external+torch:py:class:`torch.nn.Sigmoid` (Gurobi 12.0+),
+    :external+torch:py:class:`torch.nn.Tanh` (Gurobi 13.0+), and
+    :external+torch:py:class:`torch.nn.Softplus` (Gurobi 12.0+) layers are supported.
 
     Notes
     -----
@@ -78,12 +93,9 @@ class SequentialConstr(BaseNNConstr):
     """
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
+        _supported = (*_NN_ACTIVATION_MAP, nn.Softplus, nn.Linear)
         for step in predictor:
-            if isinstance(step, nn.ReLU):
-                pass
-            elif isinstance(step, nn.Linear):
-                pass
-            else:
+            if not isinstance(step, _supported):
                 raise ModelConfigurationError(
                     predictor, f"Unsupported layer {type(step).__name__}"
                 )
@@ -98,9 +110,31 @@ class SequentialConstr(BaseNNConstr):
         for i, step in enumerate(network):
             if i == num_layers - 1:
                 output = self._output
-            if isinstance(step, nn.ReLU):
+
+            act_name = _NN_ACTIVATION_MAP.get(type(step))
+            if act_name is not None:
                 layer = self._add_activation_layer(
-                    _input, self.act_dict["relu"], output, name=f"relu_{i}", **kwargs
+                    _input,
+                    self._get_activation(act_name),
+                    output,
+                    name=f"{act_name}_{i}",
+                    **kwargs,
+                )
+                _input = layer.output
+            elif isinstance(step, nn.Softplus):
+                # Softplus carries parameters; validate threshold before constructing.
+                if step.threshold != 20:
+                    raise ModelConfigurationError(
+                        self.predictor,
+                        f"PyTorch Softplus with non-default threshold ({step.threshold}) is not supported. "
+                        f"Only threshold=20 (default) is supported.",
+                    )
+                layer = self._add_activation_layer(
+                    _input,
+                    SoftPlus(beta=step.beta),
+                    output,
+                    name=f"softplus_{i}",
+                    **kwargs,
                 )
                 _input = layer.output
             elif isinstance(step, nn.Linear):
@@ -119,7 +153,7 @@ class SequentialConstr(BaseNNConstr):
                     _input,
                     layer_weight,
                     layer_bias,
-                    self.act_dict["identity"],
+                    self._get_activation("identity"),
                     output,
                     name=f"linear_{i}",
                     **kwargs,

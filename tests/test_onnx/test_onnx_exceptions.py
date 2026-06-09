@@ -11,10 +11,10 @@ from gurobi_ml.exceptions import ModelConfigurationError
 
 class TestUnsupportedONNX(unittest.TestCase):
     def test_unsupported_op(self):
-        # Build a simple graph with an unsupported op (Sigmoid)
+        # Build a simple graph with an op we don't support (Sin has no dense layer)
         X = helper.make_tensor_value_info("X", TensorProto.FLOAT, [None, 4])
         Y = helper.make_tensor_value_info("Y", TensorProto.FLOAT, [None, 4])
-        node = helper.make_node("Sigmoid", inputs=["X"], outputs=["Y"], name="sigmoid")
+        node = helper.make_node("Sin", inputs=["X"], outputs=["Y"], name="sin")
         graph = helper.make_graph(
             nodes=[node], name="BadGraph", inputs=[X], outputs=[Y]
         )

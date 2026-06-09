@@ -16,9 +16,8 @@
 """Module for formulating an ONNX MLP model into a :external+gurobi:py:class:`Model`.
 
 Supported ONNX models are simple feed-forward networks composed of `Gemm`
-nodes (dense layers) or `MatMul`+`Add` sequences, along with `Relu` activations.
-This mirrors the Keras and PyTorch integrations, which currently handle
-Dense/Linear + ReLU networks.
+nodes (dense layers) or `MatMul`+`Add` sequences, along with `Relu`,
+`Softplus`, `Sigmoid`, and `Tanh` activations.
 """
 
 from __future__ import annotations
@@ -31,6 +30,14 @@ from onnx import numpy_helper
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr
+
+# Maps ONNX op names to activation registry names used by BaseNNConstr.
+_ONNX_ACTIVATION_OPS = {
+    "Relu": "relu",
+    "Softplus": "softplus",
+    "Sigmoid": "sigmoid",
+    "Tanh": "tanh",
+}
 
 
 def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs):
@@ -45,7 +52,7 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
         Target Gurobi model where the predictor submodel is added.
     onnx_model : onnx.ModelProto
         ONNX model, expected to represent a sequential MLP with `Gemm` nodes
-        (or `MatMul`+`Add` sequences) and `Relu` activations.
+        (or `MatMul`+`Add` sequences) and `Relu`, `Sigmoid`, `Tanh`, or `Softplus` activations.
     input_vars : mvar_array_like
         Decision variables used as input for the model in `gp_model`.
     output_vars : mvar_array_like, optional
@@ -53,9 +60,9 @@ def add_onnx_constr(gp_model, onnx_model, input_vars, output_vars=None, **kwargs
 
     Warnings
     --------
-    Only networks composed of `Gemm` (or `MatMul`+`Add`) and `Relu` nodes are
-    supported. `Gemm` nodes must use default `alpha=1`, `beta=1`. Attribute
-    `transB` is supported.
+    Only networks composed of `Gemm` (or `MatMul`+`Add`), `Relu`, and `Softplus`
+    nodes are supported. `Gemm` nodes must use default `alpha=1`, `beta=1`.
+    Attribute `transB` is supported.
     """
     return ONNXNetworkConstr(gp_model, onnx_model, input_vars, output_vars, **kwargs)
 
@@ -66,7 +73,7 @@ class _ONNXLayer:
     def __init__(self, W: np.ndarray, b: np.ndarray, activation: str = "identity"):
         self.W = W  # shape (in, out)
         self.b = b  # shape (out,)
-        self.activation = activation  # "relu" or "identity"
+        self.activation = activation  # "relu", "softplus", or "identity"
 
 
 class ONNXNetworkConstr(BaseNNConstr):
@@ -288,24 +295,14 @@ class ONNXNetworkConstr(BaseNNConstr):
                         f"(MatMul+Add pattern) are allowed.",
                     )
 
-            elif op == "Relu":
-                # Next linear layer will use relu activation; if we have no
-                # preceding linear layer, we model it as a pure activation layer
-                # via _add_activation_layer during _mip_model.
-                # To keep the implementation simple and in line with Keras/Torch,
-                # we treat Relu as activation for the preceding affine transform
-                # when possible; otherwise mark pending_activation to apply to
-                # the following Dense layer.
+            elif op in _ONNX_ACTIVATION_OPS:
+                act_name = _ONNX_ACTIVATION_OPS[op]
                 if layers and layers[-1].activation == "identity":
-                    layers[-1].activation = "relu"
+                    layers[-1].activation = act_name
                 else:
-                    # No prior dense, remember to insert a standalone activation
-                    # at modeling time by setting a pending flag.
-                    # Here we store a marker layer with zero-sized W to signal
-                    # a standalone activation to the modeler.
                     layers.append(
                         _ONNXLayer(
-                            W=np.zeros((0, 0)), b=np.zeros((0,)), activation="relu"
+                            W=np.zeros((0, 0)), b=np.zeros((0,)), activation=act_name
                         )
                     )
                 processed_indices.add(node_idx)
@@ -326,6 +323,7 @@ class ONNXNetworkConstr(BaseNNConstr):
     def _mip_model(self, **kwargs):
         _input = self._input
         output = None
+
         # Build Gurobi layers according to parsed spec
         for i, spec in enumerate(self._layers_spec):
             if i == len(self._layers_spec) - 1:
@@ -334,9 +332,9 @@ class ONNXNetworkConstr(BaseNNConstr):
                 # Standalone activation layer
                 layer = self._add_activation_layer(
                     _input,
-                    self.act_dict[spec.activation],
+                    self._get_activation(spec.activation),
                     output,
-                    name=f"relu{i}",
+                    name=f"{spec.activation}{i}",
                     **kwargs,
                 )
                 _input = layer.output
@@ -345,9 +343,7 @@ class ONNXNetworkConstr(BaseNNConstr):
                     _input,
                     spec.W,
                     spec.b,
-                    self.act_dict[
-                        spec.activation if spec.activation != "identity" else "identity"
-                    ],
+                    self._get_activation(spec.activation),
                     output,
                     name=f"dense{i}",
                     **kwargs,
