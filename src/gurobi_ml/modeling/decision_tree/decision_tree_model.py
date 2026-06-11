@@ -110,6 +110,12 @@ def _leaf_formulation(
     active_reachability = reachability_matrix[:, any_reachable]  # (nex, n_active)
     n_active = len(active_leaf_nodes)
 
+    if n_active == 0:
+        raise ValueError(
+            "No reachable leaf nodes given the current input variable bounds; "
+            "the decision tree constraint would be infeasible."
+        )
+
     leafs_vars = gp_model.addMVar(
         (nex, n_active), vtype=GRB.BINARY, name=_name_var("leafs")
     )
