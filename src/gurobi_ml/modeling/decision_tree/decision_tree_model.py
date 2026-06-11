@@ -86,12 +86,8 @@ def _leaf_formulation(
 
     # Collect leaf nodes
     leafs = tree["children_left"] < 0
-    leafs_vars = gp_model.addMVar(
-        (nex, sum(leafs)), vtype=GRB.BINARY, name=_name_var("leafs")
-    )
+    leaf_nodes = leafs.nonzero()[0]
 
-    if verbose:
-        timer.timing(f"Added {nex * sum(leafs)} leafs vars")
     # Get fixed features we don't want to apply the epsilon for them
     feature_is_fixed = (_input.lb == _input.ub).all(axis=0)
 
@@ -99,10 +95,30 @@ def _leaf_formulation(
     input_ub = _input.getAttr(GRB.Attr.UB)
     input_lb = _input.getAttr(GRB.Attr.LB)
 
-    for i, node in enumerate(leafs.nonzero()[0]):
-        reachable = (input_ub >= node_lb[:, node]).all(axis=1) & (
-            input_lb <= node_ub[:, node]
-        ).all(axis=1)
+    # Vectorised reachability: compute (nex, n_leaves) in one go.
+    # Broadcasting: (nex, n_features, 1) vs (1, n_features, n_leaves).
+    leaf_lb = node_lb[:, leaf_nodes]  # (n_features, n_leaves)
+    leaf_ub = node_ub[:, leaf_nodes]  # (n_features, n_leaves)
+    reachability_matrix = (
+        (input_ub[:, :, np.newaxis] >= leaf_lb[np.newaxis, :, :])
+        & (input_lb[:, :, np.newaxis] <= leaf_ub[np.newaxis, :, :])
+    ).all(axis=1)  # (nex, n_leaves)
+
+    # Drop leaves that no example can reach — they contribute nothing.
+    any_reachable = reachability_matrix.any(axis=0)  # (n_leaves,)
+    active_leaf_nodes = leaf_nodes[any_reachable]
+    active_reachability = reachability_matrix[:, any_reachable]  # (nex, n_active)
+    n_active = len(active_leaf_nodes)
+
+    leafs_vars = gp_model.addMVar(
+        (nex, n_active), vtype=GRB.BINARY, name=_name_var("leafs")
+    )
+
+    if verbose:
+        timer.timing(f"Added {nex * n_active} leafs vars")
+
+    for i, node in enumerate(active_leaf_nodes):
+        reachable = active_reachability[:, i]
         # Non reachable nodes
         leafs_vars[~reachable, i].setAttr(GRB.Attr.UB, 0.0)
         # Leaf node:
@@ -143,7 +159,8 @@ def _leaf_formulation(
     # We should attain 1 leaf
     gp_model.addConstr(leafs_vars.sum(axis=1) == 1)
 
-    values = [tree["value"][i] for i in leafs.nonzero()[0]]
+    # Use only active leaves for bounds — tighter than using all leaves.
+    values = [tree["value"][i] for i in active_leaf_nodes]
 
     gp_model.addConstr(output <= np.max(values, axis=0))
     gp_model.addConstr(output >= np.min(values, axis=0))
