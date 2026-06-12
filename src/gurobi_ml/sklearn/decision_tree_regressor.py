@@ -51,8 +51,7 @@ def add_decision_tree_regressor_constr(
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
     safety_floor : float, optional
-        Thresholds with absolute value smaller than this will be clamped
-        to this value to avoid numerical issues with Gurobi's tolerance.
+        |SafetyFloorParam|
     Returns
     -------
     DecisionTreeRegressorConstr
@@ -119,8 +118,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
         formulation : {'leafs', 'paths'}, default='leafs'
             Formulation to use for decision tree. 'paths' is deprecated.
         safety_floor : float, optional
-            Thresholds with absolute value smaller than this will be clamped
-            to this value to avoid numerical issues with Gurobi's tolerance.
+            |SafetyFloorParam|
         """
         self._default_name = "tree_reg"
 

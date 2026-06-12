@@ -60,8 +60,7 @@ def add_lgbmregressor_constr(
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
     safety_floor : float, optional
-        Thresholds with absolute value smaller than this will be clamped
-        to this value to avoid numerical issues with Gurobi's tolerance.
+        |SafetyFloorParam|
 
     Returns
     -------
@@ -124,8 +123,7 @@ def add_lgbm_booster_constr(
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
     safety_floor : float, optional
-        Thresholds with absolute value smaller than this will be clamped
-        to this value to avoid numerical issues with Gurobi's tolerance.
+        |SafetyFloorParam|
 
     Returns
     -------
@@ -190,8 +188,7 @@ class LGBMConstr(AbstractPredictorConstr):
             Small value used to impose strict inequalities for splitting nodes in
             MIP formulations.
         safety_floor : float, optional
-            Thresholds with absolute value smaller than this will be clamped
-            to this value to avoid numerical issues with Gurobi's tolerance.
+            |SafetyFloorParam|
         """
         self._output_shape = 1
         self.estimators_ = []

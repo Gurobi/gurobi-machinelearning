@@ -54,8 +54,7 @@ def add_random_forest_regressor_constr(
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
     safety_floor : float, optional
-        Thresholds with absolute value smaller than this will be clamped
-        to this value to avoid numerical issues with Gurobi's tolerance.
+        |SafetyFloorParam|
 
     Returns
     -------

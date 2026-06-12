@@ -70,8 +70,7 @@ def add_xgbregressor_constr(
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
     safety_floor : float, optional
-        Thresholds with absolute value smaller than this will be clamped
-        to this value to avoid numerical issues with Gurobi's tolerance.
+        |SafetyFloorParam|
 
     Returns
     -------
@@ -134,8 +133,7 @@ def add_xgboost_regressor_constr(
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
     safety_floor : float, optional
-        Thresholds with absolute value smaller than this will be clamped
-        to this value to avoid numerical issues with Gurobi's tolerance.
+        |SafetyFloorParam|
 
     Returns
     -------
@@ -200,8 +198,7 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
             Small value used to impose strict inequalities for splitting nodes in
             MIP formulations.
         safety_floor : float, optional
-            Thresholds with absolute value smaller than this will be clamped
-            to this value to avoid numerical issues with Gurobi's tolerance.
+            |SafetyFloorParam|
         """
         self._output_shape = 1
         self.estimators_ = []
