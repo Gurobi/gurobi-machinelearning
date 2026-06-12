@@ -20,7 +20,6 @@ class TestSafetyFloor(unittest.TestCase):
         # Test without safety_floor (threshold should be 0.00001)
         with gp.Env(params={"OutputFlag": 0}) as env, gp.Model(env=env) as m:
             x_var = m.addMVar((1, 1), lb=0, ub=1)
-            # Use a large epsilon so we can see the effect
             pred = add_decision_tree_regressor_constr(m, dt, x_var, epsilon=0.0)
 
             # The split is x <= 0.00001
