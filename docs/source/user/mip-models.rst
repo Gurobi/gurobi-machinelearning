@@ -115,37 +115,38 @@ are imposed using indicator constraints:
    & \delta_l = 1 \rightarrow x_{i_v} \ge \theta_v + \epsilon, & & \text{for } x_{i_v} > \theta_v \in \mathcal R_l.
    \end{align*}
 
-A difficulty here is that the strictly greater than constraints of :math:`\mathcal R_l`
-can't be represented exactly in a mixed integer optimization model. To
-approximate it, we introduce a small threshold :math:`\epsilon`. We discuss
-below the trade-offs for choosing a value for :math:`\epsilon`.
+Two numerical parameters control the accuracy of this formulation, both
+exposed as keyword arguments of
+:func:`add_decision_tree_regressor_constr <gurobi_ml.sklearn.add_decision_tree_regressor_constr>`.
 
-In our implementation, :math:`\epsilon` can be specified by a keyword parameter
-of :func:`add_decision_tree_regressor_constr <gurobi_ml.sklearn.add_decision_tree_regressor_constr>`. The default
-value for :math:`\epsilon` is 0. This means in particular that if :math:`x_{i_v}
-= \theta_v` in the solution, the model doesn't discriminate between the two child
-nodes of :math:`v` and either direction may be picked. This may also
-happen whenever :math:`\epsilon` is set to a value that is below the
-`feasibility tolerance
-<https://www.gurobi.com/documentation/current/refman/feasibilitytol.html#parameter:FeasibilityTol>`_
-of Gurobi. If the value is instead set above the feasibility tolerance, then the
-left and right nodes are correctly discriminated by the model, but a small
-interval is created between :math:`\theta` and :math:`\theta + \epsilon` where
-there is no feasible solution. This may artificially make the optimization model infeasible
-depending on how tightly the input of the decision tree regressor is
-constrained.
+**epsilon** (:math:`\epsilon`, default 0) approximates the strict inequality in
+:math:`\mathcal R_l`. For :math:`\epsilon` to correctly discriminate left and
+right branches it must exceed Gurobi's
+:external+gurobi:ref:`FeasibilityTol <parameterfeasibilitytol>`
+(default :math:`10^{-6}`); below that threshold the solver treats
+:math:`x_{i_v} \ge \theta_v + \epsilon` and :math:`x_{i_v} \ge \theta_v`
+as equivalent. Setting :math:`\epsilon` above the feasibility tolerance does
+enforce the correct branch, but creates a gap :math:`[\theta_v,\,\theta_v + \epsilon]`
+with no feasible solution, which may make the model infeasible when the inputs
+are tightly constrained. The default of 0 avoids this, at the cost of
+ambiguity exactly at a split boundary.
 
-The reasoning behind our default setting is that even though there may be a
-difference between the output value of the Gurobi model and the prediction of
-the original decision tree, it only corresponds to a small perturbation in the
-values of the input variables.
+**safety_floor** (default 0, i.e. disabled) addresses a different issue: when
+:math:`|\theta_v|` itself is smaller than
+:external+gurobi:ref:`FeasibilityTol <parameterfeasibilitytol>`,
+the solver treats 0 and :math:`\theta_v` as equal and the indicator constraints become
+ineffective. Setting ``safety_floor`` clamps those thresholds to
+:math:`\pm\,\text{safety\_floor}`, which fixes the issue provided
+``safety_floor`` :math:`\ge` ``FeasibilityTol``. Because the clamping shifts
+decision boundaries it can distort models whose legitimate thresholds are
+genuinely near zero, so the parameter is opt-in.
 
 Random Forest Regression
 ========================
 
 The regression model of Random Forests is a linear combination of decision trees.
 Each decision tree is represented using the model above. The same difficulties
-with the choice of :math:`\epsilon` apply to this case.
+with the choice of :math:`\epsilon` and ``safety_floor`` apply to this case.
 
 We note additionally that the random forests are often very large and generating
 their representation in Gurobi may take a significant amount of time.
@@ -155,7 +156,7 @@ Gradient Boosting Regression
 
 The gradient boosting regressor is a linear combination of decision trees. Each
 decision tree is represented using the model above. The same difficulties with
-the choice of :math:`\epsilon` apply to this case.
+the choice of :math:`\epsilon` and ``safety_floor`` apply to this case.
 
 We note additionally that the gradient boosting regressors are often very large
 and generating their representation in Gurobi may take a significant amount of
