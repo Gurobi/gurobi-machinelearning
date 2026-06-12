@@ -77,7 +77,7 @@ SAFETY_FLOOR = (
     "Thresholds with absolute value smaller than this will be clamped "
     "to this value to avoid numerical issues with Gurobi's tolerance. "
     "To be effective, this value must be larger than Gurobi "
-    ":external+gurobi:ref:`FeasibilityTol <parameterfeasibilitytol>`."
+    ":external+gurobi:ref:`FeasibilityTol <parameterfeasibilitytol>`. "
     "A smaller value will have no effect. "
     "Note that clamping can distort models whose legitimate split "
     "thresholds are genuinely small, so this parameter is opt-in "

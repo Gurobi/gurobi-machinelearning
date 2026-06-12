@@ -36,33 +36,14 @@ class TestIssue496(unittest.TestCase):
         self.X = X
 
     def test_numerical_issue_leaf_formulation(self):
-        """Verify that the leaf formulation can exhibit numerical discrepancies."""
+        """Verify that a warning is raised when thresholds fall below FeasibilityTol."""
         with gp.Env(params={"OutputFlag": 0}) as env, gp.Model(env=env) as m:
             x_vars = m.addMVar(shape=5, lb=-10.0, ub=10.0, name="x")
             y_var = m.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, name="score")
-            add_lgbm_booster_constr(m, self.model, x_vars, y_var, formulation="leaf")
-            m.update()
-
-            # The threshold is likely around 1e-35. x = 1e-10 should be > threshold.
-            # But Gurobi's FeasibilityTol (default 1e-6) treats 1e-10 as <= 1e-35.
-            x0 = 1e-10
-            x_test = np.array([x0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
-            lgbm_score = float(
-                self.model.predict(x_test.reshape(1, -1), raw_score=True)[0]
-            )
-
-            for j in range(5):
-                x_vars[j].LB = float(x_test[j])
-                x_vars[j].UB = float(x_test[j])
-
-            m.optimize()
-            if m.Status == GRB.OPTIMAL:
-                mip_score = float(y_var.X)
-                diff = abs(lgbm_score - mip_score)
-                if diff > 1e-5:
-                    print(
-                        f"Confirmed numerical issue in leaf formulation: diff={diff:.2e}"
-                    )
+            with self.assertWarns(UserWarning):
+                add_lgbm_booster_constr(
+                    m, self.model, x_vars, y_var, formulation="leaf"
+                )
 
     def test_leaf_formulation_fix(self):
         """Verify that the leaf formulation with safety_floor fixes the numerical issue."""
