@@ -95,13 +95,11 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         predictor,
         input_vars,
         output_vars,
-        formulation="leaf",
         safety_floor=0.0,
         **kwargs,
     ):
         self.estimators_ = []
         self._default_name = "rand_forest_reg"
-        self.formulation = formulation
         self.safety_floor = safety_floor
         SKgetter.__init__(self, predictor, input_vars)
         AbstractPredictorConstr.__init__(
@@ -147,7 +145,6 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
                     _input,
                     tree_vars[:, i, :],
                     safety_floor=self.safety_floor,
-                    formulation=self.formulation,
                     **kwargs,
                 )
             )

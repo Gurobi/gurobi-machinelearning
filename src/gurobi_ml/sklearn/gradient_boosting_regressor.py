@@ -96,14 +96,12 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
         predictor,
         input_vars,
         output_vars,
-        formulation="leaf",
         safety_floor=0.0,
         **kwargs,
     ):
         self._output_shape = 1
         self.estimators_ = []
         self._default_name = "gbtree_reg"
-        self.formulation = formulation
         self.safety_floor = safety_floor
         SKgetter.__init__(self, predictor, input_vars)
         AbstractPredictorConstr.__init__(
@@ -151,7 +149,6 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
                     _input,
                     tree_vars[:, i, :],
                     safety_floor=self.safety_floor,
-                    formulation=self.formulation,
                     **kwargs,
                 )
             )

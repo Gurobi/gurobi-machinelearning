@@ -96,7 +96,6 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
         input_vars,
         output_vars=None,
         epsilon=0.0,
-        formulation="leafs",
         safety_floor=0.0,
         **kwargs,
     ):
@@ -115,19 +114,11 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
         epsilon : float, optional
             Small value used to impose strict inequalities for splitting nodes in
             MIP formulations.
-        formulation : {'leafs', 'paths'}, default='leafs'
-            Formulation to use for decision tree. 'paths' is deprecated.
         safety_floor : float, optional
             |SafetyFloorParam|
         """
         self._default_name = "tree_reg"
 
-        formulations = ("leafs", "paths")
-        if formulation not in formulations:
-            raise ValueError(
-                f"Wrong value for formulation should be one of {formulations}."
-            )
-        self._formulation = formulation
         SKgetter.__init__(self, predictor, input_vars)
         tree = self.predictor.tree_
 
@@ -148,6 +139,5 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
             output_vars,
             epsilon,
             safety_floor=safety_floor,
-            formulation=formulation,
             **kwargs,
         )
