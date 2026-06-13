@@ -52,9 +52,10 @@ extensions = [
 def get_versions(file: Path):
     new_dict = {}
     for line in file.read_text().splitlines():
+        line = line.split("#")[0].split(";")[0].strip()
         try:
             package, version = line.split("==")
-            new_dict[package] = version
+            new_dict[package.strip()] = version.split("+")[0].strip()
         except ValueError:
             pass  # Skip lines that don't split into exactly two items
 
