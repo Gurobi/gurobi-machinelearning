@@ -26,9 +26,17 @@ jobs:
         WHEEL_VERSION: ${{ github.event.inputs.version }}
       run: |
         echo "Download $WHEEL_VERSION wheel and sdist"
+        # Strip leading 'v' if present (e.g., v1.6.0a1 -> 1.6.0a1)
+        CLEAN_VERSION="${WHEEL_VERSION#v}"
         mkdir -p dist
         cd dist
-        wget -q -r -np -nd -A "gurobi-machinelearning-${WHEEL_VERSION}.tar.gz,gurobi_machinelearning-${WHEEL_VERSION}-*.whl" https://pypi.anaconda.org/gurobi-machinelearning-wheels-staging/simple/gurobi-machinelearning/
+        wget -q -r -np -nd -A "gurobi-machinelearning-${CLEAN_VERSION}.tar.gz,gurobi_machinelearning-${CLEAN_VERSION}.tar.gz,gurobi-machinelearning-${CLEAN_VERSION}.zip,gurobi_machinelearning-${CLEAN_VERSION}.zip,gurobi-machinelearning-${CLEAN_VERSION}-*.whl,gurobi_machinelearning-${CLEAN_VERSION}-*.whl" https://pypi.anaconda.org/gurobi-machinelearning-wheels-staging/simple/gurobi-machinelearning/
+        # Check that files were actually downloaded
+        file_count=$(ls -A | wc -l)
+        if [ "$file_count" -eq 0 ]; then
+          echo "Error: No files matching version ${CLEAN_VERSION} (derived from ${WHEEL_VERSION}) were found/downloaded from staging!"
+          exit 1
+        fi
     - name: Publish package to TestPyPI
       uses: pypa/gh-action-pypi-publish@v1.14.0
       with:
