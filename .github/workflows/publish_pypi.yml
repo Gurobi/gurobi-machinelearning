@@ -25,7 +25,7 @@ jobs:
         cache-dependency-path: 'pyproject.toml'
     - name: Install dependencies
       run: |
-        pip install -U wheelhouse_uploader pyyaml
+        pip install -U "wheelhouse_uploader" "apache-libcloud>=3.8.0" pyyaml
     - name: Downloading wheels and sdist from staging
       env:
         WHEEL_VERSION: ${{ github.event.inputs.version }}
