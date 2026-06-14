@@ -1,6 +1,6 @@
 [project]
 name = "gurobi-machinelearning"
-version = "1.7dev"
+version = "1.6.0"
 description = "package to insert ML models in Gurobi"
 readme = "README.md"
 requires-python = ">=3.10"
