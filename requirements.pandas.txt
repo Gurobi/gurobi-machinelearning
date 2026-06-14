@@ -1,2 +1,3 @@
-pandas==2.3.3
+gurobipy-pandas==1.2.2
+pandas==3.0.3
 gurobipy-pandas==1.2.2
