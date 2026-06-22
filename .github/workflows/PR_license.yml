@@ -45,7 +45,7 @@ jobs:
     steps:
       # Check out the base branch first so that local reusable actions are
       # loaded from trusted code, not from the (potentially untrusted) PR branch.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup Python
         uses: ./.github/actions/setup-python-and-install
         with:
@@ -58,7 +58,7 @@ jobs:
         with:
           license: ${{ secrets.LICENSE }}
       # Now check out the PR code for test execution.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
       - name: Test with tox (uv)
@@ -80,7 +80,7 @@ jobs:
     steps:
       # Check out the base branch first so that local reusable actions are
       # loaded from trusted code, not from the (potentially untrusted) PR branch.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup Python
         uses: ./.github/actions/setup-python-and-install
         with:
@@ -93,7 +93,7 @@ jobs:
         with:
           license: ${{ secrets.LICENSE }}
       # Now check out the PR code for test execution.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
       - name: Run examples (uv)
