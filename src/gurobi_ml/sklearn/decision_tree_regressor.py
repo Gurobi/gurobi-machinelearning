@@ -28,6 +28,7 @@ def add_decision_tree_regressor_constr(
     input_vars,
     output_vars=None,
     epsilon=0.0,
+    safety_floor=0.0,
     **kwargs,
 ):
     """Formulate decision_tree_regressor into gp_model.
@@ -49,6 +50,8 @@ def add_decision_tree_regressor_constr(
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
+    safety_floor : float, optional
+        |SafetyFloorParam|
     Returns
     -------
     DecisionTreeRegressorConstr
@@ -68,7 +71,13 @@ def add_decision_tree_regressor_constr(
     this point.
     """
     return DecisionTreeRegressorConstr(
-        gp_model, decision_tree_regressor, input_vars, output_vars, epsilon, **kwargs
+        gp_model,
+        decision_tree_regressor,
+        input_vars,
+        output_vars,
+        epsilon,
+        safety_floor=safety_floor,
+        **kwargs,
     )
 
 
@@ -87,7 +96,7 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
         input_vars,
         output_vars=None,
         epsilon=0.0,
-        formulation="leafs",
+        safety_floor=0.0,
         **kwargs,
     ):
         """Initialize DecisionTreeRegressorConstr.
@@ -105,17 +114,11 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
         epsilon : float, optional
             Small value used to impose strict inequalities for splitting nodes in
             MIP formulations.
-        formulation : {'leafs', 'paths'}, default='leafs'
-            Formulation to use for decision tree. 'paths' is deprecated.
+        safety_floor : float, optional
+            |SafetyFloorParam|
         """
         self._default_name = "tree_reg"
 
-        formulations = ("leafs", "paths")
-        if formulation not in formulations:
-            raise ValueError(
-                f"Wrong value for formulation should be one of {formulations}."
-            )
-        self._formulation = formulation
         SKgetter.__init__(self, predictor, input_vars)
         tree = self.predictor.tree_
 
@@ -129,5 +132,12 @@ class DecisionTreeRegressorConstr(SKgetter, AbstractTreeEstimator):
             "n_features": tree.n_features,
         }
         AbstractTreeEstimator.__init__(
-            self, gp_model, tree_dict, input_vars, output_vars, epsilon, **kwargs
+            self,
+            gp_model,
+            tree_dict,
+            input_vars,
+            output_vars,
+            epsilon,
+            safety_floor=safety_floor,
+            **kwargs,
         )

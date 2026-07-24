@@ -39,7 +39,13 @@ from ..modeling.decision_tree import AbstractTreeEstimator
 
 
 def add_xgbregressor_constr(
-    gp_model, xgboost_regressor, input_vars, output_vars=None, epsilon=0.0, **kwargs
+    gp_model,
+    xgboost_regressor,
+    input_vars,
+    output_vars=None,
+    epsilon=0.0,
+    safety_floor=0.0,
+    **kwargs,
 ):
     """Formulate xgboost_regressor into gp_model.
 
@@ -63,6 +69,8 @@ def add_xgbregressor_constr(
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
+    safety_floor : float, optional
+        |SafetyFloorParam|
 
     Returns
     -------
@@ -89,12 +97,19 @@ def add_xgbregressor_constr(
         input_vars,
         output_vars,
         epsilon=epsilon,
+        safety_floor=safety_floor,
         **kwargs,
     )
 
 
 def add_xgboost_regressor_constr(
-    gp_model, xgboost_regressor, input_vars, output_vars=None, epsilon=0.0, **kwargs
+    gp_model,
+    xgboost_regressor,
+    input_vars,
+    output_vars=None,
+    epsilon=0.0,
+    safety_floor=0.0,
+    **kwargs,
 ):
     """Formulate xgboost_regressor into gp_model.
 
@@ -117,6 +132,8 @@ def add_xgboost_regressor_constr(
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
+    safety_floor : float, optional
+        |SafetyFloorParam|
 
     Returns
     -------
@@ -138,7 +155,13 @@ def add_xgboost_regressor_constr(
         If the booster is not of type "gbtree".
     """
     return XGBoostRegressorConstr(
-        gp_model, xgboost_regressor, input_vars, output_vars, epsilon=epsilon, **kwargs
+        gp_model,
+        xgboost_regressor,
+        input_vars,
+        output_vars,
+        epsilon=epsilon,
+        safety_floor=safety_floor,
+        **kwargs,
     )
 
 
@@ -150,7 +173,14 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
     """
 
     def __init__(
-        self, gp_model, xgb_regressor, input_vars, output_vars, epsilon=0.0, **kwargs
+        self,
+        gp_model,
+        xgb_regressor,
+        input_vars,
+        output_vars,
+        epsilon=0.0,
+        safety_floor=0.0,
+        **kwargs,
     ):
         """Initialize XGBoostRegressorConstr.
 
@@ -167,12 +197,15 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         epsilon : float, optional
             Small value used to impose strict inequalities for splitting nodes in
             MIP formulations.
+        safety_floor : float, optional
+            |SafetyFloorParam|
         """
         self._output_shape = 1
         self.estimators_ = []
         self.xgb_regressor = xgb_regressor
         self._default_name = "xgb_reg"
         self.epsilon = epsilon
+        self.safety_floor = safety_floor
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
         )
@@ -204,11 +237,13 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
                 xgb_regressor, f"model not implemented for {booster_type}"
             )
         trees = xgb_raw["learner"]["gradient_booster"]["model"]["trees"]
+
+        if self._no_debug:
+            kwargs["no_record"] = True
+
         n_estimators = len(trees)
 
         estimators = []
-        if self._no_debug:
-            kwargs["no_record"] = True
 
         tree_vars = model.addMVar(
             (nex, n_estimators, 1),
@@ -219,13 +254,18 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
         for i, tree in enumerate(trees):
             if self.verbose:
                 self._timer.timing(f"Estimator {i}")
-            tree["threshold"] = (
-                np.array(tree["split_conditions"], dtype=np.float32) - self.epsilon
-            )
-            tree["children_left"] = np.array(tree["left_children"])
+            raw_vals = np.array(tree["split_conditions"], dtype=np.float32)
+            children_left = np.array(tree["left_children"])
+            is_leaf = children_left < 0
+
+            mip_thresholds = raw_vals.copy()
+            mip_thresholds[~is_leaf] -= self.epsilon
+
+            tree["threshold"] = mip_thresholds
+            tree["children_left"] = children_left
             tree["children_right"] = np.array(tree["right_children"])
             tree["feature"] = np.array(tree["split_indices"])
-            tree["value"] = tree["threshold"].reshape(-1, 1)
+            tree["value"] = raw_vals.reshape(-1, 1)
             tree["capacity"] = len(tree["split_conditions"])
             tree["n_features"] = int(tree["tree_param"]["num_feature"])
 
@@ -237,6 +277,7 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
                     tree_vars[:, i, :],
                     self.epsilon,
                     timer,
+                    safety_floor=self.safety_floor,
                     **kwargs,
                 )
             )

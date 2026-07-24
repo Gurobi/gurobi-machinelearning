@@ -31,6 +31,7 @@ def add_random_forest_regressor_constr(
     input_vars,
     output_vars=None,
     epsilon=0.0,
+    safety_floor=0.0,
     **kwargs,
 ):
     """Formulate random_forest_regressor in gp_model.
@@ -52,6 +53,8 @@ def add_random_forest_regressor_constr(
     epsilon : float, optional
         Small value used to impose strict inequalities for splitting nodes in
         MIP formulations.
+    safety_floor : float, optional
+        |SafetyFloorParam|
 
     Returns
     -------
@@ -73,6 +76,7 @@ def add_random_forest_regressor_constr(
         input_vars,
         output_vars,
         epsilon=epsilon,
+        safety_floor=safety_floor,
         **kwargs,
     )
 
@@ -85,9 +89,18 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
     |ClassShort|
     """
 
-    def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
+    def __init__(
+        self,
+        gp_model,
+        predictor,
+        input_vars,
+        output_vars,
+        safety_floor=0.0,
+        **kwargs,
+    ):
         self.estimators_ = []
         self._default_name = "rand_forest_reg"
+        self.safety_floor = safety_floor
         SKgetter.__init__(self, predictor, input_vars)
         AbstractPredictorConstr.__init__(
             self, gp_model, input_vars, output_vars, **kwargs
@@ -127,7 +140,12 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
             tree = predictor.estimators_[i]
             estimators.append(
                 add_decision_tree_regressor_constr(
-                    model, tree, _input, tree_vars[:, i, :], **kwargs
+                    model,
+                    tree,
+                    _input,
+                    tree_vars[:, i, :],
+                    safety_floor=self.safety_floor,
+                    **kwargs,
                 )
             )
         self.estimators_ = estimators

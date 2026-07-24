@@ -52,9 +52,10 @@ extensions = [
 def get_versions(file: Path):
     new_dict = {}
     for line in file.read_text().splitlines():
+        line = line.split("#")[0].split(";")[0].strip()
         try:
             package, version = line.split("==")
-            new_dict[package] = version
+            new_dict[package.strip()] = version.split("+")[0].strip()
         except ValueError:
             pass  # Skip lines that don't split into exactly two items
 
@@ -73,6 +74,16 @@ dep_versions |= get_versions(root_path / "requirements.lightgbm.txt")
 
 VARS_SHAPE = """See :py:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>` for acceptable values for input_vars and output_vars"""
 CLASS_SHORT = """Stores the changes to :external+gurobi:py:class:`Model` for formulating the predictor."""
+SAFETY_FLOOR = (
+    "Thresholds with absolute value smaller than this will be clamped "
+    "to this value to avoid numerical issues with Gurobi's tolerance. "
+    "To be effective, this value must be larger than Gurobi "
+    ":external+gurobi:ref:`FeasibilityTol <parameterfeasibilitytol>`. "
+    "A smaller value will have no effect. "
+    "Note that clamping can distort models whose legitimate split "
+    "thresholds are genuinely small, so this parameter is opt-in "
+    "(default 0.0, i.e. disabled)."
+)
 
 
 rst_epilog = f"""
@@ -86,6 +97,7 @@ rst_epilog = f"""
 .. |LightGBMVersion| replace:: {dep_versions["lightgbm"]}
 .. |VariablesDimensionsWarn| replace:: {VARS_SHAPE}
 .. |ClassShort| replace:: {CLASS_SHORT}
+.. |SafetyFloorParam| replace:: {SAFETY_FLOOR}
 """
 
 # Add any paths that contain templates here, relative to this directory.

@@ -1,3 +1,18 @@
+# Copyright © 2023-2026 Gurobi Optimization, LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+
 import os
 import unittest
 import warnings
@@ -48,17 +63,28 @@ class TestSklearnModel(FixedRegressionModel):
         cases = DiabetesCases()
 
         for regressor in cases:
+            if isinstance(regressor, Pipeline):
+                actual_reg = regressor[-1]
+            else:
+                actual_reg = regressor
+            reg_name = type(actual_reg).__name__
+            if reg_name in ["RandomForestRegressor", "GradientBoostingRegressor"]:
+                formulations = ["leaf"]
+            else:
+                formulations = [None]
+
             onecase = cases.get_case(regressor)
-            self.do_one_case(onecase, X, 5, "all", float_type=np.float32, epsilon=1e-5)
-            self.do_one_case(
-                onecase, X, 6, "pairs", float_type=np.float32, epsilon=1e-5
-            )
-            self.do_one_case(
-                onecase, X, 5, "all", float_type=np.float32, no_debug=True, epsilon=1e-5
-            )
-            self.do_one_case(
-                onecase, X, 6, "pairs", float_type=np.float32, no_debug=True
-            )
+            for formulation in formulations:
+                kwargs = {"float_type": np.float32, "epsilon": 1e-5}
+                if formulation:
+                    kwargs["formulation"] = formulation
+
+                self.do_one_case(onecase, X, 5, "all", **kwargs)
+                self.do_one_case(onecase, X, 6, "pairs", **kwargs)
+
+                kwargs["no_debug"] = True
+                self.do_one_case(onecase, X, 5, "all", **kwargs)
+                self.do_one_case(onecase, X, 6, "pairs", **kwargs)
 
     def test_iris_proba(self):
         data = datasets.load_iris()
@@ -124,12 +150,32 @@ class TestSklearnModel(FixedRegressionModel):
         cases = CircleCase()
 
         for regressor in cases:
+            if isinstance(regressor, Pipeline):
+                actual_reg = regressor[-1]
+            else:
+                actual_reg = regressor
+            reg_name = type(actual_reg).__name__
+            if reg_name in ["RandomForestRegressor", "DecisionTreeRegressor"]:
+                if reg_name == "DecisionTreeRegressor":
+                    formulations = ["leafs", "paths"]
+                else:
+                    formulations = ["leaf"]
+            else:
+                formulations = [None]
+
             onecase = cases.get_case(regressor)
             X = onecase["data"]
-            self.do_one_case(onecase, X, 5, "all")
-            self.do_one_case(onecase, X, 6, "pairs")
-            self.do_one_case(onecase, X, 5, "all", no_debug=True)
-            self.do_one_case(onecase, X, 6, "pairs", no_debug=True)
+            for formulation in formulations:
+                kwargs = {}
+                if formulation:
+                    kwargs["formulation"] = formulation
+
+                self.do_one_case(onecase, X, 5, "all", **kwargs)
+                self.do_one_case(onecase, X, 6, "pairs", **kwargs)
+
+                kwargs["no_debug"] = True
+                self.do_one_case(onecase, X, 5, "all", **kwargs)
+                self.do_one_case(onecase, X, 6, "pairs", **kwargs)
 
 
 class TestMNIST(unittest.TestCase):
@@ -147,7 +193,10 @@ class TestMNIST(unittest.TestCase):
             ub = np.minimum(examples + 1e-4, 1.0)
             x = gpm.addMVar(examples.shape, lb=lb, ub=ub)
 
-            predictor.out_activation_ = "identity"
+            if isinstance(predictor, Pipeline):
+                predictor[-1].out_activation_ = "identity"
+            else:
+                predictor.out_activation_ = "identity"
             register_predictor_constr("MLPClassifier", add_mlp_regressor_constr)
             pred_constr = add_predictor_constr(
                 gpm, predictor, x, output_type="probability"
@@ -196,7 +245,6 @@ class TestMNIST(unittest.TestCase):
             onecase = cases.get_case(regressor)
             X = onecase["data"]
             self.do_one_case(onecase, X, 1)
-            break
             self.do_one_case(onecase, X, 3)
 
 

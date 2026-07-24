@@ -97,7 +97,7 @@ python3.10 -m venv .venv
 Then, you can install `tox` (>= 3.26.0) and run a few basic tests:
 ```shell
 (.venv) pip install tox
-(.venv) tox -e py310,pre-commit,docs
+(.venv) tox -e py311,pre-commit,docs
 ```
 `tox` will install, among others, the aforementioned ML packages into a separate `venv`. These packages can be quite
 large, so this might take a while.

@@ -49,6 +49,20 @@ class TestXGBoosthModel(FixedRegressionModel):
 
         self.do_one_case(one_case, X, 5, "all", epsilon=1e-5)
 
+    def test_diabetes_xgboost(self):
+        data = datasets.load_diabetes()
+        X = data["data"]
+        y = data["target"]
+
+        xgb_reg = xgb.XGBRegressor(n_estimators=5, max_depth=3)
+        xgb_reg.fit(X, y)
+        one_case = {"predictor": xgb_reg, "nonconvex": 0}
+
+        for formulation in ["leaf"]:
+            self.do_one_case(
+                one_case, X, 3, formulation=formulation, float_type=np.float32
+            )
+
     @staticmethod
     def prepare_binary_iris():
         data = datasets.load_iris()
@@ -62,7 +76,10 @@ class TestXGBoosthModel(FixedRegressionModel):
 
     def run_iris_test_case(self, predictor, X, method):
         one_case = {"predictor": predictor, "nonconvex": 0}
-        self.do_one_case(one_case, X, 6, method, float_type=np.float32)
+        for formulation in ["leaf"]:
+            self.do_one_case(
+                one_case, X, 6, method, formulation=formulation, float_type=np.float32
+            )
 
     def test_iris_xgboost_pipeline(self):
         if gp.gurobi.version()[0] < 11:
