@@ -60,7 +60,10 @@ jobs:
       # Now check out the PR code for test execution.
       - uses: actions/checkout@v7
         with:
+          repository: ${{ github.event.workflow_run.head_repository.full_name }}
           ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+          allow-unsafe-pr-checkout: true
       - name: Test with tox (uv)
         env:
           GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
@@ -95,7 +98,10 @@ jobs:
       # Now check out the PR code for test execution.
       - uses: actions/checkout@v7
         with:
+          repository: ${{ github.event.workflow_run.head_repository.full_name }}
           ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+          allow-unsafe-pr-checkout: true
       - name: Run examples (uv)
         env:
           GRB_LICENSE_FILE: ${{ steps.write-license.outputs.grb_license_file }}
