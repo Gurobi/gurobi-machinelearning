@@ -73,9 +73,7 @@ class ColumnTransformerConstr(SKtransformer):
         """
         if trans == "passthrough":
             return True
-        if type(trans) is FunctionTransformer and trans.func is None:
-            return True
-        return False
+        return type(trans) is FunctionTransformer and trans.func is None
 
     def _mip_model(self, **kwargs):
         """Do the transformation on x."""
@@ -108,15 +106,13 @@ class ColumnTransformerConstr(SKtransformer):
                 if isinstance(cols, str) or isinstance(cols[0], str):
                     data = _input.loc[:, cols]
                     any_var = any(
-                        map(lambda i: isinstance(i, gp.Var), data.to_numpy().ravel())
+                        isinstance(i, gp.Var) for i in data.to_numpy().ravel()
                     )
                 else:
                     if hasattr(_input, "iloc"):
                         data = _input.iloc[:, cols]
                         any_var = any(
-                            map(
-                                lambda i: isinstance(i, gp.Var), data.to_numpy().ravel()
-                            )
+                            isinstance(i, gp.Var) for i in data.to_numpy().ravel()
                         )
                     else:
                         data = _input

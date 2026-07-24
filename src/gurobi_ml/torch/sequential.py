@@ -80,7 +80,7 @@ class SequentialConstr(BaseNNConstr):
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         for step in predictor:
-            if isinstance(step, nn.ReLU) or isinstance(step, nn.Linear):
+            if isinstance(step, (nn.ReLU, nn.Linear)):
                 pass
             else:
                 raise ModelConfigurationError(

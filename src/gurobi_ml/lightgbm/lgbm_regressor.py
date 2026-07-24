@@ -260,7 +260,7 @@ class LGBMConstr(AbstractPredictorConstr):
         threshold = np.empty(numnodes, dtype=np.float32)
 
         def node_index(node):
-            if "split_index" in node.keys():
+            if "split_index" in node:
                 return node["split_index"]
             return node["leaf_index"] + num_split
 
@@ -272,7 +272,7 @@ class LGBMConstr(AbstractPredictorConstr):
                 raise RuntimeError(
                     f"LightGBM tree traversal error: node index {index} visited more than once"
                 )
-            if "split_index" in node.keys():
+            if "split_index" in node:
                 feature[index] = node["split_feature"]
                 threshold[index] = node["threshold"]
                 children_left[index] = node_index(node["left_child"])

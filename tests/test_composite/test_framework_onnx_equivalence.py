@@ -88,7 +88,7 @@ class TestFrameworkONNXEquivalence(unittest.TestCase):
         # Get Gurobi-Keras predictions
         try:
             keras_gurobi = self._solve_with_model(keras_model, samples)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.skipTest(f"Could not formulate Keras model: {e}")
 
         # Convert to ONNX
@@ -134,7 +134,7 @@ class TestFrameworkONNXEquivalence(unittest.TestCase):
                     f"ONNX Gurobi: {onnx_gurobi}",
                 )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001  # noqa: BLE001
                 # Clean up and skip if there are issues
                 self.skipTest(f"ONNX conversion failed: {e}")
             finally:
@@ -153,7 +153,7 @@ class TestFrameworkONNXEquivalence(unittest.TestCase):
         try:
             pytorch_model = torch.load(filename, weights_only=False)
             pytorch_model.eval()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.skipTest(f"Could not load PyTorch model: {e}")
 
         # Select samples
@@ -167,7 +167,7 @@ class TestFrameworkONNXEquivalence(unittest.TestCase):
         # Get Gurobi-PyTorch predictions
         try:
             pytorch_gurobi = self._solve_with_model(pytorch_model, samples)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.skipTest(f"Could not formulate PyTorch model: {e}")
 
         # Convert to ONNX
@@ -208,7 +208,7 @@ class TestFrameworkONNXEquivalence(unittest.TestCase):
                     f"ONNX Gurobi: {onnx_gurobi}",
                 )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001  # noqa: BLE001
                 self.skipTest(f"ONNX conversion or formulation failed: {e}")
             finally:
                 if os.path.exists(tmp.name):
@@ -273,7 +273,7 @@ class TestFrameworkONNXEquivalence(unittest.TestCase):
                 finally:
                     if os.path.exists(tmp.name):
                         os.unlink(tmp.name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             warnings.warn(f"Keras test skipped: {e}")
 
         # Test PyTorch -> ONNX
@@ -309,7 +309,7 @@ class TestFrameworkONNXEquivalence(unittest.TestCase):
                 finally:
                     if os.path.exists(tmp.name):
                         os.unlink(tmp.name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             warnings.warn(f"PyTorch test skipped: {e}")
 
         # Verify we got at least some results

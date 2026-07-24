@@ -240,7 +240,7 @@ print(
 # regression in a solution as a pandas dataframe using input_values.
 #
 
-pred_constr.input_values
+pred_constr.input_values  # noqa: B018
 
 
 ######################################################################

@@ -53,13 +53,13 @@ def predictor_as_string(predictor):
     rval = ""
     if isinstance(predictor, Pipeline):
         rval += "_pipeline"
-        for predictor in predictor:
-            rval += predictor_as_string(predictor)
+        for step in predictor:
+            rval += predictor_as_string(step)
         return rval
     if isinstance(predictor, ColumnTransformer):
         rval += "_columntransformer"
-        for _, predictor, _ in predictor.transformers:
-            rval += predictor_as_string(predictor)
+        for _, step, _ in predictor.transformers:
+            rval += predictor_as_string(step)
         return rval
     if isinstance(predictor, MLPRegressor):
         size = ""
@@ -114,7 +114,7 @@ class Cases(ABC):
         self._data = None
 
         if regressors is None:
-            regressors = [r for r in sklearn_predictors().keys() if r not in excluded]
+            regressors = [r for r in sklearn_predictors() if r not in excluded]
         if transformers is None:
             transformers = list(sklearn_transformers().keys())
 
@@ -296,7 +296,6 @@ class MNISTCase(Cases):
         X, y = mnist.data, mnist.target
 
         X = X.astype(np.float64)
-        y = y
         X /= 255.0  # scaling
         self._data = (X, y)
 

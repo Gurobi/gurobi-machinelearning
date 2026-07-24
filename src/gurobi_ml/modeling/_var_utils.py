@@ -44,19 +44,18 @@ def _get_sol_values(values, columns=None, index=None):
     In most cases we can just do values.X but if we have a column transformer with
     some constants that can't be translated to Gurobi variables we need to fill in missing values
     """
-    if HAS_PANDAS:
-        if isinstance(values, pd.DataFrame):
-            rval = pd.DataFrame(
-                data=_get_sol_values(values.to_numpy()),
-                index=values.index,
-                columns=values.columns,
-            )
-            for col in rval.columns:
-                try:
-                    rval[col] = rval[col].astype(np.float64)
-                except ValueError:
-                    pass
-            return rval.convert_dtypes()
+    if HAS_PANDAS and isinstance(values, pd.DataFrame):
+        rval = pd.DataFrame(
+            data=_get_sol_values(values.to_numpy()),
+            index=values.index,
+            columns=values.columns,
+        )
+        for col in rval.columns:
+            try:
+                rval[col] = rval[col].astype(np.float64)
+            except ValueError:
+                pass
+        return rval.convert_dtypes()
     if isinstance(values, np.ndarray):
         return np.array(
             [v.X if isinstance(v, gp.Var) else v for v in values.ravel()]
@@ -114,7 +113,7 @@ def _array_to_mvar(model, data, columns=None, index=None):
     """
 
     # If data only contains gp.Var's we can directly convert it to an MVar
-    if all(map(lambda i: isinstance(i, gp.Var), data.ravel())):
+    if all(isinstance(i, gp.Var) for i in data.ravel()):
         rval = gp.MVar.fromlist(data.tolist())
         return rval
 
@@ -125,7 +124,7 @@ def _array_to_mvar(model, data, columns=None, index=None):
     rval = np.zeros(data.shape, dtype=object)
     const_indices = []
     for i, a in enumerate(data.T):
-        if all(map(lambda i: isinstance(i, gp.Var), a)):
+        if all(isinstance(i, gp.Var) for i in a):
             rval[:, i] = a
             continue
         try:
@@ -174,11 +173,10 @@ def validate_output_vars(gp_vars):
     mvar_array_like
         Decision variables with correctly adjusted shape.
     """
-    if HAS_PANDAS:
-        if isinstance(gp_vars, (pd.DataFrame, pd.Series)):
-            return validate_output_vars(gp_vars.to_numpy())
+    if HAS_PANDAS and isinstance(gp_vars, (pd.DataFrame, pd.Series)):
+        return validate_output_vars(gp_vars.to_numpy())
     if isinstance(gp_vars, np.ndarray):
-        if any(map(lambda i: not isinstance(i, gp.Var), gp_vars.ravel())):
+        if any(not isinstance(i, gp.Var) for i in gp_vars.ravel()):
             raise TypeError("Dataframe can't be converted to an MVar")
         rval = gp.MVar.fromlist(gp_vars.tolist())
         return rval

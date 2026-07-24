@@ -71,7 +71,6 @@ class TestAddRemove(unittest.TestCase):
             x = gp_model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
             y = gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY)
             gp_model.update()
-            gp_model.numvars
 
             gp_model.Params.OutputFlag = 0
             # All of these should fail
@@ -117,7 +116,7 @@ class TestAddRemove(unittest.TestCase):
             else:
                 assert len(output_shape) == 1
                 output_dim = 1
-            pred_constrs = list()
+            pred_constrs = []
             numvars = gp_model.numvars
             for _ in range(nexamples):
                 varsbefore = gp_model.numvars
@@ -179,7 +178,6 @@ class TestAddRemove(unittest.TestCase):
             x = gp_model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
             y = gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY)
             gp_model.update()
-            gp_model.numvars
 
             gp_model.Params.OutputFlag = 0
             # All of these should fail
@@ -198,7 +196,6 @@ class TestAddRemove(unittest.TestCase):
             x = gp_model.addMVar(input_shape, lb=-gp.GRB.INFINITY)
             y = gp_model.addMVar(output_shape, lb=-gp.GRB.INFINITY)
             gp_model.update()
-            gp_model.numvars
 
             gp_model.Params.OutputFlag = 0
             # All of these should fail

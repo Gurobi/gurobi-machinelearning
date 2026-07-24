@@ -121,7 +121,7 @@ avocado_old["date"] = pd.to_datetime(avocado_old["date"], format="%m/%d/%y")
 
 # Concatenate the two notebooks
 avocado = pd.concat([avocado, avocado_old])
-avocado
+avocado  # noqa: B018
 
 
 ######################################################################
@@ -161,7 +161,7 @@ avocado = avocado[
     ["date", "units_sold", "price", "region", "year", "month", "peak"]
 ].reset_index(drop=True)
 
-avocado
+avocado  # noqa: B018
 
 
 ######################################################################
@@ -466,7 +466,7 @@ data = pd.concat(
     axis=1,
 )
 
-data
+data  # noqa: B018
 
 
 ######################################################################
@@ -509,7 +509,7 @@ d = gppd.add_vars(
 m.update()
 
 # Display one of the variables
-p
+p  # noqa: B018
 
 
 ######################################################################
@@ -640,7 +640,7 @@ feats = pd.DataFrame(
     },
     index=regions,
 )
-feats
+feats  # noqa: B018
 
 
 ######################################################################
@@ -690,7 +690,7 @@ solution["Wasted"] = w.gppd.X
 solution["Pred_demand"] = d.gppd.X
 
 opt_revenue = m.ObjVal
-print("\n The optimal net revenue: $%f million" % opt_revenue)
+print(f"\n The optimal net revenue: ${opt_revenue:f} million")
 solution.round(4)
 
 

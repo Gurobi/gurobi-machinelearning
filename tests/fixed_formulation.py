@@ -30,9 +30,9 @@ class FixedRegressionModel(unittest.TestCase):
         }
         if nonconvex:
             params["NonConvex"] = 2
-        for param in params:
+        for param, value in params.items():
             try:
-                params[param] = int(params[param])
+                params[param] = int(value)
             except ValueError:
                 pass
 

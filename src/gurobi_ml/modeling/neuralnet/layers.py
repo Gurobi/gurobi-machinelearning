@@ -87,10 +87,7 @@ class ActivationLayer(AbstractNNLayer):
         """Add the layer to model."""
         model = self.gp_model
         model.update()
-        if "activation" in kwargs:
-            activation = kwargs["activation"]
-        else:
-            activation = self.activation
+        activation = kwargs.get("activation", self.activation)
 
         # Do the mip model for the activation in the layer
         activation.mip_model(self)
@@ -133,10 +130,7 @@ class DenseLayer(AbstractNNLayer):
         """Add the layer to model."""
         model = self.gp_model
         model.update()
-        if "activation" in kwargs:
-            activation = kwargs["activation"]
-        else:
-            activation = self.activation
+        activation = kwargs.get("activation", self.activation)
 
         # Do the mip model for the activation in the layer
         activation.mip_model(self)

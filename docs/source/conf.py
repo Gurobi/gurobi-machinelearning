@@ -23,9 +23,7 @@ sys.path.insert(0, os.path.abspath("../../src/"))
 config = SphinxConfig("../../pyproject.toml", globalns=globals())
 
 project = "Gurobi Machine Learning"
-copyright = (
-    f"{datetime.datetime.now().year}, Gurobi Optimization, LLC. All Rights Reserved."
-)
+copyright = f"{datetime.datetime.now(tz=datetime.timezone.utc).year}, Gurobi Optimization, LLC. All Rights Reserved."
 
 # -- General configuration ---------------------------------------------------
 
@@ -62,7 +60,7 @@ def get_versions(file: Path):
     return new_dict
 
 
-root_path = Path().resolve().parent.parent
+root_path = Path.cwd().parent.parent
 dep_versions = get_versions(root_path / "requirements.tox.txt")
 dep_versions |= get_versions(root_path / "requirements.keras.txt")
 dep_versions |= get_versions(root_path / "requirements.pytorch.txt")
