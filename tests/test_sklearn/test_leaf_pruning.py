@@ -1,4 +1,4 @@
-"""Tests for the reachable-leaf pruning optimisation in _leaf_formulation.
+"""Tests for the reachable-leaf pruning optimisation in _leafs_formulation.
 
 The optimisation skips leaf binary variables that are unreachable given the
 current input-variable bounds.  These tests verify:
@@ -25,6 +25,7 @@ from gurobi_ml import add_predictor_constr
 def _build_and_count_binvars(gp_model, predictor, x):
     """Add predictor constraint and return number of binary variables."""
     add_predictor_constr(gp_model, predictor, x)
+    gp_model.update()
     return gp_model.NumBinVars
 
 
