@@ -231,9 +231,7 @@ m.optimize()
 #
 
 print(
-    "Maximum error in approximating the regression {:.6}".format(
-        np.max(pred_constr.get_error())
-    )
+    f"Maximum error in approximating the regression {np.max(pred_constr.get_error()):.6}"
 )
 
 

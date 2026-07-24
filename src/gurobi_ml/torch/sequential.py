@@ -17,9 +17,10 @@
 :external+gurobi:py:class:`Model`.
 """
 
+import warnings
+
 import numpy as np
 import torch
-import warnings
 from torch import nn
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
@@ -79,9 +80,7 @@ class SequentialConstr(BaseNNConstr):
 
     def __init__(self, gp_model, predictor, input_vars, output_vars=None, **kwargs):
         for step in predictor:
-            if isinstance(step, nn.ReLU):
-                pass
-            elif isinstance(step, nn.Linear):
+            if isinstance(step, nn.ReLU) or isinstance(step, nn.Linear):
                 pass
             else:
                 raise ModelConfigurationError(

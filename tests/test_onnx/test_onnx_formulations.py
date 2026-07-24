@@ -3,7 +3,7 @@ import os
 import numpy as np
 import onnx
 from joblib import load
-from onnx import helper, TensorProto
+from onnx import TensorProto, helper
 
 from ..fixed_formulation import FixedRegressionModel
 

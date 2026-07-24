@@ -3,7 +3,7 @@ import unittest
 import gurobipy as gp
 import numpy as np
 import onnx
-from onnx import helper, TensorProto
+from onnx import TensorProto, helper
 
 from gurobi_ml import add_predictor_constr
 from gurobi_ml.exceptions import ModelConfigurationError

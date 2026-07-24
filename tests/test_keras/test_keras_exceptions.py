@@ -1,8 +1,8 @@
 import unittest
 
 import gurobipy as gp
-import numpy as np
 import keras
+import numpy as np
 
 from gurobi_ml import add_predictor_constr
 from gurobi_ml.exceptions import ModelConfigurationError

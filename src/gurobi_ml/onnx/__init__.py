@@ -19,4 +19,4 @@ Currently supports sequential MLPs represented with ONNX `Gemm` layers and
 `Relu` activations, matching the capabilities of the Keras and PyTorch
 converters (Dense/Linear + ReLU)."""
 
-from .onnx_model import add_onnx_constr as add_onnx_constr  # noqa: F401
+from .onnx_model import add_onnx_constr as add_onnx_constr

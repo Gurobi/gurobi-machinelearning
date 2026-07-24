@@ -1,8 +1,10 @@
 import unittest
-import numpy as np
+
 import gurobipy as gp
+import numpy as np
 from gurobipy import GRB
 from sklearn.tree import DecisionTreeRegressor
+
 from gurobi_ml.sklearn import add_decision_tree_regressor_constr
 
 

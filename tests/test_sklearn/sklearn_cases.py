@@ -7,15 +7,26 @@ from sklearn import __version__ as sklearn_version
 from sklearn import datasets
 from sklearn.compose import ColumnTransformer, make_column_transformer
 from sklearn.cross_decomposition import PLSCanonical, PLSRegression  # noqa
-from sklearn.ensemble import GradientBoostingRegressor  # noqa
-from sklearn.ensemble import RandomForestRegressor  # noqa
-from sklearn.linear_model import LogisticRegression  # noqa
-from sklearn.linear_model import Lasso, LinearRegression, Ridge  # noqa
+from sklearn.ensemble import (
+    GradientBoostingRegressor,  # noqa
+    RandomForestRegressor,  # noqa
+)
+from sklearn.linear_model import (  # noqa
+    Lasso,
+    LinearRegression,
+    LogisticRegression,
+    Ridge,
+)
 from sklearn.neural_network import MLPClassifier, MLPRegressor  # noqa
-from sklearn.pipeline import Pipeline  # noqa
-from sklearn.pipeline import make_pipeline  # noqa
-from sklearn.preprocessing import PolynomialFeatures  # noqa
-from sklearn.preprocessing import OneHotEncoder, StandardScaler  # noqa
+from sklearn.pipeline import (
+    Pipeline,
+    make_pipeline,
+)
+from sklearn.preprocessing import (
+    OneHotEncoder,
+    PolynomialFeatures,
+    StandardScaler,
+)
 from sklearn.tree import DecisionTreeRegressor  # noqa
 
 from gurobi_ml.sklearn import sklearn_predictors, sklearn_transformers

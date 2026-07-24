@@ -18,8 +18,8 @@
 import numbers
 import warnings
 
-import numpy as np
 import keras
+import numpy as np
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling.neuralnet import BaseNNConstr

@@ -1,8 +1,10 @@
 import unittest
+
+import gurobipy as gp
 import numpy as np
 import pandas as pd
-import gurobipy as gp
 from sklearn.linear_model import LinearRegression
+
 from gurobi_ml import add_predictor_constr
 
 

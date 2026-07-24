@@ -18,7 +18,7 @@
 import warnings
 
 import numpy as np
-from sklearn.utils.validation import check_is_fitted, _check_feature_names
+from sklearn.utils.validation import _check_feature_names, check_is_fitted
 
 from ..exceptions import NoSolutionError
 from ..modeling import AbstractPredictorConstr

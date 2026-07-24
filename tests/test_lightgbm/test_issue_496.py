@@ -1,8 +1,10 @@
-import numpy as np
-import lightgbm as lgb
-import gurobipy as gp
-from gurobipy import GRB
 import unittest
+
+import gurobipy as gp
+import lightgbm as lgb
+import numpy as np
+from gurobipy import GRB
+
 from gurobi_ml.lightgbm import add_lgbm_booster_constr
 
 
