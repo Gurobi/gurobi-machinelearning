@@ -34,3 +34,6 @@ Documentation = "https://gurobi-optimization-gurobi-machine-learning.readthedocs
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.ruff.lint.per-file-ignores]
+"docs/examples/*.py" = ["B018"]

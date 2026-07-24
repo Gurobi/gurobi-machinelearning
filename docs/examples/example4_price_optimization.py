@@ -121,7 +121,7 @@ avocado_old["date"] = pd.to_datetime(avocado_old["date"], format="%m/%d/%y")
 
 # Concatenate the two notebooks
 avocado = pd.concat([avocado, avocado_old])
-avocado  # noqa: B018
+avocado
 
 
 ######################################################################
@@ -161,7 +161,7 @@ avocado = avocado[
     ["date", "units_sold", "price", "region", "year", "month", "peak"]
 ].reset_index(drop=True)
 
-avocado  # noqa: B018
+avocado
 
 
 ######################################################################
@@ -466,7 +466,7 @@ data = pd.concat(
     axis=1,
 )
 
-data  # noqa: B018
+data
 
 
 ######################################################################
@@ -509,7 +509,7 @@ d = gppd.add_vars(
 m.update()
 
 # Display one of the variables
-p  # noqa: B018
+p
 
 
 ######################################################################
@@ -640,7 +640,7 @@ feats = pd.DataFrame(
     },
     index=regions,
 )
-feats  # noqa: B018
+feats
 
 
 ######################################################################
