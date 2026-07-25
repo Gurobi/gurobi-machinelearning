@@ -24,10 +24,10 @@ jobs:
     - name: Using ref ${{ github.ref }}
       run: echo "${{ github.ref }}"
     - uses: actions/checkout@v7
-    - name: Set up Python 3.10
+    - name: Set up Python 3.11
       uses: actions/setup-python@v7
       with:
-        python-version: '3.10'
+        python-version: '3.11'
         cache: 'pip'
         cache-dependency-path: 'pyproject.toml'
     - name: Install dependencies
@@ -55,10 +55,10 @@ jobs:
       with:
         name: artifact
         path: dist
-    - name: Set up Python 3.10
+    - name: Set up Python 3.11
       uses: actions/setup-python@v7
       with:
-        python-version: '3.10'
+        python-version: '3.11'
         cache: 'pip'
         cache-dependency-path: 'pyproject.toml'
     - name: Install dependencies
