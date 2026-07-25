@@ -40,7 +40,7 @@ source .venv/bin/activate
 pip install tox tox-uv
 ```
 
-A valid Gurobi license is required to run most tests. Set the `GRB_LICENSE_FILE` environment variable to point to your license file.
+A valid Gurobi license is required to run some tests. Set the `GRB_LICENSE_FILE` environment variable to point to your license file.
 
 ## Running Tests
 
@@ -120,7 +120,6 @@ All source files under `src/` and notebooks must include the Apache-2.0 license 
 - **Formatter/linter:** `ruff` — do not use `black` or `flake8` directly
 - **Imports:** unused imports are removed automatically by `autoflake`; keep imports clean
 - **License header:** every `.py` file in `src/` and every `.ipynb` must begin with the Apache-2.0 copyright header (see any existing source file for the exact format)
-- **Type annotations:** encouraged for public APIs
 - **Docstrings:** use NumPy-style docstrings for public functions and classes (consistent with the Sphinx docs)
 - **Commit messages:** follow [gitlint](https://jorisroovers.com/gitlint/) conventions — subject line ≤ 72 characters, imperative mood
 
@@ -152,13 +151,9 @@ register_predictor_constr(MyPredictorClass, MyConstraintClass)
 - Include tests for all changed behavior.
 - All pre-commit hooks must pass (`tox -e pre-commit`).
 - All relevant test environments must pass.
-- Accept the [Contributor License Agreement (CLA)](https://gist.github.com/mattmilten/d1c9640d79bde0ece8c2f46152639011) before your PR can be merged.
 - Respond to all review comments; resolve them after changes are applied.
 
 ## Useful Resources
 
 - [Documentation](https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com/)
 - [GitHub Issues](https://github.com/Gurobi/gurobi-machinelearning/issues)
-- [Gurobi Community Forum](https://support.gurobi.com/hc/en-us/community/topics/10373864542609-GitHub-Projects)
-- [Gurobi Support](https://support.gurobi.com/hc/en-us)
-- [Academic License](https://www.gurobi.com/academia/academic-program-and-licenses/)
