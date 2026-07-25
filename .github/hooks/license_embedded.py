@@ -1,6 +1,6 @@
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 expected_license = Path("copyright.txt").read_text().rstrip()
@@ -28,7 +28,7 @@ def _allowed_first_line(line: str, base_first_line: str) -> bool:
         return False
 
     middle = line[len(pre) : len(line) - len(post)]
-    current_year = datetime.now(tz=timezone.utc).year
+    current_year = datetime.now(tz=UTC).year
 
     # Accept single current year
     if re.fullmatch(r"\d{4}", middle):
@@ -65,7 +65,7 @@ def license_header_matches(text: str) -> bool:
 
 def python_check(content: str, cur_file: str) -> str:
     if not license_header_matches(content):
-        y = datetime.now(tz=timezone.utc).year
+        y = datetime.now(tz=UTC).year
         return (
             f"'{cur_file}' did not start with copyright.txt content. "
             f"First line must use either '{y}' or 'START-{y}' with START>=2023."
@@ -84,7 +84,7 @@ def notebook_check(content: str, cur_file: str) -> str:
         )
 
     if not isinstance(full_text, str) or not license_header_matches(full_text):
-        y = datetime.now(tz=timezone.utc).year
+        y = datetime.now(tz=UTC).year
         return (
             f"'{cur_file}' license metadata does not match expected text. "
             f"First line must use either '{y}' or 'START-{y}' with START>=2023."

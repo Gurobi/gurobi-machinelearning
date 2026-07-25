@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath("../../src/"))
 config = SphinxConfig("../../pyproject.toml", globalns=globals())
 
 project = "Gurobi Machine Learning"
-copyright = f"{datetime.datetime.now(tz=datetime.timezone.utc).year}, Gurobi Optimization, LLC. All Rights Reserved."
+copyright = f"{datetime.datetime.now(tz=datetime.UTC).year}, Gurobi Optimization, LLC. All Rights Reserved."
 
 # -- General configuration ---------------------------------------------------
 
