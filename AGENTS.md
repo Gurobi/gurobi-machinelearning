@@ -116,7 +116,7 @@ All source files under `src/` and notebooks must include the Apache-2.0 license 
 
 ## Code Conventions
 
-- **Python version target:** 3.10+ (use 3.11+ features freely in non-public code; `pyupgrade` enforces `--py311-plus`)
+- **Python version target:** supported runtime `>=3.10` (see `pyproject.toml`), but CI/tooling targets Python 3.11–3.13 (`pyupgrade --py311-plus`).
 - **Formatter/linter:** `ruff` — do not use `black` or `flake8` directly
 - **Imports:** unused imports are removed automatically by `autoflake`; keep imports clean
 - **License header:** every `.py` file in `src/` and every `.ipynb` must begin with the Apache-2.0 copyright header (see any existing source file for the exact format)
