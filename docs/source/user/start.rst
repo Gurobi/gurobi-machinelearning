@@ -60,7 +60,7 @@ We encourage to install the package via pip (or add it to your
 
 .. note::
 
-  The package is tested with and is supported for Python 3.9, 3.10, 3.11 and 3.12.
+  The package is tested with and is supported for Python 3.11, 3.12 and 3.13.
   It is also tested and supported with Gurobi 10, 11 and 12. Note however, that some newer
   features of Gurobi from later versions are used and some models may perform significantly
   worse with the older versions.
