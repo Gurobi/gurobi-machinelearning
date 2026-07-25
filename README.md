@@ -1,6 +1,6 @@
 [![build and test](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/push.yml/badge.svg?branch=main)](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/push.yml?query=branch%3Amain++)
 [![build wheel](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/build_wheel.yml/badge.svg?branch=main)](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/build_wheel.yml?query=branch%3Amain++)
-![Python versions](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue)
+![Python versions](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI](https://img.shields.io/pypi/v/gurobi-machinelearning)](https://pypi.org/project/gurobi-machinelearning)
 [![Documentation Status](https://readthedocs.org/projects/gurobi-machinelearning/badge/?version=stable)](https://gurobi-machinelearning.readthedocs.io/en/stable/?badge=stable)
@@ -34,7 +34,7 @@ If you encounter issues with Gurobi or ``gurobipy`` please contact
 ## Dependencies
 
 `gurobi-machinelearning` requires the following:
-- Python >= 3.9
+- Python >= 3.11
 - [`numpy`](https://pypi.org/project/numpy/) >= 1.23.0
 - [`gurobipy`](https://pypi.org/project/gurobipy/) >= 10.0
 - [`scipy`](https://pypi.org/project/scipy/) >= 1.9.3
@@ -91,7 +91,7 @@ git clone git@github.com:Gurobi/gurobi-machinelearning.git
 After cloning the project, you can run the tests by invoking `tox`. For this, you will need to create a virtual
 environment and activate it:
 ```shell
-python3.10 -m venv .venv
+python3.11 -m venv .venv
 . .venv/bin/activate
 ```
 Then, you can install `tox` (>= 3.26.0) and run a few basic tests:
