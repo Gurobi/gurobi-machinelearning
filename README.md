@@ -36,7 +36,7 @@ If you encounter issues with Gurobi or ``gurobipy`` please contact
 `gurobi-machinelearning` requires the following:
 - Python >= 3.11
 - [`numpy`](https://pypi.org/project/numpy/) >= 1.23.0
-- [`gurobipy`](https://pypi.org/project/gurobipy/) >= 10.0
+- [`gurobipy`](https://pypi.org/project/gurobipy/) >= 11.0
 - [`scipy`](https://pypi.org/project/scipy/) >= 1.9.3
 
 The current version supports the following ML packages:
