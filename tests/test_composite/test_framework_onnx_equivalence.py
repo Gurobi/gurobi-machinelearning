@@ -50,6 +50,16 @@ import gurobipy as gp
 from gurobi_ml import add_predictor_constr
 
 
+def _make_diabetes_sequential():
+    """Create a reproducible Sequential model for the diabetes dataset (10 features -> 1 output)."""
+    torch.manual_seed(42)
+    return torch.nn.Sequential(
+        torch.nn.Linear(10, 10),
+        torch.nn.ReLU(),
+        torch.nn.Linear(10, 1),
+    )
+
+
 class TestFrameworkONNXEquivalence(unittest.TestCase):
     """Test that framework models produce same results as their ONNX conversions."""
 
@@ -148,10 +158,9 @@ class TestFrameworkONNXEquivalence(unittest.TestCase):
         """Test basic PyTorch to ONNX conversion produces consistent results."""
         X = load(os.path.join(self.basedir, "examples_diabetes.joblib"))
 
-        # Load PyTorch model
-        filename = os.path.join(self.basedir, "diabetes__pytorch.pt")
+        # Create PyTorch model with fixed seed (avoids loading pickled files)
         try:
-            pytorch_model = torch.load(filename, weights_only=False)
+            pytorch_model = _make_diabetes_sequential()
             pytorch_model.eval()
         except Exception as e:  # noqa: BLE001
             self.skipTest(f"Could not load PyTorch model: {e}")
@@ -278,9 +287,7 @@ class TestFrameworkONNXEquivalence(unittest.TestCase):
 
         # Test PyTorch -> ONNX
         try:
-            pytorch_model = torch.load(
-                os.path.join(self.basedir, "diabetes__pytorch.pt"), weights_only=False
-            )
+            pytorch_model = _make_diabetes_sequential()
             pytorch_model.eval()
 
             with torch.no_grad():
