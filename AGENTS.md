@@ -168,14 +168,23 @@ Releases are handled in two GitHub Actions workflows:
      - `pypi_repo` (`testpypi` or `pypi`)
    - Downloads matching artifacts for that version from staging and publishes with `pypa/gh-action-pypi-publish`.
 
-To cut a new release:
+Release branch policy:
 
-1. Update `version` in `pyproject.toml` as needed for the release.
-2. Create and push a release tag (for example `v1.7.0`) so the wheel build/upload workflow runs.
+- **Feature release** (for example `1.8.0`):
+  - Create a new release branch from `main` named `1.8.x`.
+  - Set the release version on that branch, tag it (for example `v1.8.0`), and publish.
+  - Bump `main` to the next development version after the release work is cut.
+- **Bugfix release** (for example `1.7.1`):
+  - Do **not** create a new major/minor branch if `1.7.x` already exists.
+  - Commit fixes on the existing `1.7.x` branch, update version/tag there (for example `v1.7.1`), and publish from that maintenance line.
+
+To publish any release (feature or bugfix):
+
+1. Ensure `pyproject.toml` contains the target release version on the branch being released.
+2. Create and push the release tag so the wheel build/upload workflow runs.
 3. Run the **Publish to Pypi** workflow for that version:
    - First against `testpypi` (recommended verification step),
-   - Then against `pypi` for the final publication.
-4. Bump `pyproject.toml` back to the next development version (for example `1.8dev`) after release publication.
+   - Then against `pypi` for final publication.
 
 ## Useful Resources
 
