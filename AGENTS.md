@@ -153,6 +153,30 @@ register_predictor_constr(MyPredictorClass, MyConstraintClass)
 - All relevant test environments must pass.
 - Respond to all review comments; resolve them after changes are applied.
 
+## Release Process
+
+Releases are handled in two GitHub Actions workflows:
+
+1. **Build artifacts** (`.github/workflows/build_wheel.yml`)
+   - Triggered on pushes to `main`, release branches (`[0-9]+.[0-9]+.x`), and tags.
+   - Builds source and wheel artifacts with `python -m build`.
+   - On pushes to `main` or tags, uploads artifacts to the Anaconda staging channel `gurobi-machinelearning-wheels-staging`.
+2. **Publish to PyPI** (`.github/workflows/publish_pypi.yml`)
+   - Manually triggered with `workflow_dispatch`.
+   - Inputs:
+     - `version` (tag/version to publish; leading `v` is accepted and stripped)
+     - `pypi_repo` (`testpypi` or `pypi`)
+   - Downloads matching artifacts for that version from staging and publishes with `pypa/gh-action-pypi-publish`.
+
+To cut a new release:
+
+1. Update `version` in `pyproject.toml` as needed for the release.
+2. Create and push a release tag (for example `v1.7.0`) so the wheel build/upload workflow runs.
+3. Run the **Publish to Pypi** workflow for that version:
+   - First against `testpypi` (recommended verification step),
+   - Then against `pypi` for the final publication.
+4. Bump `pyproject.toml` back to the next development version (for example `1.8dev`) after release publication.
+
 ## Useful Resources
 
 - [Documentation](https://gurobi-optimization-gurobi-machine-learning.readthedocs-hosted.com/)
