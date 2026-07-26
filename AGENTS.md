@@ -184,7 +184,7 @@ To publish any release (feature or bugfix):
 2. Create and push the release tag so the wheel build/upload workflow runs.
 3. Run the **Publish to Pypi** workflow for that version:
    - First against `testpypi` (recommended verification step),
-   - Then against `pypi` for final publication.
+   - Final `pypi` publication is a maintainer-owned manual step (do it yourself when ready).
 
 ## Useful Resources
 
