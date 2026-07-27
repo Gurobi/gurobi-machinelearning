@@ -330,7 +330,41 @@ class WageCase(Cases):
         )
 
     def load_data(self):
-        survey = datasets.fetch_openml(data_id=534, as_frame=True, parser="pandas")
-        X, y = survey.data[survey.feature_names], survey.target.values.ravel()
+        import pandas as pd
+
+        rng = np.random.RandomState(0)
+        n_samples = 128
+        occupations = np.array(["ADMIN", "SALES", "TECH", "SERVICE"])
+        sectors = np.array(["PUBLIC", "PRIVATE", "HEALTH", "EDUCATION"])
+
+        education = rng.uniform(8, 21, size=n_samples)
+        experience = rng.uniform(0, 41, size=n_samples)
+        age = np.maximum(
+            18, education + experience + rng.uniform(5, 25, size=n_samples)
+        )
+        occupation = occupations[rng.randint(len(occupations), size=n_samples)]
+        sector = sectors[rng.randint(len(sectors), size=n_samples)]
+
+        X = pd.DataFrame(
+            {
+                "OCCUPATION": occupation,
+                "SECTOR": sector,
+                "EDUCATION": education,
+                "EXPERIENCE": experience,
+                "AGE": age,
+            }
+        )
+
+        occupation_effect = {"ADMIN": 1.0, "SALES": 2.5, "TECH": 4.0, "SERVICE": 0.5}
+        sector_effect = {"PUBLIC": 0.0, "PRIVATE": 2.0, "HEALTH": 1.5, "EDUCATION": 1.0}
+        y = (
+            12.0
+            + 1.8 * education
+            + 0.75 * experience
+            + 0.1 * age
+            + np.array([occupation_effect[value] for value in occupation])
+            + np.array([sector_effect[value] for value in sector])
+            + rng.normal(scale=0.25, size=n_samples)
+        )
 
         self._data = (X, y)
