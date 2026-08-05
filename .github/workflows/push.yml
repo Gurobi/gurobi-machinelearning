@@ -58,6 +58,12 @@ jobs:
           GUROBI_VERSION: ${{ matrix.gurobi-version }}
         run: |
           uvx tox
+      - name: Upload coverage artifact
+        if: matrix.python-version == '3.12' && matrix.gurobi-version == 'gurobi13'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report-python
+          path: coverage.xml
 
   examples:
     needs: test
@@ -88,3 +94,21 @@ jobs:
         run: |
           python_version_no_dot=$(echo "${{ matrix.python-version }}" | tr -d '.')
           uvx tox -e py${python_version_no_dot}-examples-${{ matrix.gurobi-version }}
+
+  upload-coverage-python:
+    needs: test
+    if: ${{ !cancelled() && needs.test.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      code-quality: write
+    steps:
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: coverage-report-python
+      - uses: actions/upload-code-coverage@v1
+        with:
+          file: coverage.xml
+          language: Python
+          label: code-coverage-agent
