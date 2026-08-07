@@ -1,6 +1,6 @@
 [![build and test](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/push.yml/badge.svg?branch=main)](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/push.yml?query=branch%3Amain++)
 [![build wheel](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/build_wheel.yml/badge.svg?branch=main)](https://github.com/Gurobi/gurobi-machinelearning/actions/workflows/build_wheel.yml?query=branch%3Amain++)
-![Python versions](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue)
+![Python versions](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI](https://img.shields.io/pypi/v/gurobi-machinelearning)](https://pypi.org/project/gurobi-machinelearning)
 [![Documentation Status](https://readthedocs.org/projects/gurobi-machinelearning/badge/?version=stable)](https://gurobi-machinelearning.readthedocs.io/en/stable/?badge=stable)
@@ -13,7 +13,7 @@
 
 Gurobi Machine Learning is an [open-source](https://gurobi-machinelearning.readthedocs.io/en/latest/meta/license.html) python package to formulate trained regression models in a [`gurobipy`](https://pypi.org/project/gurobipy/) model to be solved with the Gurobi solver.
 
-The package currently supports various [scikit-learn](https://scikit-learn.org/stable/) objects. It has limited support for [Keras](https://keras.io/), [PyTorch](https://pytorch.org/) and [XGBoost](https://www.xgboost.ai). Only neural networks with ReLU activation can be used with Keras and PyTorch.
+The package currently supports various [scikit-learn](https://scikit-learn.org/stable/) objects. It also supports [XGBoost](https://www.xgboost.ai), [LightGBM](https://lightgbm.readthedocs.io/), [ONNX](https://onnx.ai/), and has limited support for [Keras](https://keras.io/) and [PyTorch](https://pytorch.org/). Only neural networks with ReLU activation can be used with Keras and PyTorch.
 
 # Documentation
 
@@ -34,19 +34,21 @@ If you encounter issues with Gurobi or ``gurobipy`` please contact
 ## Dependencies
 
 `gurobi-machinelearning` requires the following:
-- Python >= 3.9
-- [`numpy`](https://pypi.org/project/numpy/) >= 1.23.0
-- [`gurobipy`](https://pypi.org/project/gurobipy/) >= 10.0
+- Python >= 3.11
+- [`numpy`](https://pypi.org/project/numpy/) >= 1.22.0
+- [`gurobipy`](https://pypi.org/project/gurobipy/) >= 11.0.0
 - [`scipy`](https://pypi.org/project/scipy/) >= 1.9.3
 
 The current version supports the following ML packages:
 - [`torch`](https://pypi.org/project/torch/)
 - [`scikit-learn`](https://pypi.org/project/scikit-learn)
-- [`tensorflow`](https://pypi.org/project/tensorflow)
+- [`keras`](https://pypi.org/project/keras)
 - [`XGBoost`](https://pypi.org/project/xgboost/)
+- [`lightgbm`](https://pypi.org/project/lightgbm/)
+- [`onnx`](https://pypi.org/project/onnx/)
 
 Installing these packages is only required if the predictor you want to insert uses them
-(i.e. to insert a Keras based predictor you need to have `tensorflow` installed).
+(i.e. to insert a Keras based predictor you need to have `keras` installed).
 
 The up to date supported and tested versions of each package for the last release can be
 [found in the documentation](https://gurobi-machinelearning.readthedocs.io/en/stable/user/start.html#id7).
@@ -91,7 +93,7 @@ git clone git@github.com:Gurobi/gurobi-machinelearning.git
 After cloning the project, you can run the tests by invoking `tox`. For this, you will need to create a virtual
 environment and activate it:
 ```shell
-python3.10 -m venv .venv
+python3.11 -m venv .venv
 . .venv/bin/activate
 ```
 Then, you can install `tox` (>= 3.26.0) and run a few basic tests:
