@@ -18,10 +18,15 @@
 into a :external+gurobi:py:class:`Model`.
 """
 
+import numpy as np
 from gurobipy import GRB
 
 from ..modeling import AbstractPredictorConstr
-from .decision_tree_regressor import add_decision_tree_regressor_constr
+from ..modeling.decision_tree import ENSEMBLE_FORMULATIONS, TreeLeavesAccessor
+from .decision_tree_regressor import (
+    _add_sklearn_tree_ensemble_formulation,
+    add_decision_tree_regressor_constr,
+)
 from .skgetter import SKgetter
 
 
@@ -56,6 +61,11 @@ def add_random_forest_regressor_constr(
     safety_floor : float, optional
         |SafetyFloorParam|
 
+    Other Parameters
+    ----------------
+    formulation : str, optional
+        |TreeFormulationParam|
+
     Returns
     -------
     RandomForestRegressorConstr
@@ -81,7 +91,9 @@ def add_random_forest_regressor_constr(
     )
 
 
-class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
+class RandomForestRegressorConstr(
+    SKgetter, TreeLeavesAccessor, AbstractPredictorConstr
+):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.ensemble.RandomForestRegressor` in a
     gurobipy model.
@@ -119,6 +131,22 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
         output = self._output
         nex = _input.shape[0]
 
+        formulation = kwargs.get("formulation", "leaf")
+        if formulation in ENSEMBLE_FORMULATIONS:
+            self._tree_leaves = _add_sklearn_tree_ensemble_formulation(
+                model,
+                predictor.estimators_,
+                np.ones(predictor.n_estimators),
+                _input,
+                output,
+                formulation,
+                kwargs.get("epsilon", 0.0),
+                self._name_var,
+                safety_floor=self.safety_floor,
+                output_coef=predictor.n_estimators,
+            )
+            return
+
         if self._no_debug:
             kwargs["no_record"] = True
 
@@ -149,6 +177,10 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
                 )
             )
         self.estimators_ = estimators
+        if all(est._tree_leaves is not None for est in estimators):
+            self._tree_leaves = tuple(
+                leaves for est in estimators for leaves in est._tree_leaves
+            )
 
         model.addConstr(predictor.n_estimators * output == tree_vars.sum(axis=1))
 
@@ -167,7 +199,7 @@ class RandomForestRegressorConstr(SKgetter, AbstractPredictorConstr):
             Text stream to which output should be redirected. By default sys.stdout.
         """
         super().print_stats(abbrev=abbrev, file=file)
-        if abbrev or self._no_debug:
+        if abbrev or self._no_debug or not self.estimators_:
             return
         print(file=file)
 

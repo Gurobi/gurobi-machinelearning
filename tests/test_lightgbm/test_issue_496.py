@@ -38,24 +38,52 @@ class TestIssue496(unittest.TestCase):
         self.X = X
 
     def test_numerical_issue_leaf_formulation(self):
+        self._check_numerical_issue_warning("leaf")
+
+    def test_numerical_issue_misic(self):
+        self._check_numerical_issue_warning("misic")
+
+    def test_numerical_issue_ocean(self):
+        self._check_numerical_issue_warning("ocean")
+
+    def test_numerical_issue_biggs_perakis(self):
+        self._check_numerical_issue_warning("biggs_perakis")
+
+    def _check_numerical_issue_warning(self, formulation):
         """Verify that a warning is raised when thresholds fall below FeasibilityTol."""
         with gp.Env(params={"OutputFlag": 0}) as env, gp.Model(env=env) as m:
             x_vars = m.addMVar(shape=5, lb=-10.0, ub=10.0, name="x")
             y_var = m.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, name="score")
             with self.assertWarns(UserWarning):
                 add_lgbm_booster_constr(
-                    m, self.model, x_vars, y_var, formulation="leaf"
+                    m, self.model, x_vars, y_var, formulation=formulation
                 )
 
     def test_leaf_formulation_fix(self):
-        """Verify that the leaf formulation with safety_floor fixes the numerical issue."""
+        self._check_safety_floor_fix("leaf")
+
+    def test_misic_formulation_fix(self):
+        self._check_safety_floor_fix("misic")
+
+    def test_ocean_formulation_fix(self):
+        self._check_safety_floor_fix("ocean")
+
+    def test_biggs_perakis_formulation_fix(self):
+        self._check_safety_floor_fix("biggs_perakis")
+
+    def _check_safety_floor_fix(self, formulation):
         with gp.Env(params={"OutputFlag": 0}) as env, gp.Model(env=env) as m:
             x_vars = m.addMVar(shape=5, lb=-10.0, ub=10.0, name="x")
             y_var = m.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, name="score")
 
-            # Use leaf formulation with safety_floor to avoid the issue
+            # Use the formulation with safety_floor to avoid the issue
             add_lgbm_booster_constr(
-                m, self.model, x_vars, y_var, formulation="leaf", safety_floor=1e-5
+                m,
+                self.model,
+                x_vars,
+                y_var,
+                formulation=formulation,
+                safety_floor=1e-5,
             )
             m.update()
 

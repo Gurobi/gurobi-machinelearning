@@ -15,12 +15,65 @@
 
 """Utilities for modeling decision trees"""
 
+from typing import NamedTuple
 from warnings import warn
 
+import gurobipy as gp
 import numpy as np
 from gurobipy import GRB
 
 from ..base_predictor_constr import AbstractPredictorConstr
+
+
+class TreeLeaves(NamedTuple):
+    """Leaf variables of one tree.
+
+    ``variables[k, j]`` equals 1 when input row ``k`` reaches the leaf with
+    node id ``nodes[j]``, and 0 otherwise. The columns ``j`` run over the
+    leaves that some input row can reach given the bounds of the input
+    variables; for a row that cannot reach leaf ``j``, the upper bound of
+    ``variables[k, j]`` is fixed to 0.
+
+    The kind of variable depends on the formulation: binary variables for
+    ``"leaf"`` and ``"biggs_perakis"``, continuous leaf weights for
+    ``"misic"`` and ``"misic_lazy"``, continuous leaf flows for ``"ocean"``.
+    The continuous variables take the values 0 and 1 in a solution of the
+    MIP, but can be fractional in its relaxation (e.g. with
+    :external+gurobi:py:meth:`Model.relax`).
+
+    Attributes
+    ----------
+    variables : :external+gurobi:py:class:`MVar`
+        Leaf variables, of shape (number of input rows, number of reachable
+        leaves).
+    nodes : ndarray
+        Node id of each reachable leaf in the tree.
+    """
+
+    variables: gp.MVar
+    nodes: np.ndarray
+
+
+class TreeLeavesAccessor:
+    """Mixin exposing per-tree leaf variables."""
+
+    _tree_leaves = None
+
+    @property
+    def tree_leaves(self):
+        """Tuple of :py:class:`TreeLeaves`, one per tree.
+
+        Raises
+        ------
+        AttributeError
+            If the formulation does not expose leaf variables (``"paths"``).
+        """
+        if self._tree_leaves is None:
+            raise AttributeError(
+                "this predictor constraint's formulation does not expose "
+                "per-tree leaf variables"
+            )
+        return self._tree_leaves
 
 
 def _compute_leafs_bounds(gp_model, tree, feature_is_fixed, epsilon, safety_floor=0.0):
@@ -87,6 +140,40 @@ def _compute_leafs_bounds(gp_model, tree, feature_is_fixed, epsilon, safety_floo
     return (node_lb, node_ub)
 
 
+def _compute_reachability(
+    gp_model, tree, _input, feature_is_fixed, epsilon, nodes, safety_floor=0.0
+):
+    """Which examples can reach which of the given tree nodes.
+
+    A node is reachable for an example when the box of inputs routed to it
+    (from :py:func:`_compute_leafs_bounds`, so with the same epsilon and
+    ``feature_is_fixed`` semantics as the constraints) intersects the
+    example's input variable bounds.
+
+    Returns
+    -------
+    reachability : np.ndarray
+        Boolean array of shape ``(n_examples, len(nodes))``.
+    node_lb, node_ub : np.ndarray
+        Lower and upper bounds of the input box routed to each node of the
+        tree, of shape ``(n_features, capacity)``.
+    """
+    (node_lb, node_ub) = _compute_leafs_bounds(
+        gp_model, tree, feature_is_fixed, epsilon, safety_floor
+    )
+    input_lb = _input.getAttr(GRB.Attr.LB)
+    input_ub = _input.getAttr(GRB.Attr.UB)
+
+    selected_lb = node_lb[:, nodes]  # (n_features, len(nodes))
+    selected_ub = node_ub[:, nodes]
+    reachability = np.ones((_input.shape[0], len(nodes)), dtype=bool)
+    for f in range(tree["n_features"]):
+        reachability &= (input_ub[:, f, None] >= selected_lb[f, None, :]) & (
+            input_lb[:, f, None] <= selected_ub[f, None, :]
+        )
+    return reachability, node_lb, node_ub
+
+
 def _leafs_formulation(
     gp_model, _input, output, tree, epsilon, _name_var, verbose, timer, safety_floor=0.0
 ):
@@ -105,20 +192,11 @@ def _leafs_formulation(
     # Get fixed features we don't want to apply the epsilon for them
     feature_is_fixed = (_input.lb == _input.ub).all(axis=0)
 
-    (node_lb, node_ub) = _compute_leafs_bounds(
-        gp_model, tree, feature_is_fixed, epsilon, safety_floor
+    reachability_matrix, node_lb, node_ub = _compute_reachability(
+        gp_model, tree, _input, feature_is_fixed, epsilon, leaf_nodes, safety_floor
     )
     input_ub = _input.getAttr(GRB.Attr.UB)
     input_lb = _input.getAttr(GRB.Attr.LB)
-
-    # Reachability: compute (nex, n_leaves) without materializing a (nex, n_features, n_leaves) array.
-    leaf_lb = node_lb[:, leaf_nodes]  # (n_features, n_leaves)
-    leaf_ub = node_ub[:, leaf_nodes]  # (n_features, n_leaves)
-    reachability_matrix = np.ones((nex, leaf_nodes.size), dtype=bool)
-    for f in range(n_features):
-        reachability_matrix &= (input_ub[:, f, None] >= leaf_lb[f, None, :]) & (
-            input_lb[:, f, None] <= leaf_ub[f, None, :]
-        )
 
     # Drop leaves that no example can reach — they contribute nothing.
     any_reachable = reachability_matrix.any(axis=0)  # (n_leaves,)
@@ -188,6 +266,8 @@ def _leafs_formulation(
 
     if verbose:
         timer.timing(f"Added {nex} linear constraints")
+
+    return TreeLeaves(leafs_vars, active_leaf_nodes)
 
 
 def _paths_formulation(
@@ -302,7 +382,7 @@ def _paths_formulation(
     gp_model.addConstr(output >= np.min(tree["value"], axis=0))
 
 
-class AbstractTreeEstimator(AbstractPredictorConstr):
+class AbstractTreeEstimator(TreeLeavesAccessor, AbstractPredictorConstr):
     """Abstract class to model a decision tree
 
     The decision tree should be stored in a dictionary with a similar representation
@@ -342,8 +422,15 @@ class AbstractTreeEstimator(AbstractPredictorConstr):
         )
 
     def _mip_model(self, **kwargs):
+        # Imported here to avoid a circular import: the ensemble formulations
+        # build on helpers defined in this module.
+        from .ensemble_model import (
+            ENSEMBLE_FORMULATIONS,
+            add_tree_ensemble_formulation,
+        )
+
         if self._formulation in ("leafs", "leaf"):
-            _leafs_formulation(
+            leaves = _leafs_formulation(
                 self.gp_model,
                 self.input,
                 self.output,
@@ -354,12 +441,39 @@ class AbstractTreeEstimator(AbstractPredictorConstr):
                 self._timer,
                 self._safety_floor,
             )
+            self._tree_leaves = (leaves,)
         elif self._formulation == "paths":
             _paths_formulation(
                 self.gp_model,
                 self.input,
                 self.output,
                 self._tree,
+                self._epsilon,
+                self._name_var,
+                self._safety_floor,
+            )
+        elif self._formulation == "biggs_perakis":
+            from .biggs_perakis import _biggs_perakis_formulation
+
+            leaves = _biggs_perakis_formulation(
+                self.gp_model,
+                self.input,
+                self.output,
+                self._tree,
+                self._epsilon,
+                self._name_var,
+                self._safety_floor,
+            )
+            self._tree_leaves = (leaves,)
+        elif self._formulation in ENSEMBLE_FORMULATIONS:
+            # A lone decision tree is an ensemble of one tree.
+            self._tree_leaves = add_tree_ensemble_formulation(
+                self.gp_model,
+                [self._tree],
+                np.ones(1),
+                self.input,
+                self.output,
+                self._formulation,
                 self._epsilon,
                 self._name_var,
                 self._safety_floor,

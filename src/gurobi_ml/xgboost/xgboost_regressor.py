@@ -35,7 +35,12 @@ except ImportError:
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling import AbstractPredictorConstr
-from ..modeling.decision_tree import AbstractTreeEstimator
+from ..modeling.decision_tree import (
+    ENSEMBLE_FORMULATIONS,
+    AbstractTreeEstimator,
+    TreeLeavesAccessor,
+    add_tree_ensemble_formulation,
+)
 
 
 def add_xgbregressor_constr(
@@ -71,6 +76,11 @@ def add_xgbregressor_constr(
         MIP formulations.
     safety_floor : float, optional
         |SafetyFloorParam|
+
+    Other Parameters
+    ----------------
+    formulation : str, optional
+        |TreeFormulationParam|
 
     Returns
     -------
@@ -135,6 +145,11 @@ def add_xgboost_regressor_constr(
     safety_floor : float, optional
         |SafetyFloorParam|
 
+    Other Parameters
+    ----------------
+    formulation : str, optional
+        |TreeFormulationParam|
+
     Returns
     -------
     XGBoostRegressorConstr
@@ -165,7 +180,7 @@ def add_xgboost_regressor_constr(
     )
 
 
-class XGBoostRegressorConstr(AbstractPredictorConstr):
+class XGBoostRegressorConstr(TreeLeavesAccessor, AbstractPredictorConstr):
     """Class to model trained :external+xgb:py:class:`xgboost.Booster`
     in a gurobipy model.
 
@@ -210,6 +225,32 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
             self, gp_model, input_vars, output_vars, **kwargs
         )
 
+    @staticmethod
+    def _xgb_tree_to_dict(tree, epsilon):
+        """Convert one tree of an XGBoost booster's JSON dump to the dict
+        representation used by AbstractTreeEstimator.
+
+        XGBoost branches left iff ``x < t`` (strict); shifting the split
+        thresholds down by epsilon normalizes to the ``x <= t`` convention
+        of the tree formulations.
+        """
+        raw_vals = np.array(tree["split_conditions"], dtype=np.float32)
+        children_left = np.array(tree["left_children"])
+        is_leaf = children_left < 0
+
+        mip_thresholds = raw_vals.copy()
+        mip_thresholds[~is_leaf] -= epsilon
+
+        return {
+            "threshold": mip_thresholds,
+            "children_left": children_left,
+            "children_right": np.array(tree["right_children"]),
+            "feature": np.array(tree["split_indices"]),
+            "value": raw_vals.reshape(-1, 1),
+            "capacity": len(tree["split_conditions"]),
+            "n_features": int(tree["tree_param"]["num_feature"]),
+        }
+
     def _mip_model(self, **kwargs):
         """Build the MIP model for the XGBoost regressor.
 
@@ -243,46 +284,55 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
 
         n_estimators = len(trees)
 
-        estimators = []
+        formulation = kwargs.get("formulation", "leaf")
+        if formulation in ENSEMBLE_FORMULATIONS:
+            # The objective handling below needs the sum of the trees; the
+            # ensemble formulation provides it through one variable.
+            trees_sum = model.addMVar(
+                (nex, 1), lb=-GRB.INFINITY, name=self._name_var("trees_sum")
+            )
+            self._tree_leaves = add_tree_ensemble_formulation(
+                model,
+                [self._xgb_tree_to_dict(tree, self.epsilon) for tree in trees],
+                np.ones(n_estimators),
+                _input,
+                trees_sum,
+                formulation,
+                self.epsilon,
+                self._name_var,
+                safety_floor=self.safety_floor,
+            )
+        else:
+            estimators = []
 
-        tree_vars = model.addMVar(
-            (nex, n_estimators, 1),
-            lb=-GRB.INFINITY,
-            name=self._name_var("estimator"),
-        )
-
-        for i, tree in enumerate(trees):
-            if self.verbose:
-                self._timer.timing(f"Estimator {i}")
-            raw_vals = np.array(tree["split_conditions"], dtype=np.float32)
-            children_left = np.array(tree["left_children"])
-            is_leaf = children_left < 0
-
-            mip_thresholds = raw_vals.copy()
-            mip_thresholds[~is_leaf] -= self.epsilon
-
-            tree["threshold"] = mip_thresholds
-            tree["children_left"] = children_left
-            tree["children_right"] = np.array(tree["right_children"])
-            tree["feature"] = np.array(tree["split_indices"])
-            tree["value"] = raw_vals.reshape(-1, 1)
-            tree["capacity"] = len(tree["split_conditions"])
-            tree["n_features"] = int(tree["tree_param"]["num_feature"])
-
-            estimators.append(
-                AbstractTreeEstimator(
-                    self.gp_model,
-                    tree,
-                    self.input,
-                    tree_vars[:, i, :],
-                    self.epsilon,
-                    timer,
-                    safety_floor=self.safety_floor,
-                    **kwargs,
-                )
+            tree_vars = model.addMVar(
+                (nex, n_estimators, 1),
+                lb=-GRB.INFINITY,
+                name=self._name_var("estimator"),
             )
 
-        self.estimators_ = estimators
+            for i, tree in enumerate(trees):
+                if self.verbose:
+                    self._timer.timing(f"Estimator {i}")
+                estimators.append(
+                    AbstractTreeEstimator(
+                        self.gp_model,
+                        self._xgb_tree_to_dict(tree, self.epsilon),
+                        self.input,
+                        tree_vars[:, i, :],
+                        self.epsilon,
+                        timer,
+                        safety_floor=self.safety_floor,
+                        **kwargs,
+                    )
+                )
+
+            self.estimators_ = estimators
+            if all(est._tree_leaves is not None for est in estimators):
+                self._tree_leaves = tuple(
+                    leaves for est in estimators for leaves in est._tree_leaves
+                )
+            trees_sum = tree_vars.sum(axis=1)
 
         base_score_raw = xgb_raw["learner"]["learner_model_param"]["base_score"]
         # In XGBoost 3.x, base_score is stored as a string representation of an array
@@ -307,12 +357,10 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
                 )
 
             if HAS_NLFUNC:
-                model.addConstr(
-                    output == nlfunc.logistic(learning_rate * tree_vars.sum(axis=1))
-                )
+                model.addConstr(output == nlfunc.logistic(learning_rate * trees_sum))
             else:
                 affinevar = model.addMVar(output.shape, lb=-float("infinity"))
-                model.addConstr(affinevar == learning_rate * tree_vars.sum(axis=1))
+                model.addConstr(affinevar == learning_rate * trees_sum)
                 for index in np.ndindex(self.output.shape):
                     self.gp_model.addGenConstrLogistic(
                         affinevar[index],
@@ -324,7 +372,7 @@ class XGBoostRegressorConstr(AbstractPredictorConstr):
                 for gen_constr in self.gp_model.getGenConstrs()[num_gc:]:
                     gen_constr.setAttr("FuncNonLinear", 1)
         elif objective == "reg:squarederror":
-            model.addConstr(output == learning_rate * tree_vars.sum(axis=1) + constant)
+            model.addConstr(output == learning_rate * trees_sum + constant)
         else:
             raise ModelConfigurationError(
                 xgb_regressor, f"objective type '{objective}' not implemented"
