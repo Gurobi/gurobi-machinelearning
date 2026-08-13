@@ -25,7 +25,12 @@ from gurobipy import GRB
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling import AbstractPredictorConstr
-from ..modeling.decision_tree import AbstractTreeEstimator
+from ..modeling.decision_tree import (
+    ENSEMBLE_FORMULATIONS,
+    AbstractTreeEstimator,
+    TreeLeavesAccessor,
+    add_tree_ensemble_formulation,
+)
 
 
 def add_lgbmregressor_constr(
@@ -61,6 +66,11 @@ def add_lgbmregressor_constr(
         MIP formulations.
     safety_floor : float, optional
         |SafetyFloorParam|
+
+    Other Parameters
+    ----------------
+    formulation : str, optional
+        |TreeFormulationParam|
 
     Returns
     -------
@@ -125,6 +135,11 @@ def add_lgbm_booster_constr(
     safety_floor : float, optional
         |SafetyFloorParam|
 
+    Other Parameters
+    ----------------
+    formulation : str, optional
+        |TreeFormulationParam|
+
     Returns
     -------
     LightGBMRegressorConstr
@@ -155,7 +170,7 @@ def add_lgbm_booster_constr(
     )
 
 
-class LGBMConstr(AbstractPredictorConstr):
+class LGBMConstr(TreeLeavesAccessor, AbstractPredictorConstr):
     """Class to model trained :external+lightgbm:py:class:`lightgbm.Booster`
     in a gurobipy model.
 
@@ -329,6 +344,26 @@ class LGBMConstr(AbstractPredictorConstr):
 
         n_estimators = len(trees_raw)
 
+        formulation = kwargs.get("formulation", "leaf")
+        if formulation in ENSEMBLE_FORMULATIONS:
+            trees = []
+            for tree in trees_raw:
+                flat_tree = self._flat_tree_representation(tree["tree_structure"])
+                flat_tree["n_features"] = lgbm_raw["max_feature_idx"] + 1
+                trees.append(flat_tree)
+            self._tree_leaves = add_tree_ensemble_formulation(
+                model,
+                trees,
+                np.ones(n_estimators),
+                _input,
+                output,
+                formulation,
+                self.epsilon,
+                self._name_var,
+                safety_floor=self.safety_floor,
+            )
+            return
+
         estimators = []
         if self._no_debug:
             kwargs["no_record"] = True
@@ -359,6 +394,10 @@ class LGBMConstr(AbstractPredictorConstr):
             )
 
         self.estimators_ = estimators
+        if all(est._tree_leaves is not None for est in estimators):
+            self._tree_leaves = tuple(
+                leaves for est in estimators for leaves in est._tree_leaves
+            )
 
         model.addConstr(output == tree_vars.sum(axis=1))
 
