@@ -63,6 +63,10 @@ class TreeLeavesAccessor:
     def tree_leaves(self):
         """Tuple of :py:class:`TreeLeaves`, one per tree.
 
+        Use it to read which leaf each tree selected, or to add constraints
+        on the leaves, for example to require that the solution falls into
+        leaves that contain training data.
+
         Raises
         ------
         AttributeError
