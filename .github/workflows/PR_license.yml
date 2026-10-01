@@ -37,11 +37,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
-        gurobi-version: ["gurobi11","gurobi12","gurobi13","gurobi14"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        gurobi-version: ["gurobi12","gurobi13","gurobi14"]
         exclude:
-          - python-version: "3.13"
-            gurobi-version: "gurobi11"
+          - python-version: "3.14"
+            gurobi-version: "gurobi12"
     steps:
       # Check out the base branch first so that local reusable actions are
       # loaded from trusted code, not from the (potentially untrusted) PR branch.
@@ -79,7 +79,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.12"]
-        gurobi-version: ["gurobi11","gurobi12","gurobi13","gurobi14"]
+        gurobi-version: ["gurobi12","gurobi13","gurobi14"]
     steps:
       # Check out the base branch first so that local reusable actions are
       # loaded from trusted code, not from the (potentially untrusted) PR branch.
