@@ -81,6 +81,29 @@ with:
 with :math:`\omega` an auxiliary free variable. The neurons are then connected
 according to the topology of the network.
 
+Alternatively, with the keyword argument ``formulation="bigm"``, the ReLU is
+formulated with a binary variable :math:`z` and linear constraints:
+
+.. math::
+
+    & y \ge \omega, \quad y \ge 0,
+
+    & y \le \omega - L (1 - z), \quad y \le U z,
+
+where :math:`L \le \omega \le U` are bounds computed from the bounds of the input
+variables of the network by interval arithmetic. Neurons that are always active
+(:math:`L \ge 0`) or always inactive (:math:`U \le 0`) don't need a binary
+variable. The input variables must then have finite bounds.
+
+If a value :math:`M` is given with the keyword argument ``bigm``, the bounds are not
+computed and :math:`L = -M`, :math:`U = M` are used for all neurons, each of which
+gets a binary variable. This is useful to experiment with weak formulations. The
+formulation is only valid if :math:`|\omega| \le M` for all neurons. Note also that
+large values of :math:`M` make the formulation numerically unreliable: with the
+default :external+gurobi:ref:`IntFeasTol <parameterintfeastol>` of
+:math:`10^{-5}`, :math:`M = 10^6` allows :math:`y` to deviate by up to 10 from the
+ReLU value.
+
 
 Decision Tree Regression
 ========================
@@ -114,6 +137,24 @@ are imposed using indicator constraints:
    & \delta_l = 1 \rightarrow x_{i_v} \le \theta_v, & & \text{for } x_{i_v} \le \theta_v \in \mathcal L_l,\\
    & \delta_l = 1 \rightarrow x_{i_v} \ge \theta_v + \epsilon, & & \text{for } x_{i_v} > \theta_v \in \mathcal R_l.
    \end{align*}
+
+With the keyword argument ``formulation="bigm"``, the indicator constraints are
+replaced by linear constraints. If :math:`L_i \le x_i \le U_i` are the bounds of
+feature :math:`i`, the constraints of leaf :math:`l` become
+
+.. math::
+   :nowrap:
+
+   \begin{align*}
+   & x_{i_v} \le U_{i_v} - (U_{i_v} - \theta_v) \delta_l, & & \text{for } x_{i_v} \le \theta_v \in \mathcal L_l,\\
+   & x_{i_v} \ge L_{i_v} + (\theta_v + \epsilon - L_{i_v}) \delta_l, & & \text{for } x_{i_v} > \theta_v \in \mathcal R_l,
+   \end{align*}
+
+and the output of the tree is written as :math:`\sum_l v_l \delta_l` where
+:math:`v_l` is the value of leaf :math:`l`. As for neural networks, the input
+variables should have finite bounds, or a value :math:`M` should be given with
+``bigm``. In the latter case :math:`L_{i_v}` and :math:`U_{i_v}` are replaced by
+:math:`\theta_v + \epsilon - M` and :math:`\theta_v + M` in all constraints.
 
 Two numerical parameters control the accuracy of this formulation, both
 exposed as keyword arguments of

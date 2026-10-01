@@ -35,6 +35,17 @@ def add_predictor_constr(gp_model, predictor, input_vars, output_vars=None, **kw
         Decision variables used as input for predictor in gp_model.
     output_vars : mvar_array_like, optional
         Decision variables used as output for predictor in gp_model.
+    formulation : str, optional
+        Formulation used for decision trees and ReLU activations. With
+        ``"bigm"``, they are formulated with binary variables and linear
+        (big-M) constraints instead of indicator and max general constraints.
+        By default, general constraints are used.
+    bigm : float, optional
+        With ``formulation="bigm"``, big-M value used for all constraints. It
+        must bound the values it replaces (pre-activation values of neurons,
+        distance of features to split thresholds), and large values give weak
+        formulations. If it is not given, the big-M values are derived from the
+        bounds of the input variables, which then must be finite.
     **kwargs
         Additional advanced keyword arguments forwarded to internal submodel
         constructors.

@@ -18,6 +18,8 @@ Gurobi model.
 """
 
 import gurobipy as gp
+import numpy as np
+from gurobipy import GRB
 
 from ..exceptions import ModelConfigurationError
 from .skgetter import SKtransformer
@@ -108,6 +110,21 @@ class StandardScalerConstr(SKtransformer):
         scale = self.transformer.scale_
         mean = self.transformer.mean_
 
+        if (
+            kwargs.get("formulation") == "bigm"
+            and kwargs.get("bigm") is None
+            and self._output_created
+        ):
+            # Big-M formulations of the next steps need bounds on the output
+            input_lb = _input.getAttr(GRB.Attr.LB)
+            input_ub = _input.getAttr(GRB.Attr.UB)
+            output.LB = np.where(
+                input_lb <= -GRB.INFINITY, -GRB.INFINITY, (input_lb - mean) / scale
+            )
+            output.UB = np.where(
+                input_ub >= GRB.INFINITY, GRB.INFINITY, (input_ub - mean) / scale
+            )
+
         self.gp_model.addConstr(
             _input - output * scale == mean, name=self._name_var("s")
         )
@@ -163,6 +180,64 @@ class PolynomialFeaturesConstr(SKtransformer):
                 self.gp_model.addConstr(
                     output[k, i] == q_expr, name=self._indexed_name((k, i), "polyfeat")
                 )
+
+        if (
+            kwargs.get("formulation") == "bigm"
+            and kwargs.get("bigm") is None
+            and self._output_created
+        ):
+            # Big-M formulations of the next steps need bounds on the output
+            lb, ub = _monomials_bounds(
+                _input.getAttr(GRB.Attr.LB), _input.getAttr(GRB.Attr.UB), powers
+            )
+            output.LB = lb
+            output.UB = ub
+
+
+def _monomials_bounds(input_lb, input_ub, powers):
+    """Compute bounds on monomials of degree <= 2 by interval arithmetic.
+
+    input_lb and input_ub are the bounds of the input variables (one row per
+    example) and each row of powers gives the exponents of a monomial.
+    """
+    # Work with numpy infinities (Gurobi uses 1e100)
+    input_lb = np.where(input_lb <= -GRB.INFINITY, -np.inf, input_lb)
+    input_ub = np.where(input_ub >= GRB.INFINITY, np.inf, input_ub)
+
+    def product(a_lb, a_ub, b_lb, b_ub):
+        with np.errstate(invalid="ignore"):
+            candidates = np.stack([a_lb * b_lb, a_lb * b_ub, a_ub * b_lb, a_ub * b_ub])
+        # 0 * inf is 0 in interval arithmetic
+        candidates = np.nan_to_num(candidates, nan=0.0, posinf=np.inf, neginf=-np.inf)
+        return candidates.min(axis=0), candidates.max(axis=0)
+
+    nex = input_lb.shape[0]
+    lb = np.ones((nex, powers.shape[0]))
+    ub = np.ones((nex, powers.shape[0]))
+    for i, power in enumerate(powers):
+        features = np.repeat(np.arange(len(power)), power)
+        if len(features) == 1:
+            lb[:, i] = input_lb[:, features[0]]
+            ub[:, i] = input_ub[:, features[0]]
+        elif len(features) == 2:
+            f, g = features
+            if f == g:
+                # Square: 0 is the minimum if the interval contains it
+                sq_lb, sq_ub = input_lb[:, f] ** 2, input_ub[:, f] ** 2
+                ub[:, i] = np.maximum(sq_lb, sq_ub)
+                lb[:, i] = np.where(
+                    (input_lb[:, f] <= 0) & (input_ub[:, f] >= 0),
+                    0.0,
+                    np.minimum(sq_lb, sq_ub),
+                )
+            else:
+                lb[:, i], ub[:, i] = product(
+                    input_lb[:, f], input_ub[:, f], input_lb[:, g], input_ub[:, g]
+                )
+    return (
+        np.where(np.isinf(lb), -GRB.INFINITY, lb),
+        np.where(np.isinf(ub), GRB.INFINITY, ub),
+    )
 
 
 def sklearn_transformers():
