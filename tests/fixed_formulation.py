@@ -55,6 +55,14 @@ class FixedRegressionModel(unittest.TestCase):
                     x = pd.DataFrame(data=x.tolist(), columns=examples.columns)
 
             pred_constr = add_predictor_constr(gpm, predictor, x, **kwargs)
+            if kwargs.get("formulation") == "bigm":
+                # No indicator or max constraints (other nonlinear
+                # constraints e.g. logistic may remain)
+                gpm.update()
+                gen_types = {c.GenConstrType for c in gpm.getGenConstrs()}
+                self.assertFalse(
+                    gen_types & {gp.GRB.GENCONSTR_INDICATOR, gp.GRB.GENCONSTR_MAX}
+                )
 
             y = pred_constr.output
 

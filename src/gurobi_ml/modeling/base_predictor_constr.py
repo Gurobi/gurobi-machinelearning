@@ -121,6 +121,8 @@ class AbstractPredictorConstr(ABC, _SubModel):
         self._input_index = index
         self._input_columns = columns
 
+        # Record if we created the output variables (we can then modify their bounds)
+        self._output_created = self._output is None
         if self._output is None:
             self._output = self._create_output_vars(self._input)
         if self._output is not None:

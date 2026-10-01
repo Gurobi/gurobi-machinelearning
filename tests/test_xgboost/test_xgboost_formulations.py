@@ -58,7 +58,7 @@ class TestXGBoosthModel(FixedRegressionModel):
         xgb_reg.fit(X, y)
         one_case = {"predictor": xgb_reg, "nonconvex": 0}
 
-        for formulation in ["leaf"]:
+        for formulation in ["leaf", "bigm"]:
             self.do_one_case(
                 one_case, X, 3, formulation=formulation, float_type=np.float32
             )
@@ -76,7 +76,7 @@ class TestXGBoosthModel(FixedRegressionModel):
 
     def run_iris_test_case(self, predictor, X, method):
         one_case = {"predictor": predictor, "nonconvex": 0}
-        for formulation in ["leaf"]:
+        for formulation in ["leaf", "bigm"]:
             self.do_one_case(
                 one_case, X, 6, method, formulation=formulation, float_type=np.float32
             )
