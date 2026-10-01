@@ -69,9 +69,7 @@ class TestSklearnModel(FixedRegressionModel):
                 actual_reg = regressor
             reg_name = type(actual_reg).__name__
             if reg_name in ["RandomForestRegressor", "GradientBoostingRegressor"]:
-                formulations = ["leaf", "bigm"]
-            elif reg_name in ["DecisionTreeRegressor", "MLPRegressor"]:
-                formulations = [None, "bigm"]
+                formulations = ["leaf"]
             else:
                 formulations = [None]
 

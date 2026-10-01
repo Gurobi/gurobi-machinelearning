@@ -20,4 +20,3 @@ class TestPytorchModel(FixedRegressionModel):
         onecase = {"predictor": regressor, "nonconvex": 0}
         self.do_one_case(onecase, X, 5, "all")
         self.do_one_case(onecase, X, 6, "pairs")
-        self.do_one_case(onecase, X, 6, "pairs", formulation="bigm")

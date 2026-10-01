@@ -88,26 +88,12 @@ def _compute_leafs_bounds(gp_model, tree, feature_is_fixed, epsilon, safety_floo
 
 
 def _leafs_formulation(
-    gp_model,
-    _input,
-    output,
-    tree,
-    epsilon,
-    _name_var,
-    verbose,
-    timer,
-    safety_floor=0.0,
-    use_bigm=False,
-    bigm=None,
+    gp_model, _input, output, tree, epsilon, _name_var, verbose, timer, safety_floor=0.0
 ):
     """Formulate decision tree using 'leafs' formulation
 
     We have one variable per leaf of the tree and a series of indicator to
     define when that leaf is reached.
-
-    If use_bigm is True, big-M constraints are used instead of indicators. The
-    big-M values are derived from the bounds of the input variables, or bigm is
-    used for all constraints if it is given.
     """
     nex = _input.shape[0]
     n_features = tree["n_features"]
@@ -153,34 +139,10 @@ def _leafs_formulation(
     if verbose:
         timer.timing(f"Added {nex * n_active} leafs vars")
 
-    if use_bigm:
-        # Output of the tree is the value of the selected leaf
-        gp_model.addConstr(output == leafs_vars @ tree["value"][active_leaf_nodes, :])
-        if bigm is None and (
-            (input_lb <= -GRB.INFINITY).any() or (input_ub >= GRB.INFINITY).any()
-        ):
-            raise ValueError(
-                "Big-M formulation of decision trees requires finite bounds on "
-                "the input variables or a value for bigm"
-            )
-
     for i, node in enumerate(active_leaf_nodes):
         reachable = active_reachability[:, i]
         # Non reachable nodes
         leafs_vars[~reachable, i].setAttr(GRB.Attr.UB, 0.0)
-        if use_bigm:
-            _leaf_bigm_constrs(
-                gp_model,
-                _input,
-                leafs_vars[:, i],
-                reachable,
-                node_lb[:, node],
-                node_ub[:, node],
-                input_lb,
-                input_ub,
-                bigm,
-            )
-            continue
         # Leaf node:
         rhs = output[reachable, :].tolist()
         lhs = leafs_vars[reachable, i].tolist()
@@ -226,45 +188,6 @@ def _leafs_formulation(
 
     if verbose:
         timer.timing(f"Added {nex} linear constraints")
-
-
-def _leaf_bigm_constrs(
-    gp_model, _input, leaf_var, reachable, leaf_lb, leaf_ub, input_lb, input_ub, bigm
-):
-    """Big-M constraints imposing that inputs are in the box of a leaf when it is selected.
-
-    For each feature f the constraints are
-
-        x_f >= L_f + (leaf_lb_f - L_f) z   and   x_f <= U_f - (U_f - leaf_ub_f) z
-
-    where [L_f, U_f] are the bounds of x_f. If bigm is given, L_f and U_f are
-    replaced by leaf_lb_f - bigm and leaf_ub_f + bigm.
-    """
-    for feature in range(len(leaf_lb)):
-        feat_lb = leaf_lb[feature]
-        feat_ub = leaf_ub[feature]
-
-        if feat_lb > -GRB.INFINITY:
-            tight = (input_lb[:, feature] < feat_lb) & reachable
-            if tight.any():
-                lower = input_lb[tight, feature]
-                if bigm is not None:
-                    lower = np.full(lower.shape, feat_lb - bigm)
-                gp_model.addConstr(
-                    _input[tight, feature]
-                    >= lower + (feat_lb - lower) * leaf_var[tight]
-                )
-
-        if feat_ub < GRB.INFINITY:
-            tight = (input_ub[:, feature] > feat_ub) & reachable
-            if tight.any():
-                upper = input_ub[tight, feature]
-                if bigm is not None:
-                    upper = np.full(upper.shape, feat_ub + bigm)
-                gp_model.addConstr(
-                    _input[tight, feature]
-                    <= upper - (upper - feat_ub) * leaf_var[tight]
-                )
 
 
 def _paths_formulation(
@@ -419,7 +342,7 @@ class AbstractTreeEstimator(AbstractPredictorConstr):
         )
 
     def _mip_model(self, **kwargs):
-        if self._formulation in ("leafs", "leaf", "bigm"):
+        if self._formulation in ("leafs", "leaf"):
             _leafs_formulation(
                 self.gp_model,
                 self.input,
@@ -430,8 +353,6 @@ class AbstractTreeEstimator(AbstractPredictorConstr):
                 self.verbose,
                 self._timer,
                 self._safety_floor,
-                use_bigm=self._formulation == "bigm",
-                bigm=kwargs.get("bigm"),
             )
         elif self._formulation == "paths":
             _paths_formulation(

@@ -101,7 +101,6 @@ class TestONNXModel(FixedRegressionModel):
         onecase = {"predictor": model, "nonconvex": 0}
         self.do_one_case(onecase, X, 5, "all")
         self.do_one_case(onecase, X, 6, "pairs")
-        self.do_one_case(onecase, X, 6, "pairs", formulation="bigm")
 
     def test_diabetes_onnx_mlp_matmul(self):
         """Test ONNX models using MatMul+Add pattern (tf2onnx style)."""
@@ -113,4 +112,3 @@ class TestONNXModel(FixedRegressionModel):
         onecase = {"predictor": model, "nonconvex": 0}
         self.do_one_case(onecase, X, 5, "all")
         self.do_one_case(onecase, X, 6, "pairs")
-        self.do_one_case(onecase, X, 6, "pairs", formulation="bigm")

@@ -17,7 +17,7 @@
 
 from .._var_utils import _default_name
 from ..base_predictor_constr import AbstractPredictorConstr
-from .activations import Identity, ReLU, ReLUBigM
+from .activations import Identity, ReLU
 from .layers import ActivationLayer, DenseLayer
 
 
@@ -33,22 +33,10 @@ class BaseNNConstr(AbstractPredictorConstr):
 
     def __init__(self, gp_model, predictor, input_vars, output_vars, **kwargs):
         self.predictor = predictor
-        formulation = kwargs.get("formulation", "genconstr")
-        if formulation == "bigm":
-            # Without a given bigm, linear layers set bounds on their outputs
-            # so that bounds are available for the following ReLUs.
-            bigm = kwargs.get("bigm")
-            self.act_dict = {
-                "relu": ReLUBigM(bigm),
-                "identity": Identity(setbounds=bigm is None),
-            }
-        elif formulation == "genconstr":
-            self.act_dict = {
-                "relu": ReLU(),
-                "identity": Identity(),
-            }
-        else:
-            raise ValueError(f"Unknown formulation: {formulation}")
+        self.act_dict = {
+            "relu": ReLU(),
+            "identity": Identity(),
+        }
         try:
             for activation, activation_model in kwargs["activation_models"].items():
                 self.act_dict[activation] = activation_model
