@@ -1,4 +1,4 @@
-gurobipy==13.0.2
+gurobipy==13.0.3
 gurobipy-pandas==1.2.2
 ipykernel==7.3.0
 matplotlib==3.10.9
@@ -6,7 +6,7 @@ matplotlib-inline==0.2.2
 sphinxcontrib_bibtex==2.7.0
 numpy==2.2.6
 scipy==1.15.3
-numpydoc==1.10.0
+numpydoc==1.11.0
 pandas==2.3.3
 scikit-learn==1.9.0
 seaborn==0.13.2
@@ -15,5 +15,5 @@ sphinx-copybutton==0.5.2
 sphinx_design==0.7.0
 sphinx-pyproject==0.3.0
 .
-sphinx-gallery==0.21.0
+sphinx-gallery==0.22.1
 gurobi-sphinxtheme @ git+https://github.com/Gurobi/gurobi-sphinxtheme.git@v2.0.0
