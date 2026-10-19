@@ -118,7 +118,7 @@ class TestTreeLeaves(unittest.TestCase):
                 model, self.predictors["dt"], x, formulation="paths"
             )
             with self.assertRaises(AttributeError):
-                pred_constr.tree_leaves
+                _ = pred_constr.tree_leaves
 
 
 if __name__ == "__main__":
