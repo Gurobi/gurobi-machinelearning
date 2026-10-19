@@ -47,27 +47,26 @@ class TestTreeLeaves(unittest.TestCase):
         """Fixed input: selection equals apply, output equals predict."""
         rows = self.X[7:8]
         for name, predictor in self.predictors.items():
-            with self.subTest(predictor=name):
-                with gp.Model() as model:
-                    model.Params.OutputFlag = 0
-                    x = model.addMVar(rows.shape, lb=rows, ub=rows)
-                    pred_constr = add_predictor_constr(
-                        model, predictor, x, formulation=formulation
-                    )
-                    tree_leaves = pred_constr.tree_leaves
-                    expected = _apply_2d(predictor, rows)
-                    self.assertEqual(len(tree_leaves), expected.shape[1])
-                    model.optimize()
-                    self.assertEqual(model.Status, gp.GRB.OPTIMAL)
-                    for t, (variables, nodes) in enumerate(tree_leaves):
-                        solution = variables.X[0, :]
-                        self.assertAlmostEqual(solution.sum(), 1.0, places=6)
-                        self.assertEqual(nodes[int(solution.argmax())], expected[0, t])
-                    self.assertAlmostEqual(
-                        pred_constr.output.X[0, 0],
-                        predictor.predict(rows)[0],
-                        places=4,
-                    )
+            with self.subTest(predictor=name), gp.Model() as model:
+                model.Params.OutputFlag = 0
+                x = model.addMVar(rows.shape, lb=rows, ub=rows)
+                pred_constr = add_predictor_constr(
+                    model, predictor, x, formulation=formulation
+                )
+                tree_leaves = pred_constr.tree_leaves
+                expected = _apply_2d(predictor, rows)
+                self.assertEqual(len(tree_leaves), expected.shape[1])
+                model.optimize()
+                self.assertEqual(model.Status, gp.GRB.OPTIMAL)
+                for t, (variables, nodes) in enumerate(tree_leaves):
+                    solution = variables.X[0, :]
+                    self.assertAlmostEqual(solution.sum(), 1.0, places=6)
+                    self.assertEqual(nodes[int(solution.argmax())], expected[0, t])
+                self.assertAlmostEqual(
+                    pred_constr.output.X[0, 0],
+                    predictor.predict(rows)[0],
+                    places=4,
+                )
 
     def test_selected_matches_apply_leaf(self):
         self.selected_matches_apply("leaf")
