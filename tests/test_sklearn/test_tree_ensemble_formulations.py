@@ -424,17 +424,20 @@ class TestEpsilonAndFixedFeatures(unittest.TestCase):
         a positive epsilon must warn. The other formulations stay silent."""
         params = {"OutputFlag": 0}
         for formulation in ("misic", "misic_lazy"):
-            with self.subTest(formulation=formulation):
-                with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
-                    x = gpm.addMVar((1, 1), lb=0.0, ub=1.0)
-                    with self.assertWarnsRegex(UserWarning, "applies\\s+globally"):
-                        add_predictor_constr(
-                            gpm,
-                            self.predictor,
-                            x,
-                            epsilon=1e-2,
-                            formulation=formulation,
-                        )
+            with (
+                self.subTest(formulation=formulation),
+                gp.Env(params=params) as env,
+                gp.Model(env=env) as gpm,
+            ):
+                x = gpm.addMVar((1, 1), lb=0.0, ub=1.0)
+                with self.assertWarnsRegex(UserWarning, "applies\\s+globally"):
+                    add_predictor_constr(
+                        gpm,
+                        self.predictor,
+                        x,
+                        epsilon=1e-2,
+                        formulation=formulation,
+                    )
         for formulation, epsilon in (
             ("misic", 0.0),
             ("leaf", 1e-2),
@@ -444,21 +447,22 @@ class TestEpsilonAndFixedFeatures(unittest.TestCase):
             ("biggs_perakis", 1e-2),
             ("ocean", 1e-2),
         ):
-            with self.subTest(formulation=formulation, epsilon=epsilon):
-                with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
-                    x = gpm.addMVar((1, 1), lb=0.0, ub=1.0)
-                    with warnings.catch_warnings(record=True) as caught:
-                        warnings.simplefilter("always")
-                        add_predictor_constr(
-                            gpm,
-                            self.predictor,
-                            x,
-                            epsilon=epsilon,
-                            formulation=formulation,
-                        )
-                    self.assertFalse(
-                        [w for w in caught if "globally" in str(w.message)]
+            with (
+                self.subTest(formulation=formulation, epsilon=epsilon),
+                gp.Env(params=params) as env,
+                gp.Model(env=env) as gpm,
+            ):
+                x = gpm.addMVar((1, 1), lb=0.0, ub=1.0)
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter("always")
+                    add_predictor_constr(
+                        gpm,
+                        self.predictor,
+                        x,
+                        epsilon=epsilon,
+                        formulation=formulation,
                     )
+                self.assertFalse([w for w in caught if "globally" in str(w.message)])
 
 
 class TestLifecycle(unittest.TestCase):
@@ -533,14 +537,13 @@ class TestLifecycle(unittest.TestCase):
 
     def test_unknown_formulation(self):
         for predictor in self.predictors:
-            with self.subTest(predictor=type(predictor).__name__):
-                with gp.Model() as gpm:
-                    gpm.Params.OutputFlag = 0
-                    x = gpm.addMVar((1, self.n_features), lb=-GRB.INFINITY)
-                    with self.assertRaisesRegex(ValueError, "Unknown formulation"):
-                        add_predictor_constr(
-                            gpm, predictor, x, formulation="no_such_formulation"
-                        )
+            with self.subTest(predictor=type(predictor).__name__), gp.Model() as gpm:
+                gpm.Params.OutputFlag = 0
+                x = gpm.addMVar((1, self.n_features), lb=-GRB.INFINITY)
+                with self.assertRaisesRegex(ValueError, "Unknown formulation"):
+                    add_predictor_constr(
+                        gpm, predictor, x, formulation="no_such_formulation"
+                    )
 
 
 class TestModelSize(unittest.TestCase):
