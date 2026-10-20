@@ -36,11 +36,12 @@ class SplitVariables:
 
         ``z = 1  =>  x <= v_j``    and    ``z = 0  =>  x >= v_j + epsilon``.
 
-    Thresholds falling outside the bounds of an input variable fix the
-    corresponding binary instead of adding the linking constraints.  For a
-    fixed feature (``lb == ub``), every binary is fixed this way, by comparing
-    the constant value to the threshold without applying ``epsilon`` — like
-    the ``feature_is_fixed`` handling of the leaf formulation.
+    When the bounds of an input variable already satisfy one of the two
+    constraints, the binary is fixed instead: ``ub <= v_j`` fixes it to 1 and
+    ``lb >= v_j + epsilon`` to 0.  For a fixed feature (``lb == ub``), the
+    constant value is compared to the threshold without applying
+    ``epsilon`` — like the ``feature_is_fixed`` handling of the leaf
+    formulation.
 
     Parameters
     ----------
@@ -88,11 +89,18 @@ class SplitVariables:
             if values.size > 1:
                 gp_model.addConstr(z[:, :-1] <= z[:, 1:])
 
-            # Thresholds outside the input bounds fix the binaries (including
-            # all fixed features); only the remaining ones need linking
-            # constraints to the input variables.
+            # Bounds that already satisfy a linking constraint fix the binary
+            # (including all fixed features); only the remaining ones need
+            # linking constraints to the input variables.
+            # Like the other formulations, a non-fixed input needs
+            # lb >= v + epsilon to skip epsilon; whether lb > v should be
+            # enough for all of them is discussed in #542.
+            right_bounds = values + epsilon
             always_left = input_ub[:, [f]] <= values[None, :]
-            never_left = input_lb[:, [f]] > values[None, :]
+            if self.feature_is_fixed[f]:
+                never_left = input_lb[:, [f]] > values[None, :]
+            else:
+                never_left = input_lb[:, [f]] >= right_bounds[None, :]
             z[always_left].setAttr(GRB.Attr.LB, 1.0)
             z[never_left].setAttr(GRB.Attr.UB, 0.0)
 
@@ -103,7 +111,7 @@ class SplitVariables:
                     z_var, 1, x_var, GRB.LESS_EQUAL, values[j]
                 )
                 gp_model.addGenConstrIndicator(
-                    z_var, 0, x_var, GRB.GREATER_EQUAL, values[j] + epsilon
+                    z_var, 0, x_var, GRB.GREATER_EQUAL, right_bounds[j]
                 )
 
     def column(self, feature, threshold):

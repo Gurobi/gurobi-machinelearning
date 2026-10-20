@@ -295,13 +295,27 @@ class TestEpsilonAndFixedFeatures(unittest.TestCase):
     def test_epsilon_enforced_on_right_branch_biggs_perakis(self):
         self._check_epsilon_enforced_on_right_branch("biggs_perakis")
 
-    def _check_epsilon_enforced_on_right_branch(self, formulation):
+    def test_epsilon_enforced_with_lower_bound_in_band(self):
+        self._check_epsilon_enforced_on_right_branch("leaf", lb_in_band=True)
+
+    def test_epsilon_enforced_with_lower_bound_in_band_misic(self):
+        self._check_epsilon_enforced_on_right_branch("misic", lb_in_band=True)
+
+    def test_epsilon_enforced_with_lower_bound_in_band_ocean(self):
+        self._check_epsilon_enforced_on_right_branch("ocean", lb_in_band=True)
+
+    def test_epsilon_enforced_with_lower_bound_in_band_biggs_perakis(self):
+        self._check_epsilon_enforced_on_right_branch("biggs_perakis", lb_in_band=True)
+
+    def _check_epsilon_enforced_on_right_branch(self, formulation, lb_in_band=False):
         """Selecting the right branch must push x at least epsilon above the
-        threshold."""
+        threshold, also when the lower bound of x lies in (t, t + epsilon)
+        (current behavior of every formulation; see #542)."""
         epsilon = 1e-2
+        lb = self.threshold + epsilon / 2.0 if lb_in_band else 0.0
         params = {"OutputFlag": 0}
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
-            x = gpm.addMVar((1, 1), lb=0.0, ub=1.0)
+            x = gpm.addMVar((1, 1), lb=lb, ub=1.0)
             pred_constr = _add_predictor_constr_silently(
                 gpm,
                 self.predictor,
