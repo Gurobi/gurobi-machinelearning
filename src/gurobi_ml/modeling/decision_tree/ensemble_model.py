@@ -47,6 +47,38 @@ _FORMULATIONS = {
 ENSEMBLE_FORMULATIONS = tuple(_FORMULATIONS)
 
 
+def _clamp_thresholds(trees, safety_floor, feas_tol):
+    """Return the trees with their split thresholds clamped away from zero.
+
+    Same rule as the leaf formulation. Clamping once here gives the shared
+    variables and the per-tree constraints the same threshold values, which
+    they match exactly.
+    """
+    clamped_trees = []
+    for tree in trees:
+        threshold = tree["threshold"]
+        small = (
+            (tree["children_left"] >= 0)
+            & (np.abs(threshold) > 0)
+            & (np.abs(threshold) < safety_floor)
+        )
+        threshold = np.where(small, np.sign(threshold) * safety_floor, threshold)
+        clamped_trees.append({**tree, "threshold": threshold})
+
+    split_thresholds = np.concatenate(
+        [tree["threshold"][tree["children_left"] >= 0] for tree in clamped_trees]
+    )
+    tiny = (np.abs(split_thresholds) > 0) & (np.abs(split_thresholds) < feas_tol)
+    for value in np.unique(split_thresholds[tiny]):
+        warn(
+            f"Split threshold {value} is smaller than Gurobi's "
+            f"feasibility tolerance ({feas_tol}). This may lead to numerical issues. "
+            "Consider setting 'safety_floor' to a higher value (e.g., 1e-5).",
+            UserWarning,
+        )
+    return clamped_trees
+
+
 def add_tree_ensemble_formulation(
     gp_model,
     trees,
@@ -122,9 +154,8 @@ def add_tree_ensemble_formulation(
             UserWarning,
         )
 
-    shared_vars = shared_variables(
-        gp_model, trees, _input, epsilon, _name_var, safety_floor
-    )
+    trees = _clamp_thresholds(trees, safety_floor, gp_model.Params.FeasibilityTol)
+    shared_vars = shared_variables(gp_model, trees, _input, epsilon, _name_var)
 
     outdim = output.shape[1]
     output_lb = np.full(outdim, float(constant))

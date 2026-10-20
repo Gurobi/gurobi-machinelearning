@@ -46,8 +46,6 @@ used in a split must have **finite bounds** (the paper assumes bounded
 feature domains); a :py:exc:`ValueError` is raised otherwise.
 """
 
-from warnings import warn
-
 import numpy as np
 from gurobipy import GRB
 
@@ -57,27 +55,18 @@ from .decision_tree_model import TreeLeaves, _compute_reachability
 class IncrementalMuVariables:
     """Continuous incremental variables shared by the whole ensemble."""
 
-    def __init__(self, gp_model, trees, _input, epsilon, _name_var, safety_floor=0.0):
-        self._safety_floor = safety_floor
+    def __init__(self, gp_model, trees, _input, epsilon, _name_var):
         nex, n_features = _input.shape
 
         input_lb = _input.getAttr(GRB.Attr.LB)
         input_ub = _input.getAttr(GRB.Attr.UB)
         self.feature_is_fixed = (input_lb == input_ub).all(axis=0)
 
-        feas_tol = gp_model.Params.FeasibilityTol
-
         split_features = np.concatenate(
             [tree["feature"][tree["children_left"] >= 0] for tree in trees]
         )
         split_thresholds = np.concatenate(
             [tree["threshold"][tree["children_left"] >= 0] for tree in trees]
-        )
-        clamped = (np.abs(split_thresholds) > 0) & (
-            np.abs(split_thresholds) < safety_floor
-        )
-        split_thresholds = np.where(
-            clamped, np.sign(split_thresholds) * safety_floor, split_thresholds
         )
 
         self._thresholds = {}
@@ -88,14 +77,6 @@ class IncrementalMuVariables:
             values = np.unique(split_thresholds[split_features == f])
             if values.size == 0:
                 continue
-
-            for value in values[(np.abs(values) > 0) & (np.abs(values) < feas_tol)]:
-                warn(
-                    f"Split threshold {value} is smaller than Gurobi's "
-                    f"feasibility tolerance ({feas_tol}). This may lead to numerical issues. "
-                    "Consider setting 'safety_floor' to a higher value (e.g., 1e-5).",
-                    UserWarning,
-                )
 
             if not (
                 np.isfinite(input_lb[:, f]).all() and np.isfinite(input_ub[:, f]).all()
@@ -158,11 +139,8 @@ class IncrementalMuVariables:
         so epsilon appears only through the index of the second one.
         """
         values = self._thresholds[feature]
-        threshold_clamped = threshold
-        if 0 < abs(threshold) < self._safety_floor:
-            threshold_clamped = np.sign(threshold) * self._safety_floor
-        j = np.searchsorted(values, threshold_clamped)
-        assert j < values.size and values[j] == threshold_clamped
+        j = np.searchsorted(values, threshold)
+        assert j < values.size and values[j] == threshold
         mu = self._mu[feature]
 
         if flow_left is not None:
