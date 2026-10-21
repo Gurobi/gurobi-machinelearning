@@ -226,23 +226,18 @@ class XGBoostRegressorConstr(TreeLeavesAccessor, AbstractPredictorConstr):
         )
 
     @staticmethod
-    def _xgb_tree_to_dict(tree, epsilon):
+    def _xgb_tree_to_dict(tree):
         """Convert one tree of an XGBoost booster's JSON dump to the dict
         representation used by AbstractTreeEstimator.
 
-        XGBoost branches left iff ``x < t`` (strict); shifting the split
-        thresholds down by epsilon normalizes to the ``x <= t`` convention
-        of the tree formulations.
+        XGBoost branches left iff ``x < t`` (strict); the formulations get
+        a negative epsilon to make the left branch the strict one.
         """
         raw_vals = np.array(tree["split_conditions"], dtype=np.float32)
         children_left = np.array(tree["left_children"])
-        is_leaf = children_left < 0
-
-        mip_thresholds = raw_vals.copy()
-        mip_thresholds[~is_leaf] -= epsilon
 
         return {
-            "threshold": mip_thresholds,
+            "threshold": raw_vals,
             "children_left": children_left,
             "children_right": np.array(tree["right_children"]),
             "feature": np.array(tree["split_indices"]),
@@ -293,12 +288,12 @@ class XGBoostRegressorConstr(TreeLeavesAccessor, AbstractPredictorConstr):
             )
             self._tree_leaves = add_tree_ensemble_formulation(
                 model,
-                [self._xgb_tree_to_dict(tree, self.epsilon) for tree in trees],
+                [self._xgb_tree_to_dict(tree) for tree in trees],
                 np.ones(n_estimators),
                 _input,
                 trees_sum,
                 formulation,
-                self.epsilon,
+                -self.epsilon,
                 self._name_var,
                 safety_floor=self.safety_floor,
             )
@@ -317,10 +312,10 @@ class XGBoostRegressorConstr(TreeLeavesAccessor, AbstractPredictorConstr):
                 estimators.append(
                     AbstractTreeEstimator(
                         self.gp_model,
-                        self._xgb_tree_to_dict(tree, self.epsilon),
+                        self._xgb_tree_to_dict(tree),
                         self.input,
                         tree_vars[:, i, :],
-                        self.epsilon,
+                        -self.epsilon,
                         timer,
                         safety_floor=self.safety_floor,
                         **kwargs,

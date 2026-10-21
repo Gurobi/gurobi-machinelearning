@@ -141,10 +141,10 @@ def add_tree_ensemble_formulation(
     # a value whether or not a tree traverses that split. The epsilon of
     # "ocean" lives in the flow linking, so it acts path-wise like the leaf
     # baseline.
-    if epsilon > 0.0 and formulation in ("misic", "misic_lazy"):
+    if epsilon != 0.0 and formulation in ("misic", "misic_lazy"):
         warn(
-            f"epsilon={epsilon} with the '{formulation}' formulation applies "
-            "globally: the band (t, t + epsilon) of every threshold of the "
+            f"epsilon={abs(epsilon)} with the '{formulation}' formulation applies "
+            "globally: the interval of width epsilon at every threshold of the "
             "ensemble is forbidden, not only along the selected paths as in "
             "the 'leaf' formulation. The model becomes infeasible when the "
             "attainable range of an input (e.g. a derived pipeline feature) "

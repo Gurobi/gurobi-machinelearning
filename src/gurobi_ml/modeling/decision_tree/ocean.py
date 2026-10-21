@@ -33,12 +33,13 @@ Flow through a split forces the adjacent ``mu`` values: going right forces
 the interval below the threshold to be fully crossed, going left forbids
 entering the interval above it.
 
-A positive ``epsilon`` is absorbed into that partition rather than into
+A nonzero ``epsilon`` is absorbed into that partition rather than into
 the linking rows: each threshold ``v`` contributes the two boundaries
-``v`` and ``v + epsilon``, so the band it forbids is a hole of the
-feature's domain with an interval boundary at each end. Going left binds
-the lower end, going right the upper one, and both stay single-term rows.
-At ``epsilon = 0`` the two boundaries coincide and the encoding is
+``v + low`` and ``v + high`` (see ``_split_offsets``), so the interval it
+forbids is a hole of the feature's domain with an interval boundary at each
+end. Going left binds the lower end, going right the upper one, and both
+stay single-term rows. An input whose bounds decide the split needs no
+hole. At ``epsilon = 0`` the two boundaries coincide and the encoding is
 identical to the plain one.
 
 The interval widths appear as constraint coefficients, so every feature
@@ -49,7 +50,13 @@ feature domains); a :py:exc:`ValueError` is raised otherwise.
 import numpy as np
 from gurobipy import GRB
 
-from .decision_tree_model import TreeLeaves, _compute_reachability
+from .decision_tree_model import (
+    TreeLeaves,
+    _compute_reachability,
+    _goes_left,
+    _goes_right,
+    _split_offsets,
+)
 
 
 class IncrementalMuVariables:
@@ -60,7 +67,6 @@ class IncrementalMuVariables:
 
         input_lb = _input.getAttr(GRB.Attr.LB)
         input_ub = _input.getAttr(GRB.Attr.UB)
-        self.feature_is_fixed = (input_lb == input_ub).all(axis=0)
 
         split_features = np.concatenate(
             [tree["feature"][tree["children_left"] >= 0] for tree in trees]
@@ -69,6 +75,9 @@ class IncrementalMuVariables:
             [tree["threshold"][tree["children_left"] >= 0] for tree in trees]
         )
 
+        self._epsilon = epsilon
+        self._input_lb = input_lb
+        self._input_ub = input_ub
         self._thresholds = {}
         self._mu = {}
         self._left_pos = {}
@@ -88,18 +97,15 @@ class IncrementalMuVariables:
                     "ranges) or use another formulation."
                 )
 
-            # A positive epsilon turns the band above each threshold into a
+            # A nonzero epsilon turns the interval at each threshold into a
             # hole of the domain, so both of its ends become boundaries. At
-            # epsilon = 0, or on a fixed feature (which epsilon never
-            # constrains), the two ends coincide and only the thresholds
+            # epsilon = 0 the two ends coincide and only the thresholds
             # remain.
-            if epsilon > 0.0 and not self.feature_is_fixed[f]:
-                right_ends = values + epsilon
-                boundaries = np.unique(np.concatenate([values, right_ends]))
-            else:
-                right_ends = values
-                boundaries = values
-            left_pos = np.searchsorted(boundaries, values)
+            low, high = _split_offsets(epsilon)
+            left_ends = values + low
+            right_ends = values + high
+            boundaries = np.unique(np.concatenate([left_ends, right_ends]))
+            left_pos = np.searchsorted(boundaries, left_ends)
             right_pos = np.searchsorted(boundaries, right_ends)
 
             # Interval boundaries per example: bounds plus the boundaries
@@ -132,11 +138,12 @@ class IncrementalMuVariables:
     def link_split(self, gp_model, feature, threshold, flow_left, flow_right):
         """Force mu consistent with a split's flow variables.
 
-        Going left requires ``x <= v_j``, so the interval starting at
-        ``v_j`` must not be entered; going right requires
-        ``x >= v_j + epsilon``, so the interval ending at ``v_j + epsilon``
-        must be fully crossed. Both ends are boundaries of the partition,
-        so epsilon appears only through the index of the second one.
+        Going left requires ``x <= v_j + low``, so the interval starting at
+        ``v_j + low`` must not be entered; going right requires
+        ``x >= v_j + high``, so the interval ending at ``v_j + high`` must be
+        fully crossed. Both ends are boundaries of the partition, so epsilon
+        appears only through their indices. An input whose bounds decide the
+        split needs no constraint.
         """
         values = self._thresholds[feature]
         j = np.searchsorted(values, threshold)
@@ -144,9 +151,17 @@ class IncrementalMuVariables:
         mu = self._mu[feature]
 
         if flow_left is not None:
-            gp_model.addConstr(flow_left <= 1 - mu[:, self._left_pos[feature][j] + 1])
+            near = ~_goes_left(self._input_ub[:, feature], threshold, self._epsilon)
+            if near.any():
+                gp_model.addConstr(
+                    flow_left[near] <= 1 - mu[near, self._left_pos[feature][j] + 1]
+                )
         if flow_right is not None:
-            gp_model.addConstr(flow_right <= mu[:, self._right_pos[feature][j]])
+            near = ~_goes_right(self._input_lb[:, feature], threshold, self._epsilon)
+            if near.any():
+                gp_model.addConstr(
+                    flow_right[near] <= mu[near, self._right_pos[feature][j]]
+                )
 
 
 def add_ocean_tree(
@@ -180,7 +195,6 @@ def add_ocean_tree(
         gp_model,
         tree,
         _input,
-        shared_vars.feature_is_fixed,
         epsilon,
         nodes,
         safety_floor,

@@ -295,24 +295,26 @@ class TestEpsilonAndFixedFeatures(unittest.TestCase):
     def test_epsilon_enforced_on_right_branch_biggs_perakis(self):
         self._check_epsilon_enforced_on_right_branch("biggs_perakis")
 
-    def test_epsilon_enforced_with_lower_bound_in_band(self):
+    def test_lower_bound_in_band_skips_epsilon(self):
         self._check_epsilon_enforced_on_right_branch("leaf", lb_in_band=True)
 
-    def test_epsilon_enforced_with_lower_bound_in_band_misic(self):
+    def test_lower_bound_in_band_skips_epsilon_misic(self):
         self._check_epsilon_enforced_on_right_branch("misic", lb_in_band=True)
 
-    def test_epsilon_enforced_with_lower_bound_in_band_ocean(self):
+    def test_lower_bound_in_band_skips_epsilon_ocean(self):
         self._check_epsilon_enforced_on_right_branch("ocean", lb_in_band=True)
 
-    def test_epsilon_enforced_with_lower_bound_in_band_biggs_perakis(self):
+    def test_lower_bound_in_band_skips_epsilon_biggs_perakis(self):
         self._check_epsilon_enforced_on_right_branch("biggs_perakis", lb_in_band=True)
 
     def _check_epsilon_enforced_on_right_branch(self, formulation, lb_in_band=False):
-        """Selecting the right branch must push x at least epsilon above the
-        threshold, also when the lower bound of x lies in (t, t + epsilon)
-        (current behavior of every formulation; see #542)."""
+        """Selecting the right branch pushes x at least epsilon above the
+        threshold when x can lie at or below it. When the lower bound of x
+        is above the threshold, the bounds pick the branch and epsilon is
+        skipped: x can go down to its lower bound."""
         epsilon = 1e-2
         lb = self.threshold + epsilon / 2.0 if lb_in_band else 0.0
+        expected = lb if lb_in_band else self.threshold + epsilon
         params = {"OutputFlag": 0}
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
             x = gpm.addMVar((1, 1), lb=lb, ub=1.0)
@@ -328,10 +330,7 @@ class TestEpsilonAndFixedFeatures(unittest.TestCase):
             gpm.setObjective(x.sum(), GRB.MINIMIZE)
             gpm.optimize()
             self.assertEqual(gpm.Status, GRB.OPTIMAL)
-            self.assertGreaterEqual(
-                x.X[0, 0],
-                self.threshold + epsilon - gpm.Params.FeasibilityTol,
-            )
+            self.assertAlmostEqual(x.X[0, 0], expected, delta=gpm.Params.FeasibilityTol)
 
     def test_thresholds_closer_than_epsilon(self):
         self._check_thresholds_closer_than_epsilon("leaf")
@@ -384,8 +383,8 @@ class TestEpsilonAndFixedFeatures(unittest.TestCase):
 
     def _check_fixed_feature_in_epsilon_band(self, formulation):
         """A feature fixed to a constant inside ``(t, t + epsilon)`` must not
-        make the model infeasible: epsilon is dropped for fixed features and
-        the constant routes to the right branch."""
+        make the model infeasible: the bounds pick the right branch, so
+        epsilon is skipped."""
         epsilon = 1e-2
         value = self.threshold + epsilon / 2.0
         params = {"OutputFlag": 0}
@@ -402,35 +401,71 @@ class TestEpsilonAndFixedFeatures(unittest.TestCase):
             self.assertEqual(gpm.Status, GRB.OPTIMAL)
             self.assertAlmostEqual(pred_constr.output.X[0, 0], 1.0)
 
-    def test_unfixed_box_inside_epsilon_band_has_no_leaf(self):
+    def test_unfixed_box_inside_epsilon_band_reaches_right_leaf(self):
         self._check_unfixed_box_inside_epsilon_band("leaf")
 
-    def test_unfixed_box_inside_epsilon_band_has_no_leaf_misic(self):
+    def test_unfixed_box_inside_epsilon_band_reaches_right_leaf_misic(self):
         self._check_unfixed_box_inside_epsilon_band("misic")
 
-    def test_unfixed_box_inside_epsilon_band_has_no_leaf_ocean(self):
+    def test_unfixed_box_inside_epsilon_band_reaches_right_leaf_ocean(self):
         self._check_unfixed_box_inside_epsilon_band("ocean")
 
-    def test_unfixed_box_inside_epsilon_band_has_no_leaf_biggs_perakis(self):
+    def test_unfixed_box_inside_epsilon_band_reaches_right_leaf_biggs_perakis(self):
         self._check_unfixed_box_inside_epsilon_band("biggs_perakis")
 
     def _check_unfixed_box_inside_epsilon_band(self, formulation):
-        """A non-fixed input boxed strictly inside ``(t, t + epsilon)`` can
-        reach no leaf; every formulation reports it at build time."""
+        """A non-fixed input boxed strictly inside ``(t, t + epsilon)`` is
+        above the threshold, so the bounds pick the right leaf and every
+        value of the box stays feasible."""
         epsilon = 1e-2
         lb = self.threshold + epsilon / 4.0
         ub = self.threshold + epsilon / 2.0
         params = {"OutputFlag": 0}
         with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
             x = gpm.addMVar((1, 1), lb=lb, ub=ub)
-            with self.assertRaisesRegex(ValueError, "No reachable leaf nodes"):
-                _add_predictor_constr_silently(
-                    gpm,
-                    self.predictor,
-                    x,
-                    epsilon=epsilon,
-                    formulation=formulation,
-                )
+            pred_constr = _add_predictor_constr_silently(
+                gpm,
+                self.predictor,
+                x,
+                epsilon=epsilon,
+                formulation=formulation,
+            )
+            gpm.setObjective(x.sum(), GRB.MINIMIZE)
+            gpm.optimize()
+            self.assertEqual(gpm.Status, GRB.OPTIMAL)
+            self.assertAlmostEqual(pred_constr.output.X[0, 0], 1.0)
+            self.assertAlmostEqual(x.X[0, 0], lb, delta=gpm.Params.FeasibilityTol)
+
+    def test_fixed_at_threshold_goes_left(self):
+        self._check_fixed_at_threshold_goes_left("leaf")
+
+    def test_fixed_at_threshold_goes_left_misic(self):
+        self._check_fixed_at_threshold_goes_left("misic")
+
+    def test_fixed_at_threshold_goes_left_ocean(self):
+        self._check_fixed_at_threshold_goes_left("ocean")
+
+    def test_fixed_at_threshold_goes_left_biggs_perakis(self):
+        self._check_fixed_at_threshold_goes_left("biggs_perakis")
+
+    def _check_fixed_at_threshold_goes_left(self, formulation):
+        """An input fixed exactly at the threshold goes left, as in
+        ``predict``, even when the objective prefers the right leaf."""
+        epsilon = 1e-2
+        params = {"OutputFlag": 0}
+        with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
+            x = gpm.addMVar((1, 1), lb=self.threshold, ub=self.threshold)
+            pred_constr = _add_predictor_constr_silently(
+                gpm,
+                self.predictor,
+                x,
+                epsilon=epsilon,
+                formulation=formulation,
+            )
+            gpm.setObjective(pred_constr.output.sum(), GRB.MAXIMIZE)
+            gpm.optimize()
+            self.assertEqual(gpm.Status, GRB.OPTIMAL)
+            self.assertAlmostEqual(pred_constr.output.X[0, 0], 0.0)
 
     def test_positive_epsilon_warns_for_misic(self):
         """The shared binary split variables apply epsilon globally (every

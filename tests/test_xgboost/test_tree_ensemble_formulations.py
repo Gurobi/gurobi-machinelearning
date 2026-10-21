@@ -5,9 +5,9 @@ Mirrors the cross-formulation agreement, lifecycle and model-size tests of
 are documented) for the XGBoost wiring.
 
 XGBoost branches left iff ``x < t`` (strict) and its thresholds sit at
-(float32) data values; extraction normalizes to the ``x <= t`` convention by
-shifting thresholds down by epsilon. At the default ``epsilon = 0`` the
-comparisons below share the closure semantics of the other frameworks.
+(float32) data values; the formulations move the left side by epsilon
+instead of the right one. At the default ``epsilon = 0`` the comparisons
+below share the closure semantics of the other frameworks.
 """
 
 import io
@@ -35,8 +35,8 @@ EPSILON = 0.0
 def _tree_pairs(regressor):
     """The (feature, threshold) pairs of each tree of the booster.
 
-    Thresholds are read exactly as the extraction does (float32, no shift at
-    epsilon=0) so that cell probing and tie detection see the MIP's values.
+    Thresholds are read exactly as the extraction does (float32) so that
+    cell probing and tie detection see the MIP's values.
     """
     raw = json.loads(regressor.get_booster().save_raw(raw_format="json"))
     pairs = []
@@ -230,6 +230,87 @@ class TestLifecycle(unittest.TestCase):
                 add_predictor_constr(
                     gpm, self.predictor, x, epsilon=1e-5, formulation="misic"
                 )
+
+
+class TestStrictLeftEpsilon(unittest.TestCase):
+    """XGBoost sends ``x < t`` left, so epsilon moves the left side of a
+    split: going left needs ``x <= t - epsilon``, unless the input bounds
+    already pick the branch."""
+
+    FORMULATIONS = ("leaf", "misic", "ocean", "biggs_perakis")
+    EPSILON = 1e-2
+
+    def setUp(self):
+        X = np.array([[0.0], [1.0]] * 5)
+        y = np.array([0.0, 1.0] * 5)
+        self.predictor = xgb.XGBRegressor(
+            n_estimators=1,
+            max_depth=1,
+            learning_rate=1.0,
+            min_child_weight=0,
+            reg_lambda=0,
+            base_score=0.5,
+        ).fit(X, y)
+        raw = json.loads(self.predictor.get_booster().save_raw(raw_format="json"))
+        tree = raw["learner"]["gradient_booster"]["model"]["trees"][0]
+        self.threshold = float(tree["split_conditions"][0])
+        self.left_value, self.right_value = self.predictor.predict(
+            np.array([[self.threshold - 1.0], [self.threshold]], dtype=np.float32)
+        )
+
+    def _solve(self, formulation, lb, ub, objective, sense):
+        """Build the stump on x in [lb, ub], optimize, return (x, output)."""
+        with gp.Env(params={"OutputFlag": 0}) as env, gp.Model(env=env) as gpm:
+            x = gpm.addMVar((1, 1), lb=lb, ub=ub)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", UserWarning)
+                pred_constr = add_predictor_constr(
+                    gpm,
+                    self.predictor,
+                    x,
+                    epsilon=self.EPSILON,
+                    formulation=formulation,
+                )
+            gpm.setObjective(objective(x, pred_constr.output), sense)
+            gpm.optimize()
+            self.assertEqual(gpm.Status, GRB.OPTIMAL)
+            return x.X[0, 0], pred_constr.output.X[0, 0]
+
+    def test_fixed_in_band_goes_left(self):
+        """A value fixed in ``(t - epsilon, t)`` goes left, as in predict."""
+        value = self.threshold - self.EPSILON / 2.0
+        for formulation in self.FORMULATIONS:
+            with self.subTest(formulation=formulation):
+                _, output = self._solve(
+                    formulation, value, value, lambda x, y: y.sum(), GRB.MAXIMIZE
+                )
+                self.assertAlmostEqual(output, self.left_value, places=5)
+
+    def test_box_inside_band_reaches_left_leaf(self):
+        """A box inside ``(t - epsilon, t)`` is below the threshold: the bounds
+        pick the left leaf and every value of the box stays feasible."""
+        lb = self.threshold - self.EPSILON / 2.0
+        ub = self.threshold - self.EPSILON / 4.0
+        for formulation in self.FORMULATIONS:
+            with self.subTest(formulation=formulation):
+                x, output = self._solve(
+                    formulation, lb, ub, lambda x, y: x.sum(), GRB.MAXIMIZE
+                )
+                self.assertAlmostEqual(output, self.left_value, places=5)
+                self.assertAlmostEqual(x, ub, delta=1e-6)
+
+    def test_epsilon_enforced_on_left_branch(self):
+        """When x can lie on both sides, going left needs x <= t - epsilon."""
+        for formulation in self.FORMULATIONS:
+            with self.subTest(formulation=formulation):
+                x, _ = self._solve(
+                    formulation,
+                    0.0,
+                    2.0,
+                    lambda x, y: x.sum() - 10.0 * y.sum(),
+                    GRB.MAXIMIZE,
+                )
+                self.assertLessEqual(x, self.threshold - self.EPSILON + 1e-6)
 
 
 class TestModelSize(unittest.TestCase):
