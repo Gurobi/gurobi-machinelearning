@@ -27,9 +27,8 @@ aggregated box constraints
 
     sum_l ub[l, i] * delta[l]  >=  x[i]  >=  sum_l lb[l, i] * delta[l]
 
-where ``lb``/``ub`` are the leaf boxes (with the same epsilon and
-``feature_is_fixed`` semantics as the leaf formulation) clipped to the
-input variable bounds. When ``delta`` selects one leaf the input lies in that
+where ``lb``/``ub`` are the leaf boxes (with the same epsilon semantics as
+the leaf formulation) clipped to the input variable bounds. When ``delta`` selects one leaf the input lies in that
 leaf's box; the LP relaxation, projected onto ``x``, is the convex hull of
 the union of the leaf boxes — locally ideal per tree. Trees are coupled
 through the input variables only (no shared split variables), so epsilon
@@ -47,6 +46,9 @@ from gurobipy import GRB
 from .decision_tree_model import (
     TreeLeaves,
     _compute_reachability,
+    _goes_left,
+    _goes_right,
+    _split_offsets,
 )
 
 
@@ -61,10 +63,10 @@ def _biggs_perakis_formulation(
     Returns the :py:class:`TreeLeaves` of the tree.
     """
     nex = _input.shape[0]
+    low, high = _split_offsets(epsilon)
 
     input_lb = _input.getAttr(GRB.Attr.LB)
     input_ub = _input.getAttr(GRB.Attr.UB)
-    feature_is_fixed = (input_lb == input_ub).all(axis=0)
 
     split_features = np.unique(tree["feature"][tree["children_left"] >= 0])
     for f in split_features:
@@ -83,7 +85,7 @@ def _biggs_perakis_formulation(
     leaf_nodes = leafs.nonzero()[0]
 
     reachability_matrix, node_lb, node_ub = _compute_reachability(
-        gp_model, tree, _input, feature_is_fixed, epsilon, leaf_nodes, safety_floor
+        gp_model, tree, _input, epsilon, leaf_nodes, safety_floor
     )
 
     # Drop leaves that no example can reach — they contribute nothing.
@@ -109,16 +111,15 @@ def _biggs_perakis_formulation(
         # Leaf boxes clipped to each example's input bounds: coefficients
         # stay finite and the selected leaf's box never cuts the example's
         # own domain.
-        box_lb = np.clip(
-            node_lb[f, active_leaf_nodes][None, :],
-            input_lb[:, [f]],
-            input_ub[:, [f]],
-        )
-        box_ub = np.clip(
-            node_ub[f, active_leaf_nodes][None, :],
-            input_lb[:, [f]],
-            input_ub[:, [f]],
-        )
+        # The strict side moves by epsilon unless the input bounds decide
+        # the split.
+        lb, ub = input_lb[:, [f]], input_ub[:, [f]]
+        leaf_lb = node_lb[f, active_leaf_nodes][None, :]
+        leaf_ub = node_ub[f, active_leaf_nodes][None, :]
+        box_lb = np.where(_goes_right(lb, leaf_lb, epsilon), lb, leaf_lb + high)
+        box_ub = np.where(_goes_left(ub, leaf_ub, epsilon), ub, leaf_ub + low)
+        box_lb = np.clip(box_lb, lb, ub)
+        box_ub = np.clip(box_ub, lb, ub)
         gp_model.addConstr((leafs_vars * box_lb).sum(axis=1) <= _input[:, f])
         gp_model.addConstr((leafs_vars * box_ub).sum(axis=1) >= _input[:, f])
 

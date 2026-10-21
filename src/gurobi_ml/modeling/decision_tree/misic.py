@@ -22,7 +22,13 @@ https://arxiv.org/abs/1705.10883.
 import numpy as np
 from gurobipy import GRB
 
-from .decision_tree_model import TreeLeaves, _compute_reachability
+from .decision_tree_model import (
+    TreeLeaves,
+    _compute_reachability,
+    _goes_left,
+    _goes_right,
+    _split_offsets,
+)
 
 
 class SplitVariables:
@@ -30,18 +36,15 @@ class SplitVariables:
 
     For every example ``k``, feature ``f`` and distinct split threshold
     ``v_j`` (sorted increasingly, collected over all trees of the ensemble)
-    a binary variable models ``x[k, f] <= v_j``.  The binaries of one feature
-    are ordered by ``z[k, f, j] <= z[k, f, j + 1]``, and indicator
-    constraints link them to the input variables:
+    a binary variable models whether ``x[k, f]`` goes left at ``v_j``.  The
+    binaries of one feature are ordered by ``z[k, f, j] <= z[k, f, j + 1]``,
+    and indicator constraints link them to the input variables, with the
+    strict side moved by epsilon (see ``_split_offsets``):
 
-        ``z = 1  =>  x <= v_j``    and    ``z = 0  =>  x >= v_j + epsilon``.
+        ``z = 1  =>  x <= v_j + low``    and    ``z = 0  =>  x >= v_j + high``.
 
-    When the bounds of an input variable already satisfy one of the two
-    constraints, the binary is fixed instead: ``ub <= v_j`` fixes it to 1 and
-    ``lb >= v_j + epsilon`` to 0.  For a fixed feature (``lb == ub``), the
-    constant value is compared to the threshold without applying
-    ``epsilon`` — like the ``feature_is_fixed`` handling of the leaf
-    formulation.
+    When the bounds of an input variable decide the split, the binary is
+    fixed instead, without applying epsilon, like in the leaf formulation.
 
     Parameters
     ----------
@@ -63,7 +66,6 @@ class SplitVariables:
 
         input_lb = _input.getAttr(GRB.Attr.LB)
         input_ub = _input.getAttr(GRB.Attr.UB)
-        self.feature_is_fixed = (input_lb == input_ub).all(axis=0)
 
         split_features = np.concatenate(
             [tree["feature"][tree["children_left"] >= 0] for tree in trees]
@@ -89,29 +91,23 @@ class SplitVariables:
             if values.size > 1:
                 gp_model.addConstr(z[:, :-1] <= z[:, 1:])
 
-            # Bounds that already satisfy a linking constraint fix the binary
-            # (including all fixed features); only the remaining ones need
-            # linking constraints to the input variables.
-            # Like the other formulations, a non-fixed input needs
-            # lb >= v + epsilon to skip epsilon; whether lb > v should be
-            # enough for all of them is discussed in #542.
-            right_bounds = values + epsilon
-            always_left = input_ub[:, [f]] <= values[None, :]
-            if self.feature_is_fixed[f]:
-                never_left = input_lb[:, [f]] > values[None, :]
-            else:
-                never_left = input_lb[:, [f]] >= right_bounds[None, :]
+            # When the input bounds decide a split (including all fixed
+            # features), fix the binary; only the remaining ones need linking
+            # constraints to the input variables.
+            always_left = _goes_left(input_ub[:, [f]], values[None, :], epsilon)
+            never_left = _goes_right(input_lb[:, [f]], values[None, :], epsilon)
             z[always_left].setAttr(GRB.Attr.LB, 1.0)
             z[never_left].setAttr(GRB.Attr.UB, 0.0)
 
+            low, high = _split_offsets(epsilon)
             for k, j in zip(*(~(always_left | never_left)).nonzero()):
                 z_var = z[k, j].item()
                 x_var = _input[k, f].item()
                 gp_model.addGenConstrIndicator(
-                    z_var, 1, x_var, GRB.LESS_EQUAL, values[j]
+                    z_var, 1, x_var, GRB.LESS_EQUAL, values[j] + low
                 )
                 gp_model.addGenConstrIndicator(
-                    z_var, 0, x_var, GRB.GREATER_EQUAL, right_bounds[j]
+                    z_var, 0, x_var, GRB.GREATER_EQUAL, values[j] + high
                 )
 
     def column(self, feature, threshold):
@@ -209,7 +205,6 @@ def add_misic_tree(
         gp_model,
         tree,
         _input,
-        shared_vars.feature_is_fixed,
         epsilon,
         leaves_order,
         safety_floor,

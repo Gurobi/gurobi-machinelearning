@@ -80,18 +80,43 @@ class TreeLeavesAccessor:
         return self._tree_leaves
 
 
-def _compute_leafs_bounds(gp_model, tree, feature_is_fixed, epsilon, safety_floor=0.0):
+def _split_offsets(epsilon):
+    """Offsets of the two branches of a split at threshold ``t``.
+
+    The left branch is ``x <= t + low`` and the right branch
+    ``x >= t + high``. A positive epsilon makes the right branch strict
+    (``x <= t`` goes left, as in scikit-learn and LightGBM); a negative one
+    the left branch (``x < t`` goes left, as in XGBoost).
+    """
+    return min(epsilon, 0.0), max(epsilon, 0.0)
+
+
+def _goes_left(input_ub, threshold, epsilon):
+    """Whether the input bounds alone send every input to the left."""
+    if epsilon < 0:
+        return input_ub < threshold
+    return input_ub <= threshold
+
+
+def _goes_right(input_lb, threshold, epsilon):
+    """Whether the input bounds alone send every input to the right."""
+    if epsilon < 0:
+        return input_lb >= threshold
+    return input_lb > threshold
+
+
+def _compute_leafs_bounds(gp_model, tree, safety_floor=0.0):
     """Compute the bounds that define each leaf of the tree
+
+    The bounds are the split thresholds: a node is reached by the inputs
+    between ``node_lb`` and ``node_ub``. The formulations move the strict
+    side by epsilon (see :py:func:`_split_offsets`), only for the inputs
+    whose bounds do not decide the split.
 
     Parameters
     ----------
     tree : dict
         The decision tree to model.
-    feature_is_fixed : ndarray
-        Boolean array indicating if a feature is fixed.
-    epsilon : float
-        Small value used to impose strict inequalities for splitting nodes in
-        MIP formulations.
     """
     capacity = tree["capacity"]
     n_features = tree["n_features"]
@@ -135,24 +160,19 @@ def _compute_leafs_bounds(gp_model, tree, feature_is_fixed, epsilon, safety_floo
             )
 
         node_ub[feature[node], left] = node_threshold
-        if feature_is_fixed[feature[node]]:
-            node_lb[feature[node], right] = node_threshold
-        else:
-            node_lb[feature[node], right] = node_threshold + epsilon
+        node_lb[feature[node], right] = node_threshold
         stack.append(right)
         stack.append(left)
     return (node_lb, node_ub)
 
 
-def _compute_reachability(
-    gp_model, tree, _input, feature_is_fixed, epsilon, nodes, safety_floor=0.0
-):
+def _compute_reachability(gp_model, tree, _input, epsilon, nodes, safety_floor=0.0):
     """Which examples can reach which of the given tree nodes.
 
     A node is reachable for an example when the box of inputs routed to it
-    (from :py:func:`_compute_leafs_bounds`, so with the same epsilon and
-    ``feature_is_fixed`` semantics as the constraints) intersects the
-    example's input variable bounds.
+    (from :py:func:`_compute_leafs_bounds`) intersects the example's input
+    variable bounds. The strict side of the box is moved by epsilon unless
+    the example's bounds decide the split, as in the constraints.
 
     Returns
     -------
@@ -162,19 +182,19 @@ def _compute_reachability(
         Lower and upper bounds of the input box routed to each node of the
         tree, of shape ``(n_features, capacity)``.
     """
-    (node_lb, node_ub) = _compute_leafs_bounds(
-        gp_model, tree, feature_is_fixed, epsilon, safety_floor
-    )
+    (node_lb, node_ub) = _compute_leafs_bounds(gp_model, tree, safety_floor)
     input_lb = _input.getAttr(GRB.Attr.LB)
     input_ub = _input.getAttr(GRB.Attr.UB)
 
+    low, high = _split_offsets(epsilon)
     selected_lb = node_lb[:, nodes]  # (n_features, len(nodes))
     selected_ub = node_ub[:, nodes]
     reachability = np.ones((_input.shape[0], len(nodes)), dtype=bool)
     for f in range(tree["n_features"]):
-        reachability &= (input_ub[:, f, None] >= selected_lb[f, None, :]) & (
-            input_lb[:, f, None] <= selected_ub[f, None, :]
-        )
+        lb, ub = input_lb[:, f, None], input_ub[:, f, None]
+        node_lb_f, node_ub_f = selected_lb[f, None, :], selected_ub[f, None, :]
+        reachability &= _goes_right(lb, node_lb_f, epsilon) | (ub >= node_lb_f + high)
+        reachability &= _goes_left(ub, node_ub_f, epsilon) | (lb <= node_ub_f + low)
     return reachability, node_lb, node_ub
 
 
@@ -193,12 +213,10 @@ def _leafs_formulation(
     leafs = tree["children_left"] < 0
     leaf_nodes = leafs.nonzero()[0]
 
-    # Get fixed features we don't want to apply the epsilon for them
-    feature_is_fixed = (_input.lb == _input.ub).all(axis=0)
-
     reachability_matrix, node_lb, node_ub = _compute_reachability(
-        gp_model, tree, _input, feature_is_fixed, epsilon, leaf_nodes, safety_floor
+        gp_model, tree, _input, epsilon, leaf_nodes, safety_floor
     )
+    low, high = _split_offsets(epsilon)
     input_ub = _input.getAttr(GRB.Attr.UB)
     input_lb = _input.getAttr(GRB.Attr.LB)
 
@@ -235,11 +253,17 @@ def _leafs_formulation(
                 gp_model.addGenConstrIndicator(l_var, 1, r_var, GRB.EQUAL, value)
 
         for feature in range(n_features):
-            feat_lb = node_lb[feature, node]
-            feat_ub = node_ub[feature, node]
+            feat_lb = node_lb[feature, node] + high
+            feat_ub = node_ub[feature, node] + low
+            lb, ub = input_lb[:, feature], input_ub[:, feature]
 
+            # Inputs whose bounds decide the split need no constraint.
             if feat_lb > -GRB.INFINITY:
-                tight = (input_lb[:, feature] < feat_lb) & reachable
+                tight = (
+                    ~_goes_right(lb, node_lb[feature, node], epsilon)
+                    & (lb < feat_lb)
+                    & reachable
+                )
                 lhs = leafs_vars[tight, i].tolist()
                 rhs = _input[tight, feature].tolist()
                 n_indicators += sum(tight)
@@ -249,7 +273,11 @@ def _leafs_formulation(
                     )
 
             if feat_ub < GRB.INFINITY:
-                tight = (input_ub[:, feature] > feat_ub) & reachable
+                tight = (
+                    ~_goes_left(ub, node_ub[feature, node], epsilon)
+                    & (ub > feat_ub)
+                    & reachable
+                )
                 lhs = leafs_vars[tight, i].tolist()
                 rhs = _input[tight, feature].tolist()
                 n_indicators += sum(tight)
@@ -356,18 +384,19 @@ def _paths_formulation(
             # Special case where we have an MVarPlusConst object
             # If that feature is a constant we can directly fix it.
             node_value = _input[:, node_feature].LB
-            fixed_left = node_value <= node_threshold
+            fixed_left = _goes_left(node_value, node_threshold, epsilon)
             nodes[fixed_left, right].UB = 0.0
             nodes[~fixed_left, left].UB = 0.0
         else:
             lhs = _input[:, node_feature].tolist()
             rhs = nodes[:, left].tolist()
             gp_model.addConstrs(
-                ((rhs[k] == 1) >> (lhs[k] <= node_threshold)) for k in range(nex)
+                ((rhs[k] == 1) >> (lhs[k] <= node_threshold + min(epsilon, 0.0)))
+                for k in range(nex)
             )
             rhs = nodes[:, right].tolist()
             gp_model.addConstrs(
-                ((rhs[k] == 1) >> (lhs[k] >= node_threshold + epsilon))
+                ((rhs[k] == 1) >> (lhs[k] >= node_threshold + max(epsilon, 0.0)))
                 for k in range(nex)
             )
 

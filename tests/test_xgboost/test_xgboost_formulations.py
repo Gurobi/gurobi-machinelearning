@@ -70,10 +70,10 @@ class TestXGBoosthModel(FixedRegressionModel):
         one_case = {"predictor": xgb_reg, "nonconvex": 0}
 
         # XGBoost thresholds sit at data values, so the tight test boxes
-        # contain thresholds and epsilon=0 knife edges are systematic; with
-        # the extraction's threshold shift a positive epsilon matches
-        # XGBoost's strict `x < t` exactly (the ensemble formulation warns
-        # about global epsilon).
+        # contain thresholds and epsilon=0 knife edges are systematic; a
+        # positive epsilon, applied to the left side, matches XGBoost's
+        # strict `x < t` exactly (the ensemble formulation warns about
+        # global epsilon).
         self.do_one_case(
             one_case,
             X,
