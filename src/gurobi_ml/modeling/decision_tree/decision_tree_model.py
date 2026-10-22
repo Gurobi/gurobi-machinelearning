@@ -54,6 +54,16 @@ class TreeLeaves(NamedTuple):
     nodes: np.ndarray
 
 
+#: Default value of the ``formulation`` keyword argument, shared by
+#: ``AbstractTreeEstimator`` and the ensemble wrapper classes.
+DEFAULT_FORMULATION = "leaf"
+
+
+def _formulation_kwarg(kwargs):
+    """The requested ``formulation``, defaulting to :py:data:`DEFAULT_FORMULATION`."""
+    return kwargs.get("formulation", DEFAULT_FORMULATION)
+
+
 class TreeLeavesAccessor:
     """Mixin exposing per-tree leaf variables."""
 
@@ -502,7 +512,7 @@ class AbstractTreeEstimator(TreeLeavesAccessor, AbstractPredictorConstr):
         self._epsilon = epsilon
         self._safety_floor = safety_floor
 
-        self._formulation = kwargs.get("formulation", "leaf")
+        self._formulation = _formulation_kwarg(kwargs)
         if timer is None:
             self._timer = AbstractPredictorConstr._ModelingTimer()
         else:
