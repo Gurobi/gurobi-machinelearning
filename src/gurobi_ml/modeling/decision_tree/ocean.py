@@ -52,9 +52,12 @@ from gurobipy import GRB
 
 from .decision_tree_model import (
     TreeLeaves,
+    _collect_split_thresholds,
     _compute_reachability,
     _goes_left,
     _goes_right,
+    _no_reachable_leaf_error,
+    _require_finite_split_bounds,
     _split_offsets,
 )
 
@@ -68,12 +71,8 @@ class IncrementalMuVariables:
         input_lb = _input.getAttr(GRB.Attr.LB)
         input_ub = _input.getAttr(GRB.Attr.UB)
 
-        split_features = np.concatenate(
-            [tree["feature"][tree["children_left"] >= 0] for tree in trees]
-        )
-        split_thresholds = np.concatenate(
-            [tree["threshold"][tree["children_left"] >= 0] for tree in trees]
-        )
+        thresholds = _collect_split_thresholds(trees, n_features)
+        _require_finite_split_bounds(input_lb, input_ub, thresholds.keys(), "ocean")
 
         self._epsilon = epsilon
         self._input_lb = input_lb
@@ -82,21 +81,7 @@ class IncrementalMuVariables:
         self._mu = {}
         self._left_pos = {}
         self._right_pos = {}
-        for f in range(n_features):
-            values = np.unique(split_thresholds[split_features == f])
-            if values.size == 0:
-                continue
-
-            if not (
-                np.isfinite(input_lb[:, f]).all() and np.isfinite(input_ub[:, f]).all()
-            ):
-                raise ValueError(
-                    "The 'ocean' formulation requires finite bounds on every "
-                    f"input variable used in a split; feature {f} is unbounded. "
-                    "Bound the input variables (e.g. to the observed feature "
-                    "ranges) or use another formulation."
-                )
-
+        for f, values in thresholds.items():
             # A nonzero epsilon turns the interval at each threshold into a
             # hole of the domain, so both of its ends become boundaries. At
             # epsilon = 0 the two ends coincide and only the thresholds
@@ -147,7 +132,12 @@ class IncrementalMuVariables:
         """
         values = self._thresholds[feature]
         j = np.searchsorted(values, threshold)
-        assert j < values.size and values[j] == threshold
+        if j >= values.size or values[j] != threshold:
+            raise ValueError(
+                f"No shared incremental variable for feature {feature} at "
+                f"threshold {threshold}; the tree was not part of the "
+                "ensemble these shared variables were built from."
+            )
         mu = self._mu[feature]
 
         if flow_left is not None:
@@ -203,10 +193,7 @@ def add_ocean_tree(
     active = reachability.any(axis=0)
     active_nodes = nodes[active]
     if not any(children_left[node] < 0 for node in active_nodes):
-        raise ValueError(
-            "No reachable leaf nodes given the current input variable bounds; "
-            "the decision tree constraint would be infeasible."
-        )
+        raise _no_reachable_leaf_error()
     column = {node: i for i, node in enumerate(active_nodes)}
 
     flow = gp_model.addMVar((nex, active_nodes.size), ub=1.0, name=name)

@@ -80,6 +80,17 @@ class TreeLeavesAccessor:
         return self._tree_leaves
 
 
+def _flatten_tree_leaves(estimators):
+    """Concatenate the per-tree leaves of per-tree ``AbstractTreeEstimator``\\ s.
+
+    Returns ``None`` if any estimator does not expose leaf variables (e.g.
+    the ``"paths"`` formulation), matching :py:attr:`TreeLeavesAccessor._tree_leaves`.
+    """
+    if not all(est._tree_leaves is not None for est in estimators):
+        return None
+    return tuple(leaves for est in estimators for leaves in est._tree_leaves)
+
+
 def _split_offsets(epsilon):
     """Offsets of the two branches of a split at threshold ``t``.
 
@@ -103,6 +114,55 @@ def _goes_right(input_lb, threshold, epsilon):
     if epsilon < 0:
         return input_lb >= threshold
     return input_lb > threshold
+
+
+def _no_reachable_leaf_error():
+    """Error raised when no example can reach any leaf given input bounds."""
+    return ValueError(
+        "No reachable leaf nodes given the current input variable bounds; "
+        "the decision tree constraint would be infeasible."
+    )
+
+
+def _collect_split_thresholds(trees, n_features):
+    """Distinct split thresholds of a tree ensemble, per feature.
+
+    Returns
+    -------
+    dict
+        Maps a feature index to its sorted array of distinct thresholds,
+        over all trees. Features with no split are omitted.
+    """
+    split_features = np.concatenate(
+        [tree["feature"][tree["children_left"] >= 0] for tree in trees]
+    )
+    split_thresholds = np.concatenate(
+        [tree["threshold"][tree["children_left"] >= 0] for tree in trees]
+    )
+    thresholds = {}
+    for f in range(n_features):
+        values = np.unique(split_thresholds[split_features == f])
+        if values.size:
+            thresholds[f] = values
+    return thresholds
+
+
+def _require_finite_split_bounds(input_lb, input_ub, features, formulation):
+    """Raise if a feature used in a split has non-finite input bounds.
+
+    ``"ocean"`` and ``"biggs_perakis"`` use the input variable bounds as
+    constraint coefficients, so every feature they split on must be bounded.
+    """
+    for f in features:
+        if not (
+            np.isfinite(input_lb[:, f]).all() and np.isfinite(input_ub[:, f]).all()
+        ):
+            raise ValueError(
+                f"The {formulation!r} formulation requires finite bounds on "
+                f"every input variable used in a split; feature {f} is "
+                "unbounded. Bound the input variables (e.g. to the observed "
+                "feature ranges) or use another formulation."
+            )
 
 
 def _compute_leafs_bounds(gp_model, tree, safety_floor=0.0):
@@ -227,10 +287,7 @@ def _leafs_formulation(
     n_active = len(active_leaf_nodes)
 
     if n_active == 0:
-        raise ValueError(
-            "No reachable leaf nodes given the current input variable bounds; "
-            "the decision tree constraint would be infeasible."
-        )
+        raise _no_reachable_leaf_error()
 
     leafs_vars = gp_model.addMVar(
         (nex, n_active), vtype=GRB.BINARY, name=_name_var("leafs")
@@ -463,6 +520,8 @@ class AbstractTreeEstimator(TreeLeavesAccessor, AbstractPredictorConstr):
         )
 
         if self._formulation in ("leafs", "leaf"):
+            # "leafs" is a legacy alias of "leaf", kept for backwards
+            # compatibility; new code should use "leaf".
             leaves = _leafs_formulation(
                 self.gp_model,
                 self.input,

@@ -325,7 +325,8 @@ forbids entering the interval starting at :math:`\theta_{i,j}`:
 The output of the tree is the sum of the leaf values weighted by the leaf
 flows. With a positive :math:`\epsilon` the band
 :math:`(\theta_{i,j}, \theta_{i,j} + \epsilon)` becomes an interval of its
-own, and going right requires crossing it. The only binary variables are the
+own, and going right requires crossing it; an input whose bounds already
+decide the split needs no such interval. The only binary variables are the
 per-level branching variables :math:`b_d`, and the formulation has no
 indicator constraints.
 
@@ -414,15 +415,17 @@ A positive ``epsilon`` removes the ambiguity at thresholds. Its scope differs:
 
 - In ``"leaf"``, ``"ocean"`` and ``"biggs_perakis"`` it only constrains the
   splits on the path taken by each tree.
-- In ``"misic"`` and ``"misic_lazy"`` it applies to every threshold of
-  the ensemble, since every :math:`z_{i,j}` is linked to :math:`x_i`: the
-  interval :math:`(\theta_{i,j}, \theta_{i,j} + \epsilon)` is excluded for all
-  thresholds.
+- In ``"misic"`` and ``"misic_lazy"`` it applies globally, since every
+  :math:`z_{i,j}` is linked to :math:`x_i`: the interval
+  :math:`(\theta_{i,j}, \theta_{i,j} + \epsilon)` is excluded at every
+  threshold of the ensemble that :math:`x_i`'s bounds do not already decide
+  (an input whose bounds put it entirely on one side of a threshold has that
+  side's :math:`z_{i,j}` fixed directly, without the interval).
   The model becomes infeasible if an input variable cannot avoid all those
   intervals, and an :math:`\epsilon` below Gurobi's
   :external+gurobi:ref:`IntFeasTol <parameterintfeastol>` may not be enforced,
   because the indicator constraints are handled as SOS constraints. A warning
-  is emitted when ``epsilon`` is positive for these formulations.
+  is emitted when ``epsilon`` is nonzero for these formulations.
 
 Because :math:`x` often sits exactly on a threshold, recomputing the prediction
 of the regression at the value of :math:`x` (as

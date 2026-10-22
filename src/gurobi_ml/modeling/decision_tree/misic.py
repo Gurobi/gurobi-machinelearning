@@ -24,9 +24,11 @@ from gurobipy import GRB
 
 from .decision_tree_model import (
     TreeLeaves,
+    _collect_split_thresholds,
     _compute_reachability,
     _goes_left,
     _goes_right,
+    _no_reachable_leaf_error,
     _split_offsets,
 )
 
@@ -67,20 +69,11 @@ class SplitVariables:
         input_lb = _input.getAttr(GRB.Attr.LB)
         input_ub = _input.getAttr(GRB.Attr.UB)
 
-        split_features = np.concatenate(
-            [tree["feature"][tree["children_left"] >= 0] for tree in trees]
-        )
-        split_thresholds = np.concatenate(
-            [tree["threshold"][tree["children_left"] >= 0] for tree in trees]
-        )
+        thresholds = _collect_split_thresholds(trees, n_features)
 
         self._thresholds = {}
         self._vars = {}
-        for f in range(n_features):
-            values = np.unique(split_thresholds[split_features == f])
-            if values.size == 0:
-                continue
-
+        for f, values in thresholds.items():
             z = gp_model.addMVar(
                 (nex, values.size), vtype=GRB.BINARY, name=_name_var(f"z[{f}]")
             )
@@ -114,7 +107,12 @@ class SplitVariables:
         """Return the binaries (one per example) of feature's split at threshold."""
         values = self._thresholds[feature]
         j = np.searchsorted(values, threshold)
-        assert j < values.size and values[j] == threshold
+        if j >= values.size or values[j] != threshold:
+            raise ValueError(
+                f"No shared split variable for feature {feature} at threshold "
+                f"{threshold}; the tree was not part of the ensemble these "
+                "shared variables were built from."
+            )
         return self._vars[feature][:, j]
 
 
@@ -193,9 +191,10 @@ def add_misic_tree(
     Returns
     -------
     tuple
-        ``(expression, values)`` where ``expression`` is the tree's output as
-        a linear expression of shape ``(n_examples, n_outputs)`` and
-        ``values`` are the output values of the reachable leaves.
+        ``(expression, values, leaves)`` where ``expression`` is the tree's
+        output as a linear expression of shape ``(n_examples, n_outputs)``,
+        ``values`` are the output values of the reachable leaves, and
+        ``leaves`` is the :py:class:`TreeLeaves` of the tree.
     """
     nex = _input.shape[0]
 
@@ -213,10 +212,7 @@ def add_misic_tree(
     # Positions (in depth-first leaf order) of leaves some example can reach.
     active_positions = reachability.any(axis=0).nonzero()[0]
     if active_positions.size == 0:
-        raise ValueError(
-            "No reachable leaf nodes given the current input variable bounds; "
-            "the decision tree constraint would be infeasible."
-        )
+        raise _no_reachable_leaf_error()
 
     y = gp_model.addMVar((nex, active_positions.size), ub=1.0, name=name)
     y[~reachability[:, active_positions]].setAttr(GRB.Attr.UB, 0.0)
