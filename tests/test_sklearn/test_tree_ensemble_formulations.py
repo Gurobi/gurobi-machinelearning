@@ -467,6 +467,48 @@ class TestEpsilonAndFixedFeatures(unittest.TestCase):
             self.assertEqual(gpm.Status, GRB.OPTIMAL)
             self.assertAlmostEqual(pred_constr.output.X[0, 0], 0.0)
 
+    def test_epsilon_exemption_is_per_row_not_per_batch(self):
+        """The "leaf" formulation used to exempt a feature from epsilon only
+        when it was fixed (``lb == ub``) for every row of the batch at once;
+        a single free row denied the exemption to every other row. It now
+        decides the exemption per row, so a batch mixing a fixed row, a
+        row decided only by one (possibly infinite) bound, and a genuinely
+        free row must treat each of them independently."""
+        epsilon = 1e-2
+        fixed_in_band = self.threshold + epsilon / 2.0
+        unbounded_decided_left = self.threshold - epsilon / 2.0
+        params = {"OutputFlag": 0}
+        with gp.Env(params=params) as env, gp.Model(env=env) as gpm:
+            x = gpm.addMVar(
+                (3, 1),
+                lb=[[fixed_in_band], [-GRB.INFINITY], [0.0]],
+                ub=[[fixed_in_band], [unbounded_decided_left], [1.0]],
+            )
+            pred_constr = _add_predictor_constr_silently(
+                gpm,
+                self.predictor,
+                x,
+                epsilon=epsilon,
+                formulation="leaf",
+            )
+            # Force the free row (row 2) to the right leaf and pull it down;
+            # it must still pay the full epsilon, regardless of the other
+            # rows' exemption.
+            gpm.addConstr(pred_constr.output[2, :].sum() >= 0.5)
+            gpm.setObjective(x[2, :].sum(), GRB.MINIMIZE)
+            gpm.optimize()
+            self.assertEqual(gpm.Status, GRB.OPTIMAL)
+            # Row 0: fixed inside the epsilon band, decided right without it.
+            self.assertAlmostEqual(pred_constr.output.X[0, 0], 1.0)
+            # Row 1: unbounded below, decided left by its upper bound alone.
+            self.assertAlmostEqual(pred_constr.output.X[1, 0], 0.0)
+            # Row 2: genuinely free, still pays the full epsilon.
+            self.assertAlmostEqual(
+                x.X[2, 0],
+                self.threshold + epsilon,
+                delta=gpm.Params.FeasibilityTol,
+            )
+
     def test_positive_epsilon_warns_for_misic(self):
         """The shared binary split variables apply epsilon globally (every
         threshold of every tree, not only along the selected paths); passing
