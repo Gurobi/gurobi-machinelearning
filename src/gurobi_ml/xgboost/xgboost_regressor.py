@@ -39,9 +39,9 @@ from ..modeling.decision_tree import (
     ENSEMBLE_FORMULATIONS,
     AbstractTreeEstimator,
     TreeLeavesAccessor,
+    _build_tree_ensemble,
     _flatten_tree_leaves,
     _formulation_kwarg,
-    add_tree_ensemble_formulation,
 )
 
 
@@ -283,22 +283,22 @@ class XGBoostRegressorConstr(TreeLeavesAccessor, AbstractPredictorConstr):
 
         formulation = _formulation_kwarg(kwargs)
         if formulation in ENSEMBLE_FORMULATIONS:
-            # The objective handling below needs the sum of the trees; the
-            # ensemble formulation provides it through one variable.
-            trees_sum = model.addMVar(
-                (nex, 1), lb=-GRB.INFINITY, name=self._name_var("trees_sum")
-            )
-            self._tree_leaves = add_tree_ensemble_formulation(
+            # The objective handling below needs the sum of the trees as an
+            # expression; build it directly instead of routing it through an
+            # output variable only to read it back.
+            trees_sum, output_lb, output_ub, self._tree_leaves = _build_tree_ensemble(
                 model,
                 [self._xgb_tree_to_dict(tree) for tree in trees],
                 np.ones(n_estimators),
                 _input,
-                trees_sum,
+                1,
                 formulation,
                 -self.epsilon,
                 self._name_var,
                 safety_floor=self.safety_floor,
             )
+            model.addConstr(trees_sum >= output_lb)
+            model.addConstr(trees_sum <= output_ub)
         else:
             estimators = []
 

@@ -79,6 +79,88 @@ def _clamp_thresholds(trees, safety_floor, feas_tol):
     return clamped_trees
 
 
+def _build_tree_ensemble(
+    gp_model,
+    trees,
+    weights,
+    _input,
+    outdim,
+    formulation,
+    epsilon,
+    _name_var,
+    safety_floor=0.0,
+    constant=0.0,
+):
+    """Build a tree ensemble in gp_model using formulation, without linking it
+    to an output variable.
+
+    Used by :py:func:`add_tree_ensemble_formulation` and by callers that need
+    the ensemble's prediction as a linear expression instead (e.g. to feed it
+    through a link function), so they are not forced to route it through an
+    intermediate output variable and equality constraint just to get an
+    expression they already have.
+
+    Returns
+    -------
+    total : expression
+        ``sum_t weights[t] * tree_t(input) + constant``, of shape
+        ``(n_examples, outdim)``.
+    output_lb, output_ub : np.ndarray
+        Bounds on ``total``, of shape ``(outdim,)``.
+    tree_leaves : tuple of TreeLeaves
+        The leaf variables of each tree.
+    """
+    try:
+        shared_variables, tree_builder = _FORMULATIONS[formulation]
+    except KeyError:
+        raise ValueError(f"Unknown formulation: {formulation}") from None
+
+    # Only the shared binary split variables make epsilon global: they take
+    # a value whether or not a tree traverses that split. The epsilon of
+    # "ocean" lives in the flow linking, so it acts path-wise like the leaf
+    # baseline.
+    if epsilon != 0.0 and formulation in ("misic", "misic_lazy"):
+        warn(
+            f"epsilon={abs(epsilon)} with the '{formulation}' formulation applies "
+            "globally: the interval of width epsilon at every threshold of the "
+            "ensemble is forbidden, not only along the selected paths as in "
+            "the 'leaf' formulation. The model becomes infeasible when the "
+            "attainable range of an input (e.g. a derived pipeline feature) "
+            "is narrower than epsilon, and an epsilon below Gurobi's "
+            "IntFeasTol may return solutions that disagree with the "
+            "predictor. Consider leaving epsilon at 0.",
+            UserWarning,
+        )
+
+    trees = _clamp_thresholds(trees, safety_floor, gp_model.Params.FeasibilityTol)
+    shared_vars = shared_variables(gp_model, trees, _input, epsilon, _name_var)
+
+    output_lb = np.full(outdim, float(constant))
+    output_ub = np.full(outdim, float(constant))
+    total = constant
+    tree_leaves = []
+    for i, (tree, weight) in enumerate(zip(trees, weights)):
+        expression, values, leaves = tree_builder(
+            gp_model,
+            shared_vars,
+            tree,
+            _input,
+            epsilon,
+            name=_name_var(f"y[{i}]"),
+            safety_floor=safety_floor,
+        )
+        tree_leaves.append(leaves)
+        total = total + weight * expression
+        output_lb += np.minimum(
+            weight * values.min(axis=0), weight * values.max(axis=0)
+        )
+        output_ub += np.maximum(
+            weight * values.min(axis=0), weight * values.max(axis=0)
+        )
+
+    return total, output_lb, output_ub, tuple(tree_leaves)
+
+
 def add_tree_ensemble_formulation(
     gp_model,
     trees,
@@ -132,57 +214,21 @@ def add_tree_ensemble_formulation(
     tuple of TreeLeaves
         The leaf variables of each tree.
     """
-    try:
-        shared_variables, tree_builder = _FORMULATIONS[formulation]
-    except KeyError:
-        raise ValueError(f"Unknown formulation: {formulation}") from None
-
-    # Only the shared binary split variables make epsilon global: they take
-    # a value whether or not a tree traverses that split. The epsilon of
-    # "ocean" lives in the flow linking, so it acts path-wise like the leaf
-    # baseline.
-    if epsilon != 0.0 and formulation in ("misic", "misic_lazy"):
-        warn(
-            f"epsilon={abs(epsilon)} with the '{formulation}' formulation applies "
-            "globally: the interval of width epsilon at every threshold of the "
-            "ensemble is forbidden, not only along the selected paths as in "
-            "the 'leaf' formulation. The model becomes infeasible when the "
-            "attainable range of an input (e.g. a derived pipeline feature) "
-            "is narrower than epsilon, and an epsilon below Gurobi's "
-            "IntFeasTol may return solutions that disagree with the "
-            "predictor. Consider leaving epsilon at 0.",
-            UserWarning,
-        )
-
-    trees = _clamp_thresholds(trees, safety_floor, gp_model.Params.FeasibilityTol)
-    shared_vars = shared_variables(gp_model, trees, _input, epsilon, _name_var)
-
-    outdim = output.shape[1]
-    output_lb = np.full(outdim, float(constant))
-    output_ub = np.full(outdim, float(constant))
-    total = constant
-    tree_leaves = []
-    for i, (tree, weight) in enumerate(zip(trees, weights)):
-        expression, values, leaves = tree_builder(
-            gp_model,
-            shared_vars,
-            tree,
-            _input,
-            epsilon,
-            name=_name_var(f"y[{i}]"),
-            safety_floor=safety_floor,
-        )
-        tree_leaves.append(leaves)
-        total = total + weight * expression
-        output_lb += np.minimum(
-            weight * values.min(axis=0), weight * values.max(axis=0)
-        )
-        output_ub += np.maximum(
-            weight * values.min(axis=0), weight * values.max(axis=0)
-        )
+    total, output_lb, output_ub, tree_leaves = _build_tree_ensemble(
+        gp_model,
+        trees,
+        weights,
+        _input,
+        output.shape[1],
+        formulation,
+        epsilon,
+        _name_var,
+        safety_floor=safety_floor,
+        constant=constant,
+    )
 
     gp_model.addConstr(output_coef * output == total)
     gp_model.addConstr(output_coef * output >= output_lb)
     gp_model.addConstr(output_coef * output <= output_ub)
 
-    return tuple(tree_leaves)
+    return tree_leaves
