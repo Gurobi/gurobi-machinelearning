@@ -30,6 +30,7 @@ from ..modeling.decision_tree import (
     AbstractTreeEstimator,
     TreeLeavesAccessor,
     _flatten_tree_leaves,
+    _formulation_kwarg,
     add_tree_ensemble_formulation,
 )
 
@@ -345,7 +346,7 @@ class LGBMConstr(TreeLeavesAccessor, AbstractPredictorConstr):
 
         n_estimators = len(trees_raw)
 
-        formulation = kwargs.get("formulation", "leaf")
+        formulation = _formulation_kwarg(kwargs)
         if formulation in ENSEMBLE_FORMULATIONS:
             trees = []
             for tree in trees_raw:

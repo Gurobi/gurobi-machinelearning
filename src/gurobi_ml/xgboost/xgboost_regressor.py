@@ -40,6 +40,7 @@ from ..modeling.decision_tree import (
     AbstractTreeEstimator,
     TreeLeavesAccessor,
     _flatten_tree_leaves,
+    _formulation_kwarg,
     add_tree_ensemble_formulation,
 )
 
@@ -280,7 +281,7 @@ class XGBoostRegressorConstr(TreeLeavesAccessor, AbstractPredictorConstr):
 
         n_estimators = len(trees)
 
-        formulation = kwargs.get("formulation", "leaf")
+        formulation = _formulation_kwarg(kwargs)
         if formulation in ENSEMBLE_FORMULATIONS:
             # The objective handling below needs the sum of the trees; the
             # ensemble formulation provides it through one variable.

@@ -26,6 +26,7 @@ from ..modeling.decision_tree import (
     ENSEMBLE_FORMULATIONS,
     TreeLeavesAccessor,
     _flatten_tree_leaves,
+    _formulation_kwarg,
 )
 from .decision_tree_regressor import (
     _add_sklearn_tree_ensemble_formulation,
@@ -135,7 +136,7 @@ class RandomForestRegressorConstr(
         output = self._output
         nex = _input.shape[0]
 
-        formulation = kwargs.get("formulation", "leaf")
+        formulation = _formulation_kwarg(kwargs)
         if formulation in ENSEMBLE_FORMULATIONS:
             self._tree_leaves = _add_sklearn_tree_ensemble_formulation(
                 model,
