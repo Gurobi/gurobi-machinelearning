@@ -58,7 +58,7 @@ def add_xgbregressor_constr(
 
     The formulation predicts the values of output_vars using input_vars
     according to xgboost_regressor. See our :ref:`User's Guide
-    <Gradient Boosting Regression>` for details on the mip formulation used.
+    <Decision Trees and Tree Ensembles>` for details on the mip formulation used.
 
     This version is for using directly with the Scikit-Learn wrapper of XGBoost.
     Note that only "gbtree" regressors are supported at this point.
@@ -127,7 +127,7 @@ def add_xgboost_regressor_constr(
 
     The formulation predicts the values of output_vars using input_vars
     according to xgboost_regressor. See our :ref:`User's Guide
-    <Gradient Boosting Regression>` for details on the mip formulation used.
+    <Decision Trees and Tree Ensembles>` for details on the mip formulation used.
 
     Note that only "gbtree" regressors are supported at this point.
 

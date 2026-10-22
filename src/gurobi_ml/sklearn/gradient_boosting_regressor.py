@@ -49,7 +49,7 @@ def add_gradient_boosting_regressor_constr(
 
     The formulation predicts the values of output_vars using input_vars
     according to gradient_boosting_regressor. See our :ref:`User's Guide
-    <Gradient Boosting Regression>` for details on the mip formulation used.
+    <Decision Trees and Tree Ensembles>` for details on the mip formulation used.
 
     Parameters
     ----------

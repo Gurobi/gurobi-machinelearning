@@ -83,10 +83,9 @@ SAFETY_FLOOR = (
     "(default 0.0, i.e. disabled)."
 )
 TREE_FORMULATION = (
-    "MIP formulation of the trees: ``'leaf'`` (default), or one of the "
-    "experimental ensemble formulations ``'misic'``, ``'misic_lazy'``, "
-    "``'ocean'`` and ``'biggs_perakis'``. "
-    "See :ref:`Tree Ensemble Formulations`."
+    "MIP formulation of the trees: ``'leaf'`` (default), ``'misic'``, "
+    "``'misic_lazy'``, ``'ocean'`` or ``'biggs_perakis'``. "
+    "See :ref:`Decision Trees and Tree Ensembles`."
 )
 
 

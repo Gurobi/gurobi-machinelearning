@@ -48,7 +48,7 @@ def add_lgbmregressor_constr(
 
     The formulation predicts the values of output_vars using input_vars
     according to lgbm_regressor. See our :ref:`User's Guide
-    <Gradient Boosting Regression>` for details on the mip formulation used.
+    <Decision Trees and Tree Ensembles>` for details on the mip formulation used.
 
     This version is for using directly with the Scikit-Learn wrapper of lgbm.
     Note that only "gbtree" regressors are supported at this point.
@@ -117,7 +117,7 @@ def add_lgbm_booster_constr(
 
     The formulation predicts the values of output_vars using input_vars
     according to lgbm_booster. See our :ref:`User's Guide
-    <Gradient Boosting Regression>` for details on the mip formulation used.
+    <Decision Trees and Tree Ensembles>` for details on the mip formulation used.
 
     Note that only "gbtree" regressors are supported at this point.
 
