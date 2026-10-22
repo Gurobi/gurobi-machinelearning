@@ -39,6 +39,7 @@ from ..modeling.decision_tree import (
     ENSEMBLE_FORMULATIONS,
     AbstractTreeEstimator,
     TreeLeavesAccessor,
+    _flatten_tree_leaves,
     add_tree_ensemble_formulation,
 )
 
@@ -323,10 +324,7 @@ class XGBoostRegressorConstr(TreeLeavesAccessor, AbstractPredictorConstr):
                 )
 
             self.estimators_ = estimators
-            if all(est._tree_leaves is not None for est in estimators):
-                self._tree_leaves = tuple(
-                    leaves for est in estimators for leaves in est._tree_leaves
-                )
+            self._tree_leaves = _flatten_tree_leaves(estimators)
             trees_sum = tree_vars.sum(axis=1)
 
         base_score_raw = xgb_raw["learner"]["learner_model_param"]["base_score"]

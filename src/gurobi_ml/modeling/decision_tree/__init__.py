@@ -22,6 +22,9 @@ from .decision_tree_model import (
 from .decision_tree_model import (
     TreeLeavesAccessor as TreeLeavesAccessor,
 )
+from .decision_tree_model import (
+    _flatten_tree_leaves as _flatten_tree_leaves,
+)
 from .ensemble_model import (
     ENSEMBLE_FORMULATIONS as ENSEMBLE_FORMULATIONS,
 )

@@ -48,6 +48,8 @@ from .decision_tree_model import (
     _compute_reachability,
     _goes_left,
     _goes_right,
+    _no_reachable_leaf_error,
+    _require_finite_split_bounds,
     _split_offsets,
 )
 
@@ -69,16 +71,7 @@ def _biggs_perakis_formulation(
     input_ub = _input.getAttr(GRB.Attr.UB)
 
     split_features = np.unique(tree["feature"][tree["children_left"] >= 0])
-    for f in split_features:
-        if not (
-            np.isfinite(input_lb[:, f]).all() and np.isfinite(input_ub[:, f]).all()
-        ):
-            raise ValueError(
-                "The 'biggs_perakis' formulation requires finite bounds on "
-                f"every input variable used in a split; feature {f} is "
-                "unbounded. Bound the input variables (e.g. to the observed "
-                "feature ranges) or use another formulation."
-            )
+    _require_finite_split_bounds(input_lb, input_ub, split_features, "biggs_perakis")
 
     # Collect leaf nodes
     leafs = tree["children_left"] < 0
@@ -95,10 +88,7 @@ def _biggs_perakis_formulation(
     n_active = len(active_leaf_nodes)
 
     if n_active == 0:
-        raise ValueError(
-            "No reachable leaf nodes given the current input variable bounds; "
-            "the decision tree constraint would be infeasible."
-        )
+        raise _no_reachable_leaf_error()
 
     leafs_vars = gp_model.addMVar(
         (nex, n_active), vtype=GRB.BINARY, name=_name_var("leafs")
