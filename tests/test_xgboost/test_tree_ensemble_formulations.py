@@ -352,12 +352,13 @@ class TestModelSize(unittest.TestCase):
 
                     self.assertEqual(gpm.NumBinVars, nex * n_shared)
                     self.assertLess(n_shared, n_splits)
-                    # Total: input + output + the trees-sum variable + split
-                    # binaries + one continuous leaf variable per example
-                    # and leaf.
+                    # Total: input + output + split binaries + one
+                    # continuous leaf variable per example and leaf. The
+                    # ensemble's sum of trees is an expression, not a
+                    # variable.
                     self.assertEqual(
                         gpm.NumVars,
-                        nex * X.shape[1] + nex + nex + nex * n_shared + nex * n_leaves,
+                        nex * X.shape[1] + nex + nex * n_shared + nex * n_leaves,
                     )
                     self.assertEqual(gpm.NumGenConstrs, 2 * nex * n_shared)
 
@@ -396,12 +397,12 @@ class TestModelSize(unittest.TestCase):
 
                     self.assertEqual(gpm.NumBinVars, nex * n_levels)
                     self.assertEqual(gpm.NumGenConstrs, 0)
-                    # Total: input + output + trees-sum + branching binaries
-                    # + flows + mu intervals.
+                    # Total: input + output + branching binaries + flows +
+                    # mu intervals. The ensemble's sum of trees is an
+                    # expression, not a variable.
                     self.assertEqual(
                         gpm.NumVars,
                         nex * X.shape[1]
-                        + nex
                         + nex
                         + nex * n_levels
                         + nex * n_nodes

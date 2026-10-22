@@ -50,7 +50,7 @@ feature domains); a :py:exc:`ValueError` is raised otherwise.
 import numpy as np
 from gurobipy import GRB
 
-from .decision_tree_model import (
+from ._common import (
     TreeLeaves,
     _collect_split_thresholds,
     _compute_reachability,
@@ -181,7 +181,7 @@ def add_ocean_tree(
             order.append(right)
     nodes = np.array(order)
 
-    reachability, _, _ = _compute_reachability(
+    reachability, _, _, _, _ = _compute_reachability(
         gp_model,
         tree,
         _input,

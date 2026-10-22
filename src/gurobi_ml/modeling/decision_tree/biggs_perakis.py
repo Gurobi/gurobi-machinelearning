@@ -43,14 +43,13 @@ otherwise (same requirement and rationale as the "ocean" formulation).
 import numpy as np
 from gurobipy import GRB
 
-from .decision_tree_model import (
+from ._common import (
     TreeLeaves,
     _compute_reachability,
     _goes_left,
     _goes_right,
     _no_reachable_leaf_error,
     _require_finite_split_bounds,
-    _split_offsets,
 )
 
 
@@ -65,7 +64,6 @@ def _biggs_perakis_formulation(
     Returns the :py:class:`TreeLeaves` of the tree.
     """
     nex = _input.shape[0]
-    low, high = _split_offsets(epsilon)
 
     input_lb = _input.getAttr(GRB.Attr.LB)
     input_ub = _input.getAttr(GRB.Attr.UB)
@@ -77,7 +75,7 @@ def _biggs_perakis_formulation(
     leafs = tree["children_left"] < 0
     leaf_nodes = leafs.nonzero()[0]
 
-    reachability_matrix, node_lb, node_ub = _compute_reachability(
+    reachability_matrix, node_lb, node_ub, low, high = _compute_reachability(
         gp_model, tree, _input, epsilon, leaf_nodes, safety_floor
     )
 

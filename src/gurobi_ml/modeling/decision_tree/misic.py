@@ -22,7 +22,7 @@ https://arxiv.org/abs/1705.10883.
 import numpy as np
 from gurobipy import GRB
 
-from .decision_tree_model import (
+from ._common import (
     TreeLeaves,
     _collect_split_thresholds,
     _compute_reachability,
@@ -200,7 +200,7 @@ def add_misic_tree(
 
     leaves_order, first, last = _leaf_intervals(tree)
 
-    reachability, _, _ = _compute_reachability(
+    reachability, _, _, _, _ = _compute_reachability(
         gp_model,
         tree,
         _input,
