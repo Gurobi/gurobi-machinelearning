@@ -86,8 +86,8 @@ def add_decision_tree_regressor_constr(
     """Formulate decision_tree_regressor into gp_model.
 
     The formulation predicts the values of output_vars using input_vars
-    according to decision_tree_regressor. See our :ref:`User's Guide <Decision
-    Tree Regression>` for details on the mip formulation used.
+    according to decision_tree_regressor. See our :ref:`User's Guide
+    <Decision Trees and Tree Ensembles>` for details on the mip formulation used.
 
     Parameters
     ----------

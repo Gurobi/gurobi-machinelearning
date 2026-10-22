@@ -82,8 +82,78 @@ with :math:`\omega` an auxiliary free variable. The neurons are then connected
 according to the topology of the network.
 
 
-Decision Tree Regression
-========================
+Decision Trees and Tree Ensembles
+=================================
+
+Decision trees, random forests and gradient boosting regressors are all
+modeled as ensembles of trees; a single decision tree is an ensemble of one
+tree. The ensemble predicts
+
+.. math::
+
+   y = c + \sum_{t=1}^{T} w_t f_t(x),
+
+where :math:`f_t(x)` is the value :math:`\text{val}_l` of the leaf :math:`l`
+of tree :math:`t` that :math:`x` reaches, :math:`w_t` is the weight of the tree
+(e.g. the learning rate of gradient boosting) and :math:`c` a constant. For a
+split node :math:`s`, :math:`\text{left}(s)` and :math:`\text{right}(s)` are the
+leaves below its left and right child. For each feature :math:`i`,
+:math:`\theta_{i,1} < \theta_{i,2} < \dots < \theta_{i,m_i}` are the distinct
+thresholds at which *any* tree of the ensemble splits on :math:`i`.
+
+Random forests and gradient boosting regressors are often very large, and
+generating their representation in Gurobi may take a significant amount of
+time.
+
+The default ``"leaf"`` formulation models every tree of an ensemble on its
+own: the trees only interact through the input variables :math:`x`. Three
+formulations from the literature are available as alternatives.
+``"misic"``, ``"misic_lazy"`` and ``"ocean"`` model the ensemble as a whole,
+with variables shared by all trees; ``"biggs_perakis"`` models each tree on
+its own, like ``"leaf"``, with a tighter linear relaxation. They are selected
+with the ``formulation`` keyword argument of
+:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`:
+
+.. code-block:: python
+
+   pred_constr = add_predictor_constr(
+       gp_model, gbt, input_vars, output_vars, formulation="misic"
+   )
+
+.. list-table::
+   :header-rows: 1
+
+   * - ``formulation``
+     - Reference
+   * - ``"leaf"`` (default)
+     - See :ref:`leaf-formulation`
+   * - ``"misic"``
+     - :cite:t:`Misic2020`
+   * - ``"misic_lazy"``
+     - ``"misic"`` with lazy split constraints (see
+       :ref:`Lazy Split Constraints`)
+   * - ``"ocean"``
+     - :cite:t:`ParmentierVidal2021`, as in their OCEAN implementation
+   * - ``"biggs_perakis"``
+     - :cite:t:`BiggsPerakis2025`, projected formulation
+
+They are available for the scikit-learn
+:external+sklearn:py:class:`DecisionTreeRegressor <sklearn.tree.DecisionTreeRegressor>`,
+:external+sklearn:py:class:`RandomForestRegressor <sklearn.ensemble.RandomForestRegressor>` and
+:external+sklearn:py:class:`GradientBoostingRegressor <sklearn.ensemble.GradientBoostingRegressor>`,
+and for the XGBoost and LightGBM gradient boosting regressors (a single
+decision tree is an ensemble of one tree). All formulations represent exactly
+the same function; they differ in their size, in the strength of their
+relaxation and in how they behave at a split threshold.
+
+All formulations accept the ``epsilon`` and ``safety_floor`` keyword
+arguments described in :ref:`leaf-formulation`; how the scope of ``epsilon``
+differs between them is described in :ref:`Split Thresholds and Exactness`.
+
+.. _leaf-formulation:
+
+Leaf (``"leaf"``)
+-----------------
 
 In a decision tree, each leaf :math:`l` is defined by a set of constraints
 on the input features of the tree that correspond to the branches taken in the
@@ -140,103 +210,6 @@ ineffective. Setting ``safety_floor`` clamps those thresholds to
 ``safety_floor`` :math:`\ge` ``FeasibilityTol``. Because the clamping shifts
 decision boundaries it can distort models whose legitimate thresholds are
 genuinely near zero, so the parameter is opt-in.
-
-Random Forest Regression
-========================
-
-The regression model of Random Forests is a linear combination of decision trees.
-Each decision tree is represented using the model above. The same difficulties
-with the choice of :math:`\epsilon` and ``safety_floor`` apply to this case.
-
-We note additionally that the random forests are often very large and generating
-their representation in Gurobi may take a significant amount of time.
-
-The trees of a random forest can also be formulated as one ensemble with one of
-the experimental formulations described in :ref:`Tree Ensemble Formulations`.
-
-Gradient Boosting Regression
-============================
-
-The gradient boosting regressor is a linear combination of decision trees. Each
-decision tree is represented using the model above. The same difficulties with
-the choice of :math:`\epsilon` and ``safety_floor`` apply to this case.
-
-We note additionally that the gradient boosting regressors are often very large
-and generating their representation in Gurobi may take a significant amount of
-time.
-
-The trees of a gradient boosting regressor (scikit-learn, XGBoost or LightGBM)
-can also be formulated as one ensemble with one of the experimental
-formulations described in :ref:`Tree Ensemble Formulations`.
-
-Tree Ensemble Formulations
-==========================
-
-.. warning::
-
-   The formulations in this section are **experimental**. Their names,
-   keyword arguments and the structure of the variables they create may
-   change in future releases without a deprecation period. The default
-   ``"leaf"`` formulation described above is not affected.
-
-The formulation above models every tree of an ensemble on its own: the trees
-only interact through the input variables :math:`x`. Three formulations from
-the literature are available as alternatives.
-``"misic"``, ``"misic_lazy"`` and ``"ocean"`` model the ensemble as a whole,
-with variables shared by all trees; ``"biggs_perakis"`` models each tree on
-its own, like ``"leaf"``, with a tighter linear relaxation. They are selected
-with the ``formulation`` keyword argument of
-:func:`add_predictor_constr <gurobi_ml.add_predictor_constr>`:
-
-.. code-block:: python
-
-   pred_constr = add_predictor_constr(
-       gp_model, gbt, input_vars, output_vars, formulation="misic"
-   )
-
-.. list-table::
-   :header-rows: 1
-
-   * - ``formulation``
-     - Reference
-   * - ``"leaf"`` (default)
-     - The formulation of :ref:`Decision Tree Regression`
-   * - ``"misic"``
-     - :cite:t:`Misic2020`
-   * - ``"misic_lazy"``
-     - ``"misic"`` with lazy split constraints (see
-       :ref:`Lazy Split Constraints`)
-   * - ``"ocean"``
-     - :cite:t:`ParmentierVidal2021`, as in their OCEAN implementation
-   * - ``"biggs_perakis"``
-     - :cite:t:`BiggsPerakis2025`, projected formulation
-
-They are available for the scikit-learn
-:external+sklearn:py:class:`DecisionTreeRegressor <sklearn.tree.DecisionTreeRegressor>`,
-:external+sklearn:py:class:`RandomForestRegressor <sklearn.ensemble.RandomForestRegressor>` and
-:external+sklearn:py:class:`GradientBoostingRegressor <sklearn.ensemble.GradientBoostingRegressor>`,
-and for the XGBoost and LightGBM gradient boosting regressors (a single
-decision tree is an ensemble of one tree). All formulations represent exactly
-the same function; they differ in their size, in the strength of their
-relaxation and in how they behave at a split threshold.
-
-The ensemble predicts
-
-.. math::
-
-   y = c + \sum_{t=1}^{T} w_t f_t(x),
-
-where :math:`f_t(x)` is the value :math:`\text{val}_l` of the leaf :math:`l`
-of tree :math:`t` that :math:`x` reaches, :math:`w_t` is the weight of the tree
-(e.g. the learning rate of gradient boosting) and :math:`c` a constant. For a
-split node :math:`s`, :math:`\text{left}(s)` and :math:`\text{right}(s)` are the
-leaves below its left and right child. For each feature :math:`i`,
-:math:`\theta_{i,1} < \theta_{i,2} < \dots < \theta_{i,m_i}` are the distinct
-thresholds at which *any* tree of the ensemble splits on :math:`i`.
-
-All formulations accept the ``epsilon`` and ``safety_floor`` keyword
-arguments of :ref:`Decision Tree Regression`; how the scope of ``epsilon``
-differs between them is described in :ref:`Split Thresholds and Exactness`.
 
 Mišić (``"misic"``)
 -------------------
