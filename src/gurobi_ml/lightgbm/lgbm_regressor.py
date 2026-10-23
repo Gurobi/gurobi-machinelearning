@@ -25,7 +25,14 @@ from gurobipy import GRB
 
 from ..exceptions import ModelConfigurationError, NoSolutionError
 from ..modeling import AbstractPredictorConstr
-from ..modeling.decision_tree import AbstractTreeEstimator
+from ..modeling.decision_tree import (
+    ENSEMBLE_FORMULATIONS,
+    AbstractTreeEstimator,
+    TreeLeavesAccessor,
+    _flatten_tree_leaves,
+    _formulation_kwarg,
+    add_tree_ensemble_formulation,
+)
 
 
 def add_lgbmregressor_constr(
@@ -41,7 +48,7 @@ def add_lgbmregressor_constr(
 
     The formulation predicts the values of output_vars using input_vars
     according to lgbm_regressor. See our :ref:`User's Guide
-    <Gradient Boosting Regression>` for details on the mip formulation used.
+    <Decision Trees and Tree Ensembles>` for details on the mip formulation used.
 
     This version is for using directly with the Scikit-Learn wrapper of lgbm.
     Note that only "gbtree" regressors are supported at this point.
@@ -61,6 +68,11 @@ def add_lgbmregressor_constr(
         MIP formulations.
     safety_floor : float, optional
         |SafetyFloorParam|
+
+    Other Parameters
+    ----------------
+    formulation : str, optional
+        |TreeFormulationParam|
 
     Returns
     -------
@@ -105,7 +117,7 @@ def add_lgbm_booster_constr(
 
     The formulation predicts the values of output_vars using input_vars
     according to lgbm_booster. See our :ref:`User's Guide
-    <Gradient Boosting Regression>` for details on the mip formulation used.
+    <Decision Trees and Tree Ensembles>` for details on the mip formulation used.
 
     Note that only "gbtree" regressors are supported at this point.
 
@@ -124,6 +136,11 @@ def add_lgbm_booster_constr(
         MIP formulations.
     safety_floor : float, optional
         |SafetyFloorParam|
+
+    Other Parameters
+    ----------------
+    formulation : str, optional
+        |TreeFormulationParam|
 
     Returns
     -------
@@ -155,7 +172,7 @@ def add_lgbm_booster_constr(
     )
 
 
-class LGBMConstr(AbstractPredictorConstr):
+class LGBMConstr(TreeLeavesAccessor, AbstractPredictorConstr):
     """Class to model trained :external+lightgbm:py:class:`lightgbm.Booster`
     in a gurobipy model.
 
@@ -329,6 +346,26 @@ class LGBMConstr(AbstractPredictorConstr):
 
         n_estimators = len(trees_raw)
 
+        formulation = _formulation_kwarg(kwargs)
+        if formulation in ENSEMBLE_FORMULATIONS:
+            trees = []
+            for tree in trees_raw:
+                flat_tree = self._flat_tree_representation(tree["tree_structure"])
+                flat_tree["n_features"] = lgbm_raw["max_feature_idx"] + 1
+                trees.append(flat_tree)
+            self._tree_leaves = add_tree_ensemble_formulation(
+                model,
+                trees,
+                np.ones(n_estimators),
+                _input,
+                output,
+                formulation,
+                self.epsilon,
+                self._name_var,
+                safety_floor=self.safety_floor,
+            )
+            return
+
         estimators = []
         if self._no_debug:
             kwargs["no_record"] = True
@@ -359,6 +396,7 @@ class LGBMConstr(AbstractPredictorConstr):
             )
 
         self.estimators_ = estimators
+        self._tree_leaves = _flatten_tree_leaves(estimators)
 
         model.addConstr(output == tree_vars.sum(axis=1))
 

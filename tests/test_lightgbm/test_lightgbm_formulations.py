@@ -57,7 +57,24 @@ class TestLGBMhModel(FixedRegressionModel):
         lgbm_reg.fit(X, y)
         one_case = {"predictor": lgbm_reg, "nonconvex": 0}
 
-        for formulation in ["leaf"]:
-            self.do_one_case(
-                one_case, X, 3, formulation=formulation, float_type=np.float32
-            )
+        self.do_one_case(one_case, X, 3, formulation="leaf", float_type=np.float32)
+
+    def _diabetes_lightgbm_ensemble(self, formulation):
+        data = datasets.load_diabetes()
+        X = data["data"]
+        y = data["target"]
+
+        lgbm_reg = lgb.sklearn.LGBMRegressor(n_estimators=5, max_depth=3)
+        lgbm_reg.fit(X, y)
+        one_case = {"predictor": lgbm_reg, "nonconvex": 0}
+
+        self.do_one_case(one_case, X, 3, formulation=formulation, float_type=np.float32)
+
+    def test_diabetes_lightgbm_misic(self):
+        self._diabetes_lightgbm_ensemble("misic")
+
+    def test_diabetes_lightgbm_ocean(self):
+        self._diabetes_lightgbm_ensemble("ocean")
+
+    def test_diabetes_lightgbm_biggs_perakis(self):
+        self._diabetes_lightgbm_ensemble("biggs_perakis")

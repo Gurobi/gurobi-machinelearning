@@ -18,11 +18,21 @@
 into a :external+gurobi:py:class:`Model`.
 """
 
+import numpy as np
 from gurobipy import GRB
 
 from ..exceptions import ModelConfigurationError
 from ..modeling import AbstractPredictorConstr
-from .decision_tree_regressor import add_decision_tree_regressor_constr
+from ..modeling.decision_tree import (
+    ENSEMBLE_FORMULATIONS,
+    TreeLeavesAccessor,
+    _flatten_tree_leaves,
+    _formulation_kwarg,
+)
+from .decision_tree_regressor import (
+    _add_sklearn_tree_ensemble_formulation,
+    add_decision_tree_regressor_constr,
+)
 from .skgetter import SKgetter
 
 
@@ -39,7 +49,7 @@ def add_gradient_boosting_regressor_constr(
 
     The formulation predicts the values of output_vars using input_vars
     according to gradient_boosting_regressor. See our :ref:`User's Guide
-    <Gradient Boosting Regression>` for details on the mip formulation used.
+    <Decision Trees and Tree Ensembles>` for details on the mip formulation used.
 
     Parameters
     ----------
@@ -56,6 +66,11 @@ def add_gradient_boosting_regressor_constr(
         MIP formulations.
     safety_floor : float, optional
         |SafetyFloorParam|
+
+    Other Parameters
+    ----------------
+    formulation : str, optional
+        |TreeFormulationParam|
 
     Returns
     -------
@@ -82,7 +97,9 @@ def add_gradient_boosting_regressor_constr(
     )
 
 
-class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
+class GradientBoostingRegressorConstr(
+    SKgetter, TreeLeavesAccessor, AbstractPredictorConstr
+):
     """Class to formulate a trained
     :external+sklearn:py:class:`sklearn.ensemble.GradientBoostingRegressor`
     in a gurobipy model.
@@ -128,6 +145,22 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
                 "Output dimension of gradient boosting regressor should be 1",
             )
 
+        formulation = _formulation_kwarg(kwargs)
+        if formulation in ENSEMBLE_FORMULATIONS:
+            self._tree_leaves = _add_sklearn_tree_ensemble_formulation(
+                model,
+                [predictor.estimators_[i][0] for i in range(predictor.n_estimators_)],
+                np.full(predictor.n_estimators_, predictor.learning_rate),
+                _input,
+                output,
+                formulation,
+                kwargs.get("epsilon", 0.0),
+                self._name_var,
+                safety_floor=self.safety_floor,
+                constant=predictor.init_.constant_[0][0],
+            )
+            return
+
         if self._no_debug:
             kwargs["no_record"] = True
 
@@ -153,6 +186,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
                 )
             )
         self.estimators_ = estimators
+        self._tree_leaves = _flatten_tree_leaves(estimators)
 
         constant = predictor.init_.constant_
         model.addConstr(
@@ -174,7 +208,7 @@ class GradientBoostingRegressorConstr(SKgetter, AbstractPredictorConstr):
             Text stream to which output should be redirected. By default sys.stdout.
         """
         super().print_stats(abbrev=abbrev, file=file)
-        if abbrev or self._no_debug:
+        if abbrev or self._no_debug or not self.estimators_:
             return
         print(file=file)
 

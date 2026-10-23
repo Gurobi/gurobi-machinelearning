@@ -13,4 +13,27 @@
 # limitations under the License.
 # ==============================================================================
 
-from .decision_tree_model import AbstractTreeEstimator as AbstractTreeEstimator
+from ._common import (
+    TreeLeaves as TreeLeaves,
+)
+from .decision_tree_model import (
+    AbstractTreeEstimator as AbstractTreeEstimator,
+)
+from .decision_tree_model import (
+    TreeLeavesAccessor as TreeLeavesAccessor,
+)
+from .decision_tree_model import (
+    _flatten_tree_leaves as _flatten_tree_leaves,
+)
+from .decision_tree_model import (
+    _formulation_kwarg as _formulation_kwarg,
+)
+from .ensemble_model import (
+    ENSEMBLE_FORMULATIONS as ENSEMBLE_FORMULATIONS,
+)
+from .ensemble_model import (
+    _build_tree_ensemble as _build_tree_ensemble,
+)
+from .ensemble_model import (
+    add_tree_ensemble_formulation as add_tree_ensemble_formulation,
+)
