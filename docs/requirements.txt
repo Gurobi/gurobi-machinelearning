@@ -8,7 +8,6 @@ numpy==2.4.6
 scipy==1.17.1
 numpydoc==1.11.0
 pandas==3.1.0
-pandas==2.3.3
 scikit-learn==1.9.1
 seaborn==0.13.2
 Sphinx==9.1.0
