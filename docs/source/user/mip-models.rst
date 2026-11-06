@@ -194,16 +194,12 @@ exposed as keyword arguments of
 :func:`add_decision_tree_regressor_constr <gurobi_ml.sklearn.add_decision_tree_regressor_constr>`.
 
 **epsilon** (:math:`\epsilon`, default 0) approximates the strict inequality in
-:math:`\mathcal R_l`. For :math:`\epsilon` to correctly discriminate left and
-right branches it must exceed Gurobi's
-:external+gurobi:ref:`FeasibilityTol <parameterfeasibilitytol>`
-(default :math:`10^{-6}`); below that threshold the solver treats
-:math:`x_{i_v} \ge \theta_v + \epsilon` and :math:`x_{i_v} \ge \theta_v`
-as equivalent. Setting :math:`\epsilon` above the feasibility tolerance does
-enforce the correct branch, but creates a gap :math:`[\theta_v,\,\theta_v + \epsilon]`
-with no feasible solution, which may make the model infeasible when the inputs
-are tightly constrained. The default of 0 avoids this, at the cost of
-ambiguity exactly at a split boundary.
+:math:`\mathcal R_l`. A positive :math:`\epsilon` removes the ambiguity at a
+split boundary but creates a gap :math:`(\theta_v,\,\theta_v + \epsilon)` with
+no feasible solution, which may make the model infeasible or cut off the
+optimum. The default of 0 avoids this. How large :math:`\epsilon` must be
+relative to Gurobi's tolerances is discussed in
+:ref:`Split Thresholds and Exactness`.
 
 **safety_floor** (default 0, i.e. disabled) addresses a different issue: when
 :math:`|\theta_v|` itself is smaller than
@@ -372,47 +368,40 @@ Split Thresholds and Exactness
 
 With :math:`\epsilon = 0`, an input :math:`x_i` equal to a threshold
 :math:`\theta_{i,j}` satisfies the constraints of both branches, and the
-solver may take either one. Tree ensembles often reuse the same threshold in
-many trees, and optimal solutions very often lie exactly on thresholds. The
-formulations differ in what happens then:
+solver may take either one; optimal solutions very often lie exactly on
+thresholds. In ``"misic"`` and ``"misic_lazy"`` the shared variable
+:math:`z_{i,j}` makes every tree take the same branch, so the selected leaves
+always contain a common input, although not necessarily :math:`x` itself. In
+the other formulations each tree may take a different branch, and the
+objective can exceed every value the ensemble can predict.
 
-- In ``"misic"`` and ``"misic_lazy"`` the direction is decided once, by
-  the shared variable :math:`z_{i,j}`, and every tree takes the same branch.
-  The chosen leaves always contain a common input, so the optimal value is
-  attained by some input (not necessarily by the value of :math:`x` itself
-  when it sits on a threshold; see below).
-- In ``"leaf"``, ``"ocean"`` and ``"biggs_perakis"`` each tree may take a
-  different branch at the same threshold. The resulting combination of leaves
-  may correspond to no input at all, and the optimal objective can be larger
-  (for a maximization) than any value the ensemble can predict. In
-  ``"leaf"`` and ``"biggs_perakis"``, each tree can additionally violate its
-  own constraints within the feasibility tolerance, with the same effect.
+A positive ``epsilon`` removes this ambiguity by excluding the interval
+:math:`(\theta_{i,j}, \theta_{i,j} + \epsilon)`: on the path of each tree in
+``"leaf"``, ``"ocean"`` and ``"biggs_perakis"``, and at every threshold of the
+ensemble in ``"misic"`` and ``"misic_lazy"``, where it can make the model
+infeasible (a warning is emitted). Gurobi's tolerances limit what it can
+enforce: ``epsilon`` should exceed twice
+:external+gurobi:ref:`FeasibilityTol <parameterfeasibilitytol>` and
+:external+gurobi:ref:`IntFeasTol <parameterintfeastol>`, and even then Gurobi
+can return a solution that leaves :math:`x` slightly on the wrong side of a
+threshold (with the default IntFeasTol of :math:`10^{-5}`, a binary value of
+0.999993 is accepted as 1). The objective is then not guaranteed to be
+attained by an input that satisfies the model. Tightening the tolerances, or
+setting :external+gurobi:ref:`IntegralityFocus <parameterintegralityfocus>`
+to 1 when binary variables are slightly fractional, makes this less likely.
 
-A positive ``epsilon`` removes the ambiguity at thresholds. Its scope differs:
-
-- In ``"leaf"``, ``"ocean"`` and ``"biggs_perakis"`` it only constrains the
-  splits on the path taken by each tree.
-- In ``"misic"`` and ``"misic_lazy"`` it applies globally, since every
-  :math:`z_{i,j}` is linked to :math:`x_i`: the interval
-  :math:`(\theta_{i,j}, \theta_{i,j} + \epsilon)` is excluded at every
-  threshold of the ensemble that :math:`x_i`'s bounds do not already decide
-  (an input whose bounds put it entirely on one side of a threshold has that
-  side's :math:`z_{i,j}` fixed directly, without the interval).
-  The model becomes infeasible if an input variable cannot avoid all those
-  intervals, and an :math:`\epsilon` below Gurobi's
-  :external+gurobi:ref:`IntFeasTol <parameterintfeastol>` may not be enforced,
-  because the indicator constraints are handled as SOS constraints. A warning
-  is emitted when ``epsilon`` is nonzero for these formulations.
-
-Because :math:`x` often sits exactly on a threshold, recomputing the prediction
-of the regression at the value of :math:`x` (as
-``get_error()`` does) may route :math:`x` down the other branch. This is
-also the case with ``"misic"`` and ``"misic_lazy"``. To know which leaf
+Recomputing the prediction at :math:`x` (as ``get_error()`` does) is not a
+reliable check either: :math:`x` may sit exactly on a threshold, and the
+regression may round its inputs (scikit-learn evaluates them in single
+precision, so a positive ``epsilon`` only helps if it exceeds that rounding),
+so it can route :math:`x` down the other branch. To know which leaf
 each tree selected, read the leaf variables in the
 :py:attr:`tree_leaves
 <gurobi_ml.modeling.decision_tree.decision_tree_model.TreeLeavesAccessor.tree_leaves>`
 attribute of the returned object rather than comparing :math:`x` with the
-thresholds.
+thresholds. The
+`Tree Ensemble Formulations notebook <https://github.com/Gurobi/gurobi-machinelearning/blob/main/notebooks/tree-ensembles/Tree%20Ensemble%20Formulations.ipynb>`_
+shows how to read them and check a solution.
 
 Lazy Split Constraints
 ----------------------
