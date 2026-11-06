@@ -150,6 +150,10 @@ All formulations accept the ``epsilon`` and ``safety_floor`` keyword
 arguments described in :ref:`leaf-formulation`; how the scope of ``epsilon``
 differs between them is described in :ref:`Split Thresholds and Exactness`.
 
+For a small application comparing these formulations, see
+:ref:`sphx_glr_auto_examples_example5_concrete_strength.py`. All models in
+that example can be solved with a size-limited Gurobi license.
+
 .. _leaf-formulation:
 
 Leaf (``"leaf"``)
