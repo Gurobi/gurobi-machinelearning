@@ -78,8 +78,8 @@ forest = RandomForestRegressor(
 # split threshold, where the solver may take either branch, so the objective
 # can exceed what the forest predicts at the returned input. We therefore use
 # a small positive ``epsilon``. It must be larger than Gurobi's ``IntFeasTol``
-# (1e-5 by default) to be enforced by the shared formulations. It must also
-# survive the single-precision rounding of ``predict``, so it cannot be
+# (1e-5 by default), and it must also survive the single-precision
+# rounding of ``predict``, so it cannot be
 # arbitrarily small relative to the features' magnitude; ``2e-5`` is enough
 # here, as the ``prediction at x`` entries below confirm. See
 # :ref:`Split Thresholds and Exactness`.
@@ -244,3 +244,7 @@ print(comparison.to_string())
 # The `drug-design notebook
 # <https://github.com/Gurobi/gurobi-machinelearning/blob/main/notebooks/tree-ensembles-merck/Drug%20Design%20with%20Tree%20Ensembles.ipynb>`_
 # illustrates application-specific constraints on selected tree leaves.
+
+######################################################################
+# Copyright © 2023-2026 Gurobi Optimization, LLC
+#
