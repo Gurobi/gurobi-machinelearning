@@ -85,6 +85,7 @@ import gurobipy as gp
 import gurobipy_pandas as gppd
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -241,6 +242,31 @@ print(
 #
 
 pred_constr.input_values
+
+
+######################################################################
+# To visualize the solution, we plot for each student the enrollment
+# probability predicted by the regression as a function of the scholarship
+# (grey curves). The dots show the scholarship chosen by the optimization
+# and the resulting probability: the budget goes to the students whose
+# probability increases the most.
+#
+
+merit_grid = np.linspace(0, 2.5, 100)
+fig, ax = plt.subplots(figsize=(6, 4))
+for _, student in studentsdata.iterrows():
+    grid = pd.DataFrame(
+        {"merit": merit_grid, "SAT": student["SAT"], "GPA": student["GPA"]}
+    )[features]
+    ax.plot(merit_grid, pipe.predict_proba(grid)[:, 1], color="0.8", lw=1)
+ax.scatter(
+    x.gppd.X, y.gppd.X, color="tab:red", s=18, zorder=3, label="Optimized solution"
+)
+ax.set_xlabel("Scholarship (merit)")
+ax.set_ylabel("Probability of enrollment")
+ax.legend(loc="center left")
+fig.tight_layout()
+plt.show()
 
 
 ######################################################################
