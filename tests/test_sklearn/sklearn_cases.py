@@ -9,6 +9,7 @@ from sklearn.compose import ColumnTransformer, make_column_transformer
 from sklearn.cross_decomposition import PLSCanonical, PLSRegression  # noqa
 from sklearn.ensemble import (
     GradientBoostingRegressor,  # noqa
+    HistGradientBoostingRegressor,  # noqa
     RandomForestRegressor,  # noqa
 )
 from sklearn.linear_model import (  # noqa
@@ -38,6 +39,7 @@ def init_predictor(name):
             "MLPRegressor": "hidden_layer_sizes=[20, 20]",
             "MLPClassifier": "hidden_layer_sizes=[50, 50]",
             "GradientBoostingRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
+            "HistGradientBoostingRegressor": "max_iter=10, max_leaf_nodes=10",
             "RandomForestRegressor": "n_estimators=10, max_depth=4, max_leaf_nodes=10",
             "DecisionTreeRegressor": "max_leaf_nodes=50",
             "PLSRegression": "n_components=1",
