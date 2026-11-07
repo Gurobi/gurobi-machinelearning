@@ -82,6 +82,11 @@ SAFETY_FLOOR = (
     "thresholds are genuinely small, so this parameter is opt-in "
     "(default 0.0, i.e. disabled)."
 )
+TREE_FORMULATION = (
+    "MIP formulation of the trees: ``'leaf'`` (default), ``'misic'``, "
+    "``'misic_lazy'``, ``'ocean'`` or ``'biggs_perakis'``. "
+    "See :ref:`Decision Trees and Tree Ensembles`."
+)
 
 
 rst_epilog = f"""
@@ -96,6 +101,7 @@ rst_epilog = f"""
 .. |VariablesDimensionsWarn| replace:: {VARS_SHAPE}
 .. |ClassShort| replace:: {CLASS_SHORT}
 .. |SafetyFloorParam| replace:: {SAFETY_FLOOR}
+.. |TreeFormulationParam| replace:: {TREE_FORMULATION}
 """
 
 # Add any paths that contain templates here, relative to this directory.
