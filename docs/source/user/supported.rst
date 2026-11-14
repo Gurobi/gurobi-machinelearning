@@ -55,11 +55,19 @@ to insert it in a Gurobi model.
        <sklearn.ensemble.GradientBoostingRegressor>`
      - :py:func:`add_gradient_boosting_regressor_constr
        <gurobi_ml.sklearn.gradient_boosting_regressor.add_gradient_boosting_regressor_constr>`
+   * - Histogram-based gradient boosting
+     - :external:py:class:`HistGradientBoostingRegressor
+       <sklearn.ensemble.HistGradientBoostingRegressor>`
+     - :py:func:`add_hist_gradient_boosting_regressor_constr
+       <gurobi_ml.sklearn.hist_gradient_boosting_regressor.add_hist_gradient_boosting_regressor_constr>`
    * - Random Forest
      - :external:py:class:`RandomForestRegressor
        <sklearn.ensemble.RandomForestRegressor>`
      - :py:func:`add_random_forest_regressor_constr
        <gurobi_ml.sklearn.random_forest_regressor.add_random_forest_regressor_constr>`
+
+Histogram-based gradient boosting supports numeric splits and identity-link losses.
+Categorical splits and nonlinear-link losses are not supported.
 
 
 .. list-table:: Transformers in :external+sklearn:std:doc:`scikit-learn <user_guide>`

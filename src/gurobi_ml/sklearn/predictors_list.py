@@ -15,6 +15,9 @@
 
 from .decision_tree_regressor import add_decision_tree_regressor_constr
 from .gradient_boosting_regressor import add_gradient_boosting_regressor_constr
+from .hist_gradient_boosting_regressor import (
+    add_hist_gradient_boosting_regressor_constr,
+)
 from .linear_regression import add_linear_regression_constr
 from .logistic_regression import add_logistic_regression_constr
 from .mlpregressor import add_mlp_regressor_constr
@@ -30,6 +33,7 @@ def sklearn_predictors():
         "LogisticRegression": add_logistic_regression_constr,
         "DecisionTreeRegressor": add_decision_tree_regressor_constr,
         "GradientBoostingRegressor": add_gradient_boosting_regressor_constr,
+        "HistGradientBoostingRegressor": add_hist_gradient_boosting_regressor_constr,
         "RandomForestRegressor": add_random_forest_regressor_constr,
         "MLPRegressor": add_mlp_regressor_constr,
         "PLSRegression": add_pls_regression_constr,

@@ -22,6 +22,9 @@ from .decision_tree_regressor import (
 from .gradient_boosting_regressor import (
     add_gradient_boosting_regressor_constr as add_gradient_boosting_regressor_constr,
 )
+from .hist_gradient_boosting_regressor import (
+    add_hist_gradient_boosting_regressor_constr as add_hist_gradient_boosting_regressor_constr,
+)
 from .linear_regression import (
     add_linear_regression_constr as add_linear_regression_constr,
 )
