@@ -28,9 +28,10 @@ from ..modeling.decision_tree import (
     TreeLeavesAccessor,
     _flatten_tree_leaves,
     _formulation_kwarg,
+    add_tree_ensemble_formulation,
 )
 from .decision_tree_regressor import (
-    _add_sklearn_tree_ensemble_formulation,
+    _sklearn_tree_to_dict,
     add_decision_tree_regressor_constr,
 )
 from .skgetter import SKgetter
@@ -145,11 +146,15 @@ class GradientBoostingRegressorConstr(
                 "Output dimension of gradient boosting regressor should be 1",
             )
 
+        self._trees = [
+            _sklearn_tree_to_dict(estimator[0].tree_)
+            for estimator in predictor.estimators_
+        ]
         formulation = _formulation_kwarg(kwargs)
         if formulation in ENSEMBLE_FORMULATIONS:
-            self._tree_leaves = _add_sklearn_tree_ensemble_formulation(
+            self._tree_leaves = add_tree_ensemble_formulation(
                 model,
-                [predictor.estimators_[i][0] for i in range(predictor.n_estimators_)],
+                self._trees,
                 np.full(predictor.n_estimators_, predictor.learning_rate),
                 _input,
                 output,

@@ -142,10 +142,29 @@ def _compute_leafs_bounds(gp_model, tree, safety_floor=0.0):
     side by epsilon (see :py:func:`_split_offsets`), only for the inputs
     whose bounds do not decide the split.
 
+    The formulations call this with the model they are building. It is also
+    called without a model (``gp_model=None``) to check a solution, by
+    :py:func:`_project_to_leaves`.
+
     Parameters
     ----------
+    gp_model : :external+gurobi:py:class:`Model` or None
+        Model the tree is formulated in. Only its ``FeasibilityTol`` is
+        read, to warn about nonzero thresholds smaller than it. With None,
+        there is no such warning.
     tree : dict
         The decision tree to model.
+    safety_floor : float, optional
+        Nonzero thresholds smaller than this in absolute value are moved
+        to it, keeping their sign. The default 0.0 leaves the thresholds
+        unchanged.
+
+    Returns
+    -------
+    node_lb, node_ub : np.ndarray
+        Lower and upper bounds of the input box routed to each node, of
+        shape ``(n_features, capacity)``. A side with no split is
+        ``-GRB.INFINITY`` or ``GRB.INFINITY``.
     """
     capacity = tree["capacity"]
     n_features = tree["n_features"]
@@ -161,7 +180,8 @@ def _compute_leafs_bounds(gp_model, tree, safety_floor=0.0):
         0,
     ]
 
-    feas_tol = gp_model.Params.FeasibilityTol
+    # Without a model (checking a solution), skip the tolerance warning.
+    feas_tol = gp_model.Params.FeasibilityTol if gp_model is not None else 0.0
 
     while len(stack) > 0:
         node = stack.pop()
@@ -193,6 +213,47 @@ def _compute_leafs_bounds(gp_model, tree, safety_floor=0.0):
         stack.append(right)
         stack.append(left)
     return (node_lb, node_ub)
+
+
+def _round_up(values, dtype, strict):
+    """Smallest values of dtype above (strict) or at least ``values``."""
+    rounded = values.astype(dtype)
+    keep = rounded > values if strict else rounded >= values
+    return np.where(keep, rounded, np.nextafter(rounded, dtype(np.inf)))
+
+
+def _round_down(values, dtype, strict):
+    """Largest values of dtype below (strict) or at most ``values``."""
+    rounded = values.astype(dtype)
+    keep = rounded < values if strict else rounded <= values
+    return np.where(keep, rounded, np.nextafter(rounded, dtype(-np.inf)))
+
+
+def _project_to_leaves(trees, tree_leaves, x, left_strict, dtype):
+    """Move each row of x into the leaves selected in the solution.
+
+    Intersect, row by row, the boxes of the leaves selected in each tree
+    and clip x to the intersection, in the precision ``dtype`` in which the
+    regression evaluates its inputs. The box of a leaf is ``lo < x <= hi``,
+    or ``lo <= x < hi`` if ``left_strict``. Rows whose selected leaves have
+    no input in common are NaN.
+    """
+    lo = np.full(x.shape, -np.inf)
+    hi = np.full(x.shape, np.inf)
+    for tree, leaves in zip(trees, tree_leaves):
+        selected = leaves.nodes[np.argmax(leaves.variables.X, axis=1)]
+        node_lb, node_ub = _compute_leafs_bounds(None, tree)
+        lo = np.maximum(lo, node_lb[:, selected].T)
+        hi = np.minimum(hi, node_ub[:, selected].T)
+    # A side with no split is +-GRB.INFINITY: make it a true infinity, which
+    # every dtype can represent.
+    lo[lo <= -GRB.INFINITY] = -np.inf
+    hi[hi >= GRB.INFINITY] = np.inf
+    lo = _round_up(lo, dtype, strict=not left_strict)
+    hi = _round_down(hi, dtype, strict=left_strict)
+    projected = np.clip(x.astype(dtype), lo, hi).astype(float)
+    projected[(lo > hi).any(axis=1)] = np.nan
+    return projected
 
 
 def _compute_reachability(gp_model, tree, _input, epsilon, nodes, safety_floor=0.0):

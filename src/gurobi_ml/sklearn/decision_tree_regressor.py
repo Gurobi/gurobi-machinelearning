@@ -18,10 +18,7 @@
 in a :external+gurobi:py:class:`Model`.
 """
 
-from ..modeling.decision_tree import (
-    AbstractTreeEstimator,
-    add_tree_ensemble_formulation,
-)
+from ..modeling.decision_tree import AbstractTreeEstimator
 from .skgetter import SKgetter
 
 
@@ -37,41 +34,6 @@ def _sklearn_tree_to_dict(tree):
         "capacity": tree.capacity,
         "n_features": tree.n_features,
     }
-
-
-def _add_sklearn_tree_ensemble_formulation(
-    gp_model,
-    estimators,
-    weights,
-    input_vars,
-    output_vars,
-    formulation,
-    epsilon,
-    name_var,
-    safety_floor=0.0,
-    constant=0.0,
-    output_coef=1.0,
-):
-    """Formulate a list of fitted sklearn decision trees as one ensemble.
-
-    Shared by the gradient boosting and random forest classes; they differ
-    only in how the tree predictions are combined. Returns the per-tree
-    leaf variables.
-    """
-    trees = [_sklearn_tree_to_dict(estimator.tree_) for estimator in estimators]
-    return add_tree_ensemble_formulation(
-        gp_model,
-        trees,
-        weights,
-        input_vars,
-        output_vars,
-        formulation,
-        epsilon,
-        name_var,
-        safety_floor=safety_floor,
-        constant=constant,
-        output_coef=output_coef,
-    )
 
 
 def add_decision_tree_regressor_constr(

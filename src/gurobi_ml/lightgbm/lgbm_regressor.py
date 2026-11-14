@@ -179,6 +179,8 @@ class LGBMConstr(TreeLeavesAccessor, AbstractPredictorConstr):
     |ClassShort|
     """
 
+    _input_dtype = np.float64
+
     def __init__(
         self,
         gp_model,
@@ -274,7 +276,7 @@ class LGBMConstr(TreeLeavesAccessor, AbstractPredictorConstr):
         children_right = np.full(numnodes, -2, dtype=int)
         feature = np.empty(numnodes, dtype=int)
         value = np.empty(numnodes, dtype=np.float32)
-        threshold = np.empty(numnodes, dtype=np.float32)
+        threshold = np.empty(numnodes, dtype=np.float64)
 
         def node_index(node):
             if "split_index" in node:
@@ -346,13 +348,15 @@ class LGBMConstr(TreeLeavesAccessor, AbstractPredictorConstr):
 
         n_estimators = len(trees_raw)
 
+        trees = []
+        for tree in trees_raw:
+            flat_tree = self._flat_tree_representation(tree["tree_structure"])
+            flat_tree["n_features"] = lgbm_raw["max_feature_idx"] + 1
+            trees.append(flat_tree)
+        self._trees = trees
+
         formulation = _formulation_kwarg(kwargs)
         if formulation in ENSEMBLE_FORMULATIONS:
-            trees = []
-            for tree in trees_raw:
-                flat_tree = self._flat_tree_representation(tree["tree_structure"])
-                flat_tree["n_features"] = lgbm_raw["max_feature_idx"] + 1
-                trees.append(flat_tree)
             self._tree_leaves = add_tree_ensemble_formulation(
                 model,
                 trees,
@@ -376,11 +380,9 @@ class LGBMConstr(TreeLeavesAccessor, AbstractPredictorConstr):
             name=self._name_var("estimator"),
         )
 
-        for i, tree in enumerate(trees_raw):
+        for i, flat_tree in enumerate(trees):
             if self.verbose:
                 self._timer.timing(f"Estimator {i}")
-            flat_tree = self._flat_tree_representation(tree["tree_structure"])
-            flat_tree["n_features"] = lgbm_raw["max_feature_idx"] + 1
 
             estimators.append(
                 AbstractTreeEstimator(

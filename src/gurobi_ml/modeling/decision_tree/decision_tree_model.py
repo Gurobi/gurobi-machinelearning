@@ -20,6 +20,7 @@ from warnings import warn
 import numpy as np
 from gurobipy import GRB
 
+from ...exceptions import NoSolutionError
 from ..base_predictor_constr import AbstractPredictorConstr
 from ._common import (
     TreeLeaves,
@@ -27,6 +28,7 @@ from ._common import (
     _goes_left,
     _goes_right,
     _no_reachable_leaf_error,
+    _project_to_leaves,
 )
 from .biggs_perakis import _biggs_perakis_formulation
 from .ensemble_model import ENSEMBLE_FORMULATIONS, add_tree_ensemble_formulation
@@ -45,6 +47,49 @@ class TreeLeavesAccessor:
     """Mixin exposing per-tree leaf variables."""
 
     _tree_leaves = None
+    #: The trees in the order of ``tree_leaves``, as dictionaries (see
+    #: :py:class:`AbstractTreeEstimator`).
+    _trees = None
+    #: How the regression routes an input: left iff ``x <= threshold``,
+    #: or ``x < threshold`` if ``_left_strict``, with ``x`` rounded to
+    #: ``_input_dtype``.
+    _left_strict = False
+    _input_dtype = np.float32
+
+    def project_input(self):
+        """Inputs that reach the leaves selected in the solution.
+
+        For each input row, the point closest to ``input_values`` that every
+        tree sends to the leaf it selected in the solution, in the precision
+        the regression uses to evaluate its inputs. Evaluating the regression
+        there gives the predicted values the solution relies on, even when
+        ``input_values`` sits on a split threshold. If the selected leaves
+        have no input in common, the row is NaN: no input attains the
+        values of the output variables. Other constraints on the input are
+        not taken into account.
+
+        Pass the returned array to the regression as it is: converting it to
+        another precision can move a value across a threshold.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of shape (number of inputs, number of features).
+
+        Raises
+        ------
+        NoSolutionError
+            If the Gurobi model has no solution.
+        AttributeError
+            If the formulation does not expose leaf variables (``"paths"``).
+        """
+        tree_leaves = self.tree_leaves
+        if not self._has_solution:
+            raise NoSolutionError()
+        x = np.asarray(self.input_values, dtype=float)
+        return _project_to_leaves(
+            self._trees, tree_leaves, x, self._left_strict, self._input_dtype
+        )
 
     @property
     def tree_leaves(self):
@@ -318,6 +363,7 @@ class AbstractTreeEstimator(TreeLeavesAccessor, AbstractPredictorConstr):
     ):
         self._default_name = "tree"
         self._tree = tree
+        self._trees = [tree]
         self._epsilon = epsilon
         self._safety_floor = safety_floor
 
