@@ -189,6 +189,8 @@ class XGBoostRegressorConstr(TreeLeavesAccessor, AbstractPredictorConstr):
     |ClassShort|
     """
 
+    _left_strict = True
+
     def __init__(
         self,
         gp_model,
@@ -274,7 +276,11 @@ class XGBoostRegressorConstr(TreeLeavesAccessor, AbstractPredictorConstr):
             raise ModelConfigurationError(
                 xgb_regressor, f"model not implemented for {booster_type}"
             )
-        trees = xgb_raw["learner"]["gradient_booster"]["model"]["trees"]
+        trees = [
+            self._xgb_tree_to_dict(tree)
+            for tree in xgb_raw["learner"]["gradient_booster"]["model"]["trees"]
+        ]
+        self._trees = trees
 
         if self._no_debug:
             kwargs["no_record"] = True
@@ -288,7 +294,7 @@ class XGBoostRegressorConstr(TreeLeavesAccessor, AbstractPredictorConstr):
             # output variable only to read it back.
             trees_sum, output_lb, output_ub, self._tree_leaves = _build_tree_ensemble(
                 model,
-                [self._xgb_tree_to_dict(tree) for tree in trees],
+                trees,
                 np.ones(n_estimators),
                 _input,
                 1,
@@ -314,7 +320,7 @@ class XGBoostRegressorConstr(TreeLeavesAccessor, AbstractPredictorConstr):
                 estimators.append(
                     AbstractTreeEstimator(
                         self.gp_model,
-                        self._xgb_tree_to_dict(tree),
+                        tree,
                         self.input,
                         tree_vars[:, i, :],
                         -self.epsilon,

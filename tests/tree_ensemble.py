@@ -68,3 +68,88 @@ def ties_duplicated_threshold(tree_pairs, x_star, feas_tol):
         if abs(x_star[feature] - threshold) <= tie_tol:
             return True
     return False
+
+
+class ProjectInputMixin:
+    """Tests of ``project_input`` shared by the frameworks.
+
+    The test class provides ``X``, ``predictor`` (a fitted regressor whose
+    ``predict`` takes a numpy array) and derives from ``unittest.TestCase``.
+    """
+
+    FORMULATIONS = ("leaf", "misic", "misic_lazy", "ocean", "biggs_perakis")
+    #: Large enough for Gurobi's tolerances and the float32 rounding of the
+    #: features of the diabetes data.
+    EPSILON = 1e-4
+
+    def solve(self, formulation, epsilon):
+        """Maximize the prediction of two inputs; return the value of the
+        output variables and the projected inputs."""
+        import warnings
+
+        import gurobipy as gp
+
+        from gurobi_ml import add_predictor_constr
+
+        with gp.Model() as model:
+            model.Params.OutputFlag = 0
+            x = model.addMVar(
+                (2, self.X.shape[1]), lb=self.X.min(axis=0), ub=self.X.max(axis=0)
+            )
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", UserWarning)
+                pred_constr = add_predictor_constr(
+                    model, self.predictor, x, formulation=formulation, epsilon=epsilon
+                )
+            model.setObjective(pred_constr.output.sum(), gp.GRB.MAXIMIZE)
+            model.optimize()
+            self.assertEqual(model.Status, gp.GRB.OPTIMAL)
+            return pred_constr.output.X.ravel(), pred_constr.project_input()
+
+    def test_projection_attains_output_with_epsilon(self):
+        # With a sufficient epsilon, the selected leaves of every
+        # formulation contain an input, and the regression evaluated at the
+        # projection gives the values of the output variables.
+        for formulation in self.FORMULATIONS:
+            with self.subTest(formulation=formulation):
+                output, projected = self.solve(formulation, self.EPSILON)
+                self.assertFalse(np.isnan(projected).any())
+                np.testing.assert_allclose(
+                    self.predictor.predict(projected).ravel(), output, rtol=1e-6
+                )
+
+    def test_projection_attains_output_misic_without_epsilon(self):
+        # The shared split variables keep the leaves compatible at epsilon=0.
+        for formulation in ("misic", "misic_lazy"):
+            with self.subTest(formulation=formulation):
+                output, projected = self.solve(formulation, 0.0)
+                self.assertFalse(np.isnan(projected).any())
+                np.testing.assert_allclose(
+                    self.predictor.predict(projected).ravel(), output, rtol=1e-6
+                )
+
+    def test_projection_without_epsilon_attains_output_or_is_nan(self):
+        # At epsilon=0 the other formulations may select leaves that no
+        # input reaches: such rows are NaN, the others attain the output.
+        for formulation in ("leaf", "ocean", "biggs_perakis"):
+            with self.subTest(formulation=formulation):
+                output, projected = self.solve(formulation, 0.0)
+                reached = ~np.isnan(projected).any(axis=1)
+                if reached.any():
+                    np.testing.assert_allclose(
+                        self.predictor.predict(projected[reached]).ravel(),
+                        output[reached],
+                        rtol=1e-6,
+                    )
+
+    def test_no_solution(self):
+        import gurobipy as gp
+
+        from gurobi_ml import add_predictor_constr
+        from gurobi_ml.exceptions import NoSolutionError
+
+        with gp.Model() as model:
+            x = model.addMVar((1, self.X.shape[1]), lb=-1, ub=1)
+            pred_constr = add_predictor_constr(model, self.predictor, x)
+            with self.assertRaises(NoSolutionError):
+                pred_constr.project_input()
