@@ -394,12 +394,33 @@ Recomputing the prediction at :math:`x` (as ``get_error()`` does) is not a
 reliable check either: :math:`x` may sit exactly on a threshold, and the
 regression may round its inputs (scikit-learn evaluates them in single
 precision, so a positive ``epsilon`` only helps if it exceeds that rounding),
-so it can route :math:`x` down the other branch. To know which leaf
-each tree selected, read the leaf variables in the
+so it can route :math:`x` down the other branch.
+
+To check a solution, call
+:py:meth:`project_input()
+<gurobi_ml.modeling.decision_tree.decision_tree_model.TreeLeavesAccessor.project_input>`
+on the returned object after solving the model:
+
+.. code-block:: python
+
+    pred_constr = add_predictor_constr(model, regressor, x, y)
+    model.optimize()
+    x_projected = pred_constr.project_input()
+    regressor.predict(x_projected)  # equals y.X up to rounding
+
+It moves each row of :math:`x` to the closest input that lies in the leaves
+selected by all trees, in the precision in which the regression evaluates its
+inputs; pass the returned array to the regression as it is. A row of NaN
+means that the selected leaves have no input in common: no input attains the
+value of the output variables. The method changes neither the model nor its
+solution, so if :math:`x` is subject to other constraints, check them at the
+returned input too.
+
+The leaf variables themselves are in the
 :py:attr:`tree_leaves
 <gurobi_ml.modeling.decision_tree.decision_tree_model.TreeLeavesAccessor.tree_leaves>`
-attribute of the returned object rather than comparing :math:`x` with the
-thresholds. The
+attribute of the returned object, for example to add constraints on the
+selected leaves. The
 `Tree Ensemble Formulations notebook <https://github.com/Gurobi/gurobi-machinelearning/blob/main/notebooks/tree-ensembles/Tree%20Ensemble%20Formulations.ipynb>`_
 shows how to read them and check a solution.
 
